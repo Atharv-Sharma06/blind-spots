@@ -10,7 +10,7 @@ Built for NASA Space Apps Challenge 2026, "Flame in Freefall"; not endorsed by N
 
 **Try it:** [live app](https://blind-spots-kappa.vercel.app) (press **Guided demo**) · [30-second video](https://blind-spots-kappa.vercel.app/video/blind-spots-demo-30s.webm) · [source code](https://github.com/Atharv-Sharma06/blind-spots)
 
-![Coverage map, oxygen against pressure: every integrated ISS flame observation sits at about 1 atm, far from a reduced-pressure cabin target](submission/stills/02-target-gap.png)
+![Coverage map, oxygen against pressure: every integrated ISS flame observation sits at about 1 atm, far from a reduced-pressure cabin target](submission/stills/1-explore-default.png)
 
 ## The 60-second pitch
 

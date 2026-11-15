@@ -10,7 +10,7 @@ Built for NASA Space Apps Challenge 2026, "Flame in Freefall"; not endorsed by N
 
 **Try it:** [live app]({{DEPLOYED_URL}}) (press **Guided demo**) · [30-second video]({{VIDEO_URL}}) · [source code]({{GITHUB_URL}})
 
-![Coverage map, oxygen against pressure: every integrated ISS flame observation sits at about 1 atm, far from a reduced-pressure cabin target](submission/stills/02-target-gap.png)
+![Coverage map, oxygen against pressure: every integrated ISS flame observation sits at about 1 atm, far from a reduced-pressure cabin target](submission/stills/1-explore-default.png)
 
 ## The 60-second pitch
 
