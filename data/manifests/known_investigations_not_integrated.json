@@ -1,0 +1,590 @@
+[
+  {
+    "id": "sofie-gel",
+    "name": "SoFIE-GEL (Growth and Extinction Limit of Solid Fuels), PMMA spheres",
+    "agency": "NASA (GRC) with Case Western Reserve University (PI J. T'ien); international Co-I Russian Academy of Sciences",
+    "platform": "ISS, Combustion Integrated Rack (CIR) with SoFIE insert",
+    "years": "ISS operations; SoFIE delivered via Cygnus NG-17 and (per NASA page) operating through February 2025; exact GEL run dates not verified",
+    "materials": "PMMA spheres, 4 cm diameter, ignited by an electrically heated coil",
+    "o2_percent_range": [
+      13,
+      34
+    ],
+    "pressure_kpa_range": [
+      15.2,
+      111.5
+    ],
+    "flow_cm_s_range": [
+      0.2,
+      80
+    ],
+    "conditions_quotes": [
+      {
+        "url": "https://doi.org/10.1016/j.combustflame.2025.114244",
+        "quote": "diffusion flame extinction limits of 4-cm diameter PMMA (polymethacrylate) spheres were determined as a function of forced flows (0.2 to 80 cm/s), oxygen concentrations (13 % to 34 %) and pressure (0.15–1.1 atm)"
+      },
+      {
+        "url": "https://doi.org/10.1016/j.combustflame.2025.114244",
+        "quote": "The minimum oxygen percentage is slightly <14 %."
+      },
+      {
+        "url": "https://doi.org/10.1016/j.combustflame.2025.114244",
+        "quote": "In total, 7 hours of microgravity PMMA burning time is recorded."
+      },
+      {
+        "url": "https://ntrs.nasa.gov/citations/20240007628",
+        "quote": "the 4-cm-diameter samples are exposed to forced flows ranging from 0.2 to 80 cm/s and an oxygen ranging from 13 to 28% in one atmosphere total pressure"
+      },
+      {
+        "url": "https://ntrs.nasa.gov/citations/20240007628",
+        "quote": "Five tests are presented as listed in Table 1."
+      },
+      {
+        "url": "https://ntrs.nasa.gov/citations/20190030735",
+        "quote": "Acrylic spheres (PMMA) in concurrent flow; effect of gravity, flow, O2, pressure, and preheating"
+      }
+    ],
+    "data_availability": "Published, open access: T'ien et al., Combustion and Flame 277, 114244 (2025), doi 10.1016/j.combustflame.2025.114244 (extinction boundary at 1 atm given as an O2-vs-flow map, i.e. a figure). NTRS 20240007628 (Li, T'ien et al., symposium paper) has a 5-row per-test table (PDF page 3: flow 0.44-49.68 cm/s, O2 13.54-20.77 %, p 1.03-1.07 atm, extinction mode). No machine-readable per-test dataset located; not among the 24 PSI Combustion Science investigations catalogued in docs/research/psi-catalog.md (the NASA GEL page only links to Space Station Research Explorer).",
+    "reason_not_integrated": "No public per-test table covering the 0.15-1.1 atm and 13-34 % O2 envelope was found (only a figure and a 5-case table, all near 1 atm); sphere diffusion-flame extinction under O2 depletion is a different outcome definition from BASS flow-step outcomes; outside the PSI-based scope of D-001."
+  },
+  {
+    "id": "sofie-mist",
+    "name": "SoFIE-MIST (Material Ignition and Suppression Test), PMMA cylinders with external radiant flux",
+    "agency": "NASA (GRC) with UC Berkeley (PI C. Fernandez-Pello); international Co-I Moscow State University",
+    "platform": "ISS, Combustion Integrated Rack (CIR) with SoFIE insert",
+    "years": "ISS; NASA page: hardware delivered via SpaceX-27 (page last updated Dec 04, 2023); run dates not verified",
+    "materials": "PMMA cylinders (rods); a NASA slide lists 15 cm rods",
+    "o2_percent_range": null,
+    "pressure_kpa_range": null,
+    "flow_cm_s_range": null,
+    "conditions_quotes": [
+      {
+        "url": "https://ntrs.nasa.gov/citations/20190030735",
+        "quote": "Determine the boundaries for ignition and extinction of a solid fuel (PMMA cylinder) as a function of flow speed, oxygen concentration, and external radiant flux."
+      },
+      {
+        "url": "https://ntrs.nasa.gov/citations/20190030735",
+        "quote": "Understand the effects of the space exploration atmospheres under consideration by NASA (lower pressure and increased oxygen concentrations compared to air) on the flammability and suppression of materials."
+      },
+      {
+        "url": "https://science.nasa.gov/biological-physical/investigations/sofie-mist",
+        "quote": "Delivery to the International Space Station via SpaceX-27"
+      }
+    ],
+    "data_availability": "No flight results, tables or datasets located. The NASA MIST page gives no numeric conditions and only links to Space Station Research Explorer. Not among the 24 PSI Combustion Science investigations catalogued in docs/research/psi-catalog.md.",
+    "reason_not_integrated": "No published per-test conditions or outcomes found; numeric O2, pressure and flow ranges are not stated in any source retrieved."
+  },
+  {
+    "id": "sofie-other-smurf-nca-rtdfs",
+    "name": "SoFIE other sub-investigations: SMuRF (Olson), NCA (Miller), RTDFS (Bhattacharjee)",
+    "agency": "NASA (GRC); San Diego State University; Michigan State University; international Co-I Gifu University (RTDFS)",
+    "platform": "ISS CIR with SoFIE insert (NCA is described by the project as a 1-g narrow-channel apparatus complement)",
+    "years": "SoFIE selected 2009 (NASA page); ISS operations through about February 2025 (NASA page); run dates for these sub-investigations not verified",
+    "materials": "SMuRF: PMMA cylinders and engineering-material sheets; NCA: thick PMMA slabs; RTDFS: thin PMMA sheets",
+    "o2_percent_range": null,
+    "pressure_kpa_range": null,
+    "flow_cm_s_range": null,
+    "conditions_quotes": [
+      {
+        "url": "https://ntrs.nasa.gov/citations/20190030735",
+        "quote": "Thin fuel sheets: Very few materials have been rated even in 1g at 34% O2, 8.2 psia (exploration atmosphere)."
+      },
+      {
+        "url": "https://ntrs.nasa.gov/citations/20190030735",
+        "quote": "Measure flame spread rate across a thermally thick solid fuel (PMMA slabs) as a function of forced opposed flow velocity, oxygen concentration, and pressure."
+      },
+      {
+        "url": "https://ntrs.nasa.gov/citations/20200000361",
+        "quote": "SoFIE has been developed to meet the requirements of five unique investigations."
+      },
+      {
+        "url": "https://www.nasa.gov/glenn/glenn-expertise-space-exploration/physical-sciences-program/combustion-science/solid-fuel-ignition-and-extinction-sofie",
+        "quote": "oxygen from atmospheric levels up to 85%"
+      }
+    ],
+    "data_availability": "No results or datasets located for SMuRF, NCA or RTDFS flight runs; the NASA pages give no data-availability statement. The 8.2 psia / 34 % O2 figure is the NASA exploration atmosphere cited as motivation, not a stated test result.",
+    "reason_not_integrated": "No public per-test results found; stated atmospheres are planned or motivating conditions, not documented test outcomes."
+  },
+  {
+    "id": "saffire-iv",
+    "name": "Saffire-IV (Spacecraft Fire Experiment IV): SIBAL cloth and two-sided PMMA, concurrent flow",
+    "agency": "NASA (GRC, JSC) with ESA, JAXA, CNES, DLR, Russian and university partners",
+    "platform": "Free-flying Cygnus (NG-13) after ISS departure, Saffire Flow Unit, 17.9-19.0 m3 free volume",
+    "years": "2020 (ICES-2021: 'conducted in May of 2020 and January of 2021 on the NG-13 and NG-14 flights'; mapping IV to NG-13 and V to NG-14 is inferred from order)",
+    "materials": "IV-1: SIBAL (75/25 cotton/fiberglass) 50 cm; IV-2: 2-sided PMMA 1 cm thick, 18 cm; two further samples did not ignite",
+    "o2_percent_range": [
+      22.0,
+      22.0
+    ],
+    "pressure_kpa_range": [
+      100.0,
+      100.0
+    ],
+    "flow_cm_s_range": [
+      0,
+      20
+    ],
+    "conditions_quotes": [
+      {
+        "url": "https://ntrs.nasa.gov/citations/20210011521",
+        "quote": "Flight/Sample IV-1 IV-2 V-2 V-3 V-4 Material/configuration SIBAL Cloth 2-sided PMMA Cotton Jersey 1 sided PMMA Structured PMMA Length (cm) 50 18 50 18 20 Air Flow Rate (cm/s) 20 20 20 20 20 Flow Direction Concurrent Concurrent Concurrent Concurrent Opposed Ambient Pressure (kPa) 100.0 100.0 70.7 71.3 72.6 Oxygen Concentration (mol %) 22.0 22.0 26.2 25.4 25.7"
+      },
+      {
+        "url": "https://ntrs.nasa.gov/citations/20210011521",
+        "quote": "two samples on Saffire IV and one sample on Saffire V were not ignited"
+      },
+      {
+        "url": "https://ntrs.nasa.gov/citations/20210011521",
+        "quote": "Figure 7 shows the edge view of Saffire IV-2 after the flow was reduced to 5 cm/s."
+      }
+    ],
+    "data_availability": "Per-test conditions are a public table: ICES-2021-266 (Urban et al.), NTRS 20210011521, PDF page 3, Table 1 (same row set as Saffire-V). Time series and images are not published as machine-readable data in the sources retrieved. The Saffire-I/II/III records are PSI-98/99/100 (integrated as context); no PSI record for Saffire-IV, -V or -VI is among the 24 Combustion Science investigations catalogued in docs/research/psi-catalog.md.",
+    "reason_not_integrated": "Large-scale (50 cm / 18 cm samples, 20 cm/s, 17.9-19 m3) spacecraft-fire apparatus, not flow-step boundary tests like BASS; no machine-readable per-test dataset; Saffire-IV itself is at 22.0 % O2 and 100 kPa (not reduced pressure)."
+  },
+  {
+    "id": "saffire-v",
+    "name": "Saffire-V (Spacecraft Fire Experiment V): cotton jersey, one-sided PMMA, structured PMMA at reduced pressure and elevated O2",
+    "agency": "NASA (GRC, JSC) with ESA, JAXA, CNES, DLR, Russian and university partners",
+    "platform": "Free-flying Cygnus (NG-14) after ISS departure, Saffire Flow Unit, 19.0 m3 free volume",
+    "years": "2021 (January 2021, ICES-2021)",
+    "materials": "V-2: cotton jersey 50 cm (concurrent); V-3: 1-sided PMMA 0.5 cm thick, 18 cm (concurrent); V-4: structured PMMA 1 cm thick with ribs, 20 cm (opposed); one sample did not ignite",
+    "o2_percent_range": [
+      25.4,
+      26.2
+    ],
+    "pressure_kpa_range": [
+      70.7,
+      72.6
+    ],
+    "flow_cm_s_range": [
+      0,
+      20
+    ],
+    "conditions_quotes": [
+      {
+        "url": "https://ntrs.nasa.gov/citations/20210011521",
+        "quote": "Flight/Sample IV-1 IV-2 V-2 V-3 V-4 Material/configuration SIBAL Cloth 2-sided PMMA Cotton Jersey 1 sided PMMA Structured PMMA Length (cm) 50 18 50 18 20 Air Flow Rate (cm/s) 20 20 20 20 20 Flow Direction Concurrent Concurrent Concurrent Concurrent Opposed Ambient Pressure (kPa) 100.0 100.0 70.7 71.3 72.6 Oxygen Concentration (mol %) 22.0 22.0 26.2 25.4 25.7"
+      },
+      {
+        "url": "https://ntrs.nasa.gov/citations/20210011521",
+        "quote": "the air flow for Saffire V samples 3 and 4 was reduced from the starting condition of 20 cm/s to 5 cm/s and held at 5 cm/s for 300 seconds"
+      },
+      {
+        "url": "https://ntrs.nasa.gov/citations/20210011521",
+        "quote": "At approximately 280 seconds, the fan was turned off and remained off for 70 seconds."
+      },
+      {
+        "url": "https://ntrs.nasa.gov/citations/20210011521",
+        "quote": "Increasing the ambient oxygen concentration can be expected to reduce the standoff distance."
+      }
+    ],
+    "data_availability": "Per-test conditions are a public table: ICES-2021-266, NTRS 20210011521, PDF page 3, Table 1 (rows V-2, V-3, V-4: 70.7 / 71.3 / 72.6 kPa; 26.2 / 25.4 / 25.7 mol % O2; 20 cm/s). Also ICES-2024-365 Table 1 (V-2 row) and the ICES 2021 presentation, NTRS 20210017780, slide 5. Outcomes are prose and figures; gas sensors on IV and V were 'not useful' (outlet sensor moved), so no measured O2 consumption. No machine-readable dataset located.",
+    "reason_not_integrated": "Large-scale spacecraft-fire apparatus with one flow (20 cm/s, later reduced) per sample and only 3 reduced-pressure data points; per-test numbers exist only as a table in papers; not in PSI per the catalog."
+  },
+  {
+    "id": "saffire-vi",
+    "name": "Saffire-VI (Spacecraft Fire Experiment VI): SIBAL, two-sided and one-sided PMMA at 54-55 kPa and 29-31 % O2",
+    "agency": "NASA (GRC, JSC) with ESA, JAXA, CNES, DLR, Russian and university partners",
+    "platform": "Free-flying Cygnus after ISS departure, Saffire Flow Unit, 16.7 m3 free volume; spacecraft vented and O2 backfilled before tests",
+    "years": "2023 to January 2024 (NASA article: launched August 2023, concluded Jan. 9; ICES-2024 slide: 'Saffire VI flew in December 2023'; sources differ, not reconciled)",
+    "materials": "VI-2: SIBAL cloth 50 cm; VI-3: 2-sided PMMA 1 cm thick, 18 cm; VI-4: 1-sided PMMA 0.5 cm thick, 18 cm; Nomex 7 cm sample did not ignite (conditions of that attempt not reported)",
+    "o2_percent_range": [
+      28.8,
+      31.0
+    ],
+    "pressure_kpa_range": [
+      54.1,
+      55.2
+    ],
+    "flow_cm_s_range": [
+      0,
+      20
+    ],
+    "conditions_quotes": [
+      {
+        "url": "https://ntrs.nasa.gov/citations/20240002981",
+        "quote": "Flight/Sample IV-1 V-2 VI-2 VI-3 VI-4 Material SIBAL Cloth Cotton Jersey SIBAL Cloth Two-Sided PMMA One-Sided PMMA Length (cm) 50 50 50 18 18 Air Flow Rate (cm/s) 20 20 20 20 20 Flow Direction Concurrent Concurrent Concurrent Concurrent Concurrent Ambient Pressure (kPa) 100.0 70.7 54.1 54.6 55.2 Oxygen Concentration (mol %) 22.0 26.2 31.0 30.3 28.8 Free volume (m3) 17.9 19.0 16.7 16.7 16.7"
+      },
+      {
+        "url": "https://ntrs.nasa.gov/citations/20240002981",
+        "quote": "The Northrup Grumman operators vented the spacecraft to the requested pressure and the Saffire experiment then released oxygen to bring the spacecraft to the desired condition (Table 1)."
+      },
+      {
+        "url": "https://ntrs.nasa.gov/citations/20240002981",
+        "quote": "The flow was changed from 20 cm/s to 5 cm/s at 1120 s and terminated at 1420 s."
+      },
+      {
+        "url": "https://ntrs.nasa.gov/citations/20240002981",
+        "quote": "The Nomex sample did not ignite"
+      }
+    ],
+    "data_availability": "Per-test conditions are a public table: ICES-2024-365 (Urban et al.), NTRS 20240002981, PDF page 3, Table 1 (rows VI-2, VI-3, VI-4); same table on slide 11 of NTRS 20240007488. Heat release, burn duration, CO and CO2 per test in Table 2 (PDF page 6). Results are for one test series ('preliminary'); no machine-readable per-test dataset located; no PSI record found (see docs/research/psi-catalog.md).",
+    "reason_not_integrated": "Large-scale spacecraft-fire apparatus at one flow (20 cm/s) per sample; only three conditions; per-test data are in a paper table, not a machine-readable dataset; recorded as an out-of-envelope context candidate rather than boundary data."
+  },
+  {
+    "id": "ssce-thin-cellulose",
+    "name": "SSCE (Solid Surface Combustion Experiment), thin ashless filter paper in quiescent O2/N2",
+    "agency": "NASA (Lewis/Glenn) with Mississippi State University, San Diego State University",
+    "platform": "Space Shuttle (STS-41, -40, -43, -50, -47), sealed 0.039 m3 chamber",
+    "years": "October 1990 to 1992 (STS-41 Oct 1990, STS-40 Jun 1991, STS-43 Aug 1991, STS-50 Jul 1992; STS-47 date not stated in sources retrieved)",
+    "materials": "Ashless filter paper, 0.165 mm thick, 10 cm long, 3 cm wide",
+    "o2_percent_range": [
+      35,
+      50
+    ],
+    "pressure_kpa_range": [
+      101.325,
+      202.65
+    ],
+    "flow_cm_s_range": [
+      0,
+      0
+    ],
+    "conditions_quotes": [
+      {
+        "url": "https://ntrs.nasa.gov/citations/19950007798",
+        "quote": "The experiment was conducted at 35% oxygen/65% nitrogen and 1.0 atm pressure, the lowest oxygen percentage. Earlier flight tests were conducted at 50% oxygen and 1-2 atm."
+      },
+      {
+        "url": "https://ntrs.nasa.gov/citations/19960008387",
+        "quote": "Three experiments, STS 41, 40 and 43, were designed to evaluate the effect of ambient pressure on flame spread over the thin cellulosic fuel while flights STS 50 and 47 were at the same pressure as two of the earlier flights but at a lower oxygen concentration"
+      },
+      {
+        "url": "https://ntrs.nasa.gov/citations/19950007798",
+        "quote": "the 35% oxygen/l.0 atm experiment here is 0.092 cm/s, while at 1.5 atm it is 0.150 cm/s, and at 50% oxygen, for 1.0, 1.5, and 2.0 atm it is 0.358, 0.454, and 0.547 cm/s, respectively"
+      },
+      {
+        "url": "https://ntrs.nasa.gov/citations/19960008387",
+        "quote": "to determine the mechanisms of gas-phase flame spread over solid fuel surfaces in the absence of any buoyancy induced or externally imposed oxidizer flow"
+      }
+    ],
+    "data_availability": "Five results only: leading-edge spread rates quoted in NTRS 19950007798 (0.358, 0.454, 0.547 cm/s at 50 % O2 and 1.0, 1.5, 2.0 atm; 0.092 cm/s at 35 % and 1.0 atm; 0.150 cm/s at 35 % and 1.5 atm) and figure-level temperature data. NTRS 19930011017 states STS-50 as 35 % at 1.5 atm, which conflicts with the later paper (1.0 atm); the later paper is used. No machine-readable data located.",
+    "reason_not_integrated": "Quiescent (no forced flow), all at or above 1 atm; spread rates not sustain/extinguish outcomes at a flow step; five data points; not in PSI."
+  },
+  {
+    "id": "ssce-thick-pmma",
+    "name": "SSCE thick PMMA flights (STS-54, STS-63, STS-64) and STS-85 reflight, quiescent high-O2",
+    "agency": "NASA (Lewis/Glenn) with Washington State University, San Diego State University, Factory Mutual",
+    "platform": "Space Shuttle, sealed 0.039 m3 chamber",
+    "years": "Three PMMA flights within October 1990 to February 1995 (exact dates not stated in text retrieved); STS-85 reflight 9 August 1997",
+    "materials": "PMMA, 25.4 mm long x 6.35 mm wide x 3.18 mm thick (two samples per flight)",
+    "o2_percent_range": [
+      50,
+      70
+    ],
+    "pressure_kpa_range": [
+      101.325,
+      202.65
+    ],
+    "flow_cm_s_range": [
+      0,
+      0
+    ],
+    "conditions_quotes": [
+      {
+        "url": "https://ntrs.nasa.gov/citations/19970020608",
+        "quote": "in a quiescent O2/N2 oxidizing environment"
+      },
+      {
+        "url": "https://ntrs.nasa.gov/citations/19970020608",
+        "quote": "70% O2/1 atm pressure (STS-54), 50% O2/1 atm (STS-63), and 50% 02/2 atm (STS-64)"
+      },
+      {
+        "url": "https://ntrs.nasa.gov/citations/19970020608",
+        "quote": "The flame in 70% O2, 1 atm was beginning to escape the thermocouple when it was quenched by the experiment's computer."
+      },
+      {
+        "url": "https://ntrs.nasa.gov/citations/19990053971",
+        "quote": "demonstrates that for thick, flat fuels, the ultimate fate of the flame is extinction rather than steady spread"
+      }
+    ],
+    "data_availability": "Flame-position-vs-time figures in NTRS 19970020608 (Altenkirch et al.); conditions of the three flights stated in text (extraction shows OCR '02' for O2). No tabulated per-test data or machine-readable data located; STS-85 reflight conditions not retrieved (NTRS 19990053971 PDF not downloadable here).",
+    "reason_not_integrated": "Three flights only, quiescent, at 1-2 atm and 50-70 % O2 (far from cabin-relevant O2 and reduced pressure); results are spread-rate/extinction behaviour, not tabulated; not in PSI."
+  },
+  {
+    "id": "fffft-usmp3",
+    "name": "FFFT (Forced Flow Flame Spreading Test), part of SIBAL ground/flight precursor",
+    "agency": "NASA (Lewis/Glenn), with Case Western Reserve University",
+    "platform": "Space Shuttle, USMP-3 mission (Microgravity Glovebox)",
+    "years": "USMP-3 (STS-75); year not stated in retrieved abstracts (NIST material indicates 1996, not independently verified)",
+    "materials": "Flat sheets of cellulose and cast cylinders of cellulose",
+    "o2_percent_range": null,
+    "pressure_kpa_range": null,
+    "flow_cm_s_range": [
+      1,
+      8
+    ],
+    "conditions_quotes": [
+      {
+        "url": "https://ntrs.nasa.gov/citations/19990020831",
+        "quote": "a series of 15 experiments conducted aboard the space shuttle during the United States Microgravity Payload (USMP-3) mission"
+      },
+      {
+        "url": "https://ntrs.nasa.gov/citations/19990020831",
+        "quote": "burned in air at velocities of approximately 1 to 8 cm/sec"
+      }
+    ],
+    "data_availability": "Abstract-level only (NTRS 19990020831, full text not downloadable here); per-test conditions and outcomes not located; the SIBAL flight experiment was described in 1997 as scheduled for the Fluids and Combustion Facility (NTRS 19970020611).",
+    "reason_not_integrated": "Air only (about 21 % O2, pressure not stated), cellulose, abstract-level data; no elevated-O2 or reduced-pressure conditions stated; not in PSI."
+  },
+  {
+    "id": "ritsi-usmp3",
+    "name": "RITSI (Radiative Ignition and Transition to Spread Investigation)",
+    "agency": "NASA (Lewis/Glenn) and NIST (Kashiwagi, Olson)",
+    "platform": "Space Shuttle, USMP-3 mission, Glovebox Facility",
+    "years": "USMP-3 (STS-75); year not stated in retrieved abstracts (NIST material indicates 1996, not independently verified)",
+    "materials": "Thermally thin filter paper (2-D and 3-D configurations; flaming and smoldering)",
+    "o2_percent_range": null,
+    "pressure_kpa_range": null,
+    "flow_cm_s_range": [
+      0,
+      6.5
+    ],
+    "conditions_quotes": [
+      {
+        "url": "https://ntrs.nasa.gov/citations/19990020832",
+        "quote": "A total of 25 experiments was conducted in the Glovebox Facility on the Third United States Microgravity payload (USMP3) mission"
+      },
+      {
+        "url": "https://ntrs.nasa.gov/citations/19990020832",
+        "quote": "The external air flow velocity was varied from 0 cm/s to 6.5 cm/s."
+      },
+      {
+        "url": "https://ntrs.nasa.gov/citations/19990020832",
+        "quote": "In the two-dimensional configuration, the transition from ignition to downstream flame spread never occurred; only the transition to upstream spread took place."
+      }
+    ],
+    "data_availability": "Abstract-level only (NTRS 19990020832); no per-test table retrieved.",
+    "reason_not_integrated": "Air at ambient pressure (O2 and pressure not stated numerically), ignition-transition outcomes, no flow-step flammability data; not in PSI."
+  },
+  {
+    "id": "dartfire",
+    "name": "DARTFire (Diffusive and Radiative Transport in Fires), opposed-flow flame spread over PMMA with external radiant flux",
+    "agency": "NASA (Lewis/Glenn) with San Diego State University, Washington State/Mississippi State University",
+    "platform": "Sounding rocket (about 6 minutes of microgravity per launch; two tunnels per launch)",
+    "years": "June 1996 to September 1997 (four launches)",
+    "materials": "Black PMMA, 20 mm long x 20 mm thick x 6.35 mm wide",
+    "o2_percent_range": [
+      35,
+      70
+    ],
+    "pressure_kpa_range": [
+      101.325,
+      101.325
+    ],
+    "flow_cm_s_range": [
+      1,
+      10
+    ],
+    "conditions_quotes": [
+      {
+        "url": "https://ntrs.nasa.gov/citations/20030111833",
+        "quote": "Two mirror image flow tunnels provide 1-10 cm/s flow through each 10 cm x 10 cm cross section x 15 cm long tunnel."
+      },
+      {
+        "url": "https://ntrs.nasa.gov/citations/20030111833",
+        "quote": "Pressure in the duct was maintained at 1 atmosphere."
+      },
+      {
+        "url": "https://ntrs.nasa.gov/citations/20030111833",
+        "quote": "The sounding rocket test matrix is shown in Table 1."
+      },
+      {
+        "url": "https://ntrs.nasa.gov/citations/20030111833",
+        "quote": "During test 4A the sample failed to ignite."
+      },
+      {
+        "url": "https://ntrs.nasa.gov/citations/20050192123",
+        "quote": "the four launches of this program (June 1996 to September 1997)"
+      }
+    ],
+    "data_availability": "PUBLIC PER-TEST TABLE: Olson et al. preprint, NTRS 20030111833, PDF page 45, Table 1 'DARTFire Test Matrix' (8 tunnel-tests; molar O2 35/50/70 %; flow 1/5/10 cm/s; imposed radiant flux 0-2 W/cm2; measured spread rate or outcome). Tables 2 and 3 (pages 46+) give regression/burning-rate and net-heat-flux data. Also NTRS 19970020610 Table 1 (earlier version with 4A/4B 'proposed'; 1A listed there as 'no ignition' while the 2003 text says it ignited but extinguished when the igniter stopped). No machine-readable file located.",
+    "reason_not_integrated": "Elevated O2 only (all at 1 atm), only 8 tests, spread-rate rather than flow-step sustain/extinguish outcomes; the table is in a paper (transcription would be manual); not in PSI."
+  },
+  {
+    "id": "glenn-zgrf-drop-exploration-atmospheres",
+    "name": "NASA Glenn Zero Gravity Research Facility drop-tower flammability in exploration atmospheres (Olson, Ruff, Miller; NASA/TM-2008-215260), 0g vs NASA-STD-6001 Test 1",
+    "agency": "NASA (Glenn) with San Diego State University",
+    "platform": "NASA Glenn Zero Gravity Research Facility drop rig, 5.18 s of microgravity, low-speed flow tunnel",
+    "years": "Reported 2008 (NASA/TM-2008-215260; SAE ICES 2008); test dates not stated",
+    "materials": "Kimwipes (thin cellulose), Ultem 1000 10 mil film, Nomex HT90-40 fabric, Mylar G film; 5 cm x 10 cm samples",
+    "o2_percent_range": [
+      16,
+      85
+    ],
+    "pressure_kpa_range": [
+      24.8,
+      101.4
+    ],
+    "flow_cm_s_range": [
+      0,
+      30
+    ],
+    "conditions_quotes": [
+      {
+        "url": "https://ntrs.nasa.gov/citations/20080034883",
+        "quote": "Thirty concurrent and ten opposed flow flame spread tests were conducted with Kimwipes to evaluate the effects of flow, pressure, and oxygen on the robustness of the flame. The flow velocity varied between 0 and 30 cm/s, the pressure varied between 3.6 and 14.7 psia, and the oxygen percentage ranged"
+      },
+      {
+        "url": "https://ntrs.nasa.gov/citations/20080034883",
+        "quote": "from 24 to 85%."
+      },
+      {
+        "url": "https://ntrs.nasa.gov/citations/20080034883",
+        "quote": "Ultem 1000, 10 mil 26.5% O2, 10.2 psia* 24% O2, 10.2 psia* 24% O2, 10.2 psia, 30 cm/s 23% O2, 10.2 psia, 30 cm/s Mylar G 20.8% O2, 10.2 psia* 20% O2, 10.2 psia* 17% O2, 10.2 psia, 30 cm/s 16% O2, 10.2 psia, 30 cm/s"
+      },
+      {
+        "url": "https://ntrs.nasa.gov/citations/20080034883",
+        "quote": "Nomex HT90-40 fabric 25.4% O2 (±0.6), 14.7 psia* 22% O2, 14.7 psia* 23% O2, 14.7 psia, 30 cm/s 22% O2, 14.7 psia, 30 cm/s"
+      },
+      {
+        "url": "https://ntrs.nasa.gov/citations/20080034883",
+        "quote": "The microgravity period lasted 5.18 sec"
+      }
+    ],
+    "data_availability": "PUBLIC TABLE of microgravity limits at reduced pressure: NASA/TM-2008-215260 (NTRS 20080034883), PDF page 7, Table 1 'Comparison of 1g and 0g flammability limits for three fuels' (0g ULOI burns / 0g MOC extinguishes, at 10.2 or 14.7 psia, 30 cm/s concurrent). Figure 4 (PDF page 8) is a flow-vs-O2 flammability map for Ultem 1000 at 10.2 psia (figure only). Kimwipes spread-rate data (40 tests) appear as figures 6-7. 1g values marked * are WSTF data (cited reference). No machine-readable file located.",
+    "reason_not_integrated": "Drop-tower 5.18 s limits criterion ('lowest O2 where flame survived to end of drop') differs from flame-sustained-at-flow-step outcomes in ISS tests; only Table 1 is tabular (3 fuels, 2 pressures); 40 Kimwipes tests are in figures; different materials from the BASS/BASS-II integrated set."
+  },
+  {
+    "id": "glenn-drop-lunar-martian-gravity",
+    "name": "NASA Glenn drop-tower flammability limits at Martian and Lunar gravity vs 0g and NASA-STD-6001 Test 1 (Olson, Ferkul)",
+    "agency": "NASA (Glenn), Universities Space Research Association / National Center for Space Exploration Research",
+    "platform": "NASA Glenn Zero Gravity Research Facility drop tower with centrifuge for Martian-g (partial gravity, NOT microgravity); 0g and Lunar-g columns repeat earlier tests",
+    "years": "Year not stated in the retrieved text",
+    "materials": "Ultem 1000 10 mil, Nomex HT90-40, Mylar G (Melinex 515)",
+    "o2_percent_range": [
+      14.1,
+      22.0
+    ],
+    "pressure_kpa_range": [
+      70.3,
+      101.4
+    ],
+    "flow_cm_s_range": null,
+    "conditions_quotes": [
+      {
+        "url": "https://ntrs.nasa.gov/citations/20130010991",
+        "quote": "Drop tower tests are conducted at Martian gravity to determine the flammability of three materials compared to previous tests in other normal gravity and reduced gravity environments."
+      },
+      {
+        "url": "https://ntrs.nasa.gov/citations/20130010991",
+        "quote": "Table I: Limiting Oxygen Molar Concentrations and Oxygen Margin of Safety for Different Gravity Levels Fuel Mylar® G 10.2 psia Ultem® 1000 10.2 psia Nomex® HT90-40 14.7 psia 1g ULOI 21.2 23.5 23.5 1g MOC 20.0 23.0 22.1 Martian ULOI* 18.0 22.0 19.9 Martian MOC* 17.0 21.1 19.0 Lunar ULOI* 15.6 21.0 21.0 Lunar MOC* 14.1 19.9 19.9 0g* ULOI* 17.0 24.0 23.0 0g* MOC* 16.0 23.0 22.0"
+      },
+      {
+        "url": "https://ntrs.nasa.gov/citations/20130010991",
+        "quote": "the 1g flammability limits are generally not conservative for these materials as evidenced by the negative ∆O2%, by up to -5.75% oxygen"
+      }
+    ],
+    "data_availability": "PUBLIC TABLE: NTRS 20130010991, PDF page 6, Table I (limiting O2 at 10.2 psia for Mylar G and Ultem, 14.7 psia for Nomex, for 1g, Martian, Lunar and 0g). The O2 range here covers the Martian and Lunar columns only; 0g columns are 16.0-24.0 %. No machine-readable file located.",
+    "reason_not_integrated": "Partial gravity (and drop-tower limit criteria that differ from 1g) rather than microgravity ISS flow-step data; only limit values, not per-test outcomes; the 0g column duplicates the Glenn 2008 table."
+  },
+  {
+    "id": "jaxa-flare-scem-iss",
+    "name": "JAXA FLARE (Flammability Limits at Reduced-g Experiment), Solid Combustion Experiment Module on ISS/Kibo",
+    "agency": "JAXA (lead) with NASA (GRC), ESA, CNES, DLR and universities (Hokkaido, Hirosaki, Gifu, Tokyo, Shinshu, Toyohashi, UC Berkeley, Sorbonne, Bremen)",
+    "platform": "ISS Kibo, SCEM installed in the MSPR rack (recirculating flow tunnel, 14 cm x 14 cm test section)",
+    "years": "Project initiated 2012; SCEM launched May 2020; on-orbit burning started 19 May 2022; filter-paper series finished 24 May 2024; PMMA, LDPE rod and Nomex runs followed (FLARE-2 planned)",
+    "materials": "Filter paper (Advantec No. 4A, 120 um, 20 mm and 40 mm wide, 130 mm long), thin PMMA sheet, Nomex HT90-40, LDPE rod, insulated wires (as published so far: filter paper, PMMA, Nomex)",
+    "o2_percent_range": null,
+    "pressure_kpa_range": [
+      100,
+      100
+    ],
+    "flow_cm_s_range": null,
+    "conditions_quotes": [
+      {
+        "url": "https://doi.org/10.1016/j.proci.2024.105200",
+        "quote": "with the experiments conducted in an environment of 298 K and 100 kPa. This paper highlights the results of 19 flame spread experiments performed in opposed-flow environments"
+      },
+      {
+        "url": "https://doi.org/10.1016/j.proci.2024.105200",
+        "quote": "as the opposed flow velocity was incrementally increased from 10 cm/s to 18 cm/s in 2 cm/s steps, within an environment containing 15.5 % oxygen concentration"
+      },
+      {
+        "url": "https://doi.org/10.20619/jcombsj.66.218_239",
+        "quote": "SCEM は，初期の酸素濃度(0-45 vol.%) と圧力(0-101.3 kPa) を任意の値に設定し，酸化剤流(0-25 cm/s) を供給できる"
+      },
+      {
+        "url": "https://doi.org/10.20619/jcombsj.66.218_239",
+        "quote": "実施した燃焼実験は総計で43 回，そのうち31 回が対向流燃え拡がり，12 回が並行流燃え拡がりであった"
+      },
+      {
+        "url": "https://humans-in-space.jaxa.jp/2026/07/Leaflet_CombustionExperimentInMicrogravity.pdf",
+        "quote": "SCEM enables material combustion experiments under atmospheric-pressure and low-pressure conditions, with high-oxygen-concentration conditions* (up to 45%)."
+      },
+      {
+        "url": "https://doi.org/10.1016/j.combustflame.2026.114803",
+        "quote": "long-duration microgravity experiments were conducted on two additional materials—non-charring PMMA and charring NOMEX HT90-40—using the Solid Combustion Experimental Module (SCEM) onboard the ISS/Kibo module"
+      },
+      {
+        "url": "https://doi.org/10.1016/j.proci.2026.106032",
+        "quote": "flame spread was observed even below the limiting oxygen concentration predicted by a conventional two-dimensional flame spread model"
+      }
+    ],
+    "data_availability": "Open-access papers with LOC (limiting O2 vs opposed flow) maps as figures: Takahashi et al., Proc. Combust. Inst. 40 (2024) 105200 (19 opposed-flow tests, 100 kPa, 298 K); Takahashi et al., Fire Technol. 60 (2024) 313-334 (doi 10.1007/s10694-023-01507-3, filter paper near extinction limit); Combust. Flame (2026) 114803 (PMMA and Nomex); Proc. Combust. Inst. (2026) 106032. Overview: Fujita et al., J. Combust. Soc. Jpn. 66(218) 239-246 (2024), Fig. 5 is the on-orbit filter-paper LOC map. Per-test numeric tables were NOT retrieved (publisher pages and the JAXA repository were not readable here), so whether a per-test table exists is unverified. SCEM can set 0-45 % O2 and 0-101.3 kPa (capability, not tested range); FLARE-2 plans exploration-atmosphere tests (56.5 kPa, 34 % O2 cited as the original Artemis proposal) and further low-pressure work.",
+    "reason_not_integrated": "No machine-readable per-test data located; the published tests so far (filter paper) are at 100 kPa; limiting-oxygen maps are figures; JAXA and not in PSI."
+  },
+  {
+    "id": "zarm-flare-g1-drop-tower",
+    "name": "ZARM Bremen drop-tower tests on thin PMMA sheets (FLARE-G I, ESA/DLR-supported, part of JAXA FLARE)",
+    "agency": "University of Bremen ZARM (ESA/German partners within the JAXA-coordinated FLARE programme)",
+    "platform": "ZARM Bremen drop tower",
+    "years": "Not stated on the ZARM page",
+    "materials": "Thin PMMA sheets, 0.2 mm thick",
+    "o2_percent_range": null,
+    "pressure_kpa_range": null,
+    "flow_cm_s_range": null,
+    "conditions_quotes": [
+      {
+        "url": "https://www.zarm.uni-bremen.de/en/research/combustion-engineering",
+        "quote": "In drop tower tests on thin PMMA sheets (0.2 mm thickness)"
+      },
+      {
+        "url": "https://www.zarm.uni-bremen.de/en/research/combustion-engineering",
+        "quote": "the parameters oxygen concentration, inflow velocity and test pressure are varied"
+      },
+      {
+        "url": "https://www.zarm.uni-bremen.de/en/research/combustion-engineering",
+        "quote": "decreasing pressure only slightly dampens combustion"
+      },
+      {
+        "url": "https://www.zarm.uni-bremen.de/en/research/combustion-engineering",
+        "quote": "Thereby the oxygen partial pressure is kept constant at 21.3 kPa."
+      }
+    ],
+    "data_availability": "Project description only; no numeric test matrix, results table or dataset located.",
+    "reason_not_integrated": "No numeric conditions or per-test results published on the page retrieved; short-duration drop tower; no public machine-readable data found."
+  },
+  {
+    "id": "olson-2013-ir-thin-cellulose",
+    "name": "Olson, Lee, Fujita, Kikuchi, Kashiwagi: infrared analysis of simultaneous upstream/downstream flame spread over thin cellulose in low-speed forced flow",
+    "agency": "NASA (GRC) with Hokkaido University, JAXA, NIST",
+    "platform": "Microgravity facility not identified in the text retrieved (hardware is referenced to Prasad et al.; 'microgravity time' ends with CO2 extinguishing)",
+    "years": "Reported May 2013 (8th US National Combustion Meeting); test dates not stated",
+    "materials": "Thin cellulose, 60 mg/cm2, 7.5 cm wide x 14 cm long, centre-ignited",
+    "o2_percent_range": [
+      21,
+      50
+    ],
+    "pressure_kpa_range": [
+      101.325,
+      101.325
+    ],
+    "flow_cm_s_range": [
+      2,
+      20
+    ],
+    "conditions_quotes": [
+      {
+        "url": "https://ntrs.nasa.gov/citations/20130013793",
+        "quote": "consisted of a flow duct inside a sealed chamber which was filled with 21%, 35%, or 50% oxygen in nitrogen at 1 atmosphere pressure. The flow duct provided a uniform flow of 2-20 cm/s past the fuel sample."
+      },
+      {
+        "url": "https://ntrs.nasa.gov/citations/20130013793",
+        "quote": "Four cases, at 1 atm. 35%O2 in N2, at forced flows from 2 cm/s to 20 cm/s are presented here."
+      }
+    ],
+    "data_availability": "Four 35 % O2 cases (2, 5, 10, 20 cm/s) discussed with infrared images; no tabulated per-test data retrieved (NTRS 20130013793).",
+    "reason_not_integrated": "Elevated O2 at 1 atm only; the microgravity platform was not confirmed from the retrieved text; spread-rate and heat-flux analysis, not flammability-limit outcomes; not in PSI."
+  }
+]

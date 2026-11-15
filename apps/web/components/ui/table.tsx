@@ -1,0 +1,71 @@
+import * as React from "react";
+import { cn } from "@/lib/cn";
+
+export interface TableProps extends React.TableHTMLAttributes<HTMLTableElement> {
+  /** Classes for the scroll container. Give it a max height (e.g. "max-h-[60vh]") to enable the sticky header. */
+  containerClassName?: string;
+}
+
+/** Compact data table. The header sticks to the top of the scroll container. */
+export const Table = React.forwardRef<HTMLTableElement, TableProps>(({ className, containerClassName, ...props }, ref) => (
+  <div className={cn("relative w-full overflow-auto rounded-md border border-border bg-surface", containerClassName)}>
+    <table ref={ref} className={cn("w-full caption-bottom border-separate border-spacing-0 text-[13px]", className)} {...props} />
+  </div>
+));
+Table.displayName = "Table";
+
+export const TableHeader = React.forwardRef<HTMLTableSectionElement, React.HTMLAttributes<HTMLTableSectionElement>>((props, ref) => (
+  <thead ref={ref} {...props} />
+));
+TableHeader.displayName = "TableHeader";
+
+export const TableBody = React.forwardRef<HTMLTableSectionElement, React.HTMLAttributes<HTMLTableSectionElement>>((props, ref) => (
+  <tbody ref={ref} {...props} />
+));
+TableBody.displayName = "TableBody";
+
+export const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTMLTableRowElement>>(({ className, ...props }, ref) => (
+  <tr
+    ref={ref}
+    className={cn("transition-colors hover:bg-subtle/60 data-[state=selected]:bg-accent-tint [&:last-child>td]:border-b-0", className)}
+    {...props}
+  />
+));
+TableRow.displayName = "TableRow";
+
+export interface TableCellProps {
+  /** Right-aligned, mono, tabular figures. Use for every measured value. */
+  numeric?: boolean;
+}
+
+export const TableHead = React.forwardRef<HTMLTableCellElement, React.ThHTMLAttributes<HTMLTableCellElement> & TableCellProps>(
+  ({ className, numeric, scope = "col", ...props }, ref) => (
+    <th
+      ref={ref}
+      scope={scope}
+      className={cn(
+        "sticky top-0 z-10 h-8 whitespace-nowrap border-b border-border bg-subtle px-3 text-left text-xs font-medium text-muted",
+        numeric && "text-right",
+        className,
+      )}
+      {...props}
+    />
+  ),
+);
+TableHead.displayName = "TableHead";
+
+export const TableCell = React.forwardRef<HTMLTableCellElement, React.TdHTMLAttributes<HTMLTableCellElement> & TableCellProps>(
+  ({ className, numeric, ...props }, ref) => (
+    <td
+      ref={ref}
+      className={cn("h-8 border-b border-border px-3 align-middle", numeric && "num text-right", className)}
+      {...props}
+    />
+  ),
+);
+TableCell.displayName = "TableCell";
+
+export const TableCaption = React.forwardRef<HTMLTableCaptionElement, React.HTMLAttributes<HTMLTableCaptionElement>>(({ className, ...props }, ref) => (
+  <caption ref={ref} className={cn("px-3 py-2 text-left text-xs text-muted", className)} {...props} />
+));
+TableCaption.displayName = "TableCaption";

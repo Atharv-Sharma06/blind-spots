@@ -1,0 +1,1293 @@
+[
+  {
+    "accession": "PSI-10",
+    "acronym": "ACME/Flame Design",
+    "title": "Advanced Combustion via Microgravity Experiments / Flame Design",
+    "doi": "10.60555/w4zy-bt45",
+    "doi_url": "https://doi.org/10.60555/w4zy-bt45",
+    "landing_url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-10",
+    "license": null,
+    "license_name": null,
+    "platform": "Advanced Combustion via Microgravity Experiments (ACME), Combustion Integrated Rack (CIR), Reconfiguration of Combustion Integrated Rack (CIR), International Space Station (ISS)",
+    "flight_program": "International Space Station (ISS)",
+    "experiment_hardware": "Advanced Combustion via Microgravity Experiments (ACME), Combustion Integrated Rack (CIR), Reconfiguration of Combustion Integrated Rack (CIR)",
+    "investigation_start": "01-14-1999",
+    "investigation_end": "04-30-2025",
+    "project_type": "Microgravity Investigation",
+    "research_area": "Combustion Science",
+    "sub_research_area": "Flames of Gaseous Fuels",
+    "files_listed_total": 3807,
+    "files_by_type": {
+      "zip": 1184,
+      "txt": 993,
+      "csv": 636,
+      "mdipsug": 490,
+      "ts": 317,
+      "pdf": 76,
+      "asc": 66,
+      "log": 35,
+      "jpg": 5,
+      "xlsx": 2,
+      "png": 2,
+      "errors": 1
+    },
+    "listed_files_size_bytes": 2180435304347,
+    "total_size_bytes": 2180435304347,
+    "experimental_table_files": [
+      "PSI-10_Experimental table_Flame Design_Normal Flame.csv",
+      "PSI-10_Experimental table_Flame Design_Inverse Flame.csv"
+    ],
+    "tabular_files_listed": 1631,
+    "tabular_files_under_5MB": 1594,
+    "has_tabular_files": true,
+    "solid_fuel": false,
+    "variables_in_tabular": null,
+    "role": "catalogued_not_integrated",
+    "role_reason": "Gaseous spherical diffusion flames (normal and inverse, soot-inception limits); not a solid-fuel flammability dataset.",
+    "key_files": [
+      {
+        "file_name": "PSI-10_Experimental table_Flame Design_Normal Flame.csv",
+        "size": 26933,
+        "kind": "tabular",
+        "notes": "Experimental summary table (public inventory of runs/conditions; not per-test outcomes)."
+      },
+      {
+        "file_name": "PSI-10_Experimental table_Flame Design_Inverse Flame.csv",
+        "size": 17314,
+        "kind": "tabular",
+        "notes": "Experimental summary table (public inventory of runs/conditions; not per-test outcomes)."
+      }
+    ],
+    "metadata_notes": [
+      "Metadata has no license identifier."
+    ]
+  },
+  {
+    "accession": "PSI-20",
+    "acronym": "ACME BRE",
+    "title": "Advanced Combustion via Microgravity Experiments - Burning Rate Emulator",
+    "doi": "10.60555/vb93-3y72",
+    "doi_url": "https://doi.org/10.60555/vb93-3y72",
+    "landing_url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-20",
+    "license": "CC0-1.0",
+    "license_name": "Creative Commons Zero v1.0 Universal",
+    "platform": "Combustion Integrated Rack (CIR), ACME, International Space Station (ISS)",
+    "flight_program": "International Space Station (ISS)",
+    "experiment_hardware": "Combustion Integrated Rack (CIR), ACME",
+    "investigation_start": "01-01-2010",
+    "investigation_end": "02-08-2025",
+    "project_type": "Microgravity Investigation",
+    "research_area": "Combustion Science",
+    "sub_research_area": "Flames of Gaseous Fuels",
+    "files_listed_total": 1,
+    "files_by_type": {
+      "csv": 1
+    },
+    "listed_files_size_bytes": 1113,
+    "total_size_bytes": 2035568427496,
+    "experimental_table_files": [
+      "PSI-20_Experimental table_ACME BRE.csv"
+    ],
+    "tabular_files_listed": 1,
+    "tabular_files_under_5MB": 1,
+    "has_tabular_files": true,
+    "solid_fuel": false,
+    "variables_in_tabular": null,
+    "role": "catalogued_not_integrated",
+    "role_reason": "Burning Rate Emulator: gaseous fuel through a porous burner emulating a solid-fuel burning rate; not solid fuel; O2 varied but outcome is flame ignited counts per day.",
+    "key_files": [
+      {
+        "file_name": "PSI-20_Experimental table_ACME BRE.csv",
+        "size": 1113,
+        "kind": "tabular",
+        "notes": "Experimental summary table (public inventory of runs/conditions; not per-test outcomes)."
+      }
+    ],
+    "metadata_notes": []
+  },
+  {
+    "accession": "PSI-21",
+    "acronym": "ACME CLD Flame",
+    "title": "Advanced Combustion via Microgravity Experiments / Coflow Laminar Diffusion Flame",
+    "doi": "10.60555/23e1-9950",
+    "doi_url": "https://doi.org/10.60555/23e1-9950",
+    "landing_url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-21",
+    "license": "CC0-1.0",
+    "license_name": "Creative Commons Zero v1.0 Universal",
+    "platform": "Combustion Integrated Rack (CIR), ACME, International Space Station (ISS)",
+    "flight_program": "International Space Station (ISS)",
+    "experiment_hardware": "Combustion Integrated Rack (CIR), ACME",
+    "investigation_start": "10-01-2006",
+    "investigation_end": "05-31-2022",
+    "project_type": "Microgravity Investigation",
+    "research_area": "Combustion Science",
+    "sub_research_area": "Flames of gaseous fuel",
+    "files_listed_total": 1,
+    "files_by_type": {
+      "csv": 1
+    },
+    "listed_files_size_bytes": 2454,
+    "total_size_bytes": 2005536295241,
+    "experimental_table_files": [
+      "PSI-21_Experimental table_CLD Flame.csv"
+    ],
+    "tabular_files_listed": 1,
+    "tabular_files_under_5MB": 1,
+    "has_tabular_files": true,
+    "solid_fuel": false,
+    "variables_in_tabular": null,
+    "role": "catalogued_not_integrated",
+    "role_reason": "Coflow laminar diffusion flames of gaseous fuel at the dilution extremes; not solid fuel.",
+    "key_files": [
+      {
+        "file_name": "PSI-21_Experimental table_CLD Flame.csv",
+        "size": 2454,
+        "kind": "tabular",
+        "notes": "Experimental summary table (public inventory of runs/conditions; not per-test outcomes)."
+      }
+    ],
+    "metadata_notes": []
+  },
+  {
+    "accession": "PSI-22",
+    "acronym": "ACME E-FIELD Flames",
+    "title": "Advanced Combustion via Microgravity Experiments Electric-Field Effects on Laminar Diffusion Flames",
+    "doi": "10.60555/se5a-8c73",
+    "doi_url": "https://doi.org/10.60555/se5a-8c73",
+    "landing_url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-22",
+    "license": "CC0-1.0",
+    "license_name": "Creative Commons Zero v1.0 Universal",
+    "platform": "Combustion Integrated Rack (CIR), ACME, International Space Station (ISS)",
+    "flight_program": "International Space Station (ISS)",
+    "experiment_hardware": "Combustion Integrated Rack (CIR), ACME",
+    "investigation_start": "11-18-2016",
+    "investigation_end": "11-17-2020",
+    "project_type": "Microgravity Investigation",
+    "research_area": "Combustion Science",
+    "sub_research_area": "Laminar Flames",
+    "files_listed_total": 0,
+    "files_by_type": {},
+    "listed_files_size_bytes": 0,
+    "total_size_bytes": 950212491107,
+    "experimental_table_files": [
+      "PSI-22_Experimental table_ACME E-FIELD Flames.csv"
+    ],
+    "tabular_files_listed": 0,
+    "tabular_files_under_5MB": 0,
+    "has_tabular_files": true,
+    "solid_fuel": false,
+    "variables_in_tabular": null,
+    "role": "catalogued_not_integrated",
+    "role_reason": "Electric-field effects on laminar gaseous flames; no data files in the public listing; not solid fuel.",
+    "key_files": [
+      {
+        "file_name": "PSI-22_Experimental table_ACME E-FIELD Flames.csv",
+        "size": 2475,
+        "kind": "tabular",
+        "notes": "Experimental summary table (public inventory of runs/conditions; not per-test outcomes)."
+      }
+    ],
+    "metadata_notes": [
+      "Public metadata lists no data files (only the experimental table / images); totalFileSize reports data exists, but it was not enumerated; unverified."
+    ]
+  },
+  {
+    "accession": "PSI-23",
+    "acronym": "ACME s-Flame",
+    "title": "Advanced Combustion via Microgravity Experiments-Structure and Response of Spherical Diffusion Flames",
+    "doi": "10.60555/k57n-p030",
+    "doi_url": "https://doi.org/10.60555/k57n-p030",
+    "landing_url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-23",
+    "license": "CC0-1.0",
+    "license_name": "Creative Commons Zero v1.0 Universal",
+    "platform": "Combustion Integrated Rack (CIR), ACME, International Space Station (ISS)",
+    "flight_program": "International Space Station (ISS)",
+    "experiment_hardware": "Combustion Integrated Rack (CIR), ACME",
+    "investigation_start": "02-05-2015",
+    "investigation_end": "11-24-2019",
+    "project_type": "Microgravity Investigation",
+    "research_area": "Combustion Science",
+    "sub_research_area": "Flames of gaseous fuels",
+    "files_listed_total": 4163,
+    "files_by_type": {
+      "zip": 2037,
+      "txt": 963,
+      "csv": 576,
+      "mp4": 290,
+      "asc": 170,
+      "log": 68,
+      "pdf": 38,
+      "mdipsug": 16,
+      "next": 2,
+      "xlsx": 2,
+      "sfk": 1
+    },
+    "listed_files_size_bytes": 782172103545,
+    "total_size_bytes": 782172126062,
+    "experimental_table_files": [
+      "PSI-23_Experimental table_ACME s-Flame.csv"
+    ],
+    "tabular_files_listed": 1541,
+    "tabular_files_under_5MB": 1541,
+    "has_tabular_files": true,
+    "solid_fuel": false,
+    "variables_in_tabular": null,
+    "role": "catalogued_not_integrated",
+    "role_reason": "Gaseous flame structure and response (soot-free and sooty flames); not solid fuel.",
+    "key_files": [
+      {
+        "file_name": "PSI-23_Experimental table_ACME s-Flame.csv",
+        "size": 2456,
+        "kind": "tabular",
+        "notes": "Experimental summary table (public inventory of runs/conditions; not per-test outcomes)."
+      }
+    ],
+    "metadata_notes": []
+  },
+  {
+    "accession": "PSI-25",
+    "acronym": "BASS-II",
+    "title": "Burning and Suppression of Solids - II",
+    "doi": "10.60555/4qc4-de67",
+    "doi_url": "https://doi.org/10.60555/4qc4-de67",
+    "landing_url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-25",
+    "license": "CC0-1.0",
+    "license_name": "Creative Commons Zero v1.0 Universal",
+    "platform": "Microgravity Science Glovebox (MSG), International Space Station (ISS)",
+    "flight_program": "International Space Station (ISS)",
+    "experiment_hardware": "Microgravity Science Glovebox (MSG)",
+    "investigation_start": "01-01-2010",
+    "investigation_end": "12-31-2022",
+    "project_type": "Microgravity Investigation",
+    "research_area": "Combustion Science",
+    "sub_research_area": "Spacecraft Fire Safety",
+    "files_listed_total": 694,
+    "files_by_type": {
+      "mp4": 296,
+      "zip": 265,
+      "pdf": 127,
+      "xlsx": 2,
+      "docx": 2,
+      "pptx": 1,
+      "jpg": 1
+    },
+    "listed_files_size_bytes": 274631089551,
+    "total_size_bytes": 274631106141,
+    "experimental_table_files": [
+      "PSI-25_Experimental table_BASS-II.csv"
+    ],
+    "tabular_files_listed": 2,
+    "tabular_files_under_5MB": 2,
+    "has_tabular_files": true,
+    "solid_fuel": true,
+    "variables_in_tabular": [
+      "investigator (PI)",
+      "test no.",
+      "date",
+      "GMT day",
+      "sample no.",
+      "fuel material text (type, thickness, width, sides)",
+      "flow restrictor (0/1/2)",
+      "fan display (text, multi-step)",
+      "air display cm/s (text, multi-step)",
+      "radiometer gain",
+      "total frames shot",
+      "calibrated initial O2 % vol",
+      "calibrated final O2 % vol",
+      "initial/final CO2 % vol",
+      "initial/final CO ppm"
+    ],
+    "role": "integrated_model",
+    "role_reason": "Solid-fuel flammability in ISS Microgravity Science Glovebox with per-test calibrated O2 (% vol), flow schedule (air-speed / fan display) and flame outcomes for PMMA rods, films, slabs, SIBAL and Nomex; cabin pressure is not recorded per test.",
+    "key_files": [
+      {
+        "file_name": "PSI-25_Experimental table_BASS-II.csv",
+        "size": 16590,
+        "kind": "tabular",
+        "notes": "Summary table, 129 data rows: PI, test no., date, GMT, sample no., material, flow restrictor, fan display, air display, radiometer gain, frames, calibrated initial/final O2 % vol, initial/final CO2 % vol, initial/final CO ppm. Fan/air displays are free text for multi-step flow schedules."
+      },
+      {
+        "file_name": "PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx",
+        "size": 28956,
+        "kind": "tabular",
+        "notes": "Per-PI test matrices (6 sheets: Bhattacharjee, Ferkul, Miller, Olson, Fernandez-Pello, Tien) with the same columns as the summary table; source of the curation tables."
+      },
+      {
+        "file_name": "PSI-25_Reference Data_Fan calibration data.xlsx",
+        "size": 23973,
+        "kind": "tabular",
+        "notes": "Fan-display/pot to air-speed calibration by restrictor count and date; note U = 1.0066(AIR)."
+      },
+      {
+        "file_name": "PSI-25_Science Documents_BASS-II_ReadMe.docx",
+        "size": 21538,
+        "kind": "document",
+        "notes": "ReadMe: flow direction / ignition-end conventions."
+      },
+      {
+        "file_name": "PSI-25_Science Documents_BASS-II_SRD.pdf",
+        "size": 1108340,
+        "kind": "document",
+        "notes": "Science requirements document."
+      }
+    ],
+    "metadata_notes": [
+      "Of 694 listed files, 296 mp4 and 265 zip (mostly video/image archives, ~257 GB); 127 PDFs (mostly per-test image proof sheets); only 2 xlsx."
+    ]
+  },
+  {
+    "accession": "PSI-26",
+    "acronym": "BASS",
+    "title": "Burning and Suppression of Solids",
+    "doi": "10.60555/58h4-dy80",
+    "doi_url": "https://doi.org/10.60555/58h4-dy80",
+    "landing_url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-26",
+    "license": "CC0-1.0",
+    "license_name": "Creative Commons Zero v1.0 Universal",
+    "platform": "Microgravity Science Glovebox, International Space Station (ISS)",
+    "flight_program": "International Space Station (ISS)",
+    "experiment_hardware": "Microgravity Science Glovebox",
+    "investigation_start": "10-01-2009",
+    "investigation_end": "06-30-2013",
+    "project_type": "Microgravity Investigation",
+    "research_area": "Combustion Science",
+    "sub_research_area": "Spacecraft Fire Safety",
+    "files_listed_total": 211,
+    "files_by_type": {
+      "mp4": 114,
+      "zip": 60,
+      "pdf": 32,
+      "xlsx": 2,
+      "pptx": 2,
+      "docx": 1
+    },
+    "listed_files_size_bytes": 163551367686,
+    "total_size_bytes": 163551372412,
+    "experimental_table_files": [
+      "PSI-26_Experimental table_BASS.csv"
+    ],
+    "tabular_files_listed": 2,
+    "tabular_files_under_5MB": 2,
+    "has_tabular_files": true,
+    "solid_fuel": true,
+    "variables_in_tabular": [
+      "date",
+      "GMT",
+      "as-run test no.",
+      "test no.",
+      "sample no.",
+      "material text",
+      "igniter",
+      "flow restrictor",
+      "sample distance",
+      "fan display",
+      "air display",
+      "radiometer gain/display",
+      "GN2 pot/display",
+      "O2 % by volume",
+      "pressure atm",
+      "CO2 mm Hg",
+      "free-text observations/outcomes (ignited, spread, extinguished, burn time)"
+    ],
+    "role": "integrated_model",
+    "role_reason": "Solid-fuel flammability in the ISS Microgravity Science Glovebox with per-test O2 % vol, total pressure (atm), flow schedule and free-text outcomes for PMMA, SIBAL and other fuels; flow in air display or fan/pot settings.",
+    "key_files": [
+      {
+        "file_name": "PSI-26_Experimental table_BASS.csv",
+        "size": 4726,
+        "kind": "tabular",
+        "notes": "Summary table, 122 data rows: date, GMT, as-run test no., test no., sample no., fuel material only (no O2, flow or outcome)."
+      },
+      {
+        "file_name": "PSI-26_Science Documents_As Run_Test Matrix.xlsx",
+        "size": 111886,
+        "kind": "tabular",
+        "notes": "As-run matrix (sheets 2012, 2013, combined) with flow restrictor, fan/air display, GN2 pot, O2 % vol, pressure atm, CO2 mm Hg and free-text observations/outcomes; source of the curation tables."
+      },
+      {
+        "file_name": "PSI-26_Reports_BASS_FinalReport.pdf",
+        "size": 553693,
+        "kind": "document",
+        "notes": "Final report."
+      },
+      {
+        "file_name": "PSI-26_Science Documents_SRD_BASS.pdf",
+        "size": 884257,
+        "kind": "document",
+        "notes": "Science requirements document."
+      }
+    ],
+    "metadata_notes": [
+      "One additional planned-matrix workbook is listed in the file list; intentionally not downloaded, opened or used (project rule).",
+      "Of 211 listed files, 114 mp4 and 60 zip (video/image archives, ~141 GB); 2 xlsx (as-run matrix and one other not used)."
+    ]
+  },
+  {
+    "accession": "PSI-39",
+    "acronym": "CFI",
+    "title": "Cool Flames Investigation",
+    "doi": "10.60555/m6pj-a914",
+    "doi_url": "https://doi.org/10.60555/m6pj-a914",
+    "landing_url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-39",
+    "license": "CC0-1.0",
+    "license_name": "Creative Commons Zero v1.0 Universal",
+    "platform": "Multi-User Droplet Combustion Apparatus (MDCA), Combustion Integrated Rack (CIR), International Space Station (ISS)",
+    "flight_program": "International Space Station (ISS)",
+    "experiment_hardware": "Multi-User Droplet Combustion Apparatus (MDCA), Combustion Integrated Rack (CIR)",
+    "investigation_start": "10-01-2020",
+    "investigation_end": "10-20-2021",
+    "project_type": "Microgravity Investigation",
+    "research_area": "Combustion Science",
+    "sub_research_area": "Droplets",
+    "files_listed_total": 2831,
+    "files_by_type": {
+      "txt": 1793,
+      "zip": 338,
+      "meta": 236,
+      "mp4": 126,
+      "ts": 120,
+      "metadata": 117,
+      "pdf": 48,
+      "pxp": 29,
+      "rtf": 22,
+      "pptx": 1,
+      "xlsx": 1
+    },
+    "listed_files_size_bytes": 718889560892,
+    "total_size_bytes": 718889568684,
+    "experimental_table_files": [
+      "PSI-39_Experimental table_CFI.csv"
+    ],
+    "tabular_files_listed": 1794,
+    "tabular_files_under_5MB": 1794,
+    "has_tabular_files": true,
+    "solid_fuel": false,
+    "variables_in_tabular": null,
+    "role": "catalogued_not_integrated",
+    "role_reason": "Cool-flame droplet combustion (n-dodecane mixtures) in MDCA/CIR; liquid fuel, not solid.",
+    "key_files": [
+      {
+        "file_name": "PSI-39_Experimental table_CFI.csv",
+        "size": 7792,
+        "kind": "tabular",
+        "notes": "Experimental summary table (public inventory of runs/conditions; not per-test outcomes)."
+      }
+    ],
+    "metadata_notes": []
+  },
+  {
+    "accession": "PSI-47",
+    "acronym": "DAFT / DAFT-2",
+    "title": "Dust and Aerosol Measurement Feasibility Test / Dust and Aerosol Measurement Feasibility Test-2",
+    "doi": "10.60555/ztgj-d202",
+    "doi_url": "https://doi.org/10.60555/ztgj-d202",
+    "landing_url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-47",
+    "license": "CC0-1.0",
+    "license_name": "Creative Commons Zero v1.0 Universal",
+    "platform": "TSI P-Trak, International Space Station (ISS)",
+    "flight_program": "International Space Station (ISS)",
+    "experiment_hardware": "TSI P-Trak",
+    "investigation_start": "03-01-2003",
+    "investigation_end": "06-01-2009",
+    "project_type": "Microgravity Investigation",
+    "research_area": "Combustion Science",
+    "sub_research_area": "Spacecraft Fire Safety",
+    "files_listed_total": 32,
+    "files_by_type": {
+      "xls": 12,
+      "pdf": 7,
+      "txt": 6,
+      "ppt": 3,
+      "doc": 2,
+      "zip": 1,
+      "jpg": 1
+    },
+    "listed_files_size_bytes": 41764815,
+    "total_size_bytes": 41765333,
+    "experimental_table_files": [
+      "PSI-47_Experimental table_DAFT.csv"
+    ],
+    "tabular_files_listed": 18,
+    "tabular_files_under_5MB": 18,
+    "has_tabular_files": true,
+    "solid_fuel": false,
+    "variables_in_tabular": null,
+    "role": "catalogued_not_integrated",
+    "role_reason": "Smoke-aerosol sensor feasibility test (dust aerosols with P-Trak/DustTrak); no flame or flammability outcomes.",
+    "key_files": [
+      {
+        "file_name": "PSI-47_Experimental table_DAFT.csv",
+        "size": 518,
+        "kind": "tabular",
+        "notes": "Experimental summary table (public inventory of runs/conditions; not per-test outcomes)."
+      }
+    ],
+    "metadata_notes": []
+  },
+  {
+    "accession": "PSI-60",
+    "acronym": null,
+    "title": "Computational and Experimental Analysis of SPICE Data Sets",
+    "doi": "10.60555/mzjm-yv57",
+    "doi_url": "https://doi.org/10.60555/mzjm-yv57",
+    "landing_url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-60",
+    "license": "CC0-1.0",
+    "license_name": "Creative Commons Zero v1.0 Universal",
+    "platform": null,
+    "flight_program": null,
+    "experiment_hardware": null,
+    "investigation_start": "06-05-2019",
+    "investigation_end": "08-29-2022",
+    "project_type": "Ground Investigation",
+    "research_area": "Combustion Science",
+    "sub_research_area": "Gaseous",
+    "files_listed_total": 1,
+    "files_by_type": {
+      "zip": 1
+    },
+    "listed_files_size_bytes": 7743,
+    "total_size_bytes": 7743,
+    "experimental_table_files": [],
+    "tabular_files_listed": 0,
+    "tabular_files_under_5MB": 0,
+    "has_tabular_files": false,
+    "solid_fuel": false,
+    "variables_in_tabular": null,
+    "role": "catalogued_not_integrated",
+    "role_reason": "Ground modelling/experiment study of soot formation; only a metadata zip in PSI; not solid-fuel flammability.",
+    "key_files": [],
+    "metadata_notes": []
+  },
+  {
+    "accession": "PSI-62",
+    "acronym": null,
+    "title": "Concurrent Flame Spread Modeling using Flamelet Generated Manifolds in Microgravity with Comparison to BASS Experiments using Two-Color Tomography",
+    "doi": "10.60555/e9xp-ex83",
+    "doi_url": "https://doi.org/10.60555/e9xp-ex83",
+    "landing_url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-62",
+    "license": "CC0-1.0",
+    "license_name": "Creative Commons Zero v1.0 Universal",
+    "platform": null,
+    "flight_program": null,
+    "experiment_hardware": null,
+    "investigation_start": "05-01-2019",
+    "investigation_end": "04-30-2021",
+    "project_type": "Ground Investigation",
+    "research_area": "Combustion Science",
+    "sub_research_area": "Spacecraft Fire Safety",
+    "files_listed_total": 1,
+    "files_by_type": {
+      "zip": 1
+    },
+    "listed_files_size_bytes": 9694,
+    "total_size_bytes": 9694,
+    "experimental_table_files": [],
+    "tabular_files_listed": 0,
+    "tabular_files_under_5MB": 0,
+    "has_tabular_files": false,
+    "solid_fuel": true,
+    "variables_in_tabular": null,
+    "role": "catalogued_not_integrated",
+    "role_reason": "Modelling-only (flamelet generated manifolds for concurrent flame spread, links to PMMA rod work); the only PSI file is a metadata zip, no test data.",
+    "key_files": [
+      {
+        "file_name": "PSI-62_metadata_NEWID-7_Concurrent Flame Spr.zip",
+        "size": 9694,
+        "kind": "archive",
+        "notes": "Only file: a 9.7 KB metadata zip. No data in PSI; modelling grant."
+      }
+    ],
+    "metadata_notes": []
+  },
+  {
+    "accession": "PSI-68",
+    "acronym": "FLEX-2",
+    "title": "Flame Extinguishment Experiment - 2",
+    "doi": "10.60555/byp8-h018",
+    "doi_url": "https://doi.org/10.60555/byp8-h018",
+    "landing_url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-68",
+    "license": "CC0-1.0",
+    "license_name": "Creative Commons Zero v1.0 Universal",
+    "platform": "Combustion Integrated Rack (CIR), Multi-user Droplet Combustion Appartatus (MDCA), International Space Station (ISS)",
+    "flight_program": "International Space Station (ISS)",
+    "experiment_hardware": "Combustion Integrated Rack (CIR), Multi-user Droplet Combustion Appartatus (MDCA)",
+    "investigation_start": "08-12-2016",
+    "investigation_end": "09-30-2019",
+    "project_type": "Microgravity Investigation",
+    "research_area": "Combustion Science",
+    "sub_research_area": "Spacecraft Fire Safety",
+    "files_listed_total": 0,
+    "files_by_type": {},
+    "listed_files_size_bytes": 0,
+    "total_size_bytes": 1224752113090,
+    "experimental_table_files": [
+      "PSI-68_Experimental table_Flex2.csv"
+    ],
+    "tabular_files_listed": 0,
+    "tabular_files_under_5MB": 0,
+    "has_tabular_files": true,
+    "solid_fuel": false,
+    "variables_in_tabular": null,
+    "role": "catalogued_not_integrated",
+    "role_reason": "FLEX-2 liquid droplet extinguishment (O2 mole fraction, pressure, flow ranges); no data files in the public listing; liquid fuel.",
+    "key_files": [
+      {
+        "file_name": "PSI-68_Experimental table_Flex2.csv",
+        "size": 1029,
+        "kind": "tabular",
+        "notes": "Experimental summary table (public inventory of runs/conditions; not per-test outcomes)."
+      }
+    ],
+    "metadata_notes": [
+      "Public metadata lists no data files (only the experimental table / images); totalFileSize reports data exists, but it was not enumerated; unverified."
+    ]
+  },
+  {
+    "accession": "PSI-69",
+    "acronym": "FLEX",
+    "title": "Flame Extinguishment Experiment",
+    "doi": "10.60555/mbq8-0451",
+    "doi_url": "https://doi.org/10.60555/mbq8-0451",
+    "landing_url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-69",
+    "license": "CC0-1.0",
+    "license_name": "Creative Commons Zero v1.0 Universal",
+    "platform": "Combustion Integrated Rack (CIR)-Fluids and Combustion Facility (FCF), Multi-user Droplet Combustion Appartatus (MDCA), International Space Station (ISS)",
+    "flight_program": "International Space Station (ISS)",
+    "experiment_hardware": "Combustion Integrated Rack (CIR)-Fluids and Combustion Facility (FCF), Multi-user Droplet Combustion Appartatus (MDCA)",
+    "investigation_start": "08-01-2007",
+    "investigation_end": "07-31-2016",
+    "project_type": "Microgravity Investigation",
+    "research_area": "Combustion Science",
+    "sub_research_area": "Spacecraft Fire Safety",
+    "files_listed_total": 0,
+    "files_by_type": {},
+    "listed_files_size_bytes": 0,
+    "total_size_bytes": 923832535657,
+    "experimental_table_files": [
+      "PSI-69_Experimental table_FLEX.csv"
+    ],
+    "tabular_files_listed": 0,
+    "tabular_files_under_5MB": 0,
+    "has_tabular_files": true,
+    "solid_fuel": false,
+    "variables_in_tabular": null,
+    "role": "catalogued_not_integrated",
+    "role_reason": "FLEX droplet flame extinguishment and suppressant effectiveness; no data files in the public listing; liquid fuel.",
+    "key_files": [
+      {
+        "file_name": "PSI-69_Experimental table_FLEX.csv",
+        "size": 24776,
+        "kind": "tabular",
+        "notes": "Experimental summary table (public inventory of runs/conditions; not per-test outcomes)."
+      }
+    ],
+    "metadata_notes": [
+      "Public metadata lists no data files (only the experimental table / images); totalFileSize reports data exists, but it was not enumerated; unverified."
+    ]
+  },
+  {
+    "accession": "PSI-98",
+    "acronym": "SAFFIRE-I",
+    "title": "Spacecraft Fire Safety Experiment-I",
+    "doi": "10.60555/0t15-1z43",
+    "doi_url": "https://doi.org/10.60555/0t15-1z43",
+    "landing_url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-98",
+    "license": "CC0-1.0",
+    "license_name": "Creative Commons Zero v1.0 Universal",
+    "platform": "Saffire 1 enclosure in Cygnus, International Space Station (ISS)",
+    "flight_program": "International Space Station (ISS)",
+    "experiment_hardware": "Saffire 1 enclosure in Cygnus",
+    "investigation_start": "03-02-2001",
+    "investigation_end": "02-28-2008",
+    "project_type": "Microgravity Investigation",
+    "research_area": "Combustion Science",
+    "sub_research_area": "Spacecraft Fire, Smoke Distribution",
+    "files_listed_total": 74,
+    "files_by_type": {
+      "zip": 61,
+      "pdf": 6,
+      "xlsx": 4,
+      "docx": 3
+    },
+    "listed_files_size_bytes": 12250589701,
+    "total_size_bytes": 12250600201,
+    "experimental_table_files": [
+      "PSI-98_Experimental table_SAFFIRE-1.csv"
+    ],
+    "tabular_files_listed": 4,
+    "tabular_files_under_5MB": 1,
+    "has_tabular_files": true,
+    "solid_fuel": true,
+    "variables_in_tabular": [
+      "material",
+      "thickness cm",
+      "length cm",
+      "width cm",
+      "air flow 20 cm/s",
+      "O2 % (range or approximate)",
+      "ignition power W",
+      "ignition time s",
+      "burn time s",
+      "flow direction",
+      "camera ids"
+    ],
+    "role": "integrated_context",
+    "role_reason": "Large-scale (40.6 x 94 cm) SIBAL fabric fire on a Cygnus vehicle, 2 samples at 20 cm/s; gives order-of-magnitude context, but has no per-test O2/flow variation and no flammability-boundary outcomes for a model.",
+    "key_files": [
+      {
+        "file_name": "PSI-98_Experimental table_SAFFIRE-1.csv",
+        "size": 469,
+        "kind": "tabular",
+        "notes": "2 samples (SIBAL fabric 40.6 x 94 cm, 0.37 cm; air flow 20 cm/s; O2 21.5-21.7 / ~21.5 %; ignition power 182 W, 8 s; burn time 420 s concurrent / 70 s opposed)."
+      },
+      {
+        "file_name": "PSI-98_Raw Data_Saffire-I Telemetry Data Good Process Version.xlsx",
+        "size": 2775737,
+        "kind": "tabular",
+        "notes": "Telemetry time series (RawData 9750 rows x 48 cols): radiometers, anemometers, fan tachometer, igniter V/I, cabin pressure (psi) and temperature, smoke detector, fan dP, body rates/acceleration. No O2 column."
+      },
+      {
+        "file_name": "PSI-98_Science Documents_SAFFIRE-I and SAFFIRE-III Readme.docx",
+        "size": 65426,
+        "kind": "document",
+        "notes": "ReadMe: material (SIBAL 75/25 cotton/fiberglass), 20 cm/s (I) vs 30 cm/s (III), image-set organisation."
+      },
+      {
+        "file_name": "PSI-98_Science Documents_SAFFIRE Objectives, Development and Status.pdf",
+        "size": 186259,
+        "kind": "document",
+        "notes": "Mission overview paper."
+      }
+    ],
+    "metadata_notes": [
+      "Investigation dates 03-02-2001 to 02-28-2008 in PSI metadata do not match the telemetry timestamps in the file (2016-06-14 UTC); treat metadata dates as unreliable.",
+      "PSI flightProgram field says ISS but the hardware field says Cygnus; Saffire experiments ran in the Cygnus vehicle (platform string kept as published)."
+    ]
+  },
+  {
+    "accession": "PSI-99",
+    "acronym": "SAFFIRE-II",
+    "title": "Spacecraft Fire Experiment-II",
+    "doi": "10.60555/2chp-m469",
+    "doi_url": "https://doi.org/10.60555/2chp-m469",
+    "landing_url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-99",
+    "license": "CC0-1.0",
+    "license_name": "Creative Commons Zero v1.0 Universal",
+    "platform": "Cygnus Pressurized Cargo Module, SAFFIRE, Cygnus Spacecraft",
+    "flight_program": "Cygnus Spacecraft",
+    "experiment_hardware": "Cygnus Pressurized Cargo Module, SAFFIRE",
+    "investigation_start": "09-30-2016",
+    "investigation_end": "04-01-2017",
+    "project_type": "Microgravity Investigation",
+    "research_area": "Combustion Science",
+    "sub_research_area": "Surface Combustion",
+    "files_listed_total": 0,
+    "files_by_type": {},
+    "listed_files_size_bytes": 0,
+    "total_size_bytes": 16931016137,
+    "experimental_table_files": [
+      "PSI-99_Experimental table_SAFFIRE-2.csv"
+    ],
+    "tabular_files_listed": 0,
+    "tabular_files_under_5MB": 0,
+    "has_tabular_files": true,
+    "solid_fuel": true,
+    "variables_in_tabular": [
+      "material",
+      "thickness",
+      "length",
+      "width",
+      "air flow cm/s",
+      "O2 % (derived from CO2 production)",
+      "ignition power W / time s",
+      "burn time s",
+      "flow direction",
+      "burn length (microgravity)",
+      "spread length",
+      "1-g burn length",
+      "1-g spread rate"
+    ],
+    "role": "integrated_context",
+    "role_reason": "Large-scale flammability tests (9 samples, 5 x 29 cm) at a single flow (20 cm/s) and ~21.5-22.1 % O2 with burn time and spread-rate outcomes; one condition, so usable as context only, not for fitting a boundary.",
+    "key_files": [
+      {
+        "file_name": "PSI-99_Experimental table_SAFFIRE-2.csv",
+        "size": 1973,
+        "kind": "tabular",
+        "notes": "9 samples on one card, 5 x 29 cm (silicone 3 thicknesses, SIBAL, PMMA & Nomex, PMMA thin/1 cm): thickness, 20 cm/s, ~21.5-22.1 % O2 (derived from CO2 production), ignition power/time, burn time, flow direction, burn/spread length, 1-g spread rate. Typos/unclear cells in source (\"037 mm\", \"?-g\") kept as published."
+      }
+    ],
+    "metadata_notes": [
+      "The public metadata lists no data files (only the experimental table); totalFileSize is 16.9 GB so files probably exist but are not enumerated by the API; unverified.",
+      "PSI flightProgram field says ISS but the hardware field says Cygnus; Saffire experiments ran in the Cygnus vehicle (platform string kept as published)."
+    ]
+  },
+  {
+    "accession": "PSI-100",
+    "acronym": "SAFFIRE-III",
+    "title": "Spacecraft Fire Experiment-III",
+    "doi": "10.60555/040q-4h36",
+    "doi_url": "https://doi.org/10.60555/040q-4h36",
+    "landing_url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-100",
+    "license": "CC0-1.0",
+    "license_name": "Creative Commons Zero v1.0 Universal",
+    "platform": "Saffire III enclosure in Cygnus, International Space Station (ISS)",
+    "flight_program": "International Space Station (ISS)",
+    "experiment_hardware": "Saffire III enclosure in Cygnus",
+    "investigation_start": "04-18-2017",
+    "investigation_end": null,
+    "project_type": "Microgravity Investigation",
+    "research_area": "Combustion Science",
+    "sub_research_area": "Spacecraft Fire Safety",
+    "files_listed_total": 85,
+    "files_by_type": {
+      "zip": 67,
+      "pdf": 7,
+      "xlsx": 6,
+      "docx": 3,
+      "csv": 2
+    },
+    "listed_files_size_bytes": 35210756429,
+    "total_size_bytes": 35210765052,
+    "experimental_table_files": [
+      "PSI-100_Experimental table_SAFFIRE-3.csv"
+    ],
+    "tabular_files_listed": 8,
+    "tabular_files_under_5MB": 1,
+    "has_tabular_files": true,
+    "solid_fuel": true,
+    "variables_in_tabular": [
+      "material",
+      "thickness",
+      "length",
+      "width",
+      "air flow 30 cm/s",
+      "flow direction",
+      "camera ids (no O2 or outcome)"
+    ],
+    "role": "integrated_context",
+    "role_reason": "Large-scale SIBAL fabric fire (2 samples, 30 cm/s, concurrent and opposed); telemetry only with no O2 or outcome columns, so context only.",
+    "key_files": [
+      {
+        "file_name": "PSI-100_Experimental table_SAFFIRE-3.csv",
+        "size": 239,
+        "kind": "tabular",
+        "notes": "2 samples (SIBAL fabric 94 x 40.6 cm, 0.33 cm; 30 cm/s; concurrent / opposed); no O2 or outcome columns."
+      },
+      {
+        "file_name": "PSI-100_Raw Data_Raw telemetry file.csv",
+        "size": 1656916,
+        "kind": "tabular",
+        "notes": "Raw telemetry (47 cols, ~3970 rows): radiometers, anemometers, fan tach, igniter V/I, PCM temperature/pressure, smoke detector, fan dP, attitude/IMU. No O2 column; contains spreadsheet formula strings (e.g. \"=B2-C2\") and scientific-notation rounding."
+      },
+      {
+        "file_name": "PSI-100_Raw Data_Saffire-III Telemetry Data.xlsx",
+        "size": 8677965,
+        "kind": "tabular",
+        "notes": "Telemetry workbook (8.7 MB; not opened, > 5 MB cap)."
+      },
+      {
+        "file_name": "PSI-100_Science Documents_SAFFIRE-I and SAFFIRE-III Readme.docx",
+        "size": 65426,
+        "kind": "document",
+        "notes": "Shared ReadMe."
+      }
+    ],
+    "metadata_notes": [
+      "PSI flightProgram field says ISS but the hardware field says Cygnus; Saffire experiments ran in the Cygnus vehicle (platform string kept as published).",
+      "Raw telemetry CSV timestamps correspond to 2017-06 (consistent with SAFFIRE-III)."
+    ]
+  },
+  {
+    "accession": "PSI-101",
+    "acronym": "SAME-R",
+    "title": "Smoke Aerosol Measurement Experiment-Reflight",
+    "doi": "10.60555/2np7-jv14",
+    "doi_url": "https://doi.org/10.60555/2np7-jv14",
+    "landing_url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-101",
+    "license": "CC0-1.0",
+    "license_name": "Creative Commons Zero v1.0 Universal",
+    "platform": "Comparitive Soot Diagnostic Hardware; Refer to final report, International Space Station (ISS)",
+    "flight_program": "International Space Station (ISS)",
+    "experiment_hardware": "Comparitive Soot Diagnostic Hardware; Refer to final report",
+    "investigation_start": "07-01-2010",
+    "investigation_end": "09-30-2010",
+    "project_type": "Microgravity Investigation",
+    "research_area": "Combustion Science",
+    "sub_research_area": "Spacecraft Fire Safety",
+    "files_listed_total": 342,
+    "files_by_type": {
+      "zip": 79,
+      "xls": 77,
+      "pptx": 76,
+      "csv": 44,
+      "pdf": 36,
+      "xlsx": 15,
+      "mp4": 8,
+      "tif": 3,
+      "ppt": 2,
+      "docx": 1,
+      "doc": 1
+    },
+    "listed_files_size_bytes": 6308108039,
+    "total_size_bytes": 6308124750,
+    "experimental_table_files": [
+      "PSI-101_Experimental table_SAME-R.csv"
+    ],
+    "tabular_files_listed": 136,
+    "tabular_files_under_5MB": 66,
+    "has_tabular_files": true,
+    "solid_fuel": false,
+    "variables_in_tabular": null,
+    "role": "catalogued_not_integrated",
+    "role_reason": "Smoke aerosol particle-size measurements from heated materials (SAME-R); smoke generation, not flame sustainment outcomes.",
+    "key_files": [
+      {
+        "file_name": "PSI-101_Experimental table_SAME-R.csv",
+        "size": 5674,
+        "kind": "tabular",
+        "notes": "Experimental summary table (public inventory of runs/conditions; not per-test outcomes)."
+      }
+    ],
+    "metadata_notes": []
+  },
+  {
+    "accession": "PSI-102",
+    "acronym": "SAME",
+    "title": "Smoke and Aerosol Measurement Experiment",
+    "doi": "10.60555/gd4k-8h62",
+    "doi_url": "https://doi.org/10.60555/gd4k-8h62",
+    "landing_url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-102",
+    "license": "CC0-1.0",
+    "license_name": "Creative Commons Zero v1.0 Universal",
+    "platform": "Comparitive Soot Diagnostic Hardware, International Space Station (ISS)",
+    "flight_program": "International Space Station (ISS)",
+    "experiment_hardware": "Comparitive Soot Diagnostic Hardware",
+    "investigation_start": "03-02-2001",
+    "investigation_end": "02-28-2008",
+    "project_type": "Microgravity Investigation",
+    "research_area": "Combustion Science",
+    "sub_research_area": "Spacecraft Fire Safety",
+    "files_listed_total": 104,
+    "files_by_type": {
+      "xls": 55,
+      "pdf": 27,
+      "xlsx": 6,
+      "zip": 4,
+      "xml": 4,
+      "ppt": 3,
+      "mp4": 2,
+      "pptx": 2,
+      "doc": 1
+    },
+    "listed_files_size_bytes": 657607847,
+    "total_size_bytes": 657608178,
+    "experimental_table_files": [
+      "PSI-102_Experimental table_SAME.csv"
+    ],
+    "tabular_files_listed": 61,
+    "tabular_files_under_5MB": 43,
+    "has_tabular_files": true,
+    "solid_fuel": false,
+    "variables_in_tabular": null,
+    "role": "catalogued_not_integrated",
+    "role_reason": "Smoke aerosol particle-size measurements from heated materials (SAME); smoke generation, not flame sustainment outcomes.",
+    "key_files": [
+      {
+        "file_name": "PSI-102_Experimental table_SAME.csv",
+        "size": 331,
+        "kind": "tabular",
+        "notes": "Experimental summary table (public inventory of runs/conditions; not per-test outcomes)."
+      }
+    ],
+    "metadata_notes": []
+  },
+  {
+    "accession": "PSI-106",
+    "acronym": "SLICE",
+    "title": "Structure and Liftoff In Combustion Experiment",
+    "doi": "10.60555/pm12-rg61",
+    "doi_url": "https://doi.org/10.60555/pm12-rg61",
+    "landing_url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-106",
+    "license": "CC0-1.0",
+    "license_name": "Creative Commons Zero v1.0 Universal",
+    "platform": "International Space Station (ISS)",
+    "flight_program": "International Space Station (ISS)",
+    "experiment_hardware": null,
+    "investigation_start": null,
+    "investigation_end": null,
+    "project_type": "Microgravity Investigation",
+    "research_area": "Combustion Science",
+    "sub_research_area": null,
+    "files_listed_total": 1,
+    "files_by_type": {
+      "csv": 1
+    },
+    "listed_files_size_bytes": 734,
+    "total_size_bytes": 72914598688,
+    "experimental_table_files": [
+      "PSI-106_Experimental table_Slice.csv"
+    ],
+    "tabular_files_listed": 1,
+    "tabular_files_under_5MB": 1,
+    "has_tabular_files": true,
+    "solid_fuel": false,
+    "variables_in_tabular": null,
+    "role": "catalogued_not_integrated",
+    "role_reason": "Structure and liftoff of gaseous jet diffusion flames (SLICE); gaseous fuel; only a one-row-per-day experimental table.",
+    "key_files": [
+      {
+        "file_name": "PSI-106_Experimental table_Slice.csv",
+        "size": 734,
+        "kind": "tabular",
+        "notes": "Experimental summary table (public inventory of runs/conditions; not per-test outcomes)."
+      }
+    ],
+    "metadata_notes": []
+  },
+  {
+    "accession": "PSI-107",
+    "acronym": "SPICE",
+    "title": "Smoke Point In Co-flow Experiment",
+    "doi": "10.60555/9kbh-e962",
+    "doi_url": "https://doi.org/10.60555/9kbh-e962",
+    "landing_url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-107",
+    "license": "CC0-1.0",
+    "license_name": "Creative Commons Zero v1.0 Universal",
+    "platform": "Microgravity Science Glovebox (MSG), International Space Station (ISS)",
+    "flight_program": "International Space Station (ISS)",
+    "experiment_hardware": "Microgravity Science Glovebox (MSG)",
+    "investigation_start": null,
+    "investigation_end": null,
+    "project_type": "Microgravity Investigation",
+    "research_area": "Combustion Science",
+    "sub_research_area": "Fire Safety",
+    "files_listed_total": 186,
+    "files_by_type": {
+      "zip": 100,
+      "xls": 27,
+      "pdf": 18,
+      "mp4": 18,
+      "ppt": 9,
+      "xlsx": 6,
+      "pptx": 2,
+      "txt": 2,
+      "doc": 1,
+      "docx": 1,
+      "nef": 1,
+      "avi": 1
+    },
+    "listed_files_size_bytes": 6946824055,
+    "total_size_bytes": 6946864573,
+    "experimental_table_files": [
+      "PSI-107_Experimental table_Spice.csv"
+    ],
+    "tabular_files_listed": 35,
+    "tabular_files_under_5MB": 33,
+    "has_tabular_files": true,
+    "solid_fuel": false,
+    "variables_in_tabular": null,
+    "role": "catalogued_not_integrated",
+    "role_reason": "Smoke point of gaseous coflow diffusion flames (SPICE); gaseous fuel.",
+    "key_files": [
+      {
+        "file_name": "PSI-107_Experimental table_Spice.csv",
+        "size": 31205,
+        "kind": "tabular",
+        "notes": "Experimental summary table (public inventory of runs/conditions; not per-test outcomes)."
+      }
+    ],
+    "metadata_notes": []
+  },
+  {
+    "accession": "PSI-115",
+    "acronym": null,
+    "title": "Utilization of the Smoke Aerosol Measurement Experiment Data for Advanced Modeling and Simulation of Smoke Generation in Micro-Gravity",
+    "doi": "10.60555/q0v5-1v28",
+    "doi_url": "https://doi.org/10.60555/q0v5-1v28",
+    "landing_url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-115",
+    "license": "CC0-1.0",
+    "license_name": "Creative Commons Zero v1.0 Universal",
+    "platform": "Not Applicable",
+    "flight_program": "Not Applicable",
+    "experiment_hardware": null,
+    "investigation_start": "01-30-2017",
+    "investigation_end": "12-31-2019",
+    "project_type": "Ground Investigation",
+    "research_area": "Combustion Science",
+    "sub_research_area": "Smoke Aerosol, Combustion Simulation",
+    "files_listed_total": 47,
+    "files_by_type": {
+      "dat": 44,
+      "pdf": 2,
+      "zip": 1
+    },
+    "listed_files_size_bytes": 264404901,
+    "total_size_bytes": 264404901,
+    "experimental_table_files": [],
+    "tabular_files_listed": 44,
+    "tabular_files_under_5MB": 7,
+    "has_tabular_files": true,
+    "solid_fuel": false,
+    "variables_in_tabular": null,
+    "role": "catalogued_not_integrated",
+    "role_reason": "Numerical simulation of pyrolysis smoke growth; modelling-only, simulation .dat outputs.",
+    "key_files": [],
+    "metadata_notes": []
+  },
+  {
+    "accession": "PSI-117",
+    "acronym": null,
+    "title": "Effect of External Thermo-Convective Perturbation on Cool Flame Dynamics: A Multidimensional Multi-Physics CFD Analysis",
+    "doi": "10.60555/gz0q-b577",
+    "doi_url": "https://doi.org/10.60555/gz0q-b577",
+    "landing_url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-117",
+    "license": "CC0-1.0",
+    "license_name": "Creative Commons Zero v1.0 Universal",
+    "platform": null,
+    "flight_program": null,
+    "experiment_hardware": null,
+    "investigation_start": "02-15-2017",
+    "investigation_end": "02-14-2022",
+    "project_type": "Ground Investigation",
+    "research_area": "Combustion Science",
+    "sub_research_area": "Droplet",
+    "files_listed_total": 15,
+    "files_by_type": {
+      "csv": 9,
+      "pdf": 5,
+      "xlsx": 1
+    },
+    "listed_files_size_bytes": 70810488,
+    "total_size_bytes": 70820870,
+    "experimental_table_files": [],
+    "tabular_files_listed": 10,
+    "tabular_files_under_5MB": 10,
+    "has_tabular_files": true,
+    "solid_fuel": false,
+    "variables_in_tabular": null,
+    "role": "catalogued_not_integrated",
+    "role_reason": "Ground analysis of cool-flame droplet dynamics using FLEX data; liquid droplets, small analyzed CSVs.",
+    "key_files": [
+      {
+        "file_name": "PSI-117_Analyzed Data_ReadMe_List_of_Data.xlsx",
+        "size": 11059,
+        "kind": "tabular",
+        "notes": "Index of the CSVs: fuel (n-heptane, n-decane, n-dodecane), droplet diameter, pressure, XO2, with source figure and DOI."
+      },
+      {
+        "file_name": "PSI-117_Analyzed Data_PROCI_2023_C12_Extinction_Diameter_vs_pressure.csv",
+        "size": 449,
+        "kind": "tabular",
+        "notes": "Extinction diameter vs pressure, experiment and model (liquid droplet)."
+      }
+    ],
+    "metadata_notes": []
+  },
+  {
+    "accession": "PSI-142",
+    "acronym": null,
+    "title": "Quantitative Studies of Cool Flame Transitions at Radiation / Stretch Extinction Using Counterflow Flames",
+    "doi": "10.60555/80qf-vj95",
+    "doi_url": "https://doi.org/10.60555/80qf-vj95",
+    "landing_url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-142",
+    "license": "CC0-1.0",
+    "license_name": "Creative Commons Zero v1.0 Universal",
+    "platform": "Principal Investigator Laboratory Hardware, Not Applicable",
+    "flight_program": "Not Applicable",
+    "experiment_hardware": "Principal Investigator Laboratory Hardware",
+    "investigation_start": "08-01-2016",
+    "investigation_end": "07-31-2021",
+    "project_type": "Ground Investigation",
+    "research_area": "Combustion Science",
+    "sub_research_area": "Spacecraft Fire Safety",
+    "files_listed_total": 2,
+    "files_by_type": {
+      "xlsx": 1,
+      "csv": 1
+    },
+    "listed_files_size_bytes": 735959,
+    "total_size_bytes": 748117,
+    "experimental_table_files": [
+      "PSI-142_Experimental table_Data Summary Table.csv"
+    ],
+    "tabular_files_listed": 2,
+    "tabular_files_under_5MB": 2,
+    "has_tabular_files": true,
+    "solid_fuel": false,
+    "variables_in_tabular": null,
+    "role": "catalogued_not_integrated",
+    "role_reason": "Counterflow cool-flame experiments and simulations (gaseous/prevaporized fuels); ground investigation.",
+    "key_files": [
+      {
+        "file_name": "PSI-142_Experimental table_Data Summary Table.csv",
+        "size": 727,
+        "kind": "tabular",
+        "notes": "Index of 8 data sets (cool-flame extinction limits etc.) with publication DOIs."
+      }
+    ],
+    "metadata_notes": []
+  },
+  {
+    "accession": "PSI-159",
+    "acronym": "ACME CFI-G",
+    "title": "Advanced Combustion via Microgravity Experiments / Cool Flames Investigation with Gases",
+    "doi": "10.60555/cyt1-kh64",
+    "doi_url": "https://doi.org/10.60555/cyt1-kh64",
+    "landing_url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-159",
+    "license": "CC0-1.0",
+    "license_name": "Creative Commons Zero v1.0 Universal",
+    "platform": "ACME, Combustion Integrated Rack (CIR), International Space Station (ISS)",
+    "flight_program": "International Space Station (ISS)",
+    "experiment_hardware": "ACME, Combustion Integrated Rack (CIR)",
+    "investigation_start": null,
+    "investigation_end": null,
+    "project_type": "Microgravity Investigation",
+    "research_area": "Combustion Science",
+    "sub_research_area": "Flames of Gaseous Fuels",
+    "files_listed_total": 3756,
+    "files_by_type": {
+      "txt": 1022,
+      "zip": 987,
+      "csv": 680,
+      "mdipsug": 610,
+      "ts": 336,
+      "pdf": 93,
+      "log": 22,
+      "xlsx": 1,
+      "errors": 1,
+      "mp4": 1,
+      "next": 1,
+      "png": 1,
+      "jpg": 1
+    },
+    "listed_files_size_bytes": 2085592429259,
+    "total_size_bytes": 2085592429259,
+    "experimental_table_files": [
+      "PSI-159_Experimental table_CFI-G_Normal Flames.csv",
+      "PSI-159_Experimental table_CFI-G_Inverse Flames.csv"
+    ],
+    "tabular_files_listed": 1703,
+    "tabular_files_under_5MB": 1627,
+    "has_tabular_files": true,
+    "solid_fuel": false,
+    "variables_in_tabular": null,
+    "role": "catalogued_not_integrated",
+    "role_reason": "Cool Flames Investigation, gaseous fuels in ACME (normal and inverse flames); not solid fuel.",
+    "key_files": [
+      {
+        "file_name": "PSI-159_Experimental table_CFI-G_Normal Flames.csv",
+        "size": 22166,
+        "kind": "tabular",
+        "notes": "Experimental summary table (public inventory of runs/conditions; not per-test outcomes)."
+      },
+      {
+        "file_name": "PSI-159_Experimental table_CFI-G_Inverse Flames.csv",
+        "size": 39422,
+        "kind": "tabular",
+        "notes": "Experimental summary table (public inventory of runs/conditions; not per-test outcomes)."
+      }
+    ],
+    "metadata_notes": []
+  }
+]

@@ -152,8 +152,13 @@ the air reading is a steady numeric value; else `fan_display`/`pot`); mention th
   GMT day when present; otherwise the nearest calibration day with that restrictor count; record
   `flow_calibration_ref`. Restrictor mapping: matrix "Flow restrictor" 0/1/2 ↔ calibration blocks
   "no restrictor"/"1 restrictor"/"2 restrictor" (verify against the sheet; document).
-- Below the lowest calibrated non-zero point (pot < 0.5, fan display < ~42): flow set to half of the
-  lowest calibrated non-zero flow for that block, flag `below_calibration_range`, uncertainty = ± that half.
+- Below the lowest calibrated non-zero point (pot < 0.5, fan display < ~42): linear extrapolation of the
+  chosen day's curve through its two lowest non-zero calibration points, floored at 0 cm/s; flags
+  `below_calibration_range` and `flow_extrapolated_linear`; uncertainty = ± max(0.5 cm/s, half the lowest
+  calibrated flow). Why: the near-quench steps (pots 0.275–0.36) must keep their order; a constant value
+  would merge "sustained at 0.305" and "extinguished at 0.275" into one point. The implied zero-flow point
+  (~pot 0.14, fan ~3.9 V) is consistent with the calibration sheet's note that the fan stops above 3.8 V.
+  (Superseded rule, 2026-11-15: "half of the lowest calibrated flow".)
 - BASS (PSI-26, 2012–13) has no fan calibration in the integrated files: prefer air/cm·s values; fan/pot
   values convert with the BASS-II calibration under flag `calibration_borrowed_from_bass2`, confidence low.
 

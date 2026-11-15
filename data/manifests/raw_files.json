@@ -1,0 +1,112 @@
+{
+  "files": [
+    {
+      "accession": "PSI-25",
+      "doi": "10.60555/4qc4-de67",
+      "in_psi_metadata": true,
+      "landing_url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-25",
+      "license": "CC0-1.0",
+      "path": "data/raw/psi/PSI-25/PSI-25_Reference Data_Fan calibration data.xlsx",
+      "psi_file_name": "PSI-25_Reference Data_Fan calibration data.xlsx",
+      "psi_file_size": 23973.0,
+      "psi_legacy_s3_path": "legacy/88712/11524/Fan calibration data.xlsx",
+      "retrieved_at": "2026-11-15",
+      "sha256": "bc0dca3efdef44a7774d8dd37aebc0cedae8d67d7bae8c9cbde9590014a3c983",
+      "size_bytes": 23973
+    },
+    {
+      "accession": "PSI-25",
+      "doi": "10.60555/4qc4-de67",
+      "in_psi_metadata": true,
+      "landing_url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-25",
+      "license": "CC0-1.0",
+      "path": "data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_ReadMe.docx",
+      "psi_file_name": "PSI-25_Science Documents_BASS-II_ReadMe.docx",
+      "psi_file_size": 21538.0,
+      "psi_legacy_s3_path": "legacy/88712/11524/BASS-II data FAQ.docx",
+      "retrieved_at": "2026-11-15",
+      "sha256": "69f32647792f54ab2a561e3cdafc6c87d854564fe487aed2b09265286bd84e1d",
+      "size_bytes": 21538
+    },
+    {
+      "accession": "PSI-25",
+      "doi": "10.60555/4qc4-de67",
+      "in_psi_metadata": true,
+      "landing_url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-25",
+      "license": "CC0-1.0",
+      "path": "data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx",
+      "psi_file_name": "PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx",
+      "psi_file_size": 28956.0,
+      "psi_legacy_s3_path": "legacy/88712/11524/BASS-II Test Matrix by PI Final.xlsx",
+      "retrieved_at": "2026-11-15",
+      "sha256": "1a3b283dd0adec861793bbc4a454aab64d398cd32d6f37d7a1ad0f642879e686",
+      "size_bytes": 28956
+    },
+    {
+      "accession": "PSI-26",
+      "doi": "10.60555/58h4-dy80",
+      "in_psi_metadata": true,
+      "landing_url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-26",
+      "license": "CC0-1.0",
+      "path": "data/raw/psi/PSI-26/PSI-26_Science Documents_As Run_Test Matrix.xlsx",
+      "psi_file_name": "PSI-26_Science Documents_As Run_Test Matrix.xlsx",
+      "psi_file_size": 111886.0,
+      "psi_legacy_s3_path": "legacy/7280/22141/BASS test matrix.xlsx",
+      "retrieved_at": "2026-11-15",
+      "sha256": "850910541fc9c802d00aa9de14758205103642184249b419c09868df2fbea6e8",
+      "size_bytes": 111886
+    },
+    {
+      "accession": "PSI-98",
+      "doi": "10.60555/0t15-1z43",
+      "in_psi_metadata": true,
+      "landing_url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-98",
+      "license": "CC0-1.0",
+      "path": "data/raw/psi/PSI-98/PSI-98_Science Documents_SAFFIRE-I and SAFFIRE-III Readme.docx",
+      "psi_file_name": "PSI-98_Science Documents_SAFFIRE-I and SAFFIRE-III Readme.docx",
+      "psi_file_size": 65426.0,
+      "psi_legacy_s3_path": "legacy/96717/11572/SAFFIRE-I and SAFFIRE-III DoD.docx",
+      "retrieved_at": "2026-11-15",
+      "sha256": "49c939337fa00a0473f7efa10367288f510afcbf69dd7f5405054a2617d3a66d",
+      "size_bytes": 65426
+    }
+  ],
+  "investigations": {
+    "PSI-100": {
+      "doi": "10.60555/040q-4h36",
+      "inv_snapshot": "data/raw/psi/PSI-100/inv_PSI-100.json",
+      "landing_url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-100",
+      "license": "CC0-1.0",
+      "license_name": "Creative Commons Zero v1.0 Universal"
+    },
+    "PSI-25": {
+      "doi": "10.60555/4qc4-de67",
+      "inv_snapshot": "data/raw/psi/PSI-25/inv_PSI-25.json",
+      "landing_url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-25",
+      "license": "CC0-1.0",
+      "license_name": "Creative Commons Zero v1.0 Universal"
+    },
+    "PSI-26": {
+      "doi": "10.60555/58h4-dy80",
+      "inv_snapshot": "data/raw/psi/PSI-26/inv_PSI-26.json",
+      "landing_url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-26",
+      "license": "CC0-1.0",
+      "license_name": "Creative Commons Zero v1.0 Universal"
+    },
+    "PSI-98": {
+      "doi": "10.60555/0t15-1z43",
+      "inv_snapshot": "data/raw/psi/PSI-98/inv_PSI-98.json",
+      "landing_url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-98",
+      "license": "CC0-1.0",
+      "license_name": "Creative Commons Zero v1.0 Universal"
+    },
+    "PSI-99": {
+      "doi": "10.60555/2chp-m469",
+      "inv_snapshot": "data/raw/psi/PSI-99/inv_PSI-99.json",
+      "landing_url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-99",
+      "license": "CC0-1.0",
+      "license_name": "Creative Commons Zero v1.0 Universal"
+    }
+  },
+  "retrieved_at": "2026-11-15"
+}

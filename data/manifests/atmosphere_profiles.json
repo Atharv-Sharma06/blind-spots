@@ -1,0 +1,630 @@
+{
+  "version": "2026-11-15",
+  "profiles": [
+    {
+      "profile_id": "iss_cabin_nominal",
+      "name": "ISS cabin (nominal operating range)",
+      "context": "International Space Station US-segment cabin; documented operating control ranges for total pressure and oxygen partial pressure.",
+      "status": "documented_nasa",
+      "oxygen_percent": {
+        "nominal": 21,
+        "min": null,
+        "max": 24.1
+      },
+      "total_pressure_kpa": {
+        "nominal": 101.353,
+        "min": 96.527,
+        "max": 102.732
+      },
+      "total_pressure_psia": {
+        "nominal": 14.7,
+        "min": 14.0,
+        "max": 14.9
+      },
+      "o2_partial_pressure_kpa": {
+        "nominal": 21.284,
+        "min": 19.465,
+        "max": 23.731
+      },
+      "airflow_cm_s": null,
+      "sources": [
+        {
+          "ref_id": "NTRS-20150010425",
+          "title": "Report on ISS O2 Production, Gas Supply and Partial Pressure Management",
+          "url": "https://ntrs.nasa.gov/citations/20150010425",
+          "doc_number": "ICES-2015-146 / JSC-CN-33571",
+          "page": "PDF p. 1",
+          "quote": "The oxygen partial pressure is maintained at a range of 146 – 178 mmHg (2.82 – 3.44 psi) and the total pressure is maintained between 724 – 770.5 mmHg (14.0 – 14.9 psia)."
+        },
+        {
+          "ref_id": "NTRS-20250003954",
+          "title": "Enhancing Future Commercial Space Stations: Applying ISS Insights to ECLSS Development on Emergency Response",
+          "url": "https://ntrs.nasa.gov/citations/20250003954",
+          "doc_number": "ICES-2025-126",
+          "page": "PDF p. 2",
+          "quote": "For the ISS, the cabin is maintained at a total pressure between 96.5 kPa (14.0 psia) and 102.7 kPa (14.9 psia)"
+        },
+        {
+          "ref_id": "OCHMO-TB-003",
+          "title": "NASA-STD-3001 Technical Brief: Habitable Atmosphere (OCHMO-TB-003 Rev A)",
+          "url": "https://www.nasa.gov/wp-content/uploads/2023/12/ochmo-tb-003-habitable-atmosphere.pdf",
+          "doc_number": "OCHMO-TB-003 Rev A",
+          "page": "PDF p. 8",
+          "quote": "Currently, the ISS cabin pressure is typically maintained at 14.7 psia with 21% O2, which is equivalent to sea level."
+        },
+        {
+          "ref_id": "NTRS-20160001047",
+          "title": "Oxygen Partial Pressure and Oxygen Concentration Flammability: Can They Be Correlated?",
+          "url": "https://ntrs.nasa.gov/citations/20160001047",
+          "doc_number": "JSC-CN-34845",
+          "page": "PDF p. 3",
+          "quote": "The ISS aims to operate at the 21% O2, 101.4 kPa (14.7 psia) point of the curve."
+        },
+        {
+          "ref_id": "NTRS-20070018178",
+          "title": "Oxygen Concentration Flammability Thresholds of Selected Aerospace Materials Considered for the Constellation Program",
+          "url": "https://ntrs.nasa.gov/citations/20070018178",
+          "doc_number": null,
+          "page": "PDF p. 1",
+          "quote": "the International Space Station (ISS) atmosphere is also nominally air (maximum oxygen concentration 24.1% by volume)"
+        }
+      ],
+      "notes": "Nominal 14.7 psia / 21% O2 is the documented operating point; 14.0-14.9 psia is the documented total-pressure control range (ICES-2015-146 gives 724-770.5 mmHg, ICES-2025-126 gives 96.5-102.7 kPa). ppO2 range 146-178 mmHg (2.82-3.44 psi) is the documented control range, converted here to kPa at 0.1333224 kPa/mmHg. The O2 max of 24.1 % is a documented maximum concentration (Hirsch et al. 2007); it is also the basis of the materials worst-case profile. Minimum O2 percent is not stated as a percentage in the sources, so min is null. Nominal ppO2 (kPa) is computed as 0.21 x 14.7 psia x 6.894757 and is not a source value. psia fields are source values; kPa fields are psia x 6.894757 (kPa values stated in sources are rounded slightly differently)."
+    },
+    {
+      "profile_id": "iss_materials_worst_case",
+      "name": "ISS cabin materials-testing worst case (24.1 % O2 at 14.7 psia)",
+      "context": "Worst-case ISS cabin condition under which NASA has obtained much of its materials flammability data (oxygen fluctuation above the 21 % mean).",
+      "status": "documented_nasa",
+      "oxygen_percent": {
+        "nominal": 24.1,
+        "min": null,
+        "max": null
+      },
+      "total_pressure_kpa": {
+        "nominal": 101.353,
+        "min": null,
+        "max": null
+      },
+      "total_pressure_psia": {
+        "nominal": 14.7,
+        "min": null,
+        "max": null
+      },
+      "o2_partial_pressure_kpa": {
+        "nominal": 24.426,
+        "min": null,
+        "max": null
+      },
+      "airflow_cm_s": null,
+      "sources": [
+        {
+          "ref_id": "NTRS-20160001047",
+          "title": "Oxygen Partial Pressure and Oxygen Concentration Flammability: Can They Be Correlated?",
+          "url": "https://ntrs.nasa.gov/citations/20160001047",
+          "doc_number": "JSC-CN-34845",
+          "page": "PDF p. 1",
+          "quote": "NASA possesses a large quantity of flammability data performed in ISS airlock (30% Oxygen 526mmHg) and ISS cabin (24.1% Oxygen 760 mmHg) conditions."
+        },
+        {
+          "ref_id": "NTRS-20160001047",
+          "title": "Oxygen Partial Pressure and Oxygen Concentration Flammability: Can They Be Correlated?",
+          "url": "https://ntrs.nasa.gov/citations/20160001047",
+          "doc_number": "JSC-CN-34845",
+          "page": "PDF p. 3",
+          "quote": "Nonetheless, it has obtained much of its data at 24.1% O2, 101.4 kPa (14.7 psia) conditions due to sinusoidal fluctuations of oxygen with a mean of 21% O2 seen on the ISS."
+        },
+        {
+          "ref_id": "NTRS-20070018178",
+          "title": "Oxygen Concentration Flammability Thresholds of Selected Aerospace Materials Considered for the Constellation Program",
+          "url": "https://ntrs.nasa.gov/citations/20070018178",
+          "doc_number": null,
+          "page": "PDF p. 1",
+          "quote": "the International Space Station (ISS) atmosphere is also nominally air (maximum oxygen concentration 24.1% by volume)"
+        }
+      ],
+      "notes": "NASA-STD-6001 itself was not retrieved; this profile rests on the two NASA papers quoted. One passage of Harper et al. 2016 (PDF p. 2) prints '191.4 kPa (14.7 psia)', an apparent typographical error for 101.4 kPa; that passage is not used as a quote. The same paper's abstract gives 760 mmHg, consistent with 14.7 psia. The ISS airlock condition (30 % O2 at 526 mmHg) is a different environment and is not a profile here. ppO2 is computed (0.241 x 14.7 psia x 6.894757), not a source value."
+    },
+    {
+      "profile_id": "shuttle_nominal",
+      "name": "Space Shuttle cabin (nominal)",
+      "context": "Space Shuttle Program crew cabin at Earth-equivalent sea-level atmosphere (program-era profile).",
+      "status": "documented_nasa",
+      "oxygen_percent": {
+        "nominal": 21,
+        "min": null,
+        "max": null
+      },
+      "total_pressure_kpa": {
+        "nominal": 101.353,
+        "min": null,
+        "max": null
+      },
+      "total_pressure_psia": {
+        "nominal": 14.7,
+        "min": null,
+        "max": null
+      },
+      "o2_partial_pressure_kpa": {
+        "nominal": 21.284,
+        "min": null,
+        "max": null
+      },
+      "airflow_cm_s": null,
+      "sources": [
+        {
+          "ref_id": "NTRS-20130013505",
+          "title": "Effects of the 8 psia / 32% O2 Atmosphere on the Human in the Spaceflight Environment",
+          "url": "https://ntrs.nasa.gov/citations/20130013505",
+          "doc_number": "NASA/TM-2013-217377",
+          "page": "PDF p. 12",
+          "quote": "including the Space Shuttle Program and International Space Station (ISS) programs have operated at an Earth equivalent sea level atmosphere of 14.7 psia and 21% O2."
+        },
+        {
+          "ref_id": "NTRS-20150021491",
+          "title": "Evidence Report: Risk of Hypobaric Hypoxia from the Exploration Atmosphere",
+          "url": "https://ntrs.nasa.gov/citations/20150021491",
+          "doc_number": "JSC-CN-34806",
+          "page": "PDF p. 5",
+          "quote": "NASA’s more recent programs, including the Space Shuttle Program and International Space Station (ISS) program have operated at an Earth-equivalent sea level atmosphere of 14.7 psia and 21% O2."
+        }
+      ],
+      "notes": "Same nominal point as ISS. Hirsch et al. 2007 describe the Shuttle atmosphere as 'nominally air at ambient pressure' except during EVA prebreathe. No min/max stated in the retrieved sources. ppO2 computed (0.21 x 14.7 psia x 6.894757)."
+    },
+    {
+      "profile_id": "shuttle_staged_pre_eva",
+      "name": "Space Shuttle staged pre-EVA cabin (10.2 psia / 26.5 % O2)",
+      "context": "Reduced-pressure, mildly hypoxic cabin used for staged denitrogenation before Shuttle EVAs.",
+      "status": "documented_nasa",
+      "oxygen_percent": {
+        "nominal": 26.5,
+        "min": null,
+        "max": null
+      },
+      "total_pressure_kpa": {
+        "nominal": 70.327,
+        "min": null,
+        "max": null
+      },
+      "total_pressure_psia": {
+        "nominal": 10.2,
+        "min": null,
+        "max": null
+      },
+      "o2_partial_pressure_kpa": {
+        "nominal": 18.637,
+        "min": null,
+        "max": null
+      },
+      "airflow_cm_s": null,
+      "sources": [
+        {
+          "ref_id": "STD3001-V2-REVF",
+          "title": "NASA-STD-3001, Volume 2, Revision F: Human Factors, Habitability, and Environmental Health",
+          "url": "https://standards.nasa.gov/system/files/tmp/NASA-STD-3001%20Vol%202%20Rev%20F.pdf",
+          "doc_number": "NASA-STD-3001 Vol. 2 Rev F",
+          "page": "PDF p. 50",
+          "quote": "a mildly hypoxic vehicle system atmosphere as part of a denitrogenation protocol to reduce the risk of DCS is advantageous during spaceflight (e.g., Space Shuttle 10.2 psia/26.5% O2), as well as recommended by the Exploration Atmospheres Working Group and endorsed by Human Exploration and Operations Mission Directorate (Exploration Atmospheres, HEOMD memo, February 2013)."
+        },
+        {
+          "ref_id": "NTRS-20130013505",
+          "title": "Effects of the 8 psia / 32% O2 Atmosphere on the Human in the Spaceflight Environment",
+          "url": "https://ntrs.nasa.gov/citations/20130013505",
+          "doc_number": "NASA/TM-2013-217377",
+          "page": "PDF p. 47",
+          "quote": "8.2/34 is almost physiologically equivalent to the atmosphere of 10.2 psia and 26.5% O2 used on the shuttle."
+        },
+        {
+          "ref_id": "NTRS-20070018178",
+          "title": "Oxygen Concentration Flammability Thresholds of Selected Aerospace Materials Considered for the Constellation Program",
+          "url": "https://ntrs.nasa.gov/citations/20070018178",
+          "doc_number": null,
+          "page": "PDF p. 1",
+          "quote": "when it contains 30 % oxygen at 70.1 kPa"
+        }
+      ],
+      "notes": "Operating value 26.5 % O2 at 10.2 psia. Hirsch et al. 2007 (NTRS 20070018178, not listed in sources above) state the Shuttle prebreathe atmosphere as 30 % O2 at 70.1 kPa, which conflicts with the 26.5 % stated by NASA-STD-3001 Rev F and NASA/TM-2013-217377; the sources do not reconcile this, so min/max O2 are left null and 26.5 % is kept as the nominal. Separately, Hirsch et al. 2009 (NTRS 20090012334) describe the 30 % O2 / 10.2 psia materials certification for the Orion crew module (Constellation context), not the Shuttle. ppO2 computed (0.265 x 10.2 psia x 6.894757)."
+    },
+    {
+      "profile_id": "exploration_atmosphere_8p2_34",
+      "name": "NASA Exploration Atmosphere (8.2 psia / 34 % O2)",
+      "context": "NASA Exploration Atmospheres adopted atmosphere for high-frequency-EVA exploration spacecraft; updated in 2012 from the 2006 EAWG 8.0 psia / 32 % O2 recommendation.",
+      "status": "nasa_design_recommendation",
+      "oxygen_percent": {
+        "nominal": 34,
+        "min": null,
+        "max": null
+      },
+      "total_pressure_kpa": {
+        "nominal": 56.537,
+        "min": null,
+        "max": null
+      },
+      "total_pressure_psia": {
+        "nominal": 8.2,
+        "min": null,
+        "max": null
+      },
+      "o2_partial_pressure_kpa": {
+        "nominal": 19.223,
+        "min": null,
+        "max": null
+      },
+      "airflow_cm_s": null,
+      "sources": [
+        {
+          "ref_id": "NTRS-20140000417",
+          "title": "Fifteen-minute Extravehicular Activity Prebreathe Protocol Using NASA's Exploration Atmosphere (8.2 psia / 34% O2)",
+          "url": "https://ntrs.nasa.gov/citations/20140000417",
+          "doc_number": "JSC-CN-29019",
+          "page": "PDF p. 2",
+          "quote": "NASA recently adopted an exploration atmosphere (Expl. Atm.) of 8.2 psia, 34% oxygen (O2), 66% nitrogen (N2) for future spacecraft that will be used for high-frequency EVAs"
+        },
+        {
+          "ref_id": "NTRS-20150021491",
+          "title": "Evidence Report: Risk of Hypobaric Hypoxia from the Exploration Atmosphere",
+          "url": "https://ntrs.nasa.gov/citations/20150021491",
+          "doc_number": "JSC-CN-34806",
+          "page": "PDF p. 5",
+          "quote": "The Exploration Atmosphere Action Team convened in 2012 to review the 8/32 atmospheric recommendation and moved to alter the environment to 8.2 psia and 34% O2 to reduce the hypoxic stress without affecting DCS risk or materials concerns [3]."
+        },
+        {
+          "ref_id": "NTRS-20150021491",
+          "title": "Evidence Report: Risk of Hypobaric Hypoxia from the Exploration Atmosphere",
+          "url": "https://ntrs.nasa.gov/citations/20150021491",
+          "doc_number": "JSC-CN-34806",
+          "page": "PDF p. 29",
+          "quote": "Consider the case of the current 8.2 psia habitat pressure with 34% O2 and 66% N2. The ambient ppO2 is 2.79 psia (0.34 × 8.2 psia)."
+        },
+        {
+          "ref_id": "STD3001-V2-REVF",
+          "title": "NASA-STD-3001, Volume 2, Revision F: Human Factors, Habitability, and Environmental Health",
+          "url": "https://standards.nasa.gov/system/files/tmp/NASA-STD-3001%20Vol%202%20Rev%20F.pdf",
+          "doc_number": "NASA-STD-3001 Vol. 2 Rev F",
+          "page": "PDF p. 49",
+          "quote": "typically 8.2 to 14.7 psia"
+        },
+        {
+          "ref_id": "NTRS-20220011152",
+          "title": "Open Atmospheres Forum: Exploration Atmospheres Validation Study",
+          "url": "https://ntrs.nasa.gov/citations/20220011152",
+          "doc_number": null,
+          "page": "PDF p. 2",
+          "quote": "Artemis habitat and suit atmospheric parameters have not been finalized"
+        }
+      ],
+      "notes": "Recommendation/adoption for exploration vehicles, not a certified flown cabin. A 2022 NASA forum deck states Artemis habitat and suit atmospheric parameters have not been finalized, so this must not be presented as a flight-baseline for any specific Artemis element. No min/max tolerance was found for this point. ppO2 computed (0.34 x 8.2 psia x 6.894757); the evidence report states 2.79 psia."
+    },
+    {
+      "profile_id": "eawg_2006_8p0_32",
+      "name": "EAWG 2006 recommendation (8.0 psia / 32 % O2), superseded",
+      "context": "Exploration Atmospheres Working Group 2006 recommendation for Constellation-era CEV (Orion precursor) and Lunar Surface Access Module; superseded by the 8.2 / 34 atmosphere.",
+      "status": "nasa_design_recommendation",
+      "oxygen_percent": {
+        "nominal": 32,
+        "min": null,
+        "max": null
+      },
+      "total_pressure_kpa": {
+        "nominal": 55.158,
+        "min": null,
+        "max": null
+      },
+      "total_pressure_psia": {
+        "nominal": 8.0,
+        "min": null,
+        "max": null
+      },
+      "o2_partial_pressure_kpa": {
+        "nominal": 17.651,
+        "min": null,
+        "max": null
+      },
+      "airflow_cm_s": null,
+      "sources": [
+        {
+          "ref_id": "NTRS-20130013505",
+          "title": "Effects of the 8 psia / 32% O2 Atmosphere on the Human in the Spaceflight Environment",
+          "url": "https://ntrs.nasa.gov/citations/20130013505",
+          "doc_number": "NASA/TM-2013-217377",
+          "page": "PDF p. 11",
+          "quote": "the 8.0 psia and 32% oxygen (O2) environment were recommended for EVA-intensive phases of missions."
+        },
+        {
+          "ref_id": "NTRS-20140000417",
+          "title": "Fifteen-minute Extravehicular Activity Prebreathe Protocol Using NASA's Exploration Atmosphere (8.2 psia / 34% O2)",
+          "url": "https://ntrs.nasa.gov/citations/20140000417",
+          "doc_number": "JSC-CN-29019",
+          "page": "PDF p. 2",
+          "quote": "This is a change from the previously defined Expl. Atm. of 8.0 psia, 32% O2, 68% N2, recommended in 2006 by the Exploration Atmospheres Working Group"
+        },
+        {
+          "ref_id": "NTRS-20070021378",
+          "title": "Risk Assessment of Physiological Effects of Atmospheric Composition and Pressure in Constellation Vehicles",
+          "url": "https://ntrs.nasa.gov/citations/20070021378",
+          "doc_number": null,
+          "page": "PDF p. 1",
+          "quote": "hypobaric (PB = 414 mmHg) and mildly hypoxic (ppO2 = 132 mmHg, 32% O2 - 68% N2) living environment is considered for the Crew Exploration Vehicle (CEV) and Lunar Surface Access Module (LSAM)"
+        }
+      ],
+      "notes": "Historical design recommendation retained for comparison with the current Exploration Atmosphere. The 2007 Conkin et al. abstract is Constellation-era; the Constellation program is not the current Artemis architecture. ppO2 computed (0.32 x 8.0 psia x 6.894757); source gives 132 mmHg (17.6 kPa)."
+    },
+    {
+      "profile_id": "orion_cm_lunar_design_10p2",
+      "name": "Orion crew module design basis, lunar missions (up to 30 % O2 at 10.2 psia)",
+      "context": "Orion Crew Exploration Vehicle crew module design atmosphere for lunar missions as stated in a 2009 NASA materials-flammability analysis.",
+      "status": "nasa_design_recommendation",
+      "oxygen_percent": {
+        "nominal": null,
+        "min": null,
+        "max": 30
+      },
+      "total_pressure_kpa": {
+        "nominal": 70.327,
+        "min": null,
+        "max": null
+      },
+      "total_pressure_psia": {
+        "nominal": 10.2,
+        "min": null,
+        "max": null
+      },
+      "o2_partial_pressure_kpa": {
+        "nominal": null,
+        "min": null,
+        "max": 21.098
+      },
+      "airflow_cm_s": null,
+      "sources": [
+        {
+          "ref_id": "NTRS-20090012334",
+          "title": "Pressure Effects on the Self-Extinguishment Limits of Aerospace Materials (NTRS abstract)",
+          "url": "https://ntrs.nasa.gov/citations/20090012334",
+          "doc_number": "JSC-17943; 09ICES-0267",
+          "page": "abstract",
+          "quote": "The Orion Crew Exploration Vehicle Module (CM) is being designed to operate in an atmosphere of up to 30% oxygen at a pressure of 10.2 psia for lunar missions."
+        },
+        {
+          "ref_id": "NTRS-20090012334",
+          "title": "Pressure Effects on the Self-Extinguishment Limits of Aerospace Materials (NTRS abstract)",
+          "url": "https://ntrs.nasa.gov/citations/20090012334",
+          "doc_number": "JSC-17943; 09ICES-0267",
+          "page": "abstract",
+          "quote": "Material flammability depends on both oxygen concentration and pressure but, since oxygen concentration is the primary driver, all materials are certified in the 30% oxygen, 10.2 psia environment."
+        }
+      ],
+      "notes": "2009 Constellation-era statement. Nominal O2 is not stated, so nominal is null and only the upper bound (30 %) is documented. Max ppO2 is computed (0.30 x 10.2 psia x 6.894757). Do not treat as the current Artemis Orion cabin; no current NASA document with Orion cabin numbers was found."
+    },
+    {
+      "profile_id": "orion_cm_14p7_o2_limit",
+      "name": "Orion crew module at 14.7 psia (analysed max O2 25.6 %)",
+      "context": "Upper oxygen concentration a 2009 NASA analysis found compatible with the 30 % O2 / 10.2 psia materials certification when the Orion CM is held at 14.7 psia.",
+      "status": "historical_nasa",
+      "oxygen_percent": {
+        "nominal": null,
+        "min": null,
+        "max": 25.6
+      },
+      "total_pressure_kpa": {
+        "nominal": 101.353,
+        "min": null,
+        "max": null
+      },
+      "total_pressure_psia": {
+        "nominal": 14.7,
+        "min": null,
+        "max": null
+      },
+      "o2_partial_pressure_kpa": {
+        "nominal": null,
+        "min": null,
+        "max": 25.946
+      },
+      "airflow_cm_s": null,
+      "sources": [
+        {
+          "ref_id": "NTRS-20090012334",
+          "title": "Pressure Effects on the Self-Extinguishment Limits of Aerospace Materials (NTRS abstract)",
+          "url": "https://ntrs.nasa.gov/citations/20090012334",
+          "doc_number": "JSC-17943; 09ICES-0267",
+          "page": "abstract",
+          "quote": "This analysis showed that the oxygen concentration for the Orion CM at 14.7 psia cannot be set higher than 25.6% without potentially invalidating the materials flammability certification in 30% oxygen at 10.2 psia for some materials."
+        }
+      ],
+      "notes": "Analysis result for a proposed pre-reentry oxygen increase, not a nominal operating point; nominal O2 is not stated (null). Max ppO2 computed (0.256 x 14.7 psia x 6.894757)."
+    },
+    {
+      "profile_id": "nasa_std_3001_crew_envelope",
+      "name": "NASA-STD-3001 crew-exposure envelope (indefinite exposure)",
+      "context": "Outer bounds NASA-STD-3001 Vol. 2 sets for habitable cabin total pressure and diluent gas; an envelope, not an operating point.",
+      "status": "documented_nasa",
+      "oxygen_percent": {
+        "nominal": null,
+        "min": null,
+        "max": 70
+      },
+      "total_pressure_kpa": {
+        "nominal": null,
+        "min": 34.5,
+        "max": 103
+      },
+      "total_pressure_psia": {
+        "nominal": null,
+        "min": 5.0,
+        "max": 15.0
+      },
+      "o2_partial_pressure_kpa": {
+        "nominal": null,
+        "min": null,
+        "max": 50.676
+      },
+      "airflow_cm_s": null,
+      "sources": [
+        {
+          "ref_id": "STD3001-V2-REVF",
+          "title": "NASA-STD-3001, Volume 2, Revision F: Human Factors, Habitability, and Environmental Health",
+          "url": "https://standards.nasa.gov/system/files/tmp/NASA-STD-3001%20Vol%202%20Rev%20F.pdf",
+          "doc_number": "NASA-STD-3001 Vol. 2 Rev F",
+          "page": "PDF p. 52",
+          "quote": "The system shall maintain the pressure to which the crew is exposed to between 34.5 kPa < pressure ≤ 103 kPa (5 psia < pressure ≤ 15.0 psia) for indefinite human exposure without measurable impairments to health or performance."
+        },
+        {
+          "ref_id": "STD3001-V2-REVF",
+          "title": "NASA-STD-3001, Volume 2, Revision F: Human Factors, Habitability, and Environmental Health",
+          "url": "https://standards.nasa.gov/system/files/tmp/NASA-STD-3001%20Vol%202%20Rev%20F.pdf",
+          "doc_number": "NASA-STD-3001 Vol. 2 Rev F",
+          "page": "PDF p. 49",
+          "quote": "Cabin atmospheric composition shall contain at least 30% diluent gas (assuming balance oxygen)."
+        },
+        {
+          "ref_id": "STD3001-V2-REVF",
+          "title": "NASA-STD-3001, Volume 2, Revision F: Human Factors, Habitability, and Environmental Health",
+          "url": "https://standards.nasa.gov/system/files/tmp/NASA-STD-3001%20Vol%202%20Rev%20F.pdf",
+          "doc_number": "NASA-STD-3001 Vol. 2 Rev F",
+          "page": "PDF p. 50",
+          "quote": "this is a ppO2 of 7.35 psia, or 380 mmHg"
+        }
+      ],
+      "notes": "Pressure bounds are the V2 6006 requirement (lower bound exclusive, upper bound inclusive). O2 max 70 % is derived from the V2 6002 requirement of at least 30 % diluent gas with balance oxygen; it is not stated as a percentage. ppO2 max 7.35 psia (380 mmHg) is quoted from the V2 6003 rationale as the level generally accepted for constant exposure, not as a requirement limit; Rev F expresses the V2 6003 requirement in terms of inspired O2 partial pressure (Table 6.2-1), whose values could not be extracted from the PDF text. No nominal is defined.",
+      "kind": "envelope"
+    },
+    {
+      "profile_id": "skylab",
+      "name": "Skylab cabin (5 psia / ~70 % O2)",
+      "context": "Skylab orbital workshop cabin atmosphere (historical).",
+      "status": "historical_nasa",
+      "oxygen_percent": {
+        "nominal": 70,
+        "min": null,
+        "max": null
+      },
+      "total_pressure_kpa": {
+        "nominal": 34.474,
+        "min": null,
+        "max": null
+      },
+      "total_pressure_psia": {
+        "nominal": 5.0,
+        "min": null,
+        "max": null
+      },
+      "o2_partial_pressure_kpa": {
+        "nominal": 24.132,
+        "min": null,
+        "max": null
+      },
+      "airflow_cm_s": null,
+      "sources": [
+        {
+          "ref_id": "NTRS-20130013505",
+          "title": "Effects of the 8 psia / 32% O2 Atmosphere on the Human in the Spaceflight Environment",
+          "url": "https://ntrs.nasa.gov/citations/20130013505",
+          "doc_number": "NASA/TM-2013-217377",
+          "page": "PDF p. 12",
+          "quote": "Skylab missions were longer in duration, but still employed a low pressure (5 psia), high O2 (70%) environment."
+        },
+        {
+          "ref_id": "NTRS-20150021491",
+          "title": "Evidence Report: Risk of Hypobaric Hypoxia from the Exploration Atmosphere",
+          "url": "https://ntrs.nasa.gov/citations/20150021491",
+          "doc_number": "JSC-CN-34806",
+          "page": "PDF p. 5",
+          "quote": "Skylab missions were longer in duration but still employed a low-pressure (5 psia), 70% O2 environment."
+        },
+        {
+          "ref_id": "NTRS-20070018178",
+          "title": "Oxygen Concentration Flammability Thresholds of Selected Aerospace Materials Considered for the Constellation Program",
+          "url": "https://ntrs.nasa.gov/citations/20070018178",
+          "doc_number": null,
+          "page": "PDF p. 1",
+          "quote": "Historically, the Apollo program used an oxygen concentration of 100 % by volume and Skylab used 70 % oxygen."
+        }
+      ],
+      "notes": "Historical, not a target for new designs. Sources give 70 % without a tolerance. ppO2 computed (0.70 x 5.0 psia x 6.894757)."
+    },
+    {
+      "profile_id": "apollo_cm",
+      "name": "Apollo command module cabin (5 psia / ~100 % O2)",
+      "context": "Apollo Command Module in-flight cabin atmosphere (historical).",
+      "status": "historical_nasa",
+      "oxygen_percent": {
+        "nominal": 100,
+        "min": null,
+        "max": null
+      },
+      "total_pressure_kpa": {
+        "nominal": 34.474,
+        "min": null,
+        "max": null
+      },
+      "total_pressure_psia": {
+        "nominal": 5.0,
+        "min": null,
+        "max": null
+      },
+      "o2_partial_pressure_kpa": {
+        "nominal": 34.474,
+        "min": null,
+        "max": null
+      },
+      "airflow_cm_s": null,
+      "sources": [
+        {
+          "ref_id": "NTRS-19720012252",
+          "title": "Apollo Experience Report: Command and Service Module Environmental Control System",
+          "url": "https://ntrs.nasa.gov/citations/19720012252",
+          "doc_number": "NASA TN D-6718",
+          "page": "PDF p. 4",
+          "quote": "A 5.0-psia pure oxygen atmosphere was required in the pressurized CM"
+        },
+        {
+          "ref_id": "NTRS-20150021491",
+          "title": "Evidence Report: Risk of Hypobaric Hypoxia from the Exploration Atmosphere",
+          "url": "https://ntrs.nasa.gov/citations/20150021491",
+          "doc_number": "JSC-CN-34806",
+          "page": "PDF p. 5",
+          "quote": "Early missions during the Gemini and Apollo programs were short duration and relied on low-pressure, 100% O2 environments."
+        },
+        {
+          "ref_id": "NTRS-20070018178",
+          "title": "Oxygen Concentration Flammability Thresholds of Selected Aerospace Materials Considered for the Constellation Program",
+          "url": "https://ntrs.nasa.gov/citations/20070018178",
+          "doc_number": null,
+          "page": "PDF p. 1",
+          "quote": "Historically, the Apollo program used an oxygen concentration of 100 % by volume and Skylab used 70 % oxygen."
+        }
+      ],
+      "notes": "Historical. TN D-6718 also records a design criterion to maintain cabin pressure above 3.5 psia for 5 minutes under emergency conditions; that is an emergency criterion, not a nominal range, so min/max are null. 'Pure oxygen' is recorded as 100 %. ppO2 computed (5.0 psia x 6.894757)."
+    }
+  ],
+  "ventilation": {
+    "min_cm_s": 7.62,
+    "max_cm_s": 60.96,
+    "sources": [
+      {
+        "ref_id": "HIDH-REV1",
+        "title": "Human Integration Design Handbook (HIDH), Revision 1",
+        "url": "https://www.nasa.gov/sites/default/files/atoms/files/human_integration_design_handbook_revision_1.pdf",
+        "doc_number": "NASA/SP-2010-3407/REV1",
+        "page": "PDF p. 368 (printed p. 363, section 6.2.3.3)",
+        "quote": "For microgravity operations, the nominal ventilation rate in the internal atmosphere must be such that two-thirds (66.7%) of the atmosphere velocities are between 4.57 m/min (15 ft/min) and 36.58 m/min (120 ft/min)."
+      },
+      {
+        "ref_id": "STD3001-V2-REVF",
+        "title": "NASA-STD-3001, Volume 2, Revision F: Human Factors, Habitability, and Environmental Health",
+        "url": "https://standards.nasa.gov/system/files/tmp/NASA-STD-3001%20Vol%202%20Rev%20F.pdf",
+        "doc_number": "NASA-STD-3001 Vol. 2 Rev F",
+        "page": "PDF p. 61",
+        "quote": "The effective atmosphere velocity range of 4.57-36.58 m/min (15-120 ft/min) pertains to the time averaged velocity magnitudes in the crew occupied space using averages over time periods sufficient to achieve stability."
+      },
+      {
+        "ref_id": "STD3001-V2-WEB",
+        "title": "6.0 Natural and Induced Environments (NASA-STD-3001 Vol. 2 web edition)",
+        "url": "https://www.nasa.gov/reference/6-0-natural-and-induced-environments-vol-2",
+        "doc_number": "NASA-STD-3001 Vol. 2 (nasa.gov web page)",
+        "page": "web page, section 6.2.7.1",
+        "quote": "The effective atmosphere velocity range of 4.57-36.58 m/min (15-120 ft/min) pertains to the time averaged velocity magnitudes in the crew occupied space using averages over time periods sufficient to achieve stability."
+      }
+    ]
+  }
+}

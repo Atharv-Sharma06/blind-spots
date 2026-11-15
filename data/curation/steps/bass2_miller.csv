@@ -1,0 +1,80 @@
+investigation_id,test_label,source_file,source_sheet,source_row,step_index,flow_value,flow_unit,flow_qualifier,flame_state,extinction_mode,raw_token,raw_column,token_row,confidence,note
+PSI-25,M1,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,2,0,10,air_cm_s,,sustained,,10,Air display,2,medium,implied by list order
+PSI-25,M2,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,3,0,20,air_cm_s,,sustained,,20,Air display,3,medium,implied by list order
+PSI-25,M2,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,3,1,15,air_cm_s,,sustained,,15,Air display,3,medium,implied by list order
+PSI-25,M2,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,3,2,13,air_cm_s,,sustained,,13,Air display,3,medium,implied by list order
+PSI-25,M3,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,4,0,3,pot,,sustained,,3.0,Fan display,4,medium,implied by list order
+PSI-25,M3,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,4,1,3.1,pot,,sustained,,3.1,Fan display,4,medium,implied by list order
+PSI-25,M3,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,4,2,3.2,pot,,sustained,,3.2,Fan display,4,medium,implied by list order
+PSI-25,M3,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,4,3,6.4,pot,,sustained,,6.4,Fan display,4,medium,implied by list order
+PSI-25,M3,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,4,4,5.5,pot,,sustained,,5.5,Fan display,4,medium,implied by list order
+PSI-25,M4,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,5,0,5,air_cm_s,,sustained,,5,Air display,5,medium,implied by list order
+PSI-25,M4,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,5,1,4,air_cm_s,,sustained,,4,Air display,5,medium,implied by list order
+PSI-25,M5,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,6,0,20,air_cm_s,,sustained,,20,Air display,6,medium,implied by list order
+PSI-25,M5,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,6,1,13,air_cm_s,,sustained,,13,Air display,6,medium,implied by list order
+PSI-25,M5,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,6,2,10,air_cm_s,,sustained,,10,Air display,6,medium,implied by list order
+PSI-25,M5,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,6,3,8,air_cm_s,,sustained,,8,Air display,6,medium,implied by list order
+PSI-25,M6,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,7,0,68,fan_display,,sustained,,68,Fan display,7,medium,implied by list order
+PSI-25,M6,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,7,1,52,fan_display,,sustained,,52,Fan display,7,medium,implied by list order
+PSI-25,M6,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,7,2,47,fan_display,,sustained,,47,Fan display,7,medium,implied by list order
+PSI-25,M6,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,7,3,43,fan_display,,sustained,,43,Fan display,7,medium,implied by list order
+PSI-25,M6,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,7,4,42,fan_display,,sustained,,42,Fan display,7,medium,implied by list order
+PSI-25,M7,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,8,0,10,air_cm_s,,sustained,,10,Air display,8,medium,implied by list order
+PSI-25,M7,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,8,1,6,air_cm_s,,sustained,,6,Air display,8,medium,implied by list order
+PSI-25,M7,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,8,2,5,air_cm_s,,sustained,,5,Air display,8,medium,implied by list order
+PSI-25,M7,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,8,3,4.5,air_cm_s,,sustained,,4.5,Air display,8,medium,implied by list order
+PSI-25,M7,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,8,4,4,air_cm_s,,sustained,,4,Air display,8,medium,implied by list order
+PSI-25,M8,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,9,0,10,air_cm_s,,sustained,,10,Air display,9,medium,implied by list order; pot 3.3 same step
+PSI-25,M8,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,9,1,1.6,pot,,sustained,,1.6,Fan display,9,medium,implied by list order; air '5>7' not steady so pot used
+PSI-25,M8,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,9,2,1,pot,,sustained,,1.0,Fan display,9,low,"followed by 'decr' (further decrease, no value, no outcome); flame at this setting only implied"
+PSI-25,M9,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,10,0,10,air_cm_s,,sustained,,10,Air display,10,medium,implied by list order
+PSI-25,M10,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,11,0,10,air_cm_s,,sustained,,10,Air display,11,medium,implied by list order
+PSI-25,M10,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,11,1,17,air_cm_s,,sustained,,17,Air display,11,medium,implied by list order
+PSI-25,M10,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,11,2,14,air_cm_s,,sustained,,14,Air display,11,medium,implied by list order
+PSI-25,M10,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,11,3,10,air_cm_s,,sustained,,10,Air display,11,medium,implied by list order
+PSI-25,M11,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,12,0,62.5,fan_display,,sustained,,62.5,Fan display,12,medium,implied by list order
+PSI-25,M11,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,12,1,93,fan_display,,sustained,,93,Fan display,12,medium,implied by list order
+PSI-25,M11,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,12,2,77,fan_display,,sustained,,77,Fan display,12,medium,implied by list order
+PSI-25,M11,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,12,3,66,fan_display,,sustained,,66,Fan display,12,medium,implied by list order
+PSI-25,M11,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,12,4,63,fan_display,,sustained,,63,Fan display,12,medium,implied by list order
+PSI-25,M12,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,13,0,41,fan_display,,sustained,,41,Fan display,13,medium,implied by list order
+PSI-25,M12,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,13,1,42,fan_display,,sustained,,42,Fan display,13,medium,implied by list order
+PSI-25,M13,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,14,0,6,air_cm_s,,sustained,,6,Air display,14,medium,implied by list order
+PSI-25,M13,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,14,1,5,air_cm_s,,sustained,,5,Air display,14,medium,implied by list order
+PSI-25,M14,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,15,0,10,air_cm_s,,sustained,,10,Air display,15,medium,implied by list order
+PSI-25,M15,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,16,0,10,air_cm_s,,sustained,,10,Air display,16,medium,implied by list order
+PSI-25,M15,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,16,1,8,air_cm_s,,sustained,,8,Air display,16,medium,implied by list order
+PSI-25,M15,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,16,2,7,air_cm_s,,sustained,,7,Air display,16,medium,implied by list order
+PSI-25,M15,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,16,3,8,air_cm_s,,sustained,,8,Air display,16,medium,implied by list order
+PSI-25,M15,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,16,4,10,air_cm_s,,sustained,,10,Air display,16,medium,implied by list order
+PSI-25,M15,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,16,5,20,air_cm_s,,sustained,,20,Air display,16,medium,implied by list order
+PSI-25,M15,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,16,6,18,air_cm_s,,sustained,,18,Air display,16,medium,implied by list order
+PSI-25,M15,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,16,7,16,air_cm_s,,sustained,,16,Air display,16,medium,implied by list order
+PSI-25,M16,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,17,0,73,fan_display,,sustained,,73,Fan display,17,medium,implied by list order
+PSI-25,M16,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,17,1,57,fan_display,,sustained,,57,Fan display,17,medium,implied by list order
+PSI-25,M16,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,17,2,59,fan_display,,sustained,,59,Fan display,17,medium,implied by list order
+PSI-25,M16,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,17,3,48,fan_display,,sustained,,48,Fan display,17,medium,implied by list order
+PSI-25,M16,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,17,4,45,fan_display,,sustained,,45,Fan display,17,medium,implied by list order
+PSI-25,M16,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,17,5,43,fan_display,,sustained,,43,Fan display,17,low,"pot 0.5, below calibration; flow raised to 75 afterwards; flame state not stated"
+PSI-25,M17,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,18,0,3.7,pot,,sustained,,3.7,Fan display,18,medium,implied by list order
+PSI-25,M17,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,18,1,1.7,pot,,sustained,,1.7,Fan display,18,medium,implied by list order
+PSI-25,M17,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,18,2,1.5,pot,,sustained,,1.5,Fan display,18,medium,implied by list order
+PSI-25,M17,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,18,3,1.3,pot,,sustained,,1.3,Fan display,18,medium,implied by list order
+PSI-25,M17,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,18,4,0.8,pot,,sustained,,0.8,Fan display,18,medium,implied by list order
+PSI-25,M17,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,18,5,0.6,pot,,sustained,,0.6,Fan display,18,medium,implied by list order
+PSI-25,M17,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,18,6,0.5,pot,,sustained,,0.5,Fan display,18,medium,implied by list order
+PSI-25,M17,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,18,7,0.3,pot,,extinguished,quench_low_flow,0.3ext,Fan display,18,high,flow stepped down to pot 0.3 where flame went out; Air display '0ext'
+PSI-25,M18,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,19,0,10,air_cm_s,,sustained,,10,Air display,19,medium,implied by list order; pot 3.5
+PSI-25,M18,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,19,1,15,air_cm_s,,sustained,,15 (brief),Air display,19,low,'(brief)' read as brief flow excursion; flame state implied
+PSI-25,M18,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,19,2,10,air_cm_s,,sustained,,10,Air display,19,medium,"implied by list order; fan '3,5' read as pot 3.5"
+PSI-25,M19,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,20,0,75,fan_display,,sustained,,75,Fan display,20,medium,implied by list order
+PSI-25,M19,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,20,1,105,fan_display,,sustained,,105,Fan display,20,medium,implied by list order
+PSI-25,M19,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,20,2,94,fan_display,,sustained,,94,Fan display,20,medium,implied by list order
+PSI-25,M19,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,20,3,75,fan_display,,sustained,,75,Fan display,20,medium,implied by list order
+PSI-25,M19,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,20,4,77,fan_display,,sustained,,77,Fan display,20,medium,implied by list order
+PSI-25,M19,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,20,5,79,fan_display,,sustained,,79,Fan display,20,medium,implied by list order
+PSI-25,M19,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,20,6,59,fan_display,,sustained,,59,Fan display,20,medium,implied by list order
+PSI-25,M19,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,20,7,61,fan_display,,sustained,,61,Fan display,20,medium,implied by list order
+PSI-25,M19,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,20,8,57,fan_display,,sustained,,57,Fan display,20,medium,implied by list order
+PSI-25,M19,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,20,9,55,fan_display,,sustained,,55,Fan display,20,medium,implied by list order
+PSI-25,M20,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Miller,21,0,10,air_cm_s,,sustained,,10,Air display,21,medium,implied by list order

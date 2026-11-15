@@ -1,0 +1,561 @@
+{
+ "counts": {
+  "investigations": 24,
+  "experiments": 254,
+  "observations": 684,
+  "experiments_included_in_training": 189,
+  "observations_included_in_training": 481,
+  "experiments_by_investigation": {
+   "PSI-100": 2,
+   "PSI-25": 129,
+   "PSI-26": 121,
+   "PSI-98": 2
+  },
+  "observations_by_investigation": {
+   "PSI-25": 366,
+   "PSI-26": 318
+  },
+  "experiments_by_campaign": {
+   "BASS-II/Bhattacharjee": 22,
+   "BASS-II/Ferkul": 4,
+   "BASS-II/Fernandez-Pello": 27,
+   "BASS-II/Miller": 20,
+   "BASS-II/Olson": 27,
+   "BASS-II/T'ien": 29,
+   "BASS/2012": 80,
+   "BASS/2013": 41,
+   "SAFFIRE/SAFFIRE-I": 2,
+   "SAFFIRE/SAFFIRE-III": 2
+  },
+  "observations_by_campaign": {
+   "BASS-II/Bhattacharjee": 50,
+   "BASS-II/Fernandez-Pello": 109,
+   "BASS-II/Miller": 79,
+   "BASS-II/Olson": 104,
+   "BASS-II/T'ien": 24,
+   "BASS/2012": 199,
+   "BASS/2013": 119
+  },
+  "observations_by_material_family": {
+   "nomex_fabric": 6,
+   "paraffin_slab": 7,
+   "pmma_rod": 213,
+   "pmma_slab": 89,
+   "pmma_sphere": 206,
+   "pmma_thin_film": 50,
+   "sibal_fabric": 45,
+   "ultem_sheet": 2,
+   "wax_candle": 66
+  },
+  "observations_by_flame_configuration": {
+   "concurrent": 26,
+   "opposed": 242,
+   "stagnation": 162,
+   "unknown": 138,
+   "wake": 116
+  },
+  "observations_by_label": {
+   "0": 86,
+   "1": 580,
+   "null": 18
+  },
+  "observations_by_confidence": {
+   "high": 87,
+   "low": 187,
+   "medium": 410
+  },
+  "training_observations_by_family": {
+   "nomex_fabric": 3,
+   "paraffin_slab": 3,
+   "pmma_rod": 199,
+   "pmma_slab": 85,
+   "pmma_sphere": 102,
+   "pmma_thin_film": 36,
+   "sibal_fabric": 39,
+   "ultem_sheet": 1,
+   "wax_candle": 13
+  }
+ },
+ "exclusions": {
+  "observations_by_reason": {
+   "low_confidence": 178,
+   "n2_suppression": 2,
+   "no_numeric_airflow": 7,
+   "not_ignited": 16
+  },
+  "experiments_by_reason": {
+   "different apparatus and scale: context only": 4,
+   "low_confidence": 19,
+   "no_curated_flow_steps": 30,
+   "not_ignited": 12
+  }
+ },
+ "quality_flags": {
+  "experiments": {
+   "campaign_year_from_gmt_text": 1,
+   "co2_percent_from_mmhg_formula": 111,
+   "co_final_over_range": 3,
+   "co_final_unparsed": 1,
+   "co_initial_out_of_range": 13,
+   "co_initial_over_range": 1,
+   "context_only": 4,
+   "date_parsed_from_text": 12,
+   "date_year_implausible": 1,
+   "date_year_mismatch": 5,
+   "duplicate_as_run_number": 10,
+   "o2_anomaly": 15,
+   "o2_final_out_of_range": 4,
+   "over_range": 3,
+   "possible_duplicate": 4,
+   "pressure_assumed": 129,
+   "test_confidence_low": 48,
+   "test_date_from_notes": 4
+  },
+  "observations": {
+   "air_factor_from_bass2_note": 86,
+   "below_calibration_range": 211,
+   "calibration_borrowed_from_bass2": 154,
+   "calibration_day_gap_over_30_days": 13,
+   "calibration_nearest_day": 275,
+   "calibration_same_day_not_covering_value": 14,
+   "flow_approximate": 4,
+   "flow_interpolated_to_fan_off": 211,
+   "flow_off_transient": 22,
+   "flow_upper_bound": 2,
+   "no_restrictor_for_calibration": 1,
+   "no_sustained_propagation": 12,
+   "o2_initial_only": 353,
+   "o2_interpolated": 331,
+   "pressure_assumed": 366
+  },
+  "range_check_counts": {
+   "co_initial_out_of_range": 13,
+   "o2_final_out_of_range": 4
+  }
+ },
+ "provenance_failures": {
+  "observations": [],
+  "experiments": []
+ },
+ "missing_values": {
+  "experiments": {
+   "experiment_id": {
+    "missing": 0,
+    "total": 254,
+    "fraction_missing": 0.0
+   },
+   "investigation_id": {
+    "missing": 0,
+    "total": 254,
+    "fraction_missing": 0.0
+   },
+   "investigation_name": {
+    "missing": 0,
+    "total": 254,
+    "fraction_missing": 0.0
+   },
+   "investigation_acronym": {
+    "missing": 0,
+    "total": 254,
+    "fraction_missing": 0.0
+   },
+   "campaign_group": {
+    "missing": 0,
+    "total": 254,
+    "fraction_missing": 0.0
+   },
+   "test_label": {
+    "missing": 0,
+    "total": 254,
+    "fraction_missing": 0.0
+   },
+   "sample_id": {
+    "missing": 0,
+    "total": 254,
+    "fraction_missing": 0.0
+   },
+   "test_date": {
+    "missing": 1,
+    "total": 254,
+    "fraction_missing": 0.0039
+   },
+   "oxygen_percent": {
+    "missing": 0,
+    "total": 254,
+    "fraction_missing": 0.0
+   },
+   "oxygen_percent_initial": {
+    "missing": 0,
+    "total": 254,
+    "fraction_missing": 0.0
+   },
+   "oxygen_percent_final": {
+    "missing": 127,
+    "total": 254,
+    "fraction_missing": 0.5
+   },
+   "total_pressure_kpa": {
+    "missing": 129,
+    "total": 254,
+    "fraction_missing": 0.5079
+   },
+   "total_pressure_atm_raw": {
+    "missing": 133,
+    "total": 254,
+    "fraction_missing": 0.5236
+   },
+   "pressure_assumed_kpa": {
+    "missing": 125,
+    "total": 254,
+    "fraction_missing": 0.4921
+   },
+   "pressure_assumption_source": {
+    "missing": 125,
+    "total": 254,
+    "fraction_missing": 0.4921
+   },
+   "airflow_cm_s": {
+    "missing": 55,
+    "total": 254,
+    "fraction_missing": 0.2165
+   },
+   "airflow_min_cm_s": {
+    "missing": 34,
+    "total": 254,
+    "fraction_missing": 0.1339
+   },
+   "airflow_max_cm_s": {
+    "missing": 34,
+    "total": 254,
+    "fraction_missing": 0.1339
+   },
+   "material_type": {
+    "missing": 4,
+    "total": 254,
+    "fraction_missing": 0.0157
+   },
+   "material_family": {
+    "missing": 0,
+    "total": 254,
+    "fraction_missing": 0.0
+   },
+   "specimen_geometry": {
+    "missing": 0,
+    "total": 254,
+    "fraction_missing": 0.0
+   },
+   "material_thickness_mm": {
+    "missing": 212,
+    "total": 254,
+    "fraction_missing": 0.8346
+   },
+   "specimen_diameter_mm": {
+    "missing": 130,
+    "total": 254,
+    "fraction_missing": 0.5118
+   },
+   "specimen_width_mm": {
+    "missing": 166,
+    "total": 254,
+    "fraction_missing": 0.6535
+   },
+   "flame_configuration": {
+    "missing": 0,
+    "total": 254,
+    "fraction_missing": 0.0
+   },
+   "gravity_environment": {
+    "missing": 0,
+    "total": 254,
+    "fraction_missing": 0.0
+   },
+   "experimental_platform": {
+    "missing": 0,
+    "total": 254,
+    "fraction_missing": 0.0
+   },
+   "flow_restrictor": {
+    "missing": 5,
+    "total": 254,
+    "fraction_missing": 0.0197
+   },
+   "observed_outcome": {
+    "missing": 0,
+    "total": 254,
+    "fraction_missing": 0.0
+   },
+   "outcome_definition": {
+    "missing": 0,
+    "total": 254,
+    "fraction_missing": 0.0
+   },
+   "measurement_method": {
+    "missing": 0,
+    "total": 254,
+    "fraction_missing": 0.0
+   },
+   "co2_percent_initial": {
+    "missing": 16,
+    "total": 254,
+    "fraction_missing": 0.063
+   },
+   "co2_percent_final": {
+    "missing": 131,
+    "total": 254,
+    "fraction_missing": 0.5157
+   },
+   "co_ppm_initial": {
+    "missing": 128,
+    "total": 254,
+    "fraction_missing": 0.5039
+   },
+   "co_ppm_final": {
+    "missing": 134,
+    "total": 254,
+    "fraction_missing": 0.5276
+   },
+   "notes_raw": {
+    "missing": 129,
+    "total": 254,
+    "fraction_missing": 0.5079
+   },
+   "source_url": {
+    "missing": 0,
+    "total": 254,
+    "fraction_missing": 0.0
+   },
+   "source_doi": {
+    "missing": 0,
+    "total": 254,
+    "fraction_missing": 0.0
+   },
+   "source_file": {
+    "missing": 4,
+    "total": 254,
+    "fraction_missing": 0.0157
+   },
+   "source_sheet": {
+    "missing": 4,
+    "total": 254,
+    "fraction_missing": 0.0157
+   },
+   "source_row": {
+    "missing": 4,
+    "total": 254,
+    "fraction_missing": 0.0157
+   },
+   "extraction_method": {
+    "missing": 0,
+    "total": 254,
+    "fraction_missing": 0.0
+   },
+   "extraction_confidence": {
+    "missing": 0,
+    "total": 254,
+    "fraction_missing": 0.0
+   },
+   "quality_flags": {
+    "missing": 0,
+    "total": 254,
+    "fraction_missing": 0.0
+   },
+   "included_in_training": {
+    "missing": 0,
+    "total": 254,
+    "fraction_missing": 0.0
+   },
+   "exclusion_reason": {
+    "missing": 189,
+    "total": 254,
+    "fraction_missing": 0.7441
+   },
+   "n_observations": {
+    "missing": 0,
+    "total": 254,
+    "fraction_missing": 0.0
+   }
+  },
+  "observations": {
+   "observation_id": {
+    "missing": 0,
+    "total": 684,
+    "fraction_missing": 0.0
+   },
+   "experiment_id": {
+    "missing": 0,
+    "total": 684,
+    "fraction_missing": 0.0
+   },
+   "investigation_id": {
+    "missing": 0,
+    "total": 684,
+    "fraction_missing": 0.0
+   },
+   "campaign_group": {
+    "missing": 0,
+    "total": 684,
+    "fraction_missing": 0.0
+   },
+   "material_family": {
+    "missing": 0,
+    "total": 684,
+    "fraction_missing": 0.0
+   },
+   "flame_configuration": {
+    "missing": 0,
+    "total": 684,
+    "fraction_missing": 0.0
+   },
+   "step_index": {
+    "missing": 0,
+    "total": 684,
+    "fraction_missing": 0.0
+   },
+   "oxygen_percent": {
+    "missing": 0,
+    "total": 684,
+    "fraction_missing": 0.0
+   },
+   "airflow_cm_s": {
+    "missing": 7,
+    "total": 684,
+    "fraction_missing": 0.0102
+   },
+   "airflow_uncertainty_cm_s": {
+    "missing": 473,
+    "total": 684,
+    "fraction_missing": 0.6915
+   },
+   "airflow_basis": {
+    "missing": 0,
+    "total": 684,
+    "fraction_missing": 0.0
+   },
+   "flow_raw_value": {
+    "missing": 6,
+    "total": 684,
+    "fraction_missing": 0.0088
+   },
+   "flow_raw_unit": {
+    "missing": 0,
+    "total": 684,
+    "fraction_missing": 0.0
+   },
+   "flow_calibration_ref": {
+    "missing": 298,
+    "total": 684,
+    "fraction_missing": 0.4357
+   },
+   "total_pressure_kpa": {
+    "missing": 366,
+    "total": 684,
+    "fraction_missing": 0.5351
+   },
+   "pressure_for_analysis_kpa": {
+    "missing": 0,
+    "total": 684,
+    "fraction_missing": 0.0
+   },
+   "flame_state": {
+    "missing": 0,
+    "total": 684,
+    "fraction_missing": 0.0
+   },
+   "extinction_mode": {
+    "missing": 608,
+    "total": 684,
+    "fraction_missing": 0.8889
+   },
+   "label": {
+    "missing": 18,
+    "total": 684,
+    "fraction_missing": 0.0263
+   },
+   "raw_token": {
+    "missing": 0,
+    "total": 684,
+    "fraction_missing": 0.0
+   },
+   "raw_column": {
+    "missing": 0,
+    "total": 684,
+    "fraction_missing": 0.0
+   },
+   "source_row": {
+    "missing": 0,
+    "total": 684,
+    "fraction_missing": 0.0
+   },
+   "confidence": {
+    "missing": 0,
+    "total": 684,
+    "fraction_missing": 0.0
+   },
+   "quality_flags": {
+    "missing": 0,
+    "total": 684,
+    "fraction_missing": 0.0
+   },
+   "included_in_training": {
+    "missing": 0,
+    "total": 684,
+    "fraction_missing": 0.0
+   },
+   "exclusion_reason": {
+    "missing": 481,
+    "total": 684,
+    "fraction_missing": 0.7032
+   }
+  }
+ },
+ "duplicates": {
+  "id_errors": [],
+  "possible_duplicates": [
+   [
+    "PSI-26:24/12-R",
+    "PSI-26:24/12-R2"
+   ],
+   [
+    "PSI-26:26",
+    "PSI-26:27"
+   ]
+  ]
+ },
+ "chunks_found": {
+  "tests": [
+   "bass1_2012a",
+   "bass1_2012b",
+   "bass1_2013",
+   "bass2_bhattacharjee_ferkul",
+   "bass2_fernandez_pello",
+   "bass2_miller",
+   "bass2_olson",
+   "bass2_tien"
+  ],
+  "steps": [
+   "bass1_2012a",
+   "bass1_2012b",
+   "bass1_2013",
+   "bass2_bhattacharjee_ferkul",
+   "bass2_fernandez_pello",
+   "bass2_miller",
+   "bass2_olson",
+   "bass2_tien"
+  ]
+ },
+ "curation_problems": [],
+ "atmosphere_profiles": {
+  "n_profiles": 11,
+  "errors": [],
+  "keys_outside_schema": {},
+  "file_present": true
+ },
+ "errors": [],
+ "calibration_file_found": true,
+ "matrices_missing": [],
+ "tests_skipped_no_investigation": [],
+ "curation_tests_without_matrix_row": [],
+ "curation_step_tests_without_test_row": [],
+ "pressure_assumption_sourced": true,
+ "dataset_version": "da32b5c9ca7c"
+}

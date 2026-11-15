@@ -23,3 +23,4 @@ next-env.d.ts
 .DS_Store
 # Large raw downloads fetched on demand (small CC0 source tables are committed)
 data/raw/**/large/
+.next-*/
