@@ -23,15 +23,15 @@ const MAIN_CHIPS: Chip[] = [
 ];
 /** Behind "More options". */
 const MORE_CHIPS: Chip[] = [
-  { layer: "uncertainty", label: "Uncertainty", swatch: "var(--plum-5)", needsModel: true },
+  { layer: "uncertainty", label: "Uncertainty", swatch: "var(--plum-6)", needsModel: true },
   { layer: "context", label: "Related NASA work", swatch: "var(--muted)" },
 ];
 
 /** A control's visible label plus its one short helper line (the helper is tied to the control with aria-describedby). */
 export function ControlLabel({ id, label, helpId, help }: { id: string; label: string; helpId?: string; help?: string }) {
   return (
-    <div className="mb-1">
-      <p id={id} className="text-[13px] font-medium text-fg">{label}</p>
+    <div className="mb-2">
+      <p id={id} className="text-xs font-medium tracking-[0.02em] text-muted">{label}</p>
       {help ? <p id={helpId} className="mt-0.5 text-xs leading-snug text-muted">{help}</p> : null}
     </div>
   );
@@ -54,18 +54,27 @@ export function LayerChips({ layers, onToggle, modelled }: { layers: Layers; onT
         data-testid={`layer-${c.layer}`}
         title={SHOW_HELP[c.layer]}
         className={cn(
-          "inline-flex h-10 items-center gap-1.5 rounded-md border px-3 text-[13px] transition-colors md:h-8 md:px-2.5",
-          on ? "border-fg bg-surface font-medium text-fg" : "border-border bg-subtle text-muted hover:text-fg",
+          "inline-flex h-10 items-center gap-2 rounded-full py-1 pr-1.5 pl-3.5 text-[13px] shadow-[inset_0_1px_0_rgb(255_255_255/.05)] ring-1 transition-colors",
+          on ? "bg-subtle font-medium text-fg ring-accent/45" : "bg-black/25 text-muted ring-border hover:text-fg",
           "disabled:cursor-not-allowed disabled:opacity-50",
         )}
       >
-        <span aria-hidden className="size-2 rounded-full" style={{ background: c.swatch, opacity: on ? 1 : 0.45 }} />
+        <span aria-hidden className="size-2.5 rounded-full ring-1 ring-white/25" style={{ background: c.swatch, opacity: on ? 1 : 0.85 }} />
         {c.label}
+        {/* Mini switch (decorative; aria-pressed carries the state): white knob on a dark track, yellow track when on. */}
+        <span aria-hidden className={cn("relative ml-0.5 inline-block h-[18px] w-[30px] shrink-0 rounded-full transition-colors", on ? "bg-accent" : "bg-[#2A2A2F]")}>
+          <span
+            className={cn(
+              "absolute top-[3px] size-3 rounded-full shadow-[0_1px_2px_rgb(0_0_0/.5)] transition-[left] duration-150 motion-reduce:transition-none",
+              on ? "left-[15px] bg-[#0B0B0C]" : "left-[3px] bg-white",
+            )}
+          />
+        </span>
       </button>
     );
     return disabled ? (
       <Tooltip key={c.layer} content="Too few test results for a model.">
-        <span tabIndex={0} className="inline-flex rounded-md">{btn}</span>
+        <span tabIndex={0} className="inline-flex rounded-full">{btn}</span>
       </Tooltip>
     ) : (
       btn
@@ -74,21 +83,21 @@ export function LayerChips({ layers, onToggle, modelled }: { layers: Layers; onT
   return (
     <div>
       <ControlLabel id="show-label" label="Show" />
-      <div role="group" aria-labelledby="show-label" className="flex flex-wrap items-center gap-1.5">
+      <div role="group" aria-labelledby="show-label" className="flex flex-wrap items-center gap-2">
         {MAIN_CHIPS.map(chip)}
         <button
           type="button"
           aria-expanded={more}
           aria-controls={moreId}
           onClick={() => setMore((v) => !v)}
-          className="inline-flex h-10 items-center gap-1 rounded-md px-2 text-[13px] text-muted hover:text-fg md:h-8"
+          className="inline-flex h-10 items-center gap-1 rounded-full px-3 text-[13px] text-muted transition-colors hover:bg-subtle hover:text-fg"
         >
           <span aria-hidden className={cn("inline-block transition-transform", more && "rotate-90")}>›</span>
           More options
         </button>
       </div>
       {more ? (
-        <div id={moreId} role="group" aria-label="More options" className="mt-1.5 flex flex-wrap gap-1.5">
+        <div id={moreId} role="group" aria-label="More options" className="mt-2 flex flex-wrap gap-2">
           {MORE_CHIPS.map(chip)}
         </div>
       ) : null}
@@ -153,8 +162,8 @@ export function SliceControl({
   return (
     <div className="w-full min-w-[200px] sm:w-[250px]">
       <div className="flex items-baseline justify-between gap-2">
-        <p id={id} className="text-[13px] font-medium text-fg">{label}</p>
-        <span className="num text-xs text-fg" data-testid="slice-value">
+        <p id={id} className="text-xs font-medium tracking-[0.02em] text-muted">{label}</p>
+        <span className="num text-[13px] text-fg" data-testid="slice-value">
           {fmtFixed(local, 1)} {ax.unit}
           {plane === "o2_flow" ? <span className="text-muted"> ({fmtPsia(kpaToPsia(local))})</span> : null}
         </span>

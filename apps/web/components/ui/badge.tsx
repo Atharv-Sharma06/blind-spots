@@ -10,16 +10,16 @@ import { cn } from "@/lib/cn";
  * For verdicts use <VerdictBadge verdict=... /> rather than picking a tone by hand.
  */
 export const badgeVariants = cva(
-  "inline-flex h-5 shrink-0 items-center gap-1 whitespace-nowrap rounded-sm border px-1.5 text-label font-medium leading-none [&_svg]:size-3",
+  "inline-flex h-6 shrink-0 items-center gap-1 whitespace-nowrap rounded-full border px-2.5 text-label font-medium leading-none [&_svg]:size-3",
   {
     variants: {
       tone: {
-        neutral: "border-border bg-subtle text-fg",
-        outline: "border-border bg-surface text-fg",
-        observed: "border-observed/25 bg-observed-tint text-observed",
+        neutral: "border-white/[0.06] bg-subtle text-fg",
+        outline: "border-border-strong bg-transparent text-fg",
+        observed: "border-periwinkle/25 bg-observed-tint text-periwinkle",
         gap: "border-gap/30 bg-gap-tint text-gap-fg",
-        accent: "border-accent/25 bg-accent-tint text-accent",
-        plum: "border-plum-3 bg-plum-1 text-plum-7",
+        accent: "border-accent/30 bg-accent-tint text-accent",
+        plum: "border-plum-4/60 bg-plum-2 text-plum-7",
         warn: "border-transparent bg-transparent px-0 text-warn",
         quiet: "border-transparent bg-transparent px-0 text-muted",
       },
@@ -38,7 +38,7 @@ export function Badge({ className, tone, ...props }: BadgeProps) {
     <span
       className={cn(
         badgeVariants({ tone }),
-        interactive && "relative before:absolute before:inset-x-0 before:-inset-y-[10px] before:content-['']",
+        interactive && "relative before:absolute before:inset-x-0 before:-inset-y-[8px] before:content-['']",
         className,
       )}
       {...props}

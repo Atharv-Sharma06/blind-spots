@@ -31,7 +31,7 @@ export function ScatterPlot({ points, xLabel, yLabel, ariaLabel, className }: Sc
         <YAxis scale={y} x={m.left} ticks={niceTicks(yd[0], yd[1], 5)} label={yLabel} width={W - m.left - m.right} />
         <XAxis scale={x} y={H - m.bottom} ticks={niceTicks(xd[0], xd[1], W < 400 ? 4 : 5)} label={xLabel} />
         {points.map((p) => (
-          <circle key={p.label} cx={x(p.x)} cy={y(p.y)} r={4.5} fill={CHART.ink} fillOpacity={0.25} stroke={CHART.ink} strokeWidth={1.25}>
+          <circle key={p.label} cx={x(p.x)} cy={y(p.y)} r={4.5} fill={CHART.observed} fillOpacity={0.3} stroke={CHART.observed} strokeWidth={1.5}>
             <title>{`${p.label}: uncertainty ${p.x.toFixed(3)}, error ${p.y.toFixed(3)}`}</title>
           </circle>
         ))}

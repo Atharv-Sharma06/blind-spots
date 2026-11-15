@@ -79,6 +79,8 @@ number; the partner rows below are context that the product cites as "documented
 | Link Text | Link Url |
 |---|---|
 | Geist Sans and Geist Mono fonts by Vercel (SIL Open Font License 1.1), via the `geist` package | https://github.com/vercel/geist-font |
+| Outfit font, Google Fonts (SIL Open Font License), via `next/font/google` | https://fonts.google.com/specimen/Outfit |
+| Doto dot-matrix font, Google Fonts (SIL Open Font License), via `next/font/google` | https://fonts.google.com/specimen/Doto |
 | Lucide icons, lucide-react (ISC) | https://lucide.dev/ |
 
 ## Hosting and tools
@@ -101,8 +103,10 @@ number; the partner rows below are context that the product cites as "documented
 
 ## Verification notes
 
-- Totals: 58 rows (2 partner, 11 literature, 18 web software, 19 analysis software, 2 fonts/icons, 4 hosting/tools,
+- Totals: 60 rows (2 partner, 11 literature, 18 web software, 19 analysis software, 4 fonts/icons, 4 hosting/tools,
   2 SI tool).
+- Added 2026-11-15 ~18:00 for the dark restyle: Outfit and Doto (both `curl -sIL` HTTP/2 200 on 2026-11-15, Mozilla
+  user agent). Fonts are loaded with `next/font/google`, which self-hosts the files at build time.
 - Every URL returned HTTP 200 to `curl -sIL` on 2026-11-15 (Mozilla user agent). Redirects seen: the doi.org links
   resolve to nature.com, link.springer.com, linkinghub.elsevier.com and jstage.jst.go.jp; anthropic.com/claude and
   /claude-code redirect to claude.com/product/overview and claude.com/product/claude-code; github.com/encode/starlette and
@@ -113,7 +117,7 @@ number; the partner rows below are context that the product cites as "documented
 - Sources of the lists: `apps/web/package.json` (every direct dependency and dev dependency is covered),
   `services/analysis/pyproject.toml` (dependencies and the dev group), imports in `services/analysis/src` (Starlette is
   imported directly; scikit-learn only in `models/baselines.py`), `apps/web/app/layout.tsx` (fonts: `geist/font/sans`,
-  `geist/font/mono`; no Google Fonts or CDN fonts), `apps/web/vercel.json` (Vercel), literature from
+  `geist/font/mono`; Outfit and Doto added for the restyle via `next/font/google`), `apps/web/vercel.json` (Vercel), literature from
   `submission/project-page.md`, `docs/research/publication-crosscheck.md`, `docs/research/other-microgravity-evidence.md`,
   `docs/scientific-methodology.md` and `data/manifests/known_investigations_not_integrated.json`.
 - Licences: from installed `node_modules/*/package.json` for the web packages (Geist: SIL OFL 1.1; lucide-react and d3: ISC;

@@ -73,7 +73,8 @@ documented NASA cabin atmosphere, then asks which next experiment would teach th
 
 1. **Cabins page, three steps.** Pick a cabin. Read the answer: a one-line verdict, a simple oxygen-against-pressure chart
    and a material picker. See what to test next: the top three computational research candidates and "What would we
-   learn?". Cards say Covered, Barely covered or Not covered. A 30-second tour walks through it.
+   learn?". Cards say Covered, Barely covered or Not covered. A 30-second tour walks through it. The home page asks the
+   question, shows the key numbers and opens this page (`/cabins`) with **Check a cabin**.
 2. **Explorer, for experts.** For one material and flame setup, shows where ISS tests exist across oxygen, airflow and
    pressure, and how far any point is from the nearest test. Documented studies we did not integrate (Saffire-I and III to
    VI, DARTFire, the Glenn drop-tower limits) sit on a separate "Related NASA work" view.

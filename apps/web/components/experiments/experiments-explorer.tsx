@@ -8,6 +8,7 @@ import { exportExperimentsCsvHref } from "@/lib/api";
 import { getDataMode } from "@/lib/snapshot";
 import { fmtCount, MISSING } from "@/lib/format";
 import { Button } from "@/components/ui/button";
+import { DotNumber } from "@/components/ui/dot-number";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -44,11 +45,22 @@ const COLUMNS: { key: SortKey; label: string; numeric?: boolean }[] = [
 ];
 const SORT_KEYS = new Set<string>(COLUMNS.map((c) => c.key));
 
-/** Phones show the experiments 25 at a time so the page does not turn into a 60,000 px scroll. */
-const PHONE_PAGE = 25;
+/** The list shows experiments 25 at a time, so the page scrolls normally instead of trapping the mouse wheel in a tall table. */
+const PAGE_SIZE = 25;
 
+/** Charcoal pill fields (search, result filter). */
 const FIELD =
-  "h-10 w-full rounded-md border border-border bg-surface px-3 text-prose text-fg placeholder:text-muted hover:border-border-strong md:h-9 md:text-ui";
+  "h-11 w-full rounded-full border border-border bg-surface px-4 text-prose text-fg shadow-[inset_0_1px_0_rgb(255_255_255/0.05)] placeholder:text-muted hover:border-border-strong md:h-10 md:text-ui";
+
+/** One summary count: a big dot-matrix number in a charcoal squircle tile. */
+function CountTile({ value, label }: { value: string; label: string }) {
+  return (
+    <div className="card flex min-w-0 flex-col justify-between gap-3 rounded-xl bg-surface p-3.5 sm:rounded-2xl sm:p-5">
+      <span className="text-xs leading-4 text-muted sm:text-ui">{label}</span>
+      <DotNumber className="text-[28px] leading-none text-fg sm:text-[44px]">{value}</DotNumber>
+    </div>
+  );
+}
 
 /** Value with its unit in muted text; "—" (missing) has no unit. */
 function Measure({ value, unit }: { value: string; unit: string }) {
@@ -112,11 +124,12 @@ export function ExperimentsExplorer() {
   const all = exps.data?.data;
   const rows = React.useMemo(() => (all ? sortRows(applyFilters(all, filters), sort.key, sort.dir) : []), [all, filters, sort.key, sort.dir]);
 
-  // Phone list length: starts at one page and resets whenever the search, filters or sort change.
+  // List length (table and cards): starts at one page and resets whenever the search, filters or sort change.
   const listSig = `${filters.q}|${filters.result}|${sort.key}|${sort.dir}`;
-  const [phoneLimit, setPhoneLimit] = React.useState({ sig: listSig, n: PHONE_PAGE });
-  if (phoneLimit.sig !== listSig) setPhoneLimit({ sig: listSig, n: PHONE_PAGE });
-  const phoneShown = phoneLimit.sig === listSig ? phoneLimit.n : PHONE_PAGE;
+  const [pageLimit, setPageLimit] = React.useState({ sig: listSig, n: PAGE_SIZE });
+  if (pageLimit.sig !== listSig) setPageLimit({ sig: listSig, n: PAGE_SIZE });
+  const shownCount = pageLimit.sig === listSig ? pageLimit.n : PAGE_SIZE;
+  const shownRows = React.useMemo(() => rows.slice(0, shownCount), [rows, shownCount]);
 
   // Counted from the records, never typed: all experiments, and how many the model uses.
   const total = all?.length ?? 0;
@@ -144,7 +157,7 @@ export function ExperimentsExplorer() {
   const lastOpened = React.useRef<string | null>(null);
   const bodyRef = React.useRef<HTMLTableSectionElement>(null);
   const focusRow = (i: number) => {
-    const n = Math.max(0, Math.min(rows.length - 1, i));
+    const n = Math.max(0, Math.min(shownRows.length - 1, i));
     setFocusIdx(n);
     bodyRef.current?.rows[n]?.focus();
   };
@@ -159,7 +172,7 @@ export function ExperimentsExplorer() {
     else if (e.key === "PageDown") move(i + 10);
     else if (e.key === "PageUp") move(i - 10);
     else if (e.key === "Home") move(0);
-    else if (e.key === "End") move(rows.length - 1);
+    else if (e.key === "End") move(shownRows.length - 1);
     else if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       lastOpened.current = row.experiment_id;
@@ -188,12 +201,19 @@ export function ExperimentsExplorer() {
   };
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-3">
-      <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 md:grid-cols-[minmax(0,1fr)_14rem_auto]" role="search" aria-label="Filter experiments">
-        <label className="relative col-span-2 block md:col-span-1">
+    <div className="flex min-h-0 flex-1 flex-col gap-4">
+      {all && used > 0 ? (
+        <div className="grid grid-cols-3 gap-2 sm:gap-3" data-summary="counts">
+          <CountTile value={fmtCount(total)} label="Experiments" />
+          <CountTile value={fmtCount(used)} label="The model uses" />
+          {steps ? <CountTile value={fmtCount(steps)} label="Test results" /> : null}
+        </div>
+      ) : null}
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 max-[359px]:grid-cols-1 md:grid-cols-[minmax(0,1fr)_14rem_auto]" role="search" aria-label="Filter experiments">
+        <label className="relative col-span-2 block max-[359px]:col-span-1 md:col-span-1">
           <span className="sr-only">Search experiments</span>
-          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted" aria-hidden />
-          <input type="search" value={qText} onChange={(e) => setQText(e.target.value)} placeholder="Search by material" className={cn(FIELD, "pl-9")} />
+          <Search className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-muted" aria-hidden />
+          <input type="search" value={qText} onChange={(e) => setQText(e.target.value)} placeholder="Search by material" className={cn(FIELD, "pl-10")} />
         </label>
         <FilterSelect
           label="Result"
@@ -203,13 +223,13 @@ export function ExperimentsExplorer() {
           onChange={(v) => setParams({ result: v })}
         />
         {csvHref && !exps.isError ? (
-          <Button asChild className="h-10 md:h-9">
+          <Button asChild className="h-11 rounded-full px-5 md:h-10">
             <a href={csvHref} download="experiments.csv" title="Every experiment in our data, as a CSV file.">
               <Download aria-hidden /> Download all (CSV)
             </a>
           </Button>
         ) : (
-          <Button disabled aria-disabled="true" className="h-10 md:h-9" title="No download is available right now.">
+          <Button disabled aria-disabled="true" className="h-11 rounded-full px-5 md:h-10" title="No download is available right now.">
             <Download aria-hidden /> Download all (CSV)
           </Button>
         )}
@@ -223,12 +243,13 @@ export function ExperimentsExplorer() {
             <span>
               <span className="num text-fg">{fmtCount(rows.length)}</span> of <span className="num">{fmtCount(total)}</span> experiments
             </span>
-            <Button variant="ghost" onClick={clear} className="h-10 md:h-8">
+            <Button variant="ghost" onClick={clear} className="h-10 rounded-full md:h-8">
               <X aria-hidden /> Clear
             </Button>
           </>
         ) : (
-          <span>
+          // The count tiles above show these numbers; the sentence stays for screen readers.
+          <span className={used > 0 ? "sr-only" : undefined}>
             <span className="num text-fg">{fmtCount(total)}</span> experiments.
             {used > 0 ? (
               <>
@@ -250,11 +271,11 @@ export function ExperimentsExplorer() {
       {!all ? (
         <div className="space-y-1" role="status" aria-label="Loading experiments">
           {Array.from({ length: 8 }, (_, i) => (
-            <Skeleton key={i} className="h-12 w-full" />
+            <Skeleton key={i} className="h-12 w-full rounded-xl" />
           ))}
         </div>
       ) : rows.length === 0 ? (
-        <div className="rounded-lg border border-border bg-surface">
+        <div className="card rounded-2xl bg-surface">
           <EmptyState
             icon={<Search aria-hidden />}
             title="No experiments match"
@@ -269,7 +290,7 @@ export function ExperimentsExplorer() {
       ) : (
         <>
           {/* Desktop: a plain table. */}
-          <div className="hidden max-h-[calc(100dvh-15rem)] min-h-64 overflow-auto rounded-lg border border-border bg-surface md:block" role="region" aria-label="Experiments (scrollable)" tabIndex={0}>
+          <div className="card hidden overflow-x-auto rounded-2xl bg-surface px-2 pb-2 md:block" role="region" aria-label="Experiments (scrollable)" tabIndex={0}>
             <table className="w-full table-fixed border-separate border-spacing-0 text-prose" aria-label="Experiments" aria-rowcount={rows.length + 1}>
               <colgroup>
                 <col className="w-[28%]" />
@@ -287,12 +308,12 @@ export function ExperimentsExplorer() {
                         key={c.key}
                         scope="col"
                         aria-sort={active ? (sort.dir === "asc" ? "ascending" : "descending") : "none"}
-                        className={cn("sticky top-0 z-10 h-10 border-b border-border bg-subtle px-4 text-left text-ui font-medium text-muted", c.numeric && "text-right")}
+                        className={cn("h-12 border-b border-white/[0.08] bg-[#212125] px-4 text-left text-ui font-medium text-muted", c.numeric && "text-right")}
                       >
                         <button
                           type="button"
                           onClick={() => toggleSort(c.key)}
-                          className={cn("inline-flex items-center gap-1 rounded-sm hover:text-fg", active && "text-fg")}
+                          className={cn("inline-flex min-h-8 items-center gap-1 rounded-full hover:text-fg", active && "text-fg")}
                         >
                           {c.label}
                           {active ? sort.dir === "asc" ? <ArrowUp className="size-3" aria-hidden /> : <ArrowDown className="size-3" aria-hidden /> : null}
@@ -303,31 +324,31 @@ export function ExperimentsExplorer() {
                 </tr>
               </thead>
               <tbody ref={bodyRef}>
-                {rows.map((e, i) => {
+                {shownRows.map((e, i) => {
                   const r = resultOfExperiment(e);
                   return (
                     <tr
                       key={e.experiment_id}
-                      tabIndex={i === Math.min(focusIdx, rows.length - 1) ? 0 : -1}
+                      tabIndex={i === Math.min(focusIdx, shownRows.length - 1) ? 0 : -1}
                       data-state={e.experiment_id === selectedId ? "selected" : undefined}
                       onClick={() => openRow(e, i)}
                       onKeyDown={(ev) => onRowKey(ev, i, e)}
                       aria-label={`${materialLabel(e.material_family)}, ${sourceLabel(e)}`}
-                      className="cursor-pointer transition-colors hover:bg-subtle/60 focus-visible:outline-offset-[-2px] data-[state=selected]:bg-accent-tint [&:last-child>td]:border-b-0"
+                      className="cursor-pointer transition-colors hover:bg-white/[0.035] focus-visible:outline-offset-[-2px] data-[state=selected]:bg-observed-tint [&:last-child>td]:border-b-0"
                     >
-                      <td className="border-b border-border px-4 py-2 align-top">
+                      <td className="border-b border-white/[0.06] px-4 py-3 align-top">
                         <span className="block font-medium text-fg">{materialLabel(e.material_family)}</span>
                       </td>
-                      <td className="border-b border-border px-4 py-2 text-right align-top whitespace-nowrap">
+                      <td className="border-b border-white/[0.06] px-4 py-3 text-right align-top whitespace-nowrap">
                         <Measure value={fmtPlain(oxygenOf(e), 1)} unit="%" />
                       </td>
-                      <td className="border-b border-border px-4 py-2 text-right align-top whitespace-nowrap">
+                      <td className="border-b border-white/[0.06] px-4 py-3 text-right align-top whitespace-nowrap">
                         <Measure value={fmtAirflow(e)} unit="cm/s" />
                       </td>
-                      <td className="border-b border-border px-4 py-2 align-top">
+                      <td className="border-b border-white/[0.06] px-4 py-3 align-top">
                         <ResultChip kind={r.kind} label={r.label} />
                       </td>
-                      <td className="max-w-[16rem] border-b border-border px-4 py-2 align-top">
+                      <td className="max-w-[16rem] border-b border-white/[0.06] px-4 py-3 align-top">
                         <a
                           href={e.source_url}
                           target="_blank"
@@ -349,17 +370,17 @@ export function ExperimentsExplorer() {
             </table>
           </div>
 
-          {/* Phones: one compact line per experiment, shown 25 at a time. Source link is in the details. */}
-          <ul className="flex flex-col gap-1.5 md:hidden" aria-label="Experiments">
-            {rows.slice(0, phoneShown).map((e, i) => {
+          {/* Phones: one compact line per experiment. Source link is in the details. */}
+          <ul className="flex flex-col gap-2 md:hidden" aria-label="Experiments">
+            {shownRows.map((e, i) => {
               const r = resultOfExperiment(e);
               return (
                 <li
                   key={e.experiment_id}
                   data-state={e.experiment_id === selectedId ? "selected" : undefined}
-                  className="overflow-hidden rounded-lg border border-border bg-surface data-[state=selected]:border-accent"
+                  className="overflow-hidden rounded-xl border border-white/[0.06] bg-surface shadow-[inset_0_1px_0_rgb(255_255_255/0.06)] data-[state=selected]:border-observed"
                 >
-                  <button type="button" data-exp-id={e.experiment_id} onClick={() => openRow(e, i)} className="block min-h-14 w-full px-3.5 py-2.5 text-left">
+                  <button type="button" data-exp-id={e.experiment_id} onClick={() => openRow(e, i)} className="block min-h-14 w-full rounded-xl px-4 py-3 text-left">
                     <span className="sr-only">Open details: </span>
                     <span className="block text-prose font-medium text-fg">{materialLabel(e.material_family)}</span>
                     <span className="mt-1 flex flex-col items-start gap-1 text-ui">
@@ -373,13 +394,13 @@ export function ExperimentsExplorer() {
               );
             })}
           </ul>
-          {rows.length > phoneShown ? (
-            <div className="flex flex-col items-center gap-2 md:hidden">
+          {rows.length > shownCount ? (
+            <div className="flex flex-col items-center gap-2">
               <p className="text-ui text-muted" aria-live="polite">
-                Showing <span className="num text-fg">{fmtCount(phoneShown)}</span> of <span className="num">{fmtCount(rows.length)}</span>
+                Showing <span className="num text-fg">{fmtCount(shownCount)}</span> of <span className="num">{fmtCount(rows.length)}</span>
               </p>
-              <Button className="h-10 w-full" onClick={() => setPhoneLimit({ sig: listSig, n: phoneShown + PHONE_PAGE })}>
-                Show {fmtCount(Math.min(PHONE_PAGE, rows.length - phoneShown))} more
+              <Button className="h-11 w-full rounded-full md:w-auto" onClick={() => setPageLimit({ sig: listSig, n: shownCount + PAGE_SIZE })}>
+                Show {fmtCount(Math.min(PAGE_SIZE, rows.length - shownCount))} more
               </Button>
             </div>
           ) : null}

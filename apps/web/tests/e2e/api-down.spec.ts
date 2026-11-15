@@ -22,7 +22,7 @@ const errorBox = (page: Page) => page.locator('[data-error-code="backend_unavail
 test.describe("API down -> explicit error states or an openly labelled snapshot", () => {
   test("Cabins page never shows invented data when the service is down", async ({ page }) => {
     await killApi(page);
-    await page.goto("/");
+    await page.goto("/cabins");
     const mode = await outcome(page);
     if (mode === "unavailable") {
       await expect(errorBox(page)).toBeVisible();
@@ -103,7 +103,7 @@ test.describe("API down -> explicit error states or an openly labelled snapshot"
 
   test("a healthy API shows dataset and model versions in the chip", async ({ page, request }) => {
     const h = await (await request.get("/api/health")).json();
-    await page.goto("/");
+    await page.goto("/cabins");
     const chip = page.getByTestId("version-chip");
     await expect(chip).toHaveAttribute("data-state", "ok");
     await expect(chip).toContainText(h.dataset_version.slice(0, 12));

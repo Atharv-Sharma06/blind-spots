@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
+import { DisclosureChevron } from "@/components/ui/disclosure";
 import { api } from "@/lib/api";
 import { queryKeys } from "@/hooks/api";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -90,7 +91,7 @@ function FlowProvenance({ methodology }: { methodology: ApiQuery<MethodologyResp
 function ReasonTable({ caption, rows }: { caption: string; rows: [string, number][] }) {
   if (rows.length === 0) return <P className="text-muted">No counts reported.</P>;
   return (
-    <Table>
+    <Table containerClassName="rounded-[var(--radius-lg)] border-border/70">
       <caption className="sr-only">{caption}</caption>
       <TableHeader>
         <TableRow>
@@ -113,9 +114,14 @@ function ReasonTable({ caption, rows }: { caption: string; rows: [string, number
 /** Collapsed block with a plain summary line (>= 40 px tap target). */
 function More({ summary, children }: { summary: string; children: ReactNode }) {
   return (
-    <details className="max-w-[78ch]">
-      <summary className="flex min-h-10 cursor-pointer items-center text-[14px] text-accent underline underline-offset-2">{summary}</summary>
-      <div className="mt-2 space-y-3">{children}</div>
+    <details className="card group/disclosure max-w-[78ch] rounded-[var(--radius-xl)] bg-surface px-4 sm:px-5">
+      <summary data-disclosure="" className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 rounded-[var(--radius-sm)] text-[14px] font-medium text-fg hover:text-accent focus-visible:outline-2 focus-visible:outline-accent [&::-webkit-details-marker]:hidden">
+        <span>{summary}</span>
+        <span aria-hidden className="grid size-8 shrink-0 place-items-center rounded-full bg-subtle">
+          <DisclosureChevron />
+        </span>
+      </summary>
+      <div className="space-y-3 pb-4 pt-1">{children}</div>
     </details>
   );
 }
@@ -145,7 +151,7 @@ export function DataSection({ methodology, sources, groups }: { methodology: Api
             const model = s.investigations.filter((i) => i.role === "integrated_model");
             if (model.length === 0) return <P className="text-muted">No studies are used for the model.</P>;
             return (
-              <Table>
+              <Table containerClassName="rounded-[var(--radius-lg)] border-border/70">
                 <caption className="sr-only">NASA studies used by the model</caption>
                 <TableHeader>
                   <TableRow>
@@ -262,7 +268,7 @@ airflow_cm_s = 1.0066 x AIR        (duct "Air display" reading, per the BASS-II 
               gs.length === 0 ? (
                 <P className="text-muted">None available.</P>
               ) : (
-                <Table containerClassName="max-h-[340px]">
+                <Table containerClassName="max-h-[340px] rounded-[var(--radius-lg)] border-border/70">
                   <caption className="sr-only">Pressure source per material and flame setup</caption>
                   <TableHeader>
                     <TableRow>

@@ -21,12 +21,12 @@ export interface SheetContentProps extends Omit<React.ComponentPropsWithoutRef<t
 export const SheetContent = React.forwardRef<React.ElementRef<typeof DialogPrimitive.Content>, SheetContentProps>(
   ({ className, title, description, footer, children, ...props }, ref) => (
     <DialogPrimitive.Portal>
-      <DialogPrimitive.Overlay className="fixed inset-0 z-40 bg-fg/20 data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in" />
+      <DialogPrimitive.Overlay className="fixed inset-0 z-40 bg-black/60 backdrop-blur-[2px] data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in" />
       <DialogPrimitive.Content
         ref={ref}
         {...(description ? {} : { "aria-describedby": undefined })}
         className={cn(
-          "fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l border-border bg-surface sm:max-w-[480px]",
+          "fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l border-white/[0.06] bg-[#121214] shadow-[-24px_0_48px_-24px_rgb(0_0_0/0.9)] sm:max-w-[480px] sm:rounded-l-2xl",
           "data-[state=closed]:animate-sheet-out data-[state=open]:animate-sheet-in",
           className,
         )}
@@ -40,7 +40,7 @@ export const SheetContent = React.forwardRef<React.ElementRef<typeof DialogPrimi
             ) : null}
           </div>
           <DialogPrimitive.Close
-            className="-mt-1 -mr-1.5 inline-flex size-8 shrink-0 items-center justify-center max-md:size-10 rounded-md text-muted transition-colors hover:bg-subtle hover:text-fg"
+            className="-mt-1.5 -mr-2 inline-flex size-10 shrink-0 items-center justify-center rounded-full border border-white/[0.07] bg-[#1c1c1f] text-muted transition-colors hover:bg-[#25252a] hover:text-fg"
             aria-label="Close"
           >
             <X className="size-4" aria-hidden />

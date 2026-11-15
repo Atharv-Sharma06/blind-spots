@@ -13,15 +13,18 @@ would teach the most. Built for NASA Space Apps Challenge 2026, "Flame in Freefa
 
 ## How to use it
 
+Open the [live site](https://blind-spots-kappa.vercel.app). The home page asks the question and shows the key numbers. Press **Check a cabin**
+to open the Cabins tool (`/cabins`).
+
 1. **Pick a cabin.** Each card shows the cabin's air and one label: Covered, Barely covered or Not covered.
 2. **Read the answer.** One line says whether ISS tests cover that air. A chart shows where the tests ran and where the cabin sits.
 3. **See what to test next.** The three most useful computational research candidates, and what each could teach us.
 
-New here? Press **30-second tour** on the live site.
+New here? Watch the **30-second tour** (button on the home page and the Cabins page, or open `/cabins?demo=1`).
 
 ![The answer for NASA's Exploration Atmosphere: every ISS test sits near 1 atm, far from the cabin](docs/img/cabins-answer.png)
 
-More pages: **Explorer** (`/explore`, for experts), **Experiments** (`/experiments`, every test with its NASA source cell),
+More pages: **Cabins** (`/cabins`), **Explorer** (`/explore`, for experts), **Experiments** (`/experiments`, every test with its NASA source cell),
 **How it works** (`/methodology`) and **Research brief** (`/brief`, printable).
 
 ## What we found
@@ -170,4 +173,5 @@ More: [docs/limitations.md](docs/limitations.md). Future work (not implemented):
 
 NASA PSI data (BASS, BASS-II, Saffire) are released by NASA under CC0-1.0; NTRS documents are cited with their NTRS
 identifiers. Source files are never modified; derived tables are labelled as interpretations. Blind Spots is an
-independent project and is **not endorsed by NASA**; it uses no NASA logos or branding. The project's own code is licensed as stated in [LICENSE](LICENSE).
+independent project and is **not endorsed by NASA**; it uses no NASA logos or branding. Fonts: Outfit and Doto (Google
+Fonts, SIL Open Font License) and Geist Mono (SIL Open Font License 1.1). The project's own code is licensed as stated in [LICENSE](LICENSE).

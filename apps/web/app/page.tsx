@@ -1,12 +1,15 @@
 import { Suspense } from "react";
-import { HomePage } from "@/components/home/home-page";
-import { HomeFallback } from "@/components/home/home-fallback";
+import { LegacyRedirect } from "@/components/home/legacy-redirect";
+import { Landing } from "@/components/landing/landing";
 
-/** "/" = Cabins: pick a cabin, see whether the ISS tests cover its air, see what to test next. */
+/** "/" = the landing page. The Cabins tool lives at /cabins; old query links are forwarded by LegacyRedirect. */
 export default function Page() {
   return (
-    <Suspense fallback={<HomeFallback />}>
-      <HomePage />
-    </Suspense>
+    <>
+      <Suspense fallback={null}>
+        <LegacyRedirect />
+      </Suspense>
+      <Landing />
+    </>
   );
 }

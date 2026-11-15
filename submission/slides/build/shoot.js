@@ -1,4 +1,4 @@
-// Headless screenshots of the snapshot-mode site (what judges get) for the backup slide deck.
+// Headless screenshots of the snapshot-mode Cabins tool (/cabins; what judges get) for the backup slide deck.
 // Run from apps/web: node ../../submission/slides/build/shoot.js [outdir]
 const { chromium } = require('/Users/atharvsharma/Desktop/moon-app/apps/web/node_modules/playwright');
 const path = require('path');
@@ -8,7 +8,7 @@ const BASE = process.env.BASE || 'http://localhost:3709';
   const browser = await chromium.launch({ headless: true });
   const ctx = await browser.newContext({ viewport: { width: 1600, height: 900 }, deviceScaleFactor: 2, colorScheme: 'light', reducedMotion: 'reduce' });
   const page = await ctx.newPage();
-  await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+  await page.goto(BASE + '/cabins', { waitUntil: 'networkidle' });
   await page.waitForSelector('#answer');
   await page.waitForTimeout(3000);
   // Hide the Next.js dev-mode indicator (not part of the product).

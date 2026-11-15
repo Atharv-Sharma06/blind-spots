@@ -75,12 +75,12 @@ export function TargetSelector({ className }: { className?: string } = {}) {
               return (
                 <section key={status} aria-label={title}>
                   <h3 className="mb-1.5 text-xs font-medium tracking-wide text-muted uppercase">{title}</h3>
-                  <ul className="divide-y divide-border rounded-md border border-border">
+                  <ul className="card divide-y divide-border/70 overflow-hidden rounded-[var(--radius-xl)]">
                     {list.map((p) => {
                       const selected = "profile_id" in target && target.profile_id === p.profile_id;
                       const src = profileSourceLink(p);
                       return (
-                        <li key={p.profile_id} className={cn("flex items-stretch", selected && "bg-accent-tint")}>
+                        <li key={p.profile_id} className={cn("flex items-stretch", selected && "bg-accent-tint shadow-[inset_3px_0_0_var(--accent)]")}>
                           <button
                             type="button"
                             aria-pressed={selected}
@@ -88,7 +88,7 @@ export function TargetSelector({ className }: { className?: string } = {}) {
                               setTarget({ profile_id: p.profile_id });
                               setOpen(false);
                             }}
-                            className="min-w-0 flex-1 px-3 py-2 text-left hover:bg-subtle focus-visible:relative"
+                            className="min-h-12 min-w-0 flex-1 px-4 py-2.5 text-left hover:bg-white/5 focus-visible:relative"
                           >
                             <span className="block text-[13px] font-medium text-fg">{shortCabinName(p.profile_id, p.name)}</span>
                             <span className="num mt-0.5 block text-xs text-muted">{profileConditions(p)}</span>
@@ -99,7 +99,7 @@ export function TargetSelector({ className }: { className?: string } = {}) {
                               target="_blank"
                               rel="noreferrer noopener"
                               aria-label={`Source for ${shortCabinName(p.profile_id, p.name)}`}
-                              className="flex items-center px-3 text-xs text-muted hover:text-fg"
+                              className="flex min-w-11 items-center justify-center px-3 text-xs text-muted hover:text-fg"
                             >
                               <ExternalLink className="size-3.5" aria-hidden />
                             </a>
@@ -114,9 +114,9 @@ export function TargetSelector({ className }: { className?: string } = {}) {
             {envelope.length > 0 ? (
               <section aria-label="Context only">
                 <h3 className="mb-1.5 text-xs font-medium tracking-wide text-muted uppercase">Context only</h3>
-                <ul className="rounded-md border border-dashed border-border">
+                <ul className="rounded-[var(--radius-xl)] border border-dashed border-border-strong">
                   {envelope.map((p) => (
-                    <li key={p.profile_id} className="px-3 py-2">
+                    <li key={p.profile_id} className="px-4 py-2.5">
                       <span className="block text-[13px] text-muted">{shortCabinName(p.profile_id, p.name)}</span>
                       <span className="mt-0.5 block text-xs text-muted">Crew-safety range. Not checked here.</span>
                     </li>
@@ -179,7 +179,7 @@ function CustomTargetForm({ onCancel, onApply }: { onCancel: () => void; onApply
     });
   };
 
-  const field = "num h-8 w-full rounded-md border border-border bg-surface px-2.5 text-[13px] text-fg hover:border-border-strong";
+  const field = "num h-10 w-full rounded-[var(--radius-md)] border border-border bg-subtle px-3 text-[14px] text-fg hover:border-border-strong";
   return (
     <form
       className="space-y-4"

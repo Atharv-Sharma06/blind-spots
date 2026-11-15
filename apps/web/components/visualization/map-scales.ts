@@ -1,11 +1,22 @@
 /** Shared colour constants, grid geometry and tick helpers for the parameter map. */
 
-export const INK = "#17171a";
-export const OBSERVED = "#2f64d6";
-export const GAP = "#c97a06";
-export const ACCENT = "#0e7c66";
-export const MUTED = "#6b6a65";
-export const PLUM_STOPS = ["#f5eef6", "#e6d3ea", "#d0afd7", "#b386bd", "#8f5c9f", "#744383", "#5b2a6e"] as const;
+/* SVG marks use the theme tokens directly; canvas layers need literal colours, so the *_HEX values mirror the dark
+ * tokens in styles/globals.css (keep them in sync). */
+export const INK = "var(--fg)";
+export const OBSERVED = "var(--observed)";
+export const GAP = "var(--gap)";
+export const ACCENT = "var(--accent)";
+export const MUTED = "var(--muted)";
+export const TARGET = "var(--target)";
+export const ON_ACCENT = "var(--on-accent)";
+/** Canvas copies of the tokens (canvas cannot resolve CSS variables). */
+export const GAP_HEX = "#FFB547";
+/** Light ink for the prediction shading on the dark plot (--fg). */
+export const INK_RGB: readonly [number, number, number] = [244, 244, 245];
+/** --plum-1 … --plum-7, dark to bright: low uncertainty recedes into the dark plot, high uncertainty glows. */
+/** Opacity of the uncertainty wash on the plot (and of the legend ramp, so they match). */
+export const UNC_ALPHA = 0.5;
+export const PLUM_STOPS = ["#1E1522", "#2E1A36", "#4A2357", "#6E2A8C", "#9B3FB5", "#C46BD8", "#EBB2F5"] as const;
 
 function hexToRgb(h: string): [number, number, number] {
   const n = parseInt(h.slice(1), 16);

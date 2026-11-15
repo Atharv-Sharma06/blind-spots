@@ -1,13 +1,13 @@
 import { expect, test, type Page } from "@playwright/test";
 import { HOME_H1 } from "./helpers";
 
-/** The 30-second tour of the Cabins page ("/"): a title card, five scenes (Next / Back), an end card. */
+/** The 30-second tour of the Cabins page ("/cabins"; autostarts on /cabins?demo=1): a title card, five scenes (Next / Back), an end card. */
 const card = (page: Page) => page.getByTestId("home-tour-card");
 const start = (page: Page) => page.getByTestId("home-tour-start");
 const sceneLabel = (page: Page, n: number) => card(page).getByText(new RegExp(`^${n} of 5 · `));
 
 async function openTour(page: Page) {
-  await page.goto("/");
+  await page.goto("/cabins");
   await expect(page.getByRole("heading", { level: 1, name: HOME_H1 })).toBeVisible();
   await expect(start(page)).toHaveText(/30-second tour/);
   await start(page).click();
@@ -69,7 +69,7 @@ test.describe("30-second tour on the Cabins page", () => {
   });
 
   test("?demo=1 starts the tour automatically and exiting drops the parameter", async ({ page }) => {
-    await page.goto("/?demo=1");
+    await page.goto("/cabins?demo=1");
     await expect(card(page)).toBeVisible();
     await expect(sceneLabel(page, 1)).toBeVisible({ timeout: 10_000 });
     await card(page).getByRole("button", { name: "Exit the tour" }).click();
@@ -79,7 +79,7 @@ test.describe("30-second tour on the Cabins page", () => {
 
   test("?demo=1 plays on its own to the end card within 31 s (30-second tour)", async ({ page }) => {
     test.setTimeout(75_000);
-    await page.goto("/?demo=1");
+    await page.goto("/cabins?demo=1");
     await expect(card(page)).toBeVisible();
     const t0 = Date.now();
     await expect(card(page)).toHaveAttribute("data-tour-state", "end", { timeout: 33_000 });

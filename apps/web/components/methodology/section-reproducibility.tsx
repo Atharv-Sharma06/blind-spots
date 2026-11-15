@@ -17,7 +17,7 @@ uv run blindspots export-artifacts --snapshot ../../apps/web/public/snapshot`;
 
 function Detail({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <Disclosure tone="strong" className="border-t border-border pt-2" summaryClassName="min-h-10 text-[14px]" contentClassName="mt-2 space-y-3 pl-0 text-fg sm:pl-5" summary={title}>
+    <Disclosure tone="strong" className="card rounded-[var(--radius-xl)] bg-surface px-4 sm:px-5" summaryClassName="flex w-full min-h-12 text-[14px] hover:text-accent" contentClassName="mt-1 space-y-3 pb-4 pl-0 text-fg sm:pl-5" summary={title}>
       {children}
     </Disclosure>
   );
@@ -74,7 +74,7 @@ export function ReproducibilitySection({ methodology, validation }: { methodolog
                 </QueryBoundary>
               </Detail>
               <Detail title="Commands">
-                <pre className="num max-w-[78ch] overflow-x-auto rounded-md border border-border bg-surface px-4 py-3 text-[12.5px] leading-relaxed" tabIndex={0} aria-label="Commands to reproduce the analysis">
+                <pre className="num max-w-[78ch] overflow-x-auto rounded-[var(--radius-lg)] border border-white/5 bg-bg/60 px-4 py-3 text-[12.5px] leading-relaxed text-fg" tabIndex={0} aria-label="Commands to reproduce the analysis">
                   {COMMANDS}
                 </pre>
                 <P className="text-xs text-muted">

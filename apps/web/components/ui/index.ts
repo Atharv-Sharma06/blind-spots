@@ -16,3 +16,5 @@ export * from "./table";
 export * from "./tabs";
 export * from "./tooltip";
 export * from "./disclosure";
+export * from "./dot-number";
+export * from "./progress-ring";

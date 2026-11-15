@@ -2,10 +2,10 @@ import * as React from "react";
 import { cn } from "@/lib/cn";
 import type { ResultKind } from "./model";
 
-/** Same convention as the chart on the home page: filled dot = flame kept burning, hollow ring = went out. */
+/** Filled periwinkle dot = flame kept burning, hollow white ring = went out (shape carries the meaning, not only colour). */
 export function FlameDot({ kind, className }: { kind: ResultKind; className?: string }) {
-  if (kind === "burned") return <span aria-hidden className={cn("inline-block size-2.5 shrink-0 rounded-full bg-accent", className)} />;
-  if (kind === "out") return <span aria-hidden className={cn("inline-block size-2.5 shrink-0 rounded-full border-2 border-fg bg-surface", className)} />;
+  if (kind === "burned") return <span aria-hidden className={cn("inline-block size-2.5 shrink-0 rounded-full bg-observed", className)} />;
+  if (kind === "out") return <span aria-hidden className={cn("inline-block size-2.5 shrink-0 rounded-full border-2 border-fg bg-transparent", className)} />;
   return <span aria-hidden className={cn("inline-block h-0.5 w-2.5 shrink-0 rounded-full bg-muted", className)} />;
 }
 
@@ -16,11 +16,11 @@ export function ResultChip({ kind, label, detail, large }: { kind: ResultKind; l
       <span
         data-result={kind}
         className={cn(
-          "inline-flex w-fit max-w-full items-center gap-2 rounded-md px-2 py-0.5 font-medium",
-          large ? "text-prose px-2.5 py-1" : "text-ui",
-          kind === "burned" && "bg-accent-tint text-accent",
-          kind === "out" && "bg-subtle text-fg",
-          kind === "other" && "text-muted",
+          "inline-flex w-fit max-w-full items-center gap-2 rounded-full border px-2.5 py-0.5 font-medium",
+          large ? "text-prose px-3 py-1" : "text-ui",
+          kind === "burned" && "border-transparent bg-observed-tint text-observed",
+          kind === "out" && "border-border-strong bg-transparent text-fg",
+          kind === "other" && "border-transparent px-0 text-muted",
         )}
       >
         <FlameDot kind={kind} />

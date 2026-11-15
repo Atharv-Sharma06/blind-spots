@@ -42,7 +42,7 @@ test.describe("Responsive smoke at 390x844", () => {
   });
 
   test("Cabins page: no horizontal scroll, two-column cabin cards, answer and next steps reachable", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/cabins");
     await expect(page.getByRole("heading", { level: 1, name: HOME_H1 })).toBeVisible();
     await expect(page.getByTestId("answer-verdict")).not.toHaveAttribute("data-verdict", "loading", { timeout: 30_000 });
     await noHorizontalScroll(page, "cabins");
@@ -57,7 +57,7 @@ test.describe("Responsive smoke at 390x844", () => {
   });
 
   test("30-second tour card stays inside the viewport", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/cabins");
     await page.getByTestId("home-tour-start").click();
     const card = page.getByTestId("home-tour-card");
     await expect(card).toBeVisible();
@@ -71,7 +71,7 @@ test.describe("Responsive smoke at 390x844", () => {
     await noHorizontalScroll(page, "tour");
   });
 
-  for (const path of ["/experiments", "/methodology", "/brief"]) {
+  for (const path of ["/", "/experiments", "/methodology", "/brief"]) {
     test(`${path} has no horizontal page scroll`, async ({ page }) => {
       await page.goto(path);
       await page.waitForLoadState("networkidle");

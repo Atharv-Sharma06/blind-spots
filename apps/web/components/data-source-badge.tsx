@@ -69,10 +69,18 @@ export function DataSourceBadge({ meta, className }: DataSourceBadgeProps) {
         data-source={view.kind}
         data-version={view.modelVersion ?? undefined}
         className={cn(
-          "h-10 rounded-md border-transparent bg-transparent px-1.5 font-normal text-muted underline decoration-dotted decoration-border underline-offset-4 transition-colors hover:text-fg md:h-6",
+          "h-8 gap-1.5 rounded-full text-[length:var(--text-label)] border-white/[0.08] bg-white/[0.04] px-2.5 font-normal text-muted transition-colors hover:border-white/[0.16] hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent md:h-7",
           className,
         )}
       >
+        <span
+          aria-hidden
+          className={cn(
+            "size-1.5 shrink-0 rounded-full",
+            view.kind === "live" || view.kind === "snapshot" ? "bg-fg/80" : "border border-muted",
+            view.kind === "connecting" && "motion-safe:animate-pulse",
+          )}
+        />
         <span>{text}</span>
         <span className="sr-only">. {details}</span>
       </Badge>

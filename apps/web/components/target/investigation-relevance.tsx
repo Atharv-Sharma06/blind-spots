@@ -8,9 +8,9 @@ import type { AssessResponse } from "@/lib/types";
 import { relevanceRows, type RelevanceRole } from "./evidence";
 
 const ROLE: Record<RelevanceRole, { label: string; cls: string }> = {
-  integrated: { label: "In the model", cls: "border-observed/25 bg-observed-tint text-observed" },
-  context: { label: "Context only", cls: "border-border bg-subtle text-fg" },
-  not_integrated: { label: "Not in the model", cls: "border-border bg-surface text-muted" },
+  integrated: { label: "In the model", cls: "border-observed/30 bg-observed-tint text-periwinkle" },
+  context: { label: "Context only", cls: "border-border-strong bg-subtle text-fg" },
+  not_integrated: { label: "Not in the model", cls: "border-border bg-bg text-muted" },
 };
 
 const TOP = 3;
@@ -41,12 +41,12 @@ export function InvestigationRelevance({ a }: { a: AssessResponse }) {
   if (rows.length === 0) return null;
   const shown = all ? rows : rows.slice(0, TOP);
   return (
-    <section id="related-work" aria-labelledby="inv-rel-heading" className="scroll-mt-20 pt-1" data-testid="investigation-relevance">
-      <h3 id="inv-rel-heading" className="text-[13px] font-semibold text-fg">Related NASA work</h3>
+    <section id="related-work" aria-labelledby="inv-rel-heading" className="card scroll-mt-20 p-5" data-testid="investigation-relevance">
+      <h3 id="inv-rel-heading" className="text-[15px] font-semibold text-fg">Related NASA work</h3>
       <p className="mt-0.5 text-xs text-muted">
         {fromBackend ? "Closest first. Only some feed the model." : "None of it feeds the model."}
       </p>
-      <ol className="mt-2 divide-y divide-border">
+      <ol className="mt-3 divide-y divide-border">
         {shown.map((r) => {
           const role = ROLE[r.role];
           const reason = reasonOf(r);
@@ -64,7 +64,7 @@ export function InvestigationRelevance({ a }: { a: AssessResponse }) {
                     <span className="block truncate">{r.acronym}</span>
                   )}
                 </p>
-                <span className={cn("inline-flex h-5 shrink-0 items-center rounded-sm border px-1.5 text-xs font-medium leading-none", role.cls)}>{role.label}</span>
+                <span className={cn("inline-flex h-6 shrink-0 items-center rounded-full border px-2.5 text-xs font-medium leading-none", role.cls)}>{role.label}</span>
               </div>
               {reason ? <p className="mt-0.5 line-clamp-1 text-xs text-muted">{reason}</p> : null}
             </li>

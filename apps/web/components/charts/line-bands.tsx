@@ -41,7 +41,7 @@ export function LineBands({ series, xLabel, yLabel, reference, ariaLabel, classN
         <XAxis scale={x} y={H - m.bottom} ticks={xt} label={xLabel} />
         {reference ? (
           <g>
-            <line x1={x(xd[0])} x2={x(xd[1])} y1={y(reference.value)} y2={y(reference.value)} stroke={CHART.muted} strokeDasharray="2 3" />
+            <line x1={x(xd[0])} x2={x(xd[1])} y1={y(reference.value)} y2={y(reference.value)} stroke={CHART.muted} strokeOpacity={0.8} strokeDasharray="2 3" />
             <text x={x(xd[1])} y={y(reference.value) - 5} textAnchor="end" fontSize={TEXT.value} fill={CHART.muted} fontFamily={SANS}>
               {reference.label}
             </text>
@@ -58,7 +58,7 @@ export function LineBands({ series, xLabel, yLabel, reference, ariaLabel, classN
               : null;
           return (
             <g key={s.key}>
-              {band ? <path d={band} fill={s.stroke} fillOpacity={0.08} stroke="none" /> : null}
+              {band ? <path d={band} fill={s.stroke} fillOpacity={0.12} stroke="none" /> : null}
               <polyline fill="none" stroke={s.stroke} strokeWidth={s.key === "evr" ? 2.25 : 1.75} strokeDasharray={s.dash} points={s.points.map((p) => `${x(p.x)},${y(p.mean)}`).join(" ")} />
             </g>
           );
@@ -74,7 +74,7 @@ export function LineBands({ series, xLabel, yLabel, reference, ariaLabel, classN
           </li>
         ))}
         <li className="flex items-center gap-1.5">
-          <span className="inline-block h-2.5 w-4 rounded-sm bg-muted/20" aria-hidden />
+          <span className="inline-block h-2.5 w-4 rounded-sm bg-fg/15" aria-hidden />
           95 % interval across seeds
         </li>
       </ul>

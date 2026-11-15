@@ -1,6 +1,6 @@
 # Demo script
 
-Describes the current build. The Cabins page (`/`) is the home page; the full workspace is the Explorer (`/explore`). Numbers come from the analysis API via `docs/_gen/build.py` (dataset `4fe55f76142a`); re-check them after any rebuild.
+Describes the current build. The home page (`/`) asks the question, shows the key numbers and links to the Cabins page (`/cabins`) with **Check a cabin**; the full workspace is the Explorer (`/explore`). The whole site uses one dark look. Numbers come from the analysis API via `docs/_gen/build.py` (dataset `4fe55f76142a`); re-check them after any rebuild.
 
 Setup, from the repository root:
 
@@ -13,7 +13,7 @@ The static site (`NEXT_PUBLIC_DATA_MODE=snapshot`) works for the documented cabi
 
 ## A. 30-second tour
 
-Press **30-second tour** under the title on the Cabins page, or open `/?demo=1`. It plays on the real page for about 29 seconds: a title card, five scenes, an end card. Space pauses, arrow keys step, Esc exits. Each scene shows one short caption and at most three facts. Suggested narration, one line per scene:
+Press **30-second tour** under the title on the Cabins page (or **Watch the 30-second tour** on the home page), or open `/cabins?demo=1` (old `/?demo=1` links forward there). It plays on the real page for about 29 seconds: a title card, five scenes, an end card. Space pauses, arrow keys step, Esc exits. Each scene shows one short caption and at most three facts. Suggested narration, one line per scene:
 
 0. **Title.** "Do NASA's space-station fire tests cover this cabin's air?"
 1. **ISS cabin.** 241 nearby ISS test results. Covered.
@@ -27,7 +27,7 @@ Press **30-second tour** under the title on the Cabins page, or open `/?demo=1`.
 
 Say it up front: a research-planning tool, not a certified fire-safety assessment, not endorsed by NASA. Three steps on one page, then the expert views.
 
-**0:00 - Step 1, pick a cabin (30 s).** Open **Cabins**. NASA burned materials aboard the ISS to learn when flames keep burning; air planned for Moon and Mars cabins (thinner, more oxygen) is missing from those tests. Each card shows a cabin's air and a chip: **Covered**, **Barely covered** or **Not covered**, with its count of nearby ISS test results. The ISS has 241. 8 of 11 documented cabins have none, including all 7 below 1 atm (Shuttle pre-EVA, Exploration Atmosphere, Artemis Surface Habitat, EAWG 2006, Orion lunar, Skylab, Apollo).
+**0:00 - Step 1, pick a cabin (30 s).** Open the home page: the question and the key numbers. Press **Check a cabin** (`/cabins`). NASA burned materials aboard the ISS to learn when flames keep burning; air planned for Moon and Mars cabins (thinner, more oxygen) is missing from those tests. Each card shows a cabin's air and a chip: **Covered**, **Barely covered** or **Not covered**, with its count of nearby ISS test results. The ISS has 241. 8 of 11 documented cabins have none, including all 7 below 1 atm (Shuttle pre-EVA, Exploration Atmosphere, Artemis Surface Habitat, EAWG 2006, Orion lunar, Skylab, Apollo).
 
 **0:30 - Step 2, the answer (40 s).** The page opens on the NASA Exploration Atmosphere (`?cabin=` in the URL). Read the verdict (icon and words, never colour alone). Pick a **Material** under it. The chart plots oxygen against pressure: dots are ISS tests, the shaded area is where they ran, "This cabin" is the bold marker. Every ISS test ran near 1 atm. "By material": 0 of 20 material setups have nearby tests. If asked: related NASA ground tests exist, the model does not use them, the Explorer lists them. If asked about gravity: all ISS tests ran in microgravity, so "covered" is about the air only. "Show as table" gives the chart as text.
 

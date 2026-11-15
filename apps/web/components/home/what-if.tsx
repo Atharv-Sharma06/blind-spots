@@ -2,6 +2,7 @@
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { DotNumber } from "@/components/ui/dot-number";
 import { useCounterfactual } from "@/hooks/api";
 import { fmtFixed, isNum } from "@/lib/format";
 import type { Candidate, CounterfactualResponse } from "@/lib/types";
@@ -63,25 +64,25 @@ export function WhatIf({ cabin, groupId, candidate }: WhatIfProps) {
   const complete = list.length === 2 && list.every((r) => r.value !== null);
 
   return (
-    <div id="what-if" data-tour="what-if" aria-labelledby="what-if-h" role="group" className="scroll-mt-20 rounded-xl border border-border bg-subtle p-4 md:p-6">
-      <h3 id="what-if-h" className="text-title font-semibold">
+    <div id="what-if" data-tour="what-if" aria-labelledby="what-if-h" role="group" className="card-indigo scroll-mt-20 p-6 text-white md:px-10 md:py-8">
+      <h3 id="what-if-h" className="text-heading font-semibold tracking-[-0.01em]">
         What would we learn?
       </h3>
-      <p className="mt-1 text-prose text-muted">Uncertainty change after test 1:</p>
+      <p className="mt-1 text-prose text-white/75">Uncertainty change after test 1:</p>
 
-      <div className="mt-4 min-h-[7.5rem] md:min-h-[4rem]" aria-busy={!d && !q.isError ? true : undefined}>
+      <div className="mt-5 min-h-[8.75rem] md:min-h-16" aria-busy={!d && !q.isError ? true : undefined}>
         {complete ? (
-          <ul className="grid gap-2 md:grid-cols-2" aria-label="Uncertainty change after test 1">
+          <ul className="grid gap-3 md:grid-cols-2" aria-label="Uncertainty change after test 1">
             {list.map((r) => (
-              <li key={r.key} className="flex min-h-12 items-baseline justify-between gap-4 rounded-lg border border-border bg-surface px-4 py-3" data-testid={`what-if-${r.key}`}>
-                <span className="text-prose">{r.label}</span>
-                <span className="num whitespace-nowrap text-title font-semibold">{r.value}</span>
+              <li key={r.key} className="flex min-h-16 items-center justify-between gap-4 rounded-full border border-white/12 bg-white/[0.06] py-3 pl-6 pr-6 md:pr-7" data-testid={`what-if-${r.key}`}>
+                <span className="text-prose text-white/90">{r.label}</span>
+                <DotNumber className="whitespace-nowrap text-[2.25rem] text-white [word-spacing:-0.3em] md:text-[2.5rem]">{r.value}</DotNumber>
               </li>
             ))}
           </ul>
         ) : q.isError && !d ? (
           <div className="flex flex-wrap items-center gap-3">
-            <p className="text-prose text-muted">
+            <p className="text-prose text-white/75">
               {q.error?.snapshotUnavailable ? "No preview for this cabin and material." : "Could not load the preview."}
             </p>
             {q.error?.snapshotUnavailable ? null : (
@@ -91,16 +92,16 @@ export function WhatIf({ cabin, groupId, candidate }: WhatIfProps) {
             )}
           </div>
         ) : d ? (
-          <p className="text-prose text-muted">No preview for this cabin and material.</p>
+          <p className="text-prose text-white/75">No preview for this cabin and material.</p>
         ) : (
-          <div className="grid gap-2 md:grid-cols-2" role="status" aria-label="Loading">
-            <Skeleton className="h-12 rounded-lg" />
-            <Skeleton className="h-12 rounded-lg" />
+          <div className="grid gap-3 md:grid-cols-2" role="status" aria-label="Loading">
+            <Skeleton className="h-16 rounded-full bg-white/10" />
+            <Skeleton className="h-16 rounded-full bg-white/10" />
           </div>
         )}
       </div>
 
-      <p className="mt-4 text-ui font-medium">{WHAT_IF_DISCLAIMER}</p>
+      <p className="mt-5 text-ui font-medium text-white/90">{WHAT_IF_DISCLAIMER}</p>
     </div>
   );
 }

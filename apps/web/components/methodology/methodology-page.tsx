@@ -84,17 +84,17 @@ export function MethodologyPage() {
             <p className="mt-2 max-w-[68ch] text-[14px] leading-relaxed text-muted">For reviewers. You do not need these to use the site.</p>
           </div>
           <div className="flex gap-2">
-            <button type="button" onClick={() => setSectionOpen("*", true)} className="inline-flex min-h-10 items-center rounded-md border border-border bg-surface px-3 text-[13px] font-medium hover:bg-subtle">
+            <button type="button" onClick={() => setSectionOpen("*", true)} className="inline-flex min-h-10 items-center rounded-full bg-surface px-4 text-[13px] font-medium ring-1 ring-border hover:bg-subtle focus-visible:outline-2 focus-visible:outline-accent">
               Open all sections
             </button>
-            <button type="button" onClick={() => setSectionOpen("*", false)} className="inline-flex min-h-10 items-center rounded-md border border-border bg-surface px-3 text-[13px] font-medium hover:bg-subtle">
+            <button type="button" onClick={() => setSectionOpen("*", false)} className="inline-flex min-h-10 items-center rounded-full bg-surface px-4 text-[13px] font-medium ring-1 ring-border hover:bg-subtle focus-visible:outline-2 focus-visible:outline-accent">
               Close all
             </button>
           </div>
         </div>
         <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[210px_minmax(0,1fr)] lg:gap-10">
           <Toc items={TOC} />
-          <div className="min-w-0 border-y border-border">
+          <div className="card min-w-0 rounded-[32px] px-4 py-2 sm:px-7">
             <DataSection methodology={methodology} sources={sources} groups={groups} />
             <ModellingSection methodology={methodology} metadata={metadata} groupLabel={groupLabel} />
             <ActiveLearningSection methodology={methodology} />

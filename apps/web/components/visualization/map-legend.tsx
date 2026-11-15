@@ -1,6 +1,6 @@
 "use client";
 import { cn } from "@/lib/cn";
-import { ACCENT, GAP, INK, MUTED, OBSERVED, PLUM_STOPS, KPA_PER_PSI, plumColor } from "./map-scales";
+import { ACCENT, GAP, INK, MUTED, OBSERVED, ON_ACCENT, TARGET, UNC_ALPHA, PLUM_STOPS, KPA_PER_PSI, plumColor } from "./map-scales";
 
 export interface MapLegendProps {
   layers: {
@@ -77,8 +77,8 @@ export default function MapLegend(p: MapLegendProps) {
           <Item
             swatch={
               <>
-                <rect x="2" y="2" width="18" height="12" fill={INK} fillOpacity="0.06" stroke={INK} strokeWidth="1.4" strokeDasharray="4 2" />
-                <circle cx="11" cy="8" r="3" fill={INK} stroke="var(--surface)" strokeWidth="1" />
+                <rect x="2" y="2" width="18" height="12" fill={TARGET} fillOpacity="0.06" stroke={TARGET} strokeOpacity="0.9" strokeWidth="1.4" strokeDasharray="4 2" />
+                <circle cx="11" cy="8" r="3" fill={TARGET} stroke="var(--surface)" strokeWidth="1" style={{ filter: "drop-shadow(0 0 3px rgb(242 210 27 / 0.75))" }} />
               </>
             }
             label="This cabin"
@@ -90,7 +90,7 @@ export default function MapLegend(p: MapLegendProps) {
               swatch={
                 <>
                   <path d="M11 1 L18 8 L11 15 L4 8 Z" fill={ACCENT} stroke="var(--surface)" />
-                  <text x="11" y="11.2" fontSize="8" fill="#fff" textAnchor="middle" fontWeight="700">
+                  <text x="11" y="11.2" fontSize="8" fill={ON_ACCENT} textAnchor="middle" fontWeight="700">
                     1
                   </text>
                 </>
@@ -154,7 +154,7 @@ export default function MapLegend(p: MapLegendProps) {
               </>
             }
             label="Grey: chance it burns"
-            hint="(darker = higher; no grey = no estimate)"
+            hint="(lighter = higher; no grey = no estimate)"
             title="Grey shading is the model's estimated chance that a flame keeps burning. Darker means a higher chance. Where the model has no estimate, the map is not shaded."
           />
         )}
@@ -162,7 +162,7 @@ export default function MapLegend(p: MapLegendProps) {
           <li className="flex basis-full items-center gap-1.5">
             <span className="text-fg">Uncertainty</span>
             <span className="text-muted">low</span>
-            <span className="flex w-20 opacity-[0.72]" role="img" aria-label="Colour scale from low uncertainty (light) to high uncertainty (dark purple)">
+            <span className="flex w-20" style={{ opacity: UNC_ALPHA }} role="img" aria-label="Colour scale from low uncertainty (dark) to high uncertainty (bright purple)">
               {Array.from({ length: PLUM_STOPS.length * 2 - 1 }, (_, i) => (
                 <span key={i} className="h-3 flex-1 border-y border-border" style={{ background: plumColor(i / (PLUM_STOPS.length * 2 - 2)) }} />
               ))}

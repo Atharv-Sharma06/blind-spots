@@ -9,7 +9,7 @@ type Headline = { profiles: { profile_id: string; comparable_observations: numbe
 test.describe("Cabins page vs the live API", () => {
   test("each card's status chip follows the one rule (none, barely under 90 % of the materials, covered) from /api/headline", async ({ page, request }) => {
     const { profiles } = (await (await request.get("/api/headline")).json()) as Headline;
-    await page.goto("/");
+    await page.goto("/cabins");
     await expect(page.locator(`[data-cabin="${DEFAULT_CABIN}"]`)).toBeVisible();
     let checked = 0;
     for (const p of profiles) {

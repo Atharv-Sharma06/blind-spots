@@ -44,10 +44,10 @@ test.describe("Explorer (live API)", () => {
     await expect(page.getByTestId("candidate-panel")).not.toContainText("P(sustained)");
   });
 
-  test("the candidate panel carries the framing sentence and a Cabins link leads home", async ({ page }) => {
+  test("the candidate panel carries the framing sentence and a Cabins link leads to /cabins", async ({ page }) => {
     await openExplore(page);
     await expect(page.getByTestId("candidate-panel")).toContainText("Computational research candidates requiring qualified scientific review");
     await page.getByRole("link", { name: /Cabins/ }).first().click();
-    await expect(page).toHaveURL(/\/(\?.*)?$/);
+    await expect(page).toHaveURL(/\/cabins(\?.*|#.*)?$/);
   });
 });

@@ -18,13 +18,13 @@ export const Switch = React.forwardRef<React.ElementRef<typeof SwitchPrimitive.R
         ref={ref}
         id={sid}
         className={cn(
-          "relative inline-flex h-4 w-7 shrink-0 items-center rounded-full border border-transparent bg-border-strong p-0.5 transition-colors before:absolute before:-inset-1 before:content-[''] max-md:before:-inset-3",
-          "data-[state=checked]:bg-accent disabled:cursor-not-allowed disabled:opacity-50",
+          "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-white/[0.06] bg-[#2a2a2f] p-[3px] shadow-[inset_0_1px_2px_rgb(0_0_0/0.5)] transition-colors before:absolute before:-inset-2 before:content-[''] max-md:before:-inset-3",
+          "data-[state=checked]:border-transparent data-[state=checked]:bg-accent disabled:cursor-not-allowed disabled:opacity-50",
           className,
         )}
         {...props}
       >
-        <SwitchPrimitive.Thumb className="block size-3 rounded-full bg-surface transition-transform data-[state=checked]:translate-x-3" />
+        <SwitchPrimitive.Thumb className="block size-[18px] rounded-full bg-[#f4f4f5] shadow-[0_1px_3px_rgb(0_0_0/0.5)] transition-[transform,background-color] data-[state=checked]:translate-x-[18px] data-[state=checked]:bg-on-accent" />
       </SwitchPrimitive.Root>
     );
     if (!label) return control;

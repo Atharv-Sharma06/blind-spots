@@ -83,12 +83,16 @@ export function tickLabel(v: number): string {
 export const CHART = {
   ink: "var(--fg)",
   muted: "var(--muted)",
-  grid: "var(--border)",
+  /** Faint guides: a hairline that reads on charcoal without competing with the data. */
+  grid: "rgb(255 255 255 / 0.07)",
   axis: "var(--border-strong)",
   surface: "var(--surface)",
   plum: "var(--plum-6)",
   plumBand: "var(--plum-3)",
+  /** Signal yellow: the model of interest / Blind Spots. */
   accent: "var(--accent)",
+  /** Periwinkle: what ISS tests actually showed. */
+  observed: "var(--observed)",
 } as const;
 
 export const FONT = "var(--font-mono), ui-monospace, monospace";

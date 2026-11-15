@@ -6,6 +6,7 @@ import { decomposition, groupBalance, SMALL_SAMPLE_EXPERIMENTS } from "@/compone
 import { PLAIN_VERDICT, pct, pctRange } from "@/components/explore/plain";
 import { materialFullName } from "@/components/home/cabins";
 import { cn } from "@/lib/cn";
+import { DotNumber } from "@/components/ui/dot-number";
 import {
   airflowBandSourceLabel,
   fmtCount,
@@ -42,8 +43,8 @@ function airflowText(r: Range): string {
 function CabinLine({ t }: { t: ResolvedTarget }) {
   const kpa = t.total_pressure_kpa.nominal ?? t.total_pressure_kpa.max ?? t.total_pressure_kpa.min;
   return (
-    <div>
-      <p className="text-[13px] font-semibold text-fg">{t.label}</p>
+    <div className="px-1">
+      <p className="text-[15px] font-semibold text-fg">{t.label}</p>
       <p className="mt-0.5 flex flex-wrap gap-x-2 text-xs text-muted">
         <span className="whitespace-nowrap">{o2Text(t.oxygen_percent)}</span>
         <span aria-hidden>·</span>
@@ -70,19 +71,27 @@ const PLAIN_REASON: Record<string, string> = {
 };
 
 const TONE = {
-  blind: { box: "border-plum-3 bg-plum-1 text-plum-7", Icon: CircleSlash },
-  partly: { box: "border-gap/40 bg-gap-tint text-gap-fg", Icon: TriangleAlert },
-  covered: { box: "border-accent/30 bg-accent-tint text-accent", Icon: CircleCheck },
+  blind: { box: "card-magenta text-white", icon: "text-white", sub: "text-white/85", Icon: CircleSlash },
+  partly: { box: "card ring-1 ring-accent/35 text-fg", icon: "text-accent", sub: "text-muted", Icon: TriangleAlert },
+  covered: { box: "card-indigo text-white", icon: "text-periwinkle", sub: "text-white/80", Icon: CircleCheck },
 } as const;
 
-/** The verdict in plain words, same wording as the Cabins answer card. Icon and words, never colour alone. */
-function PlainVerdict({ verdict, headline }: { verdict: AssessResponse["verdict"]; headline: string }) {
+/**
+ * The verdict in plain words, same wording and gradient as the Cabins answer card (magenta blind spot,
+ * indigo covered, charcoal + yellow partly covered). Icon and words, never colour alone.
+ */
+function PlainVerdict({ verdict, headline, children }: { verdict: AssessResponse["verdict"]; headline: string; children?: React.ReactNode }) {
   const v = PLAIN_VERDICT[verdict];
   const tone = TONE[v.tone];
   return (
-    <div role="status" className={cn("flex items-start gap-2.5 rounded-md border px-3 py-2.5", tone.box)} data-testid="plain-verdict">
-      <tone.Icon className="mt-[3px] size-5 shrink-0" aria-hidden />
-      <p className="text-xl leading-snug font-semibold tracking-[-0.01em] sm:text-[22px]">{headline}</p>
+    <div className={cn("relative overflow-hidden px-5 py-5 sm:px-6", v.tone === "partly" && "rounded-[var(--radius-3xl)]", tone.box)}>
+      <div role="status" className="flex items-start gap-3" data-testid="plain-verdict">
+        <span aria-hidden className={cn("mt-0.5 grid size-9 shrink-0 place-items-center rounded-full bg-black/25", tone.icon)}>
+          <tone.Icon className="size-5" />
+        </span>
+        <p className="text-xl leading-snug font-semibold tracking-[-0.01em] sm:text-[22px]">{headline}</p>
+      </div>
+      {children ? <div className={cn("mt-3 space-y-1.5 pl-12", tone.sub)}>{children}</div> : null}
     </div>
   );
 }
@@ -97,15 +106,33 @@ function plainSentence(a: AssessResponse): string {
   return `Tests are nearby for ${k} of ${n} cabin conditions. Elsewhere, estimates rest on model assumptions.`;
 }
 
-/** One key number: plain label (and optional short help) on the left, value on the right. */
-function Fact({ label, help, value, note, ...rest }: { label: string; help?: string; value: string; note?: string } & React.HTMLAttributes<HTMLDivElement>) {
+/**
+ * One key number as a charcoal tile: plain label (and optional short help) above the value.
+ * Whole numbers use the dot font; words ("of 9") stay in regular type and decimals use mono, because dotted words and periods misread.
+ */
+function Fact({
+  label,
+  help,
+  value,
+  suffix,
+  mono,
+  note,
+  ...rest
+}: { label: string; help?: string; value: string; suffix?: string; mono?: boolean; note?: string } & React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-4 py-2" {...rest}>
-      <dt className="col-start-1 text-[13px] text-fg">{label}</dt>
-      {help ? <dd className="col-start-1 row-start-2 mt-0.5 text-xs text-muted">{help}</dd> : null}
-      <dd className={cn("col-start-2 row-start-1 text-right", help && "row-span-2")}>
-        <span className="num text-[15px] font-medium text-fg">{value}</span>
-        {note ? <span className="block text-xs text-muted">{note}</span> : null}
+    <div className="card flex min-h-[124px] min-w-0 flex-col gap-0 rounded-[var(--radius-xl)] p-4" {...rest}>
+      <dt className="text-[13px] leading-snug text-fg">{label}</dt>
+      {help ? <dd className="mt-0.5 text-xs text-muted">{help}</dd> : null}
+      <dd className="mt-auto min-w-0 pt-3">
+        {mono ? (
+          <span className="num block text-[28px] leading-none font-semibold break-words text-fg">{value}</span>
+        ) : (
+          <span className="flex flex-wrap items-baseline gap-x-1.5">
+            <DotNumber className="text-[32px] leading-none break-words text-fg sm:text-[36px]">{value}</DotNumber>
+            {suffix ? <span className="text-ui text-muted">{suffix}</span> : null}
+          </span>
+        )}
+        {note ? <span className="mt-1 block text-xs text-muted">{note}</span> : null}
       </dd>
     </div>
   );
@@ -119,7 +146,7 @@ export function UncertaintyBar({ knowledge, variability }: { knowledge: number; 
       <div
         role="img"
         aria-label={`Uncertainty decomposition: ${k}% knowledge uncertainty, ${100 - k}% outcome variability`}
-        className="flex h-2 w-full overflow-hidden rounded-sm border border-border"
+        className="flex h-2 w-full overflow-hidden rounded-full bg-subtle"
       >
         <div style={{ width: `${knowledge * 100}%`, background: "var(--plum-6)" }} />
         <div style={{ width: `${variability * 100}%`, background: "var(--plum-2)" }} />
@@ -171,31 +198,31 @@ export function TargetAnalysis({ query, group, pending }: TargetAnalysisProps) {
           </p>
         ) : null}
 
-        <div className="space-y-2">
-          <PlainVerdict verdict={a.verdict} headline={headline} />
-          <p className="text-sm leading-snug text-fg" data-testid="plain-sentence">{plainSentence(a)}</p>
+        <PlainVerdict verdict={a.verdict} headline={headline}>
+          <p className="text-sm leading-snug" data-testid="plain-sentence">{plainSentence(a)}</p>
           {a.verdict === "insufficient_evidence" ? (
-            <p className="text-xs leading-snug text-muted">Insufficient experimental evidence for a reliable estimate.</p>
+            <p className="text-xs leading-snug">Insufficient experimental evidence for a reliable estimate.</p>
           ) : null}
-        </div>
+        </PlainVerdict>
 
         <CabinLine t={a.target} />
 
-        <dl className="divide-y divide-border border-y border-border">
+        <dl className="grid grid-cols-2 gap-2.5">
           <Fact label="Nearby ISS test results" value={fmtCount(cov.comparable_observations)} />
-          <Fact label="Cabin conditions with a nearby test" value={`${fmtCount(cov.points_with_comparable)} of ${fmtCount(cov.n_target_points)}`} />
+          <Fact label="Cabin conditions with a nearby test" value={fmtCount(cov.points_with_comparable)} suffix={`of ${fmtCount(cov.n_target_points)}`} />
           {sup !== null ? (
             <Fact
               data-testid="points-supported"
               label="Conditions with an estimate"
               help="Where the model is confident."
-              value={`${fmtCount(sup)} of ${fmtCount(cov.n_target_points)}`}
+              value={fmtCount(sup)}
+              suffix={`of ${fmtCount(cov.n_target_points)}`}
             />
           ) : null}
           {showP ? (
             <Fact label="Chance the flame keeps burning" help="Model estimate, not a measurement." value={pctRange(m.p_sustained_min, m.p_sustained_max)} />
           ) : (
-            <Fact label="Nearest ISS test" help="1 step or less counts as nearby." value={nearest} note={isNum(cov.nn_distance_min) ? "steps" : undefined} />
+            <Fact label="Nearest ISS test" help="1 step or less counts as nearby." value={nearest} mono note={isNum(cov.nn_distance_min) ? "steps" : undefined} />
           )}
         </dl>
 

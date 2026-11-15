@@ -1,16 +1,17 @@
 "use client";
 
 /**
- * 30-second tour of the Cabins page ("/"). Mount <HomeTour/> once in the hero: it renders the quiet
+ * 30-second tour of the Cabins page ("/cabins"). Mount <HomeTour/> once in the hero: it renders the quiet
  * "30-second tour" button and, while running, a docked caption card plus a highlight ring around the part of the
  * page being explained. The page stays readable and clickable underneath (the ring ignores the pointer).
- * `?demo=1` starts it automatically. Every number in the captions comes from the API (see tour-model.ts).
+ * `/cabins?demo=1` starts it automatically (any page that mounts it honours `?demo=1`). Every number in the captions comes from the API (see tour-model.ts).
  */
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, Pause, Play, RotateCcw, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
+import { DotNumber } from "@/components/ui/dot-number";
 import { COVERAGE_STATUS_LABEL, coverageStatus, materialName, shortCabinName } from "@/components/home/cabins";
 import { useHomeSelection } from "@/components/home/use-home-selection";
 import { useAssessTarget, useCounterfactual, useDataMode, useGroups, useHeadline, useRankCandidates } from "@/hooks/api";
@@ -38,6 +39,13 @@ import {
 /** Public site address for the end card (omitted when unset). */
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "").trim();
 const siteLabel = SITE_URL.replace(/^https?:\/\//, "").replace(/\/$/, "");
+
+/** Highlight ring: a signal-yellow edge with a soft glow (the second value is the breathing peak). */
+const RING_GLOW_A = "0 0 0 2px #F2D21B, 0 0 0 6px rgb(242 210 27 / .16), 0 0 28px 4px rgb(242 210 27 / .38)";
+const RING_GLOW_B = "0 0 0 2px #F2D21B, 0 0 0 10px rgb(242 210 27 / .08), 0 0 40px 8px rgb(242 210 27 / .5)";
+
+/** A fact value that is a plain number (count, percent, range): shown large in the dot-matrix face. */
+const NUMERIC_FACT = /^[\d.,\s–−%]+$|^\d+ of \d+$/;
 
 /** How long a scene waits for its data before moving on anyway (an unreachable service must not freeze the tour). */
 const WAIT_GRACE_MS = 5000;
@@ -170,7 +178,8 @@ export function HomeTour({ className }: { className?: string }) {
   const blindRow = profiles?.find((p) => p.profile_id === TOUR_BLIND_CABIN) ?? null;
 
   const target = useMemo(() => ({ profile_id: TOUR_BLIND_CABIN }), []);
-  const needAnswer = active && scene >= 3 && !!group;
+  // Loads from the start of the tour (the same request scene 3 shows), so no scene waits and the end card lands before 27 s.
+  const needAnswer = active && !!group;
   const assessQ = useAssessTarget(needAnswer && group ? { group_id: group.group_id, target } : null);
   const assess = assessQ.isPlaceholderData ? null : assessQ.data?.data ?? null;
   // Rank and the what-if load while the earlier scenes play, so no scene has to wait.
@@ -418,30 +427,30 @@ export function HomeTour({ className }: { className?: string }) {
   }, [active, scene, go, exit, togglePause]);
 
   const launcher = (
-    <button
+    <Button
       ref={launcherRef}
-      type="button"
+      variant="secondary"
       data-testid="home-tour-start"
       aria-pressed={active}
       onClick={start}
-      className={cn(
-        "inline-flex min-h-10 items-center gap-2 rounded-md px-2 text-ui font-medium text-muted underline-offset-4 transition-colors hover:text-fg hover:underline",
-        className,
-      )}
+      className={className}
     >
       <span aria-hidden className="text-[11px] text-accent">▶</span>
       30-second tour
-    </button>
+    </Button>
   );
   if (!active || !mounted) return launcher;
 
   const isEnd = scene >= END_SCENE;
   const isTitle = scene === 0;
   const running = !paused && !reduced && !blocked;
+  const pill = "h-10 rounded-full px-4";
+  /** The one forward action: signal-yellow dot-texture pill (forced over the Button variant colours). */
+  const yellow = "pill-yellow !border-transparent !bg-accent !text-[#0B0B0C] font-semibold";
   const pauseButton = reduced ? (
     <span className="text-xs text-muted">Autoplay is off. Use Next.</span>
   ) : (
-    <Button size="sm" variant="secondary" onClick={togglePause} aria-pressed={paused} aria-keyshortcuts="Space" className="h-10 sm:h-8">
+    <Button size="sm" variant="secondary" onClick={togglePause} aria-pressed={paused} aria-keyshortcuts="Space" className={pill}>
       {paused ? <Play aria-hidden /> : <Pause aria-hidden />}
       {paused ? "Play" : "Pause"}
     </Button>
@@ -450,7 +459,7 @@ export function HomeTour({ className }: { className?: string }) {
   const style = (
     <style>{`
       @keyframes tour-fill{from{width:var(--from)}to{width:var(--to)}}
-      @keyframes tour-ring{0%,100%{box-shadow:0 0 0 3px var(--accent),0 0 0 9px rgb(14 124 102 / .16)}50%{box-shadow:0 0 0 3px var(--accent),0 0 0 13px rgb(14 124 102 / .08)}}
+      @keyframes tour-ring{0%,100%{box-shadow:${RING_GLOW_A}}50%{box-shadow:${RING_GLOW_B}}}
       @media (prefers-reduced-motion: reduce){[data-tour-ring]{animation:none!important}}
     `}</style>
   );
@@ -468,52 +477,70 @@ export function HomeTour({ className }: { className?: string }) {
             aria-label="Tour"
             data-testid="home-tour-card"
             data-tour-state={isTitle ? "title" : "end"}
-            className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-bg/95 px-5 outline-none backdrop-blur-sm"
+            className="bg-dots fixed inset-0 z-50 flex flex-col items-center justify-center overflow-y-auto px-5 py-10 text-white outline-none"
+            style={{ backgroundColor: "#08080A" }}
           >
             {style}
-            <div className="w-full max-w-[880px]" aria-live="polite">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0"
+              style={{ background: "radial-gradient(60% 50% at 50% 42%, rgb(92 89 196 / .22) 0%, rgb(8 8 10 / 0) 70%)" }}
+            />
+            <div className={cn("relative w-full max-w-[880px]", isEnd && "text-center")} aria-live="polite">
               {isTitle ? (
                 <>
-                  <p className="text-sm font-medium uppercase tracking-[0.12em] text-muted">{TITLE_SUBLINE}</p>
-                  <h2 className="mt-4 text-balance text-[32px] font-semibold leading-[1.15] tracking-[-0.02em] text-fg sm:text-[48px]">{TITLE_LINE}</h2>
+                  <p className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3.5 py-1.5 text-sm font-medium text-fg">
+                    <span aria-hidden className="size-2 rounded-full bg-accent shadow-[0_0_10px_rgb(242_210_27/.7)]" />
+                    {TITLE_SUBLINE}
+                  </p>
+                  <h2 className="mt-5 text-balance text-[34px] font-semibold leading-[1.1] tracking-[-0.02em] text-white sm:text-[56px]">{TITLE_LINE}</h2>
                 </>
               ) : (
                 <>
-                  <h2 className="text-[44px] font-semibold leading-none tracking-[-0.03em] text-fg sm:text-[64px]">{END_NAME}</h2>
-                  <p className="mt-4 text-balance text-[20px] leading-snug text-fg sm:text-[28px]">{END_LINE}</p>
+                  <h2 className="text-[52px] font-semibold leading-none tracking-[-0.035em] text-white sm:text-[88px]">{END_NAME}</h2>
+                  <p className="mx-auto mt-5 max-w-[720px] text-balance text-[20px] leading-snug text-white/90 sm:text-[28px]">{END_LINE}</p>
                   {siteLabel ? (
-                    <p className="num mt-6 text-[18px] text-accent sm:text-[24px]" data-testid="home-tour-site-url">
-                      <a href={SITE_URL} className="underline-offset-4 hover:underline">{siteLabel}</a>
+                    <p className="mt-7" data-testid="home-tour-site-url">
+                      <a
+                        href={SITE_URL}
+                        className="num inline-flex min-h-11 items-center rounded-full border border-border-strong bg-surface px-5 text-[17px] text-accent underline-offset-4 hover:underline sm:text-[22px]"
+                      >
+                        {siteLabel}
+                      </a>
                     </p>
                   ) : null}
-                  <p className="mt-6 text-[14px] text-muted">{DISCLAIMER}</p>
+                  <p className="mx-auto mt-7 max-w-[640px] text-[13px] leading-relaxed text-muted sm:text-[14px]">{DISCLAIMER}</p>
                 </>
               )}
             </div>
-            <div className="mt-10 flex w-full max-w-[880px] flex-wrap items-center gap-2">
+            <div className={cn("relative mt-10 flex w-full max-w-[880px] flex-wrap items-center gap-2.5", isEnd && "justify-center")}>
               {isTitle ? (
                 <>
-                  <Button size="sm" variant="primary" onClick={() => go(1)} aria-keyshortcuts="ArrowRight" className="h-10 sm:h-8">
+                  <Button size="sm" variant="primary" onClick={() => go(1)} aria-keyshortcuts="ArrowRight" className={cn(pill, yellow)}>
                     Start<ChevronRight aria-hidden />
                   </Button>
-                  <Button size="sm" variant="ghost" onClick={exit} aria-keyshortcuts="Escape" className="ml-auto h-10 sm:h-8">
+                  <Button size="sm" variant="secondary" onClick={exit} aria-keyshortcuts="Escape" className={cn(pill, "ml-auto")}>
                     <X aria-hidden />Exit
                   </Button>
                 </>
               ) : (
                 <>
-                  <Button size="sm" variant="primary" onClick={exit} aria-keyshortcuts="Escape" className="h-10 sm:h-8">
+                  <Button size="sm" variant="primary" onClick={exit} aria-keyshortcuts="Escape" className={cn(pill, yellow)}>
                     <X aria-hidden />Close the tour
                   </Button>
-                  <Button size="sm" variant="secondary" onClick={replay} className="h-10 sm:h-8">
+                  <Button size="sm" variant="secondary" onClick={replay} className={pill}>
                     <RotateCcw aria-hidden />Replay
                   </Button>
                 </>
               )}
             </div>
             {isTitle && running ? (
-              <div className="absolute inset-x-0 bottom-0 h-1 bg-subtle" aria-hidden>
-                <div key={runId} className="h-full bg-accent" style={{ ["--from" as string]: "0%", ["--to" as string]: "100%", animation: `tour-fill ${TITLE_SECONDS}s linear forwards` }} />
+              <div className="absolute inset-x-0 bottom-0 h-1.5 bg-white/10" aria-hidden>
+                <div
+                  key={runId}
+                  className="h-full rounded-r-full bg-accent shadow-[0_0_12px_rgb(242_210_27/.6)]"
+                  style={{ ["--from" as string]: "0%", ["--to" as string]: "100%", animation: `tour-fill ${TITLE_SECONDS}s linear forwards` }}
+                />
               </div>
             ) : null}
             {isEnd ? <span className="sr-only">Tour finished.</span> : null}
@@ -541,8 +568,8 @@ export function HomeTour({ className }: { className?: string }) {
             ref={ringRef}
             aria-hidden
             data-tour-ring
-            className="pointer-events-none fixed left-0 top-0 z-20 rounded-lg opacity-0 transition-opacity duration-200"
-            style={{ boxShadow: "0 0 0 3px var(--accent), 0 0 0 9px rgb(14 124 102 / .16)", animation: "tour-ring 1.8s ease-in-out infinite" }}
+            className="pointer-events-none fixed left-0 top-0 z-20 rounded-[22px] opacity-0 transition-opacity duration-200"
+            style={{ boxShadow: RING_GLOW_A, animation: "tour-ring 1.8s ease-in-out infinite" }}
           />
           {scene <= 2 ? (
             <div
@@ -560,19 +587,23 @@ export function HomeTour({ className }: { className?: string }) {
             aria-label="Tour"
             data-testid="home-tour-card"
             data-tour-state={`scene-${scene}`}
-            className="fixed inset-x-0 bottom-0 z-50 mx-auto max-h-[52vh] w-full max-w-[760px] overflow-y-auto rounded-t-lg border border-border-strong bg-surface shadow-[var(--shadow-popover)] outline-none sm:bottom-4 sm:w-[calc(100%-2rem)] sm:rounded-lg"
+            className="fixed inset-x-0 bottom-0 z-50 mx-auto max-h-[56vh] w-full max-w-[780px] overflow-y-auto rounded-t-[28px] text-white outline-none backdrop-blur-xl sm:bottom-5 sm:w-[calc(100%-2rem)] sm:rounded-[34px]"
+            style={{
+              background: "linear-gradient(160deg, rgb(40 40 46 / .9) 0%, rgb(24 24 27 / .93) 55%, rgb(17 17 19 / .96) 100%)",
+              boxShadow: "inset 0 1px 0 rgb(255 255 255 / .09), inset 0 0 0 1px rgb(255 255 255 / .07), 0 30px 60px -18px rgb(0 0 0 / .85)",
+            }}
           >
-            <div className="flex gap-1 px-4 pt-3 sm:px-5" aria-hidden>
+            <div className="flex gap-1.5 px-5 pt-4 sm:px-7 sm:pt-5" aria-hidden>
               {SCENES.map((s, k) => {
                 const n = k + 1;
                 const done = scene > n;
                 const cur = scene === n;
                 return (
-                  <div key={s.id} className="h-1 flex-1 overflow-hidden rounded-xs bg-subtle">
+                  <div key={s.id} className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
                     {cur ? (
                       <div
                         key={`${runId}-${beat}`}
-                        className="h-full bg-accent"
+                        className="h-full rounded-full bg-accent shadow-[0_0_10px_rgb(242_210_27/.6)]"
                         style={{
                           ["--from" as string]: `${from}%`,
                           ["--to" as string]: `${to}%`,
@@ -582,50 +613,57 @@ export function HomeTour({ className }: { className?: string }) {
                         }}
                       />
                     ) : (
-                      <div className={cn("h-full bg-accent", done ? "w-full" : "w-0")} />
+                      <div className={cn("h-full rounded-full bg-accent", done ? "w-full" : "w-0")} />
                     )}
                   </div>
                 );
               })}
             </div>
-            <div className="px-4 pb-3 pt-2.5 sm:px-5" aria-live="polite" aria-atomic="true">
+            <div className="px-5 pb-3 pt-3 sm:px-7 sm:pb-4 sm:pt-4" aria-live="polite" aria-atomic="true">
               <p className="num text-[12px] text-muted sm:text-[13px]">
                 {`${scene} of ${SCENE_COUNT} · ${cap?.title ?? ""}`}
                 {paused ? " · paused" : ""}
               </p>
-              <h2 className="mt-1.5 text-balance text-[19px] font-semibold leading-[1.22] tracking-[-0.015em] text-fg sm:text-[26px]" data-testid="home-tour-caption">
+              <h2 className="mt-1.5 text-balance text-[21px] font-semibold leading-[1.2] tracking-[-0.015em] text-white sm:text-[30px]" data-testid="home-tour-caption">
                 {cap?.caption}
               </h2>
               {cap && cap.facts.length > 0 ? (
-                <dl className="mt-2 flex flex-wrap gap-x-5 gap-y-1 sm:mt-2.5 sm:gap-x-6 sm:gap-y-1.5">
+                <dl className="mt-3 flex flex-wrap items-end gap-x-6 gap-y-2 sm:mt-4 sm:gap-x-9">
                   {cap.facts.map((f) => (
-                    <div key={f.label}>
+                    <div key={f.label} className="min-w-0">
                       <dt className="text-[11px] leading-tight text-muted sm:text-[13px]">{f.label}</dt>
-                      <dd className={cn("text-[14px] font-medium text-fg sm:text-[17px]", /^[\d.,\s–−%]+$|^\d+ of \d+$/.test(f.value) ? "num" : "tabular")}>{f.value}</dd>
+                      {NUMERIC_FACT.test(f.value) ? (
+                        <DotNumber as="dd" className="mt-1.5 text-[32px] !font-black text-white sm:text-[40px]">
+                          {f.value}
+                        </DotNumber>
+                      ) : (
+                        <dd className="tabular mt-1 text-[15px] font-medium text-white sm:text-[18px]">{f.value}</dd>
+                      )}
                     </div>
                   ))}
                 </dl>
               ) : null}
               {cap && cap.notes.length > 0 ? (
-                <p className="mt-2 text-[11px] leading-snug text-muted sm:text-[12px]">
+                <p className="mt-2.5 text-[11px] leading-snug text-muted sm:text-[12px]">
                   {cap.notes.includes("hypothetical") ? `${HYPOTHETICAL_NOTE} ` : ""}
                   {cap.notes.includes("candidate_framing") ? CANDIDATE_FRAMING : ""}
                 </p>
               ) : null}
             </div>
-            <div className="flex flex-wrap items-center gap-2 border-t border-border px-4 py-2 sm:px-5">
-              <Button size="sm" variant="secondary" onClick={() => go(scene - 1)} aria-keyshortcuts="ArrowLeft" className="h-10 sm:h-8">
+            <div className="flex flex-wrap items-center gap-2 border-t border-white/[.07] px-5 py-3 sm:px-7">
+              <Button size="sm" variant="secondary" onClick={() => go(scene - 1)} aria-keyshortcuts="ArrowLeft" className={pill}>
                 <ChevronLeft aria-hidden />Back
               </Button>
-              <Button size="sm" variant="primary" onClick={() => go(scene + 1)} aria-keyshortcuts="ArrowRight" className="h-10 sm:h-8">
+              <Button size="sm" variant="primary" onClick={() => go(scene + 1)} aria-keyshortcuts="ArrowRight" className={cn(pill, yellow)}>
                 Next<ChevronRight aria-hidden />
               </Button>
               {pauseButton}
               <p className="ml-auto hidden text-xs text-muted sm:block" aria-hidden>
                 <Kbd>←</Kbd> <Kbd>→</Kbd> to step
               </p>
-              <Button size="sm" variant="ghost" onClick={exit} aria-keyshortcuts="Escape" aria-label="Exit the tour" className="ml-auto h-10 sm:ml-0 sm:h-8">
-                <X aria-hidden />Exit
+              <Button size="sm" variant="secondary" onClick={exit} aria-keyshortcuts="Escape" aria-label="Exit the tour" className={cn(pill, "ml-auto w-10 max-md:px-0 sm:ml-0 sm:w-auto")}>
+                <X aria-hidden />
+                <span className="max-sm:sr-only">Exit</span>
               </Button>
             </div>
           </section>

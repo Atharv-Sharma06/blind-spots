@@ -96,7 +96,7 @@ export function BriefView() {
     if (!profileId) return null;
     const p = new URLSearchParams({ cabin: profileId });
     if (groupId) p.set("material", groupId);
-    return `/?${p.toString()}`;
+    return `/cabins?${p.toString()}`;
   }, [profileId, groupId]);
   // Plain heading from the same names the Cabins page uses; the API's full title stays underneath as the exact name.
   // Without the "In short" box (custom target, or no model for this material) the two answer sections start open.
@@ -116,7 +116,14 @@ export function BriefView() {
           body>header,body>footer,body>a,.no-print{display:none!important}
           .brief-print-only{display:block!important}
           .brief-sec>summary::before{display:none}
-          html,body{background:#fff!important}
+          html,body{background:#fff!important;background-image:none!important;color:#111!important}
+          body::before,body::after{display:none!important}
+          .brief-root .brief-card{background:none!important;box-shadow:none!important;border:1px solid #d4d4d8!important;border-radius:8px!important;color:#111!important;filter:none!important}
+          .brief-root .brief-card::before,.brief-root .brief-card::after{display:none!important}
+          .brief-root .brief-card *{color:#111!important}
+          .brief-root .brief-card .brief-ink-muted{color:#52525b!important}
+          .brief-sec>summary{min-height:0!important;padding:6px 10px!important}
+          .brief-sec>div{padding:8px 10px!important;border-color:#d4d4d8!important}
           @page{size:A4;margin:18mm 16mm}
           .brief-root{max-width:none!important;padding:0!important}
           .brief-prose{font-size:10pt;line-height:1.45}
@@ -127,20 +134,20 @@ export function BriefView() {
         }
       `}</style>
 
-      <div className="no-print brief-ui mb-4 flex flex-wrap items-center gap-x-1 gap-y-2 sm:mb-6 sm:gap-x-2">
-        <Button asChild variant="ghost" size="sm" className="max-md:px-2">
+      <div className="no-print brief-ui mb-6 flex flex-wrap items-center gap-2 sm:mb-8">
+        <Button asChild variant="secondary" size="sm" className="min-h-10 rounded-full max-md:px-3">
           <Link href={exploreHref} aria-label="Back to Explorer"><ArrowLeft aria-hidden />Explorer</Link>
         </Button>
         {cabinsHref ? (
-          <Button asChild variant="ghost" size="sm" className="max-md:px-2">
+          <Button asChild variant="secondary" size="sm" className="min-h-10 rounded-full max-md:px-3">
             <Link href={cabinsHref}><ArrowLeft aria-hidden />Cabins</Link>
           </Button>
         ) : null}
-        <div className="ml-auto flex gap-1 sm:gap-2">
-          <Button variant="secondary" aria-label="Download .md" title="Save as a Markdown file" className="max-md:px-2.5" disabled={!brief} onClick={() => brief && download(`blind-spots-brief-${slug(groupId ?? "group")}.md`, cleanBriefText(brief.markdown))}>
-            <Download aria-hidden />Download
+        <div className="ml-auto flex gap-2 max-[359px]:ml-0">
+          <Button variant="secondary" aria-label="Download .md" title="Save as a Markdown file" className="min-h-10 rounded-full max-md:px-3 max-sm:min-w-10 max-sm:px-0" disabled={!brief} onClick={() => brief && download(`blind-spots-brief-${slug(groupId ?? "group")}.md`, cleanBriefText(brief.markdown))}>
+            <Download aria-hidden /><span className="max-sm:sr-only">Download</span>
           </Button>
-          <Button variant="primary" aria-label="Print / Save as PDF" title="Print or save as PDF" className="max-md:px-2.5" disabled={!brief} onClick={() => { flushSync(() => setPrinting(true)); window.print(); setPrinting(false); }}>
+          <Button variant="primary" aria-label="Print / Save as PDF" title="Print or save as PDF" className="pill-yellow min-h-10 rounded-full border-transparent bg-[#F2D21B] font-semibold text-[#0B0B0C] hover:bg-[#F2D21B] hover:brightness-105 max-md:px-3" disabled={!brief} onClick={() => { flushSync(() => setPrinting(true)); window.print(); setPrinting(false); }}>
             <Printer aria-hidden />Print
           </Button>
         </div>
@@ -161,17 +168,17 @@ export function BriefView() {
       ) : (
         <div className="brief-prose">
           <header className="pb-1">
-            <p className="brief-ui text-xs font-medium uppercase tracking-[0.08em] text-muted">Research brief</p>
-            <h1 className="mt-1.5 text-[26px] font-semibold leading-tight tracking-[-0.02em]">{plainTitle ?? brief.title.replace(/^Research brief:\s*/, "")}</h1>
+            <p className="brief-ui text-xs font-medium uppercase tracking-[0.12em] text-muted">Research brief</p>
+            <h1 className="mt-2 text-[28px] font-semibold leading-tight tracking-[-0.02em] text-balance sm:text-[34px] sm:leading-[40px]">{plainTitle ?? brief.title.replace(/^Research brief:\s*/, "")}</h1>
           </header>
 
           <InShort profileId={profileId} groupId={groupId} />
 
-          <Callout variant="info" title="Computational research-planning output" className="brief-ui my-4">
+          <Callout variant="info" title="Computational research-planning output" className="brief-ui brief-card my-5">
             Not a certified fire-safety assessment. Not endorsed by NASA. This brief contains no test procedures.
           </Callout>
 
-          <div className="mt-5 space-y-2">
+          <div className="mt-6 space-y-3">
             {SECTIONS.map(({ key, title }) => {
               const text = brief.sections[key];
               if (!text || text.trim() === "") return null;
@@ -179,19 +186,19 @@ export function BriefView() {
               return (
                 <details
                   key={key}
-                  className="brief-sec rounded-lg border border-border bg-surface"
+                  className="brief-sec brief-card card overflow-hidden"
                   open={open}
                 >
                   <summary
-                    className="flex min-h-11 items-center gap-2 px-3 py-2"
+                    className="flex min-h-14 cursor-pointer items-center gap-3 px-5 py-3 sm:px-6"
                     onClick={(e) => {
                       e.preventDefault();
                       setOpenMap((m) => ({ ...m, [key]: !open }));
                     }}
                   >
-                    <h2 id={`brief-${key}`} className="text-[16px] font-semibold tracking-[-0.01em]">{title}</h2>
+                    <h2 id={`brief-${key}`} className="text-[17px] font-semibold tracking-[-0.01em]">{title}</h2>
                   </summary>
-                  <div className="border-t border-border px-3 py-3">
+                  <div className="border-t border-border px-5 py-4 sm:px-6">
                     <MarkdownLite markdown={text} />
                   </div>
                 </details>

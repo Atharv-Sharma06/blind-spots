@@ -82,8 +82,8 @@ interface Rect {
 
 const overlaps = (a: Rect, b: Rect) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.y1 > b.y0;
 
-/** Rough text width: Geist is about 0.56 em per character. */
-export const textWidth = (text: string, fontSize: number, bold = false) => text.length * fontSize * (bold ? 0.6 : 0.56);
+/** Rough text width, kept on the safe side: Outfit runs about 0.42–0.47 em per character. */
+export const textWidth = (text: string, fontSize: number, bold = false) => text.length * fontSize * (bold ? 0.54 : 0.5);
 
 /**
  * Greedy label placement. Items are placed in the given order (most important first). Each tries the right side, the

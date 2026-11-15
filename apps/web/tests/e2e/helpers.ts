@@ -14,6 +14,9 @@ export const contextPoints = (page: Page): Locator => mapGroup(page).locator('g:
 /** Explorer h1 (the expert workspace, route /explore). */
 export const EXPLORE_H1 = "Explorer";
 /** Cabins page h1 (route /, the default for everyone). */
+/** The landing page "/" links to the Cabins tool, which lives on /cabins (old "/?cabin=…" links redirect there). */
+export const CABINS_PATH = "/cabins";
+export const LANDING_CTA = /Check a cabin/;
 export const HOME_H1 = "Do NASA's space-station fire tests cover this cabin's air?";
 /** Profile the Cabins page selects when the URL has no ?cabin= (the blind spot is the story). */
 export const DEFAULT_CABIN = "exploration_atmosphere_8p2_34";

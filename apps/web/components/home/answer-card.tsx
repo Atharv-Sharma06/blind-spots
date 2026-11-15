@@ -4,6 +4,8 @@ import * as React from "react";
 import Link from "next/link";
 import { CircleAlert, CircleCheck, EyeOff, type LucideIcon } from "lucide-react";
 import { Disclosure } from "@/components/ui/disclosure";
+import { DotNumber } from "@/components/ui/dot-number";
+import { ProgressRing } from "@/components/ui/progress-ring";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
@@ -39,10 +41,17 @@ export interface AnswerCardProps {
   onMaterialChange: (id: string | null) => void;
 }
 
-const TONE: Record<VerdictTone, { Icon: LucideIcon; box: string; text: string; icon: string }> = {
-  blind: { Icon: EyeOff, box: "border-plum-3 bg-plum-1", text: "text-plum-7", icon: "text-plum-6" },
-  partly: { Icon: CircleAlert, box: "border-gap/40 bg-gap-tint", text: "text-gap-fg", icon: "text-gap" },
-  covered: { Icon: CircleCheck, box: "border-accent/30 bg-accent-tint", text: "text-accent", icon: "text-accent" },
+/** Verdict banner look: magenta = blind spot, charcoal with a yellow edge = barely/partly, indigo glow = covered. */
+const TONE: Record<VerdictTone, { Icon: LucideIcon; box: string; icon: string; sub: string; link: string }> = {
+  blind: { Icon: EyeOff, box: "card-magenta", icon: "text-white", sub: "text-white/90", link: "text-white decoration-white/60" },
+  partly: {
+    Icon: CircleAlert,
+    box: "rounded-[var(--radius-3xl)] bg-[#161618] bg-[image:var(--grain-img),radial-gradient(120%_140%_at_0%_0%,#4A3A0C_0%,#2A2208_45%,#161618_100%)] bg-[size:180px_180px,100%_100%] shadow-[inset_0_0_0_1px_rgb(242_210_27/.5),inset_0_0_48px_rgb(242_210_27/.12),inset_0_1px_0_rgb(255_255_255/.08),0_24px_48px_-24px_rgb(0_0_0/.8)]",
+    icon: "text-accent",
+    sub: "text-white/85",
+    link: "text-accent decoration-accent/60",
+  },
+  covered: { Icon: CircleCheck, box: "card-indigo", icon: "text-periwinkle", sub: "text-white/85", link: "text-white decoration-white/60" },
 };
 
 /** Step 2: the verdict for the chosen cabin and material, in plain sentences, with the simple chart. */
@@ -79,7 +88,7 @@ export function AnswerCard({ cabin, material, onMaterialChange }: AnswerCardProp
     <section id="answer" data-tour="answer" aria-labelledby="answer-heading" className="scroll-mt-20">
       <StepHeading n={2} id="answer-heading" title="The answer" hint="Do the ISS flame tests cover this cabin's air?" />
 
-      <div className="mt-4 overflow-hidden rounded-lg border border-border bg-surface" data-testid="answer-card">
+      <div className="card mt-4 overflow-hidden" data-testid="answer-card">
         {fatal ? (
           <Notice>We could not load the cabin data. Please reload the page.</Notice>
         ) : unknownCabin ? (
@@ -97,7 +106,7 @@ export function AnswerCard({ cabin, material, onMaterialChange }: AnswerCardProp
               assess={assess}
               comparableAnyMaterial={headlineProfile ? headlineProfile.comparable_observations : null}
               picker={
-                <div className="border-b border-border bg-subtle/50 px-4 py-3 sm:px-6">
+                <div className="px-4 pt-1 pb-3 sm:px-6">
                   <MaterialPicker part="select" groups={groups} nearby={nearby} selectedId={group.group_id} onChange={(id) => onMaterialChange(id)} />
                 </div>
               }
@@ -111,7 +120,7 @@ export function AnswerCard({ cabin, material, onMaterialChange }: AnswerCardProp
                 </div>
               )}
             </div>
-            <div className="border-t border-border bg-subtle/50 px-4 py-2 sm:px-6">
+            <div className="border-t border-border px-4 py-2 sm:px-6">
               <MaterialPicker part="list" groups={groups} nearby={nearby} selectedId={group.group_id} onChange={(id) => onMaterialChange(id)} />
             </div>
           </>
@@ -166,11 +175,11 @@ function Notice({ children }: { children: React.ReactNode }) {
 function AnswerSkeleton() {
   return (
     <div aria-busy="true" aria-label="Loading the answer">
-      <div className="h-[170px] space-y-3 px-4 py-5 sm:h-[111px] sm:px-6">
+      <div className="m-2 h-[354px] space-y-3 rounded-[var(--radius-3xl)] bg-subtle px-5 py-5 sm:m-3 sm:h-[204px] sm:px-8 sm:py-7">
         <Skeleton className="h-4 w-56" />
         <Skeleton className="h-8 w-full max-w-xl" />
       </div>
-      <div className="h-[340px] space-y-3 px-4 py-4 sm:h-[220px] sm:px-6">
+      <div className="h-[290px] space-y-3 px-4 py-4 sm:h-[190px] sm:px-6">
         <Skeleton className="h-4 w-full max-w-3xl" />
         <Skeleton className="h-4 w-full max-w-2xl" />
         <Skeleton className="h-4 w-full max-w-xl" />
@@ -179,7 +188,7 @@ function AnswerSkeleton() {
         <Skeleton className={cn("w-full", CHART_HEIGHT_CLASS)} />
         <div className="h-[151px] sm:h-[109px]" />
       </div>
-      <div className="h-[77px] border-t border-border bg-subtle/50 px-4 py-2 sm:h-[65px] sm:px-6" />
+      <div className="h-[77px] border-t border-border px-4 py-2 sm:h-[65px] sm:px-6" />
     </div>
   );
 }
@@ -212,27 +221,28 @@ function Verdict({ profile, cabinId, group, assess, assessError, onRetry, compar
   const material = lcFirst(materialName(group.group_id, group.label));
   const related = assess && assess.verdict !== "supported" ? relatedNasaTests(assess) : null;
 
-  const cabinLine = (
-    <p className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-ui text-muted">
-      <span className="text-prose font-semibold text-fg" title={profile.name}>
+  const line = (sub: string, strong: string, link: string) => (
+    <p className={cn("flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-ui", sub)}>
+      <span className={cn("text-prose font-semibold", strong)} title={profile.name}>
         {name}
       </span>
       {air ? (
         <span>
           {air.o2UpTo ? "up to " : ""}
-          <span className="font-medium text-fg">{trimNum(air.o2, 1)} % oxygen</span> · <span className="font-medium text-fg">{kpaText(air.kpa)} kPa</span>
+          <span className={cn("font-medium", strong)}>{trimNum(air.o2, 1)} % oxygen</span> · <span className={cn("font-medium", strong)}>{kpaText(air.kpa)} kPa</span>
         </span>
       ) : null}
-      <a href="#cabins" className="-my-2.5 inline-flex min-h-10 items-center text-ui font-medium text-accent underline underline-offset-2 hover:text-fg sm:order-last sm:ml-auto" data-testid="change-cabin">
+      <a href="#cabins" className={cn("-my-2.5 inline-flex min-h-10 items-center text-ui font-medium underline underline-offset-2 hover:text-fg sm:order-last sm:ml-auto", link)} data-testid="change-cabin">
         Change cabin
       </a>
       {STATUS_NOTE[profile.status] ? (
-        <span className="text-xs text-muted" data-testid="cabin-status">
+        <span className={cn("text-xs", sub)} data-testid="cabin-status">
           ({STATUS_NOTE[profile.status]})
         </span>
       ) : null}
     </p>
   );
+  const cabinLine = line("text-muted", "text-fg", "text-accent decoration-accent/60");
 
   if (assessError) {
     const unavailable = isApiError(assessError) && assessError.snapshotUnavailable;
@@ -243,7 +253,7 @@ function Verdict({ profile, cabinId, group, assess, assessError, onRetry, compar
           {unavailable ? "This cabin and material are not in the precomputed version. Try another material." : "We could not work out this answer."}
         </p>
         {unavailable ? null : (
-          <button type="button" onClick={onRetry} className="mt-2 inline-flex h-10 items-center rounded-md border border-border-strong px-3 text-ui font-medium text-fg hover:bg-subtle">
+          <button type="button" onClick={onRetry} className="mt-2 inline-flex h-10 items-center rounded-full border border-border-strong px-4 text-ui font-medium text-fg hover:bg-subtle">
             Try again
           </button>
         )}
@@ -255,9 +265,9 @@ function Verdict({ profile, cabinId, group, assess, assessError, onRetry, compar
   if (!assess || !tone) {
     return (
       <div aria-busy="true" aria-label="Loading the answer" data-testid="answer-verdict" data-verdict="loading">
-        <div className="border-b border-border bg-subtle/40 px-4 py-5 sm:px-6">
+        <div className="m-2 rounded-[var(--radius-3xl)] bg-subtle px-5 py-5 sm:m-3 sm:px-8 sm:py-7">
           {cabinLine}
-          <Skeleton className="mt-3 h-[96px] w-full max-w-xl sm:h-9" />
+          <Skeleton className="mt-3 h-[250px] w-full sm:h-[104px] sm:max-w-xl" />
         </div>
         {picker}
         <div className="space-y-2 px-4 py-4 sm:px-6">
@@ -289,14 +299,42 @@ function Verdict({ profile, cabinId, group, assess, assessError, onRetry, compar
   // Two short sentences: what the ISS tests covered (first sentence only; the pressure caveat sits under the chart) and the gravity limit.
   const rangeSentence = sentences[0]?.startsWith("For ") ? sentences[0].replace(/\.\s+[A-Z].*$/, ".") : null;
 
+  // Share of this cabin's sampled air points with a nearby ISS test (API coverage); no ring when the API gives no points.
+  const pts = assess.coverage.points_with_comparable;
+  const nPts = assess.coverage.n_target_points;
+  const hasPts = Number.isFinite(pts) && Number.isFinite(nPts) && nPts > 0;
+
   return (
     <div data-testid="answer-verdict" data-verdict={assess.verdict}>
-      <div className={cn("border-b px-4 py-5 sm:px-6", tone.box)}>
-        {cabinLine}
-        <p className={cn("mt-3 flex items-start gap-3 text-2xl leading-8 font-semibold tracking-tight text-balance sm:text-[28px] sm:leading-9", tone.text)} role="status">
-          <tone.Icon aria-hidden className={cn("mt-0.5 size-7 shrink-0 sm:mt-1", tone.icon)} />
-          <span data-testid="verdict-title">{title}</span>
-        </p>
+      <div className={cn("relative isolate m-2 flex flex-col gap-4 px-5 py-5 sm:m-3 sm:flex-row sm:items-center sm:gap-6 sm:px-8 sm:py-7", tone.box)}>
+        {tone === TONE.blind ? (
+          // Deepens the light pink corner under the white text so it keeps AA contrast.
+          <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 rounded-[inherit] print:hidden bg-[linear-gradient(100deg,rgb(40_0_60/.4)_0%,rgb(40_0_60/.22)_55%,transparent_85%)]" />
+        ) : null}
+        <div className="min-w-0 flex-1">
+          {line(tone.sub, tone === TONE.partly ? "text-fg" : "text-white", tone.link)}
+          <p className="mt-3 flex items-start gap-3 text-2xl leading-8 font-semibold tracking-tight text-balance text-white sm:text-[32px] sm:leading-10 print:text-fg" role="status">
+            <tone.Icon aria-hidden className={cn("mt-0.5 size-7 shrink-0 sm:mt-1.5", tone.icon)} />
+            <span data-testid="verdict-title">{title}</span>
+          </p>
+        </div>
+        {hasPts ? (
+          <ProgressRing
+            className="shrink-0 self-center text-white"
+            value={pts / nPts}
+            size={148}
+            stroke={6}
+            label={<DotNumber className="text-[48px] text-white">{pts}</DotNumber>}
+            sublabel={
+              <span className={cn("block text-xs leading-4 whitespace-nowrap", tone.sub)}>
+                of {nPts} points
+                <br />
+                with ISS tests
+              </span>
+            }
+            ariaLabel={`${pts} of ${nPts} points in this cabin's air have nearby ISS tests.`}
+          />
+        ) : null}
       </div>
       {picker}
       <div className="space-y-2 px-4 py-4 sm:px-6">
@@ -394,7 +432,7 @@ function ChartBlock({
         {cabin.xHi - cabin.xLo > 0 || cabin.yHi - cabin.yLo > 0 ? (
           <span className="inline-flex items-center gap-1.5" data-testid="legend-range">
             <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>
-              <rect x="1" y="1" width="10" height="10" fill="var(--fg)" fillOpacity="0.06" stroke="var(--fg)" strokeWidth="1.25" strokeDasharray="3 2" />
+              <rect x="1" y="1" width="10" height="10" rx="2" fill="var(--accent)" fillOpacity="0.1" stroke="var(--accent)" strokeWidth="1.25" strokeDasharray="1.5 2.5" strokeLinecap="round" />
             </svg>
             Dashed box: this cabin&apos;s air range
           </span>
@@ -424,7 +462,7 @@ function ChartBlock({
 function ResultsTable({ rows, others, cabinName, air, materialLabel }: { rows: readonly TestRow[]; others: readonly { id: string; label: string; x: number; y: number }[]; cabinName: string; air: ReturnType<typeof cabinAir>; materialLabel: string }) {
   const sorted = React.useMemo(() => [...rows].sort((a, b) => a.oxygen - b.oxygen || a.kpa - b.kpa), [rows]);
   return (
-    <div className="max-h-72 overflow-y-auto rounded-md border border-border" tabIndex={0} role="region" aria-label={`Table of ISS test results for ${materialLabel}`}>
+    <div className="max-h-72 overflow-y-auto rounded-[var(--radius-md)] border border-border" tabIndex={0} role="region" aria-label={`Table of ISS test results for ${materialLabel}`}>
       <table className="w-full table-fixed border-collapse text-left text-xs sm:table-auto sm:text-ui">
         <caption className="sr-only">ISS test results for {materialLabel}, and the cabin for comparison</caption>
         <colgroup>

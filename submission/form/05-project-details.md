@@ -2,7 +2,7 @@
 
 NASA burned materials aboard the International Space Station (ISS) to learn when a flame keeps burning. All those tests ran in ISS-like air. Moon and Mars cabins plan thinner air with more oxygen.
 
-Blind Spots asks one question: **do the ISS flame tests cover this cabin's air?**
+Blind Spots asks one question: **do the ISS flame tests cover this cabin's air?** The home page asks it and shows the key numbers; **Check a cabin** opens the tool.
 
 1. **Pick a cabin.** 11 documented NASA cabin atmospheres. Each card says Covered, Barely covered or Not covered.
 2. **See the answer.** A plain verdict and a chart of oxygen against pressure, with ISS tests and your cabin marked.
@@ -55,5 +55,6 @@ The code, text and analysis were written with SI assistance from Claude, by Anth
 ## Links
 
 - Site: https://blind-spots-kappa.vercel.app
+- Check a cabin: https://blind-spots-kappa.vercel.app/cabins
 - Code: https://github.com/Atharv-Sharma06/blind-spots
 - 30-second video: https://blind-spots-kappa.vercel.app/video/blind-spots-demo-30s.webm

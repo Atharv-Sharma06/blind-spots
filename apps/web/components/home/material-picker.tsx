@@ -64,7 +64,7 @@ export function MaterialPicker({ groups, nearby, selectedId, onChange, part = "b
             id={selectId}
             value={selectedId}
             onChange={(e) => onChange(e.target.value)}
-            className="h-11 w-full min-w-0 appearance-none truncate rounded-md border border-border-strong bg-surface pr-10 pl-3 text-prose text-fg transition-colors hover:border-fg"
+            className="h-11 w-full min-w-0 appearance-none truncate rounded-full border border-border-strong bg-subtle pr-11 pl-4 text-prose text-fg shadow-[inset_0_1px_0_rgb(255_255_255/.05)] transition-colors hover:border-fg/60 hover:bg-[#26262B]"
           >
             {modelled.map((g) => (
               <option key={g.group_id} value={g.group_id}>
@@ -73,7 +73,7 @@ export function MaterialPicker({ groups, nearby, selectedId, onChange, part = "b
               </option>
             ))}
           </select>
-          <ChevronDown aria-hidden className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted" />
+          <ChevronDown aria-hidden className="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 text-accent" />
         </div>
       </div>
       {nearby && modelled.length > 0 && modelled.every((g) => (nearby.get(g.group_id) ?? 0) === 0) ? (
@@ -96,7 +96,7 @@ export function MaterialPicker({ groups, nearby, selectedId, onChange, part = "b
           contentClassName="pl-0 sm:pl-5"
         >
           <p className="mb-2 text-ui text-muted">Pick a row to switch material. Grey rows have too few ISS tests for the model.</p>
-          <ul className="divide-y divide-border overflow-hidden rounded-md border border-border">
+          <ul className="divide-y divide-border overflow-hidden rounded-[var(--radius-lg)] border border-border bg-bg/40">
             {all.map((g) => {
               const n = nearby?.get(g.group_id) ?? 0;
               const canPick = g.model_status === "modeled";

@@ -10,19 +10,19 @@ import { QueryError } from "@/components/explore/query-state";
 import type { Verdict } from "@/lib/types";
 
 /**
- * Verdict badge (visual audit a03-06): supported = neutral outline; extrapolation = warn text only;
- * insufficient evidence = the plum uncertainty hue. Never amber (gaps) or teal (candidates).
+ * Verdict chip: supported = periwinkle (covered), extrapolation = yellow (partly covered),
+ * insufficient evidence = magenta/plum (blind spot). The words always carry the meaning too.
  */
 export function VerdictBadge({ verdict, className, ...props }: { verdict: Verdict } & React.HTMLAttributes<HTMLSpanElement>) {
   const tone =
     verdict === "supported"
-      ? "border-border-strong bg-surface text-fg px-1.5"
+      ? "border-observed/30 bg-observed-tint text-periwinkle px-2.5"
       : verdict === "extrapolation"
-        ? "border-transparent bg-transparent px-0 text-warn"
-        : "border-plum-3 bg-plum-1 text-plum-7 px-1.5";
+        ? "border-accent/30 bg-accent-tint text-accent px-2.5"
+        : "border-plum-3 bg-plum-2 text-plum-7 px-2.5";
   return (
     <span
-      className={cn("inline-flex h-5 shrink-0 items-center whitespace-nowrap rounded-sm border text-xs font-medium leading-none", tone, className)}
+      className={cn("inline-flex h-6 shrink-0 items-center whitespace-nowrap rounded-full border text-xs font-medium leading-none", tone, className)}
       {...props}
     >
       {verdictLabel(verdict)}
@@ -47,7 +47,7 @@ export function Updating({ active, children }: { active: boolean; children: Reac
   return (
     <div className="relative" aria-busy={active || undefined}>
       {active ? (
-        <p role="status" className="absolute top-0 right-0 z-10 rounded-sm border border-border bg-surface px-1.5 py-0.5 text-xs text-muted">
+        <p role="status" className="absolute top-2 right-2 z-10 rounded-full border border-border-strong bg-subtle px-2.5 py-0.5 text-xs text-fg">
           Updating…
         </p>
       ) : null}

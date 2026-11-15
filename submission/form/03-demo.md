@@ -94,3 +94,7 @@ or registration" (do not choose Private).
 2. `curl -sIL https://blind-spots-kappa.vercel.app/video/blind-spots-demo-30s.webm` -> 200, `content-type: video/webm`,
    and a `content-length` equal to the new file's size.
 3. Open the link in a logged-out headless browser and confirm it plays the Cabins-page tour, not the old explorer one.
+4. Restyle (2026-11-15 evening): `/` is now a landing page and the Cabins tool moved to `/cabins`; the tour autostarts on
+   `/cabins?demo=1`. `.work/video/record.mjs` still opens `/?demo=1`, which forwards to `/cabins?demo=1` (one extra
+   redirect before the tour). The 28.80 s test above was recorded before the restyle; re-check the new recording's
+   duration (limit 30 s) and that it shows the new dark look.

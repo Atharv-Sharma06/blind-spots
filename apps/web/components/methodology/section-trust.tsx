@@ -9,28 +9,33 @@ import type { ExtValidation } from "./types";
 import { blindspotShortfall, VERDICT_WORD } from "./labels";
 import { QueryBoundary } from "./primitives";
 import { Disclosure } from "@/components/ui/disclosure";
+import { DotNumber } from "@/components/ui/dot-number";
 import { modelOf as model, retroSummary, retroVsRandom, vsMajority } from "./summary";
 
 const f = (v: number | null | undefined, d = 2): string => (typeof v === "number" && Number.isFinite(v) ? v.toFixed(d) : "—");
 
 function Tile({ value, label, note }: { value: string; label: string; note: string }) {
+  // "7 of 9" -> big "7" + small "of 9"; "97–101 kPa" -> big "97–101" + small "kPa".
+  const m = /^(\d+) (of \d+)$/.exec(value) ?? /^(.+) (kPa)$/.exec(value);
   return (
-    <div className="min-w-0 rounded-md border border-border bg-surface px-4 py-3">
-      <div className="num text-[22px] font-medium leading-tight tracking-[-0.01em] text-fg">
-        {(() => {
-          const m = /^(\d+) (of \d+)$/.exec(value);
-          return m ? (
-            <>
-              {m[1]} <span className="text-[14px] font-normal text-muted">{m[2]}</span>
-            </>
-          ) : (
-            value
-          );
-        })()}
+    <div className="card min-w-0 rounded-[28px] px-5 py-5">
+      <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 text-fg">
+        <DotNumber className="text-[36px] leading-[40px]">{m ? m[1] : value}</DotNumber>
+        {m ? <span className="num text-[14px] text-muted">{m[2]}</span> : null}
       </div>
-      <div className="mt-1 text-[13px] font-medium text-fg">{label}</div>
-      <div className="mt-0.5 text-xs leading-snug text-muted">{note}</div>
+      <div className="mt-3 text-[14px] font-medium leading-5 text-fg">{label}</div>
+      <div className="mt-1 text-xs leading-snug text-muted">{note}</div>
     </div>
+  );
+}
+
+/** One calm limit row: a small amber dot, then the text. */
+function Limit({ children }: { children: ReactNode }) {
+  return (
+    <li className="flex gap-3 border-t border-border py-3 first:border-t-0">
+      <span aria-hidden className="mt-[9px] size-1.5 shrink-0 rounded-full bg-gap" />
+      <span className="min-w-0">{children}</span>
+    </li>
   );
 }
 
@@ -53,18 +58,18 @@ function TrustSkeleton() {
         <p className="max-w-[68ch] text-[16px] leading-relaxed">
           <Ghost>Short answer: partly. On ISS tests it had not seen, the model beats a simple guess in 00 of 00 materials. Where ISS tests give no evidence, it says so.</Ghost>
         </p>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {tiles.map(([label, note]) => (
-            <div key={label} className="min-w-0 rounded-md border border-border bg-surface px-4 py-3">
-              <div className="num text-[22px] font-medium leading-tight tracking-[-0.01em]"><Ghost>00 of 00</Ghost></div>
-              <div className="mt-1 text-[13px] font-medium"><Ghost>{label}</Ghost></div>
-              <div className="mt-0.5 text-xs leading-snug"><Ghost>{note}</Ghost></div>
+            <div key={label} className="card min-w-0 rounded-[28px] px-5 py-5">
+              <div className="text-[36px] leading-[40px]"><Ghost>00 of 00</Ghost></div>
+              <div className="mt-3 text-[14px] font-medium leading-5"><Ghost>{label}</Ghost></div>
+              <div className="mt-1 text-xs leading-snug"><Ghost>{note}</Ghost></div>
             </div>
           ))}
         </div>
         <div className="max-w-[78ch] space-y-2">
-          <h3 className="text-[14px] font-semibold"><Ghost>Limits</Ghost></h3>
-          <ul className="space-y-1.5 pl-5 text-[14px] leading-relaxed">
+          <h3 className="text-[15px] font-semibold"><Ghost>Limits</Ghost></h3>
+          <ul className="text-[14px] leading-relaxed">
             {[
               "The uncertainty check passes in only 0 of 0 materials, and leans on steps where airflow was switched off. Without them, at most 00 flame-went-out results remain per material.",
               "Gravity is not modelled. All ISS tests ran in free fall; the Moon and Mars differ. This site judges the air only.",
@@ -72,7 +77,7 @@ function TrustSkeleton() {
               "The ranking beats random picks in 00 of 00 replays, but not \"test the nearest gap\" (0 better, 00 tied, 0 worse).",
               "ISS tests ran near sea-level pressure, so no pressure effect is learned. Outside the tested range, the model gives no probability.",
             ].map((t) => (
-              <li key={t}><Ghost>{t}</Ghost></li>
+              <Limit key={t}><Ghost>{t}</Ghost></Limit>
             ))}
           </ul>
         </div>
@@ -138,7 +143,7 @@ export function TrustSection({
                 <p className="max-w-[68ch] text-[16px] leading-relaxed" data-testid="trust-lead">
                   Short answer: partly. On ISS tests it had not seen, the model beats a simple guess in {better.length} of {gs.length} materials. Where ISS tests give no evidence, it says so.
                 </p>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                   <Tile
                     value={`${better.length} of ${gs.length}`}
                     label="materials beat a simple guess"
@@ -166,34 +171,34 @@ export function TrustSection({
                 </div>
 
                 <div className="max-w-[78ch] space-y-2">
-                  <h3 className="text-[14px] font-semibold">Limits</h3>
-                  <ul className="list-disc space-y-1.5 pl-5 text-[14px] leading-relaxed marker:text-muted">
+                  <h3 className="text-[15px] font-semibold">Limits</h3>
+                  <ul className="text-[14px] leading-relaxed text-fg/90">
                     {bsSupported.length ? (
-                      <li>
+                      <Limit>
                         The uncertainty check passes in only {bsSupported.length} of {gs.length} materials
                         {leftVals.length ? `, and leans on steps where airflow was switched off. Without them, at most ${Math.max(...leftVals)} flame-went-out results remain per material.` : "."}
-                      </li>
+                      </Limit>
                     ) : null}
-                    <li>
+                    <Limit>
                       <strong className="font-medium">Gravity is not modelled.</strong> All ISS tests ran in free fall; the Moon and Mars differ. This site judges the air only.
-                    </li>
-                    <li>
+                    </Limit>
+                    <Limit>
                       In {eceWorse} of {gs.length} materials, its stated chances match reality worse than a constant guess.
-                    </li>
+                    </Limit>
                     {vg ? (
-                      <li>
+                      <Limit>
                         The ranking beats random picks in {vr?.better ?? "—"} of {summary?.n_scenarios ?? "—"} replays, but not &quot;test the nearest gap&quot; ({vg.better} better, {vg.indistinguishable} tied, {vg.worse} worse).
-                      </li>
+                      </Limit>
                     ) : null}
-                    <li>
+                    <Limit>
                       ISS tests ran near sea-level pressure, so no pressure effect is learned. Outside the tested range, the model gives no probability.
-                    </li>
+                    </Limit>
                   </ul>
                 </div>
 
                 <Disclosure summary="Results for each material" tone="strong" contentClassName="mt-3 pl-0" data-testid="trust-by-group">
-                  <div className="relative overflow-x-auto rounded-md border border-border bg-surface" tabIndex={0} role="region" aria-label="Validation summary by material">
-                    <table className="w-full min-w-[720px] border-collapse text-[13px]">
+                  <div className="relative overflow-x-auto rounded-[20px] border border-border bg-surface" tabIndex={0} role="region" aria-label="Validation summary by material">
+                    <table className="w-full min-w-0 border-collapse sm:min-w-[720px] text-[13px]">
                       <caption className="sr-only">Checks on unseen tests, by material</caption>
                       <thead>
                         <tr className="border-b border-border bg-subtle text-left text-xs text-muted">
@@ -201,11 +206,11 @@ export function TrustSection({
                           <th scope="col" className="px-3 py-2 text-right font-medium">Tests</th>
                           <th scope="col" className="px-3 py-2 font-medium">Versus a simple guess</th>
                           <th scope="col" className="px-3 py-2 font-medium">Uncertainty check</th>
-                          <th scope="col" className="px-3 py-2 text-right font-medium">
+                          <th scope="col" className="hidden px-3 py-2 text-right font-medium sm:table-cell">
                             Ranking vs random
                             <div className="font-normal">better / tied / worse</div>
                           </th>
-                          <th scope="col" className="px-3 py-2"><span className="sr-only">Details</span></th>
+                          <th scope="col" className="hidden px-3 py-2 sm:table-cell"><span className="sr-only">Details</span></th>
                         </tr>
                       </thead>
                       <tbody>
@@ -217,7 +222,16 @@ export function TrustSection({
                           const rr = retroVsRandom(v, g.group_id);
                           return (
                             <tr key={g.group_id} className="border-b border-border last:border-b-0 align-top">
-                              <th scope="row" className="w-[30%] px-3 py-2 text-left font-medium">{label(g.group_id)}</th>
+                              <th scope="row" className="w-[30%] px-3 py-2 text-left font-medium">
+                                {label(g.group_id)}
+                                <button
+                                  type="button"
+                                  onClick={() => onShowGroup(g.group_id)}
+                                  className="mt-1 inline-flex min-h-10 items-center rounded-sm text-xs font-normal text-accent underline decoration-accent/40 underline-offset-2 hover:decoration-accent sm:hidden"
+                                >
+                                  Details<span className="sr-only"> for {label(g.group_id)}</span>
+                                </button>
+                              </th>
                               <td className="num px-3 py-2 text-right">{fmtCount(g.n_experiments)}</td>
                               <td className="px-3 py-2">
                                 <span className={vs === "better" ? "font-medium text-fg" : "text-fg"}>
@@ -231,7 +245,7 @@ export function TrustSection({
                                 <span className={g.blindspot_test.verdict === "supported" ? "font-medium text-fg" : "text-fg"}>{VERDICT_WORD[g.blindspot_test.verdict] ?? g.blindspot_test.verdict}</span>
                                 {short ? <div className="text-xs leading-snug text-muted">{short}</div> : null}
                               </td>
-                              <td className="num whitespace-nowrap px-3 py-2 text-right">
+                              <td className="num hidden whitespace-nowrap px-3 py-2 text-right sm:table-cell">
                                 {rr.n ? (
                                   <span aria-label={`${rr.better} better, ${rr.same} tied, ${rr.worse} worse`}>
                                     {rr.better} / {rr.same} / {rr.worse}
@@ -240,11 +254,11 @@ export function TrustSection({
                                   <span className="text-muted">no replay</span>
                                 )}
                               </td>
-                              <td className="px-3 py-1.5 text-right">
+                              <td className="hidden px-3 py-1.5 text-right sm:table-cell">
                                 <button
                                   type="button"
                                   onClick={() => onShowGroup(g.group_id)}
-                                  className="inline-flex min-h-7 items-center rounded-sm px-1.5 text-xs text-accent underline decoration-accent/40 underline-offset-2 hover:decoration-accent"
+                                  className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-sm px-1.5 text-xs text-accent underline decoration-accent/40 underline-offset-2 hover:decoration-accent"
                                 >
                                   Details<span className="sr-only"> for {label(g.group_id)}</span>
                                 </button>

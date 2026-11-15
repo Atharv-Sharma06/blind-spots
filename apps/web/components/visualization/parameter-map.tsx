@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import type { CoverageResponse, SurfaceResponse } from "@/lib/types";
 import { verdictLabel } from "@/lib/format";
 import MapLegend from "./map-legend";
-import { ACCENT, GAP, INK, MUTED, OBSERVED, fmtTick, gridGeom, maskRuns, plumRgb, yTicks, type GridGeom } from "./map-scales";
+import { ACCENT, GAP, GAP_HEX, INK, INK_RGB, MUTED, OBSERVED, ON_ACCENT, TARGET, UNC_ALPHA, fmtTick, gridGeom, maskRuns, plumRgb, yTicks, type GridGeom } from "./map-scales";
 
 export interface MapObservation {
   id: string;
@@ -159,9 +159,9 @@ function buildRasters(surface: SurfaceResponse, hypo: ParameterMapProps["hypothe
       if (pc && p && supported(i, j)) {
         const v = at(p[j], i);
         if (typeof v === "number" && Number.isFinite(v)) {
-          pc[1].data[o] = 23;
-          pc[1].data[o + 1] = 23;
-          pc[1].data[o + 2] = 26;
+          pc[1].data[o] = INK_RGB[0];
+          pc[1].data[o + 1] = INK_RGB[1];
+          pc[1].data[o + 2] = INK_RGB[2];
           pc[1].data[o + 3] = Math.round(255 * (0.05 + 0.16 * Math.min(1, Math.max(0, v))));
         }
       }
@@ -317,6 +317,19 @@ export default function ParameterMap(props: ParameterMapProps) {
   const [asTable, setAsTable] = useState(false);
   const tipRef = useRef<HTMLDivElement>(null);
   const [wrapFocus, setWrapFocus] = useState(false);
+  // Touch screens get bigger invisible hit areas (the drawn dots stay the same size).
+  const [coarse, setCoarse] = useState(false);
+  useEffect(() => {
+    try {
+      const mq = window.matchMedia("(pointer: coarse)");
+      const f = () => setCoarse(mq.matches);
+      f();
+      mq.addEventListener("change", f);
+      return () => mq.removeEventListener("change", f);
+    } catch {
+      return undefined;
+    }
+  }, []);
 
   useEffect(() => {
     const el = wrapRef.current;
@@ -340,9 +353,21 @@ export default function ParameterMap(props: ParameterMapProps) {
   const ih = Math.max(50, height - M.t - M.b);
   /** Tooltip placement at the pointer, flipped left/up near the right/bottom edges (transform: no layout shift). */
   const tipTransform = (x: number, y: number) => {
-    const fx = x + 14 + 270 > width;
-    const fy = y + 14 + 170 > height;
-    return `translate3d(${fx ? x - 14 : x + 14}px, ${fy ? y - 14 : y + 14}px, 0) translate(${fx ? "-100%" : "0"}, ${fy ? "-100%" : "0"})`;
+    const tw = Math.min(260, width - 8);
+    const th = 170;
+    let left = x + 14 + tw > width ? x - 14 - tw : x + 14;
+    left = Math.max(4, Math.min(left, width - tw - 4));
+    let top = y + 14;
+    let ty = "0";
+    if (top + th > height) {
+      if (y - 14 - th >= 4) {
+        top = y - 14;
+        ty = "-100%";
+      } else {
+        top = Math.max(4, height - th - 4);
+      }
+    }
+    return `translate3d(${left}px, ${top}px, 0) translate(0, ${ty})`;
   };
 
   const xs = useMemo(() => scaleLinear().domain(view.x).range([0, iw]), [view.x, iw]);
@@ -493,10 +518,11 @@ export default function ParameterMap(props: ParameterMapProps) {
     ctx.imageSmoothingQuality = "high";
     if (rasters) {
       const [rx, ry, rw, rh] = geomRect(rasters.geom);
-      // With coverage hatch on top, lighten the uncertainty wash so the two layers do not stack into a saturated plane.
+      // The plum scale runs dark to bright on the dark plot; a partial alpha keeps the brightest (most uncertain)
+      // cells from washing out the marks and labels drawn on top. The legend ramp uses the same alpha.
       if (layers.uncertainty && rasters.unc) {
         ctx.save();
-        ctx.globalAlpha = 0.72;
+        ctx.globalAlpha = UNC_ALPHA;
         ctx.drawImage(rasters.unc, rx, ry, rw, rh);
         ctx.restore();
       }
@@ -510,17 +536,17 @@ export default function ParameterMap(props: ParameterMapProps) {
       if (whole) {
         // The whole slice is a gap: one flat pale-amber wash and a single label instead of dense hatching.
         ctx.save();
-        ctx.globalAlpha = 0.12;
-        ctx.fillStyle = GAP;
+        ctx.globalAlpha = 0.09;
+        ctx.fillStyle = GAP_HEX;
         ctx.fillRect(0, 0, iw, ih);
         ctx.restore();
       }
-      const pat = whole ? null : hatchPattern(ctx, GAP, dpr, 8);
+      const pat = whole ? null : hatchPattern(ctx, GAP_HEX, dpr, 8);
       if (pat) {
         ctx.save();
         runsPath(sparse.geom, sparse.runs);
         ctx.clip();
-        ctx.globalAlpha = 0.95;
+        ctx.globalAlpha = 0.7;
         ctx.fillStyle = pat;
         ctx.fillRect(0, 0, iw, ih);
         ctx.restore();
@@ -1102,13 +1128,13 @@ export default function ParameterMap(props: ParameterMapProps) {
 
                 {layers.target && tgt && (
                   <g>
-                    <rect pointerEvents="none" x={tgt.rx} y={tgt.ry} width={tgt.rw} height={tgt.rh} fill={INK} fillOpacity={0.06} stroke={INK} strokeWidth={1.5} strokeDasharray="6 3" />
-                    {/* same marker as the Cabins chart: an ink dot (drawn before the candidate diamonds, which may sit on it) */}
-                    <circle pointerEvents="none" cx={tgt.nx} cy={tgt.ny} r={5.5} fill={INK} stroke="var(--surface)" strokeWidth={2} />
+                    <rect pointerEvents="none" x={tgt.rx} y={tgt.ry} width={tgt.rw} height={tgt.rh} fill={TARGET} fillOpacity={0.06} stroke={TARGET} strokeOpacity={0.9} strokeWidth={1.5} strokeDasharray="6 3" />
+                    {/* same marker as the Cabins chart: a white dot with a yellow glow (drawn before the candidate diamonds, which may sit on it) */}
+                    <circle pointerEvents="none" cx={tgt.nx} cy={tgt.ny} r={5.5} fill={TARGET} stroke="var(--surface)" strokeWidth={2} style={{ filter: "drop-shadow(0 0 5px rgb(242 210 27 / 0.75))" }} />
                     <circle
                       cx={tgt.nx}
                       cy={tgt.ny}
-                      r={12}
+                      r={coarse ? 20 : 12}
                       fill="transparent"
                       pointerEvents="all"
                       onPointerEnter={() => setHover({ kind: "tgt", x: tgt.nx + M.l, y: tgt.ny + M.t })}
@@ -1147,7 +1173,7 @@ export default function ParameterMap(props: ParameterMapProps) {
                       onBlur={() => { setFocusKey(null); setHover(null); }}
                     >
                       {focusKey === `x:${c.id}` && <circle cx={X} cy={Y} r={9} fill="none" stroke={ACCENT} strokeWidth={2} />}
-                      <circle cx={X} cy={Y} r={9} fill="transparent" />
+                      <circle cx={X} cy={Y} r={coarse ? 20 : 9} fill="transparent" />
                       <path d={`M${X},${Y - 4}L${X + 3.5},${Y + 2.5}H${X - 3.5}Z`} fill="var(--surface)" stroke={MUTED} strokeOpacity={0.75} strokeWidth={1} />
                     </g>
                   );
@@ -1176,8 +1202,8 @@ export default function ParameterMap(props: ParameterMapProps) {
                       onFocus={() => { setActiveKey(key); setFocusKey(key); setHover({ kind: "obs", id: o.id, x: X + M.l, y: Y + M.t }); }}
                       onBlur={() => { setFocusKey(null); setHover(null); }}
                     >
-                      <circle cx={X} cy={Y} r={10} fill="transparent" />
-                      {o.pressureAssumed && <circle cx={X} cy={Y} r={7} fill="none" stroke={OBSERVED} strokeWidth={0.75} strokeOpacity={0.45} strokeDasharray="2 2" />}
+                      <circle cx={X} cy={Y} r={coarse ? 20 : 10} fill="transparent" />
+                      {o.pressureAssumed && <circle cx={X} cy={Y} r={7} fill="none" stroke={OBSERVED} strokeWidth={0.75} strokeOpacity={0.6} strokeDasharray="2 2" />}
                       <circle cx={X} cy={Y} r={4.5} fill={fill} fillOpacity={o.label === 1 ? 0.85 : 1} stroke={o.label === 1 ? "var(--surface)" : OBSERVED} strokeWidth={o.label === 1 ? 1 : 1.5} />
                       {hl && <circle cx={X} cy={Y} r={9.5} fill="none" stroke={ACCENT} strokeWidth={1.5} />}
                       {(sel || focusKey === key) && <circle cx={X} cy={Y} r={12} fill="none" stroke={ACCENT} strokeWidth={2.5} />}
@@ -1216,7 +1242,7 @@ export default function ParameterMap(props: ParameterMapProps) {
                         stroke={g.anyOn ? "var(--surface)" : ACCENT}
                         strokeWidth={allOff ? 1.75 : 1.5}
                       />
-                      <text aria-hidden="true" x={X} y={Y + 3.5} textAnchor="middle" fontSize={11} fontWeight={700} fill={g.anyOn ? "#fff" : ACCENT} pointerEvents="none" style={{ fontVariantNumeric: "tabular-nums" }}>{g.label}</text>
+                      <text aria-hidden="true" x={X} y={Y + 3.5} textAnchor="middle" fontSize={11} fontWeight={700} fill={g.anyOn ? ON_ACCENT : ACCENT} pointerEvents="none" style={{ fontVariantNumeric: "tabular-nums" }}>{g.label}</text>
                       {(sel || focusKey === key) && <path d={shape(half, 4)} fill="none" stroke={INK} strokeWidth={2} />}
                     </g>
                   );
@@ -1227,7 +1253,7 @@ export default function ParameterMap(props: ParameterMapProps) {
             {/* labels that must sit above everything */}
             <g transform={`translate(${M.l},${M.t})`} pointerEvents="none" clipPath={`url(#${uid}-plot)`}>
               {layers.target && tgt?.lab && (
-                <text x={tgt.lab.x} y={tgt.lab.y} fontSize={12} fontWeight={700} fill={INK} stroke="var(--surface)" strokeWidth={3} paintOrder="stroke" strokeLinejoin="round">{tgt.lab.text}</text>
+                <text x={tgt.lab.x} y={tgt.lab.y} fontSize={12} fontWeight={700} fill={TARGET} stroke="var(--surface)" strokeWidth={3} paintOrder="stroke" strokeLinejoin="round">{tgt.lab.text}</text>
               )}
               {contourLabel && (
                 <text x={contourLabel.x} y={contourLabel.y} fontSize={11} fontWeight={500} fill={INK} stroke="var(--surface)" strokeWidth={3.5} paintOrder="stroke" strokeLinejoin="round">{CONTOUR_LABEL}</text>
@@ -1244,7 +1270,7 @@ export default function ParameterMap(props: ParameterMapProps) {
             <div
               ref={tipRef}
               role="tooltip"
-              className="pointer-events-none absolute left-0 top-0 z-10 w-max max-w-[260px] rounded-md bg-surface px-2.5 py-2 text-[12px] shadow-popover"
+              className="pointer-events-none absolute left-0 top-0 z-10 w-[min(260px,calc(100%-8px))] rounded-md bg-surface px-2.5 py-2 text-[12px] shadow-popover"
               style={{ transform: tipTransform(hover.x, hover.y) }}
             >
               {tip}

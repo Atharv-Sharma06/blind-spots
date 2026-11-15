@@ -3,7 +3,7 @@ import { expect, test, type Page } from "@playwright/test";
 
 // Accessibility scan (WCAG 2.2 AA tags) using the project's baseURL. Against `next dev` use a
 // localhost baseURL (127.0.0.1 blocks dev resources). Needs a live API for the data-driven views.
-const PAGES = ["/", "/explore", "/experiments", "/methodology", "/brief"];
+const PAGES = ["/", "/cabins", "/explore", "/experiments", "/methodology", "/brief"];
 const TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 
 async function scan(page: Page, label: string) {

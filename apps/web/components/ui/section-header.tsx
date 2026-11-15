@@ -12,7 +12,7 @@ export interface SectionHeaderProps {
 }
 
 const SIZES = {
-  h1: "text-heading font-semibold md:text-display",
+  h1: "text-heading font-semibold tracking-tight md:text-display",
   h2: "text-title font-semibold",
   h3: "text-ui font-semibold",
 } as const;

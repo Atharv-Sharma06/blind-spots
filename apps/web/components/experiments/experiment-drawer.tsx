@@ -65,7 +65,7 @@ export function ExperimentDrawer(props: {
       <SheetContent
         title={exp ? materialLabel(exp.material_family) : notFound ? "Experiment not found" : "Experiment"}
         description={exp ? sourceLabel(exp) : undefined}
-        className="sm:max-w-[640px]"
+        className="inset-y-2 right-2 left-2 w-auto overflow-hidden rounded-2xl border border-white/[0.07] bg-[linear-gradient(160deg,#242428_0%,#18181B_55%,#131315_100%)] shadow-[inset_0_1px_0_rgb(255_255_255/0.06),0_24px_48px_-24px_rgb(0_0_0/0.8)] sm:inset-y-3 sm:right-3 sm:left-auto sm:w-full sm:max-w-[640px]"
         aria-describedby={undefined}
         onCloseAutoFocus={onCloseAutoFocus}
       >
@@ -104,7 +104,7 @@ export function ExperimentDrawer(props: {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="border-b border-border py-5 first:pt-0 last:border-b-0">
+    <section className="border-b border-white/[0.06] py-5 first:pt-0 last:border-b-0">
       <h3 className="mb-3 text-prose font-semibold text-fg">{title}</h3>
       {children}
     </section>
@@ -126,7 +126,7 @@ function Fields({ items }: { items: [string, React.ReactNode][] }) {
 
 function Fact({ label, value, unit, note, className }: { label: string; value: string; unit: string; note?: React.ReactNode; className?: string }) {
   return (
-    <div className={cn("rounded-lg border border-border bg-subtle/50 px-3.5 py-3", className)}>
+    <div className={cn("rounded-xl border border-white/[0.06] bg-white/[0.04] px-4 py-3", className)}>
       <p className="text-xs text-muted">{label}</p>
       <p className="mt-0.5">
         {value === MISSING ? (
@@ -187,13 +187,13 @@ function Details({ e, obs, groups, inv }: { e: ApiExperiment; obs: ApiObservatio
           large
         />
         {described ? (
-          <blockquote className="mt-3 rounded-md border border-border bg-subtle p-3 text-ui">
+          <blockquote className="mt-3 rounded-xl border border-white/[0.06] bg-white/[0.04] p-3.5 text-ui">
             <span className="mb-1 block text-xs text-muted">NASA&apos;s words</span>
             {described}
           </blockquote>
         ) : null}
         {context ? (
-          <p className="mt-3 rounded-md bg-gap-tint px-3 py-2 text-ui text-gap-fg">Context only: different apparatus or test length, so the model skips it.</p>
+          <p className="mt-3 rounded-xl bg-gap-tint px-3.5 py-2.5 text-ui text-gap-fg">Context only: different apparatus or test length, so the model skips it.</p>
         ) : null}
       </Section>
 
@@ -204,7 +204,7 @@ function Details({ e, obs, groups, inv }: { e: ApiExperiment; obs: ApiObservatio
           <Fact className="col-span-2 sm:col-span-1" label="Airflow" value={fmtAirflow(e)} unit="cm/s" note={fmtAirflow(e).includes("–") ? "varies by step" : undefined} />
         </div>
         {p.assumed ? (
-          <p className="mt-3 rounded-md bg-gap-tint px-3 py-2 text-ui text-gap-fg">
+          <p className="mt-3 rounded-xl bg-gap-tint px-3.5 py-2.5 text-ui text-gap-fg">
             NASA did not record the pressure. We assume the ISS cabin pressure and keep it in its own field.
           </p>
         ) : null}
@@ -237,7 +237,7 @@ function Details({ e, obs, groups, inv }: { e: ApiExperiment; obs: ApiObservatio
           <p className="min-w-0 text-ui">
             <span className="num">{sourceLabel(e)}</span>
           </p>
-          <Button asChild className="h-10 sm:h-8">
+          <Button asChild className="h-10 rounded-full px-4">
             <a href={e.source_url} target="_blank" rel="noreferrer">
               Open the NASA record <ExternalLink aria-hidden />
             </a>
@@ -257,7 +257,7 @@ function Details({ e, obs, groups, inv }: { e: ApiExperiment; obs: ApiObservatio
               [
                 "DOI",
                 doi ? (
-                  <a key="d" className="num text-observed underline underline-offset-2" href={`https://doi.org/${doi}`} target="_blank" rel="noreferrer">
+                  <a key="d" className="num inline-flex min-h-10 items-center text-observed underline underline-offset-2" href={`https://doi.org/${doi}`} target="_blank" rel="noreferrer">
                     {doi}
                   </a>
                 ) : (
@@ -332,7 +332,7 @@ function StepItem({ o }: { o: ApiObservation }) {
   return (
     <li
       data-used={used ? "true" : "false"}
-      className={used ? "rounded-lg border border-border bg-surface p-3" : "rounded-lg border border-dashed border-border bg-subtle/40 p-3 text-muted"}
+      className={used ? "rounded-xl border border-white/[0.06] bg-white/[0.04] p-3.5" : "rounded-xl border border-dashed border-border bg-transparent p-3.5 text-muted"}
     >
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
         <span className="text-ui font-medium text-fg">Step {o.step_index + 1}</span>

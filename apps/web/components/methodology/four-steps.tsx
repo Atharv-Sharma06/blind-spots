@@ -7,6 +7,8 @@ import type { ApiQuery } from "@/hooks/api";
 import type { HeadlineResponse, MethodologyResponse } from "@/lib/types";
 import { fmtCount, fmtFixed } from "@/lib/format";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DotNumber } from "@/components/ui/dot-number";
+import { cn } from "@/lib/cn";
 import { coverageStatus } from "@/components/home/cabins";
 import type { ExtValidation } from "./types";
 import { validationCounts } from "./summary";
@@ -78,51 +80,82 @@ function rankSlot(validation: ApiQuery<ExtValidation>): Slot {
   };
 }
 
-function Figure({ slot }: { slot: Slot }) {
+/** Colour family of one step card (bento: charcoal, magenta, indigo, charcoal with the yellow accent). */
+type Tone = "charcoal" | "magenta" | "indigo" | "yellow";
+
+const TONE_CARD: Record<Tone, string> = {
+  charcoal: "card",
+  // Gradient starts at magenta-mid (not the light corner) so white text keeps AA contrast under the title.
+  magenta: "card-magenta text-white [background-image:var(--grain-img),radial-gradient(120%_140%_at_0%_0%,#B25AD0_0%,var(--magenta-mid)_30%,var(--magenta-to)_100%)]!",
+  indigo: "card-indigo text-white",
+  yellow: "card border border-accent/30",
+};
+/** Secondary text per tone (AA on each background). */
+const TONE_MUTED: Record<Tone, string> = {
+  charcoal: "text-muted",
+  magenta: "text-white",
+  indigo: "text-white/75",
+  yellow: "text-muted",
+};
+const TONE_RULE: Record<Tone, string> = {
+  charcoal: "border-white/10",
+  magenta: "border-white/25",
+  indigo: "border-white/15",
+  yellow: "border-white/10",
+};
+
+function Figure({ slot, tone }: { slot: Slot; tone: Tone }) {
+  const muted = TONE_MUTED[tone];
   if (slot.state === "loading") {
     return (
       <div role="status" aria-label="Loading" className="space-y-2">
-        <Skeleton className="h-9 w-24" />
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-4/5" />
+        <Skeleton className="h-11 w-24 bg-white/10" />
+        <Skeleton className="h-4 w-full bg-white/10" />
+        <Skeleton className="h-4 w-4/5 bg-white/10" />
       </div>
     );
   }
-  if (slot.state === "unavailable") return <p className="text-[13px] text-muted">This number is unavailable right now.</p>;
+  if (slot.state === "unavailable") return <p className={cn("text-[13px]", muted)}>This number is unavailable right now.</p>;
   const { big, of, caption, note } = slot.value;
   return (
     <>
-      <p className="flex items-baseline gap-1.5 leading-9 text-fg">
-        <span className="num text-[30px] font-medium tracking-[-0.02em]">{big}</span>
-        {of ? <span className="num text-[16px] text-muted">{of}</span> : null}
+      <p className="flex items-baseline gap-2">
+        <DotNumber className={cn("text-[44px] leading-[48px]", tone === "yellow" ? "text-accent" : "text-white")}>{big}</DotNumber>
+        {of ? <span className={cn("num text-[15px]", muted)}>{of}</span> : null}
       </p>
-      <p className="mt-1 text-[14px] leading-5 text-fg">{caption}</p>
-      {note ? <p className="mt-1 text-[13px] leading-[18px] text-muted">{note}</p> : null}
+      <p className="mt-2 text-[14px] leading-5">{caption}</p>
+      {note ? <p className={cn("mt-1 text-[13px] leading-[18px]", muted)}>{note}</p> : null}
     </>
   );
 }
 
-function Step({ n, icon, title, children, slot, last }: { n: number; icon: ReactNode; title: string; children: ReactNode; slot: Slot; last?: boolean }) {
+function Step({ n, icon, title, children, slot, tone, last }: { n: number; icon: ReactNode; title: string; children: ReactNode; slot: Slot; tone: Tone; last?: boolean }) {
   return (
-    <li className="relative flex min-w-0 flex-col rounded-lg border border-border bg-surface p-4">
-      <div className="flex items-center gap-2.5">
-        <span className="num inline-flex size-7 items-center justify-center rounded-full bg-accent text-[13px] font-medium text-white" aria-hidden>
+    <li className={cn("relative flex min-w-0 flex-col rounded-[32px] p-6", TONE_CARD[tone])}>
+      <div className="flex items-center justify-between gap-2.5">
+        <span
+          className={cn(
+            "num inline-flex size-8 items-center justify-center rounded-full text-[13px] font-semibold",
+            tone === "yellow" ? "bg-accent text-[#0B0B0C]" : "bg-white/12 text-white ring-1 ring-white/15",
+          )}
+          aria-hidden
+        >
           {n}
         </span>
-        <span className="text-muted" aria-hidden>
+        <span className={cn("inline-flex size-10 items-center justify-center rounded-full bg-black/25", TONE_MUTED[tone])} aria-hidden>
           {icon}
         </span>
       </div>
-      <h3 className="mt-3 text-[16px] font-semibold leading-6 tracking-[-0.01em]">
+      <h3 className="mt-5 text-[18px] font-semibold leading-6 tracking-[-0.01em]">
         <span className="sr-only">Step {n}: </span>
         {title}
       </h3>
-      <p className="mt-1.5 mb-4 min-h-[44px] text-[14px] leading-[22px] text-muted">{children}</p>
-      <div className="border-t border-border pt-3">
-        <Figure slot={slot} />
+      <p className={cn("mt-1.5 mb-5 min-h-[44px] text-[14px] leading-[22px]", TONE_MUTED[tone])}>{children}</p>
+      <div className={cn("border-t pt-4", TONE_RULE[tone])}>
+        <Figure slot={slot} tone={tone} />
       </div>
       {last ? null : (
-        <span className="absolute -right-[13px] top-[17px] z-10 hidden size-[22px] items-center justify-center rounded-full border border-border bg-bg text-muted lg:flex" aria-hidden>
+        <span className="absolute -right-[19px] top-[22px] z-10 hidden size-[22px] items-center justify-center rounded-full border border-border bg-bg text-muted lg:flex" aria-hidden>
           <ChevronRight className="size-3.5" />
         </span>
       )}
@@ -159,17 +192,17 @@ export function FourSteps({ headline, validation, methodology }: { headline: Api
       <h2 id="steps-h" className="sr-only">
         The four steps
       </h2>
-      <ol className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Step n={1} icon={<Database className="size-5" />} title="Collect ISS tests" slot={gatherSlot(headline, methodology)}>
+      <ol className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-4">
+        <Step n={1} icon={<Database className="size-5" />} title="Collect ISS tests" slot={gatherSlot(headline, methodology)} tone="charcoal">
           NASA burned materials aboard the ISS.
         </Step>
-        <Step n={2} icon={<MapIcon className="size-5" />} title="Check each cabin" slot={mapSlot(headline)}>
+        <Step n={2} icon={<MapIcon className="size-5" />} title="Check each cabin" slot={mapSlot(headline)} tone="magenta">
           Did those tests match the cabin&apos;s air?
         </Step>
-        <Step n={3} icon={<Brain className="size-5" />} title="Train the model" slot={modelSlot(validation, headline)}>
+        <Step n={3} icon={<Brain className="size-5" />} title="Train the model" slot={modelSlot(validation, headline)} tone="indigo">
           It learns when flames burn, and says when it does not know.
         </Step>
-        <Step n={4} icon={<ListOrdered className="size-5" />} title="Pick the next test" slot={rankSlot(validation)} last>
+        <Step n={4} icon={<ListOrdered className="size-5" />} title="Pick the next test" slot={rankSlot(validation)} tone="yellow" last>
           We rank the test that would teach the model most.
         </Step>
       </ol>
@@ -194,12 +227,12 @@ export function FourSteps({ headline, validation, methodology }: { headline: Api
         )}{" "}
         All numbers come from the analysis outputs.
       </p>
-      <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2 text-[14px]">
-        <Link href="/#cabins" className="inline-flex min-h-10 items-center gap-1.5 rounded-md font-medium text-accent hover:underline">
+      <div className="mt-5 flex flex-wrap items-center gap-3 text-[14px]">
+        <Link href="/cabins#cabins" className="pill-yellow inline-flex min-h-11 items-center gap-1.5 rounded-full px-5 font-semibold">
           See it for a cabin
           <ArrowRight className="size-4" aria-hidden />
         </Link>
-        <a href="#technical" className="inline-flex min-h-10 items-center rounded-md text-muted hover:text-fg hover:underline">
+        <a href="#technical" className="inline-flex min-h-11 items-center rounded-full bg-surface px-5 text-muted ring-1 ring-border hover:bg-subtle hover:text-fg">
           Technical details
         </a>
       </div>

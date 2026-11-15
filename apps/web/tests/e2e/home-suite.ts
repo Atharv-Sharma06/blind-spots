@@ -2,7 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { DEFAULT_CABIN, EXPLORE_H1, HOME_H1 } from "./helpers";
 
 /**
- * The Cabins page ("/"): three numbered steps on one page. Shared by home.spec.ts (live API) and
+ * The Cabins page ("/cabins"; "/" is the landing page): three numbered steps on one page. Shared by home.spec.ts (live API) and
  * snapshot.home.spec.ts (precomputed snapshot, no API). Nothing here hard-codes a count or a probability;
  * expectations are read from the page itself, plus the API when one is running.
  */
@@ -21,7 +21,7 @@ const noHorizontalScroll = async (page: Page, where: string) => {
 };
 
 async function openHome(page: Page, query = "") {
-  await page.goto(`/${query}`);
+  await page.goto(`/cabins${query}`);
   await expect(page.getByRole("heading", { level: 1, name: HOME_H1 })).toBeVisible();
   await expect(page.locator("#cabins")).toBeVisible();
   await expect(page.getByTestId("answer-verdict")).not.toHaveAttribute("data-verdict", "loading", { timeout: 30_000 });
@@ -118,7 +118,7 @@ export function homeSuite(mode: "live" | "snapshot") {
       await expect(page.getByRole("contentinfo")).toContainText("Not a certified fire-safety assessment");
     });
 
-    test("old Explorer links redirect to /explore with the same query string; Cabins params stay", async ({ page }) => {
+    test("old Explorer links on / redirect to /explore; old Cabins links on / redirect to /cabins with their params", async ({ page }) => {
       for (const qs of ["?group=pmma_thin_film__opposed&target=iss_cabin_nominal&plane=o2_pressure", "?target=exploration_atmosphere_8p2_34", "?plane=o2_pressure"]) {
         await page.goto(`/${qs}`);
         await expect(page.getByRole("heading", { level: 1, name: EXPLORE_H1 })).toBeVisible();
@@ -129,7 +129,8 @@ export function homeSuite(mode: "live" | "snapshot") {
       }
       await page.goto(`/?cabin=iss_cabin_nominal&material=pmma_thin_film__opposed`);
       await expect(page.getByRole("heading", { level: 1, name: HOME_H1 })).toBeVisible();
-      await expect(page).toHaveURL(/^[^?]*\/\?cabin=iss_cabin_nominal/);
+      await expect(page).toHaveURL(/\/cabins\?(.*&)?cabin=iss_cabin_nominal/);
+      expect(new URL(page.url()).searchParams.get("material"), "material after redirect").toBe("pmma_thin_film__opposed");
     });
 
     test("phone: no horizontal scroll at 390 and 320 px; cards and buttons are at least 40 px tall", async ({ page }) => {

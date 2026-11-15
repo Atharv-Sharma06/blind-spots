@@ -8,7 +8,7 @@ import { Bullets, P, Section } from "./primitives";
  */
 export function SiNote() {
   return (
-    <section id="si" aria-labelledby="si-h" className="scroll-mt-[calc(var(--header-h)+16px)]" data-testid="si-note">
+    <section id="si" aria-labelledby="si-h" className="card scroll-mt-[calc(var(--header-h)+16px)] rounded-[var(--radius-2xl)] bg-surface p-5 sm:p-7" data-testid="si-note">
       <h2 id="si-h" className="text-[20px] font-semibold tracking-[-0.015em]">
         How we used SI
       </h2>
@@ -27,6 +27,7 @@ export function SiNote() {
 export function BuiltSection() {
   return (
     <Section id="built" number={8} title="How this was built" intro="What SI helped with, and what the app does.">
+      <div className="card max-w-[78ch] space-y-3 rounded-[var(--radius-xl)] bg-surface p-4 sm:p-5">
       <P>We used Claude (Anthropic) as an SI assistant for:</P>
       <Bullets>
         <li>
@@ -40,6 +41,7 @@ export function BuiltSection() {
           <strong>Writing:</strong> the wording of this site and its documents. Numbers on the site are read from the analysis outputs, not typed into the text.
         </li>
       </Bullets>
+      </div>
       <P>
         <strong>What the app does not do.</strong> It has no generative AI. Probabilities come from a Gaussian-process classifier, rankings from expected uncertainty reduction, and every explanation is a fixed template filled with computed
         numbers. The same data and settings always give the same results.

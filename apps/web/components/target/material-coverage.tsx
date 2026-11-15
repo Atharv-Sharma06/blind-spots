@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useQueries } from "@tanstack/react-query";
+import { Ban, Check, CircleDot } from "lucide-react";
 import { api } from "@/lib/api";
 import { queryKeys } from "@/hooks/api";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -12,6 +13,13 @@ import type { ApiError } from "@/lib/api";
 import { pointsSupported } from "./evidence";
 import { PLAIN_VERDICT } from "@/components/explore/plain";
 import { materialFlowNote, materialName } from "@/components/home/cabins";
+
+/** Status chip per verdict: colour plus icon plus word (STYLE.md status mapping). */
+const CHIP = {
+  blind: { cls: "bg-plum-2 text-plum-7", Icon: Ban },
+  partly: { cls: "bg-accent-tint text-accent", Icon: CircleDot },
+  covered: { cls: "bg-observed-tint text-observed", Icon: Check },
+} as const;
 
 /** Starts the per-group assessments only once the table is near the viewport (keeps them out of the critical path). */
 function useNearViewport<T extends Element>(): [React.RefObject<T | null>, boolean] {
@@ -103,7 +111,13 @@ export function MaterialCoverage({
                 <TableCell className="py-1.5">
                   {a ? (
                     <>
-                      <span className="text-[13px] text-fg">{PLAIN_VERDICT[a.verdict].headline.split(":")[0]}</span>
+                      <span className={cn("inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[12px] font-medium", CHIP[PLAIN_VERDICT[a.verdict].tone].cls)}>
+                        {(() => {
+                          const Icon = CHIP[PLAIN_VERDICT[a.verdict].tone].Icon;
+                          return <Icon aria-hidden="true" className="size-3 shrink-0" />;
+                        })()}
+                        {PLAIN_VERDICT[a.verdict].headline.split(":")[0]}
+                      </span>
                       {sup !== null ? (
                         <span className="block text-xs whitespace-nowrap text-muted">
                           <span className="num">{sup}</span> of <span className="num">{a.coverage.n_target_points}</span> points

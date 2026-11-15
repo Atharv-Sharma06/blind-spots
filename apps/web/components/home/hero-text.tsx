@@ -5,12 +5,12 @@ export const HERO_SENTENCE = "NASA burned materials aboard the ISS to learn when
 
 export function HeroText({ children }: { children?: React.ReactNode }) {
   return (
-    <div data-tour="hero" className="flex flex-col items-start gap-2 md:gap-3">
-      <h1 className="max-w-[22ch] text-[clamp(1.625rem,1.2rem+2vw,2.75rem)] font-semibold leading-[1.1] tracking-[-0.03em] text-fg [text-wrap:balance] sm:max-w-[26ch]">
+    <div data-tour="hero" className="flex flex-col items-start gap-3 md:gap-4">
+      <h1 className="max-w-[20ch] text-[clamp(1.875rem,1.25rem+2.6vw,3.25rem)] font-medium leading-[1.06] tracking-[-0.035em] text-fg [text-wrap:balance] sm:max-w-[24ch]">
         Do NASA&apos;s <span className="whitespace-nowrap">space-station</span> fire tests cover this cabin&apos;s air?
       </h1>
-      <p className="text-[1rem] leading-6 text-fg/80 md:text-lg md:leading-7">{HERO_SENTENCE}</p>
-      <div className="-ml-2">{children}</div>
+      <p className="max-w-[46ch] text-[1rem] font-light leading-6 text-muted md:text-lg md:leading-7">{HERO_SENTENCE}</p>
+      {children ? <div className="mt-1">{children}</div> : null}
     </div>
   );
 }

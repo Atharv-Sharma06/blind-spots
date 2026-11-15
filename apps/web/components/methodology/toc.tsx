@@ -29,7 +29,7 @@ export function Toc({ items }: { items: TocItem[] }) {
 
   return (
     <nav aria-label="Technical details sections" className="hidden lg:sticky lg:top-[calc(var(--header-h)+24px)] lg:block">
-      <ol className="flex gap-1 overflow-x-auto pb-2 lg:flex-col lg:gap-0.5 lg:overflow-visible lg:pb-0">
+      <ol className="flex gap-1.5 overflow-x-auto pb-2 lg:flex-col lg:gap-1.5 lg:overflow-visible lg:pb-0">
         {items.map((it, i) => (
           <li key={it.id} className="shrink-0">
             <a
@@ -40,11 +40,18 @@ export function Toc({ items }: { items: TocItem[] }) {
                 setSectionOpen(it.id, true);
               }}
               className={cn(
-                "flex items-baseline gap-2 whitespace-nowrap rounded-md border-l-2 px-2.5 py-1.5 text-[13px] transition-colors lg:whitespace-normal",
-                active === it.id ? "border-accent bg-accent-tint font-medium text-fg" : "border-transparent text-muted hover:bg-subtle hover:text-fg",
+                "flex min-h-10 items-center gap-2.5 whitespace-nowrap rounded-full py-2 pl-2 pr-4 text-[13px] ring-1 transition-colors lg:whitespace-normal",
+                active === it.id ? "bg-subtle font-medium text-fg ring-accent/60" : "bg-surface text-muted ring-border hover:bg-subtle hover:text-fg",
               )}
             >
-              <span className="num w-3 text-xs text-muted">{i + 1}</span>
+              <span
+                className={cn(
+                  "num inline-flex size-6 shrink-0 items-center justify-center rounded-full text-[11px]",
+                  active === it.id ? "bg-accent font-semibold text-[#0B0B0C]" : "bg-black/30 text-muted",
+                )}
+              >
+                {i + 1}
+              </span>
               {it.label}
             </a>
           </li>

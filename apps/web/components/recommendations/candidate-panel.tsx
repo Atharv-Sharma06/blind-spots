@@ -73,6 +73,33 @@ function CompareToggle({ id, ids, onToggle }: { id: string; ids: [string | null,
   );
 }
 
+/** Yellow rank badge (decorative: the rank is also in the text next to it). */
+function RankBadge({ rank, active }: { rank: number; active?: boolean }) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "num grid size-10 shrink-0 place-items-center rounded-full text-[15px] font-semibold",
+        active ? "bg-accent text-on-accent shadow-[0_0_18px_rgb(242_210_27/.35)]" : "border border-border bg-subtle text-fg",
+      )}
+    >
+      {rank}
+    </span>
+  );
+}
+
+/** Headline percent: digits in the dot font, the % sign in the sans font (Doto draws % as a dotted X). */
+function EvrValue({ text }: { text: string }) {
+  const hasPct = text.endsWith("%");
+  const digits = hasPct ? text.slice(0, -1) : text;
+  return (
+    <span className="inline-block align-[-0.12em] whitespace-nowrap text-accent" data-testid="evr-value">
+      <span className="dotnum text-[34px]">{digits}</span>
+      {hasPct ? <span className="ml-0.5 font-sans text-[22px] font-semibold">%</span> : null}
+    </span>
+  );
+}
+
 export function CandidatePanel(p: CandidatePanelProps) {
   const { query, group, modelled, pending, selectedId, compareIds, onExplore, onToggleCompare, onOpenCompare } = p;
   if (!modelled) {
@@ -125,18 +152,18 @@ export function CandidatePanel(p: CandidatePanelProps) {
         <article
           aria-label="Top candidate"
           data-testid="top-candidate"
-          className={cn("space-y-3 rounded-md border bg-surface p-3", selectedId === top.candidate_id ? "border-accent" : "border-border")}
+          className={cn("card space-y-4 p-5 sm:p-6", selectedId === top.candidate_id && "ring-2 ring-accent/70")}
         >
-          <h3 className="flex items-center gap-1.5 text-[13px] font-semibold">
-            <span aria-hidden className="inline-block size-2.5 rotate-45 bg-accent" />
-            Test {top.rank}: most informative
-          </h3>
+          <div className="flex items-center gap-2.5">
+            <RankBadge rank={top.rank} active />
+            <h3 className="text-[15px] font-semibold">Test {top.rank}: most informative</h3>
+          </div>
           <Conditions c={top} />
 
           <div>
             <p className="text-[15px] leading-snug text-fg">
               Would cut the model&apos;s uncertainty about this cabin by{" "}
-              <span className="num text-xl font-medium tracking-[-0.01em] whitespace-nowrap" data-testid="evr-value">{fmtFractionPercent(top.evr_fraction)}</span>.
+              <EvrValue text={fmtFractionPercent(top.evr_fraction)} />.
             </p>
             <p className="mt-0.5 text-xs text-muted">
               A model estimate{isAssumptionDependent(top) ? ", based on an assumed pressure link" : ""}.
@@ -159,15 +186,16 @@ export function CandidatePanel(p: CandidatePanelProps) {
         </article>
 
         {rest.length > 0 ? (
-          <ul className="divide-y divide-border rounded-md border border-border" aria-label="Other ranked candidates">
+          <ul className="space-y-2" aria-label="Other ranked candidates">
             {rest.map((c) => (
-              <li key={c.candidate_id} className={cn("flex items-center justify-between gap-2 p-3", selectedId === c.candidate_id && "bg-accent-tint")}>
-                <p className="min-w-0 text-[13px]">
+              <li key={c.candidate_id} className={cn("card flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-xl)] p-3.5", selectedId === c.candidate_id && "ring-2 ring-accent/70")}>
+                <RankBadge rank={c.rank} />
+                <p className="min-w-[10rem] flex-1 text-[13px]">
                   <span className="font-medium">Test {c.rank}</span>{" "}
                   <span className="text-muted">cuts <span className="num text-fg">{fmtFractionPercent(c.evr_fraction)}</span></span>
                   <span className="num block text-xs text-muted">{shortCond(c)}</span>
                 </p>
-                <div className="flex shrink-0 gap-1.5">
+                <div className="ml-auto flex shrink-0 gap-1.5">
                   <Button size="sm" variant="ghost" onClick={() => onExplore(c)} aria-label={`What if? Test ${c.rank}`}>
                     <Crosshair aria-hidden />
                     What if?
@@ -266,7 +294,7 @@ export function CandidatePanel(p: CandidatePanelProps) {
           ) : null}
         </Disclosure>
 
-        <p className="border-t border-border pt-3 text-xs text-muted">{CANDIDATE_FRAMING}</p>
+        <p className="border-t border-border/70 pt-3 text-xs leading-relaxed text-muted">{CANDIDATE_FRAMING}</p>
       </div>
     </Updating>
   );

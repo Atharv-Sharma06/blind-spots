@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { DotNumber } from "@/components/ui/dot-number";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAssessTarget, useGroups, useObservations, useRankCandidates, useTargets } from "@/hooks/api";
 import { CANDIDATE_FRAMING } from "@/lib/copy";
@@ -47,7 +48,7 @@ function resolveGroup(groups: readonly GroupSummary[], material: string | null):
 /** One calm sentence in the card's place (loading finished, but there is nothing to rank). */
 function JumpLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
-    <a href={href} className="inline-flex min-h-10 items-center underline underline-offset-2">
+    <a href={href} className="inline-flex min-h-10 items-center underline decoration-accent underline-offset-4 hover:text-accent">
       {children}
     </a>
   );
@@ -55,7 +56,7 @@ function JumpLink({ href, children }: { href: string; children: React.ReactNode 
 
 function Calm({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-border bg-surface p-4 md:p-6" role="status">
+    <div className="card p-5 md:p-7" role="status">
       <p className="text-prose">{children}</p>
     </div>
   );
@@ -66,18 +67,18 @@ function Calm({ children }: { children: React.ReactNode }) {
  * (measured on a typical cabin) so the page below does not jump. No numbers, only empty shapes.
  */
 const SKELETON_SIZES = [
-  "h-[4.1rem] md:h-[1.4rem]",
-  "h-[11rem] md:h-[7.5rem]",
-  "h-[6.75rem] md:h-[5.75rem]",
-  "h-[6.75rem] md:h-[5.75rem]",
-  "h-[17.25rem] md:h-[13.5rem]",
+  "h-[5.25rem] md:h-[2.75rem]",
+  "h-[14rem] md:h-[8.5rem]",
+  "h-[11.5rem] md:h-[7.75rem]",
+  "h-[13.75rem] md:h-[10rem]",
+  "h-[20.875rem] md:h-[15.375rem]",
 ] as const;
 
 function ListSkeleton() {
   return (
-    <div className="space-y-3" role="status" aria-label="Ranking the next tests">
+    <div className="space-y-4" role="status" aria-label="Ranking the next tests">
       {SKELETON_SIZES.map((size, i) => (
-        <Skeleton key={`${i}-${size}`} className={cn("rounded-xl", size)} />
+        <Skeleton key={`${i}-${size}`} className={cn(i === 0 ? "rounded-xl" : i === 4 ? "rounded-[var(--radius-3xl)]" : "rounded-[var(--radius-2xl)]", size)} />
       ))}
     </div>
   );
@@ -87,7 +88,7 @@ type Differing = ReturnType<typeof differingFields>;
 
 /** A value that is the same in all three cards is quiet; the one that changes is bold, so the cards scan at a glance. */
 function Val({ differs, children }: { differs: boolean; children: React.ReactNode }) {
-  return <span className={differs ? "font-bold text-fg" : "font-medium text-fg/75"}>{children}</span>;
+  return <span className={differs ? "font-semibold text-fg" : "font-normal text-fg/70"}>{children}</span>;
 }
 
 function CandidateCard({
@@ -108,33 +109,48 @@ function CandidateCard({
   const reduction = reductionParts(c);
   return (
     <li
-      className={cn("rounded-xl border bg-surface p-4 md:p-5", first ? "border-accent shadow-[0_0_0_1px_var(--accent)]" : "border-border")}
+      className={cn(
+        "card relative p-5 md:p-7",
+        first && "shadow-[inset_0_1px_0_rgb(255_255_255/0.06),0_0_0_2px_var(--accent),0_0_32px_-6px_rgb(242_210_27/0.5),0_24px_48px_-24px_rgb(0_0_0/0.8)]!",
+      )}
       data-testid={`next-test-${c.rank}`}
     >
-      <div className="flex items-start gap-3 md:gap-4">
+      <div className="flex items-start gap-4 md:gap-5">
         <span
           aria-hidden
           className={cn(
-            "num mt-0.5 inline-flex size-7 shrink-0 items-center justify-center rounded-full text-ui font-semibold text-surface md:size-8 md:text-prose",
-            first ? "bg-accent" : "bg-fg",
+            "num mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-full text-prose font-semibold md:size-10 md:text-title",
+            first ? "bg-accent text-on-accent" : "border border-border-strong bg-subtle text-fg",
           )}
         >
           {c.rank}
         </span>
-        <div className="min-w-0 flex-1">
-          <h3 className="text-title font-semibold tracking-[-0.01em]">
-            Test {lowerFirst(material)}: <Val differs={diff.oxygen}>{oxygenText(c)} oxygen</Val>, <Val differs={diff.pressure}>{pressureText(c)}</Val>,{" "}
-            <Val differs={diff.airflow}>{airflowText(c)} airflow</Val>
-          </h3>
+        <div className="min-w-0 flex-1 md:flex md:items-center md:gap-6">
+          <div className="min-w-0 flex-1">
+            <h3 className="text-title font-medium leading-snug tracking-[-0.01em]">
+              Test {lowerFirst(material)}: <Val differs={diff.oxygen}>{oxygenText(c)} oxygen</Val>, <Val differs={diff.pressure}>{pressureText(c)}</Val>,{" "}
+              <Val differs={diff.airflow}>{airflowText(c)} airflow</Val>
+            </h3>
+            {atTarget && first ? <p className="mt-2 text-ui text-muted">{atTargetSentence(c, target)}</p> : null}
+            {c.feasibility_status === "outside_demonstrated_envelope" ? (
+              <p className="mt-2 text-ui text-muted" data-testid="beyond-iss-note">
+                Beyond what ISS tests have shown.
+              </p>
+            ) : null}
+          </div>
           {reduction ? (
-            <p className="mt-1 text-prose">
-              {reduction.lead} <span className="num font-semibold">{reduction.value}</span>
-            </p>
-          ) : null}
-          {atTarget && first ? <p className="mt-2 text-ui text-muted">{atTargetSentence(c, target)}</p> : null}
-          {c.feasibility_status === "outside_demonstrated_envelope" ? (
-            <p className="mt-2 text-ui text-muted" data-testid="beyond-iss-note">
-              Beyond what ISS tests have shown.
+            <p className="mt-4 flex items-end justify-between gap-3 border-t border-border pt-3 md:mt-0 md:block md:shrink-0 md:border-0 md:pt-0 md:text-right">
+              <span className="text-ui text-muted md:block">{reduction.lead}</span>{" "}
+              <span className={cn("block whitespace-nowrap text-[2.25rem] leading-none md:mt-1 md:text-[2.75rem]", first ? "text-accent" : "text-fg")}>
+                {reduction.value.endsWith(" %") ? (
+                  <>
+                    <DotNumber>{reduction.value.slice(0, -2)}</DotNumber>
+                    <span className="ml-0.5 align-baseline font-sans text-[0.55em] font-semibold"> %</span>
+                  </>
+                ) : (
+                  <DotNumber>{reduction.value}</DotNumber>
+                )}
+              </span>
             </p>
           ) : null}
         </div>
@@ -158,11 +174,11 @@ function Ranked({ r, material, cabin, groupId }: { r: RankResponse; material: st
   return (
     <>
       {closestText ? (
-        <p className="text-prose" data-testid="closest-iss-test">
+        <p className="rounded-[var(--radius-xl)] bg-subtle/60 px-4 py-3 text-ui text-fg/80" data-testid="closest-iss-test">
           {closestText}
         </p>
       ) : null}
-      <ol role="list" className="space-y-3" aria-label="The three tests that would teach the model the most">
+      <ol role="list" className="space-y-4" aria-label="The three tests that would teach the model the most">
         {top3.map((c) => (
           <CandidateCard key={c.candidate_id} c={c} material={material} target={r.target} atTarget={isAtTarget(c, r.target)} first={c.rank === first.rank} diff={diff} />
         ))}
@@ -265,16 +281,16 @@ export function NextTests({ cabin, material }: NextTestsProps) {
             : `Three tests that would teach the model the most about ${cabinName}.`
         }
       />
-      <p className="mt-2 pl-10 text-ui text-muted md:pl-11" data-testid="candidate-framing">
+      <p className="mt-2 pl-0 text-ui text-muted" data-testid="candidate-framing">
         {CANDIDATE_FRAMING}
       </p>
-      <div className="mt-5 space-y-3 md:mt-6">{body}</div>
+      <div className="mt-5 space-y-4 md:mt-6">{body}</div>
       <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-3 md:mt-8">
-        <Link href={explorerHref} className="inline-flex h-11 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border border-fg bg-fg px-5 text-prose font-medium text-surface transition-colors hover:bg-[#2c2c31] md:h-10" data-testid="open-explorer">
+        <Link href={explorerHref} className="pill-yellow inline-flex h-12 items-center justify-center gap-2 whitespace-nowrap px-6 text-prose" data-testid="open-explorer">
           Open this cabin in the Explorer <span aria-hidden>→</span>
         </Link>
         {briefLink ? (
-          <Link href={briefLink} className="inline-flex min-h-10 items-center text-prose underline underline-offset-2" data-testid="open-brief">
+          <Link href={briefLink} className="inline-flex min-h-10 items-center text-prose underline decoration-accent underline-offset-4 hover:text-accent" data-testid="open-brief">
             One-page brief
           </Link>
         ) : null}

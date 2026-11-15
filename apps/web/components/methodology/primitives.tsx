@@ -51,16 +51,16 @@ export function Section({ id, number, title, intro, children }: { id: string; nu
           aria-expanded={open}
           aria-controls={`${id}-body`}
           onClick={() => setOpen((o) => !o)}
-          className="group/section flex min-h-12 w-full items-center gap-3 rounded-md py-3.5 text-left text-[18px] font-semibold tracking-[-0.015em] hover:text-accent focus-visible:outline-2 focus-visible:outline-accent"
+          className="group/section flex min-h-14 w-full items-center gap-3 rounded-[14px] py-4 text-left text-[18px] font-semibold tracking-[-0.015em] hover:text-accent focus-visible:outline-2 focus-visible:outline-accent"
         >
-          <span className="num w-5 shrink-0 text-[15px] font-normal text-muted">{number}</span>
+          <span className="num inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-subtle text-[13px] font-normal text-muted ring-1 ring-border group-hover/section:text-accent">{number}</span>
           <span className="min-w-0 flex-1">{title}</span>
           <DisclosureChevron open={open} className="size-4" />
         </button>
       </h2>
-      {intro ? <p className="-mt-1.5 max-w-[68ch] pb-4 pl-8 text-[13px] leading-relaxed text-muted">{intro}</p> : null}
+      {intro ? <p className="-mt-1.5 max-w-[68ch] pb-4 pl-10 text-[13px] leading-relaxed text-muted">{intro}</p> : null}
       {open ? (
-        <div id={`${id}-body`} className="space-y-6 pb-10 pl-0 pt-1 sm:pl-8">
+        <div id={`${id}-body`} className="space-y-6 pb-10 pl-0 pt-1 sm:pl-10">
           {children}
         </div>
       ) : null}
@@ -82,17 +82,17 @@ export function P({ children, className }: { children: ReactNode; className?: st
 }
 
 export function Bullets({ children }: { children: ReactNode }) {
-  return <ul className="max-w-[72ch] list-disc space-y-1.5 pl-5 text-[14px] leading-relaxed marker:text-muted">{children}</ul>;
+  return <ul className="max-w-[72ch] list-disc space-y-2 pl-5 text-[14px] leading-relaxed marker:text-gap">{children}</ul>;
 }
 
 export function Mono({ children }: { children: ReactNode }) {
-  return <code className="num rounded-sm bg-subtle px-1 py-px text-[12.5px] [overflow-wrap:anywhere]">{children}</code>;
+  return <code className="num rounded-[6px] bg-subtle px-1.5 py-px text-[12.5px] text-fg ring-1 ring-border [overflow-wrap:anywhere]">{children}</code>;
 }
 
 /** Legible formula block (plain text in mono; the symbols are defined directly underneath). */
 export function Formula({ children, label }: { children: ReactNode; label?: string }) {
   return (
-    <figure className="max-w-[72ch] rounded-md border border-border bg-surface px-4 py-3">
+    <figure className="max-w-[72ch] rounded-[20px] border border-border bg-bg/60 px-5 py-4">
       <div tabIndex={0} className="num overflow-x-auto whitespace-pre text-[13px] leading-relaxed text-fg focus-visible:outline-2 focus-visible:outline-accent" role="math" aria-label={label}>
         {children}
       </div>
@@ -103,7 +103,7 @@ export function Formula({ children, label }: { children: ReactNode; label?: stri
 export function ExtLink({ href, children }: { href: string | null | undefined; children: ReactNode }) {
   if (!href) return <span>{children}</span>;
   return (
-    <a href={href} target="_blank" rel="noopener noreferrer" className="inline-flex items-baseline gap-1 text-accent underline decoration-accent/40 underline-offset-2 hover:decoration-accent">
+    <a href={href} target="_blank" rel="noopener noreferrer" className="inline-flex items-baseline gap-1 rounded-sm text-accent underline decoration-accent/40 underline-offset-2 hover:decoration-accent focus-visible:outline-2 focus-visible:outline-accent">
       <span>{children}</span>
       <ExternalLink className="size-3 shrink-0 translate-y-0.5" aria-hidden />
       <span className="sr-only">(opens in a new tab)</span>
@@ -117,7 +117,7 @@ export function QueryBoundary<T>({ query, children, rows = 3 }: { query: ApiQuer
     return (
       <div role="status" aria-label="Loading" className="space-y-1.5">
         {Array.from({ length: rows }, (_, i) => (
-          <Skeleton key={i} className="h-8 w-full" />
+          <Skeleton key={i} className="h-8 w-full rounded-[10px]" />
         ))}
       </div>
     );

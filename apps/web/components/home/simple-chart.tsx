@@ -68,12 +68,15 @@ export function SimpleChart(props: SimpleChartProps) {
 const INK = "var(--fg)";
 const MUTED = "var(--muted)";
 const BLUE = "var(--observed)";
-const HALO = { paintOrder: "stroke", stroke: "var(--surface)", strokeWidth: 3.5, strokeLinejoin: "round" } as const;
+const YELLOW = "var(--accent)";
+const HALO = { paintOrder: "stroke", stroke: "var(--surface)", strokeWidth: 4, strokeLinejoin: "round" } as const;
+const NUM = { fontVariantNumeric: "tabular-nums" } as const;
 
 function ChartSvg({ dots, cabin, others, ariaLabel, width, height }: SimpleChartProps & { width: number; height: number }) {
   const narrow = width < 480;
+  const uid = React.useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const [hover, setHover] = React.useState<number | null>(null);
-  const m = { t: 12, r: narrow ? 14 : 22, b: narrow ? 42 : 44, l: narrow ? 46 : 50 };
+  const m = { t: 14, r: narrow ? 14 : 22, b: narrow ? 42 : 44, l: narrow ? 46 : 50 };
   const iw = Math.max(width - m.l - m.r, 10);
   const ih = Math.max(height - m.t - m.b, 10);
 
@@ -143,104 +146,174 @@ function ChartSvg({ dots, cabin, others, ariaLabel, width, height }: SimpleChart
   }
 
   const labelFont = narrow ? 11 : 12;
+  const cabinFont = narrow ? 13 : 14;
   // Only "This cabin" and the shaded region are labelled. Other cabins are small dots whose names show on hover or tap.
-  const items: (LabelItem & { bold?: boolean })[] = [{ id: "cabin", x: cx, y: cy, text: "This cabin", fontSize: narrow ? 13 : 14, r: 8, bold: true }];
+  const items: (LabelItem & { bold?: boolean })[] = [{ id: "cabin", x: cx, y: cy, text: "This cabin", fontSize: cabinFont, r: 11, bold: true }];
   const avoid = [
     ...(regionPos ? [{ x0: regionPos.x, x1: regionPos.x + regionW, y0: regionPos.y - regionFont, y1: regionPos.y + 3 }] : []),
   ];
   const labels = placeLabels(
     items,
     { x0: 0, x1: iw, y0: 0, y1: ih },
-    [{ x: cx, y: cy, r: 8 }, ...clusters.map((c) => ({ x: c.x, y: c.y, r: 4 })), ...dots.map((d) => ({ x: x(d.x), y: y(d.y), r: 4 }))],
+    [{ x: cx, y: cy, r: 11 }, ...clusters.map((c) => ({ x: c.x, y: c.y, r: 4 })), ...dots.map((d) => ({ x: x(d.x), y: y(d.y), r: 4 }))],
     avoid,
   );
   const hot = hover !== null ? clusters[hover] : undefined;
   const hotText = hot ? hot.names.join(", ") : "";
-  const hotW = hot ? textWidth(hotText, labelFont, true) + 12 : 0;
+  // The pill hugs the real text width once it is measured; the estimate is only the first frame.
+  const hotRef = React.useRef<SVGTextElement | null>(null);
+  const [hotMeasured, setHotMeasured] = React.useState<{ text: string; w: number } | null>(null);
+  React.useLayoutEffect(() => {
+    const el = hotRef.current;
+    if (!el || !hotText) return;
+    const w = el.getComputedTextLength();
+    if (w > 0) setHotMeasured((p) => (p && p.text === hotText && Math.abs(p.w - w) < 0.5 ? p : { text: hotText, w }));
+  }, [hotText]);
+  const hotW = hot ? (hotMeasured?.text === hotText ? hotMeasured.w : textWidth(hotText, labelFont)) + 22 : 0;
   const hotX = hot ? Math.min(Math.max(hot.x - hotW / 2, 0), Math.max(iw - hotW, 0)) : 0;
-  const hotY = hot ? (hot.y - 30 >= 0 ? hot.y - 30 : hot.y + 12) : 0;
+  const hotY = hot ? (hot.y - 32 >= 0 ? hot.y - 32 : hot.y + 12) : 0;
+  const cabinLabel =
+    labels.get("cabin") ?? ({ x: Math.min(Math.max(cx, 40), iw - 40), y: Math.max(cy - 20, 8), anchor: "middle", text: "This cabin" } as const);
+
+  const ids = { grid: `${uid}-grid`, clip: `${uid}-clip`, soft: `${uid}-soft`, glow: `${uid}-glow` };
+  const grid = narrow ? 14 : 16;
 
   return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="img" aria-label={ariaLabel} className="block select-none">
+    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="img" aria-label={ariaLabel} className="block select-none" onClick={() => setHover(null)}>
+      <defs>
+        {/* faint dot grid, echoing the page background */}
+        <pattern id={ids.grid} width={grid} height={grid} patternUnits="userSpaceOnUse">
+          <circle cx={grid / 2} cy={grid / 2} r={0.9} fill={INK} fillOpacity={0.11} />
+        </pattern>
+        <clipPath id={ids.clip}>
+          <rect x={-2} y={-m.t} width={iw + 4} height={ih + m.t + 2} rx={10} />
+        </clipPath>
+        {/* soft glow for the ISS-tests region */}
+        <filter id={ids.soft} filterUnits="userSpaceOnUse" x={-40} y={-40} width={iw + 80} height={ih + 80}>
+          <feGaussianBlur stdDeviation={narrow ? 8 : 12} />
+        </filter>
+        {/* this cabin's yellow glow */}
+        <radialGradient id={ids.glow}>
+          <stop offset="0%" stopColor={YELLOW} stopOpacity={0.6} />
+          <stop offset="40%" stopColor={YELLOW} stopOpacity={0.24} />
+          <stop offset="100%" stopColor={YELLOW} stopOpacity={0} />
+        </radialGradient>
+      </defs>
       <g transform={`translate(${m.l},${m.t})`}>
-        {/* light horizontal guides only */}
+        <rect x={0} y={0} width={iw} height={ih} fill={`url(#${ids.grid})`} />
+        {/* very faint dotted guides at the y ticks */}
         {yTicks.map((t) => (
-          <line key={`gy${t}`} x1={0} x2={iw} y1={y(t)} y2={y(t)} stroke="var(--border)" strokeWidth={1} strokeOpacity={0.7} />
+          <line key={`gy${t}`} x1={0} x2={iw} y1={y(t)} y2={y(t)} stroke={INK} strokeOpacity={0.14} strokeWidth={1} strokeDasharray="1 5" strokeLinecap="round" />
         ))}
 
-        {/* where ISS tests ran */}
-        {hullPath ? <path d={hullPath} fill={BLUE} fillOpacity={0.1} stroke={BLUE} strokeOpacity={0.45} strokeWidth={1} strokeLinejoin="round" /> : null}
-        {band ? <rect x={band.x} y={band.y} width={band.w} height={band.h} rx={6} fill={BLUE} fillOpacity={0.1} stroke={BLUE} strokeOpacity={0.45} strokeWidth={1} /> : null}
+        <g clipPath={`url(#${ids.clip})`}>
+          {/* where ISS tests ran: a soft periwinkle glow under a crisp light outline */}
+          {hullPath ? (
+            <>
+              <path d={hullPath} fill={BLUE} fillOpacity={0.28} stroke={BLUE} strokeOpacity={0.28} strokeWidth={14} strokeLinejoin="round" filter={`url(#${ids.soft})`} />
+              <path d={hullPath} fill={BLUE} fillOpacity={0.08} stroke={BLUE} strokeOpacity={0.5} strokeWidth={1} strokeLinejoin="round" />
+            </>
+          ) : null}
+          {band ? (
+            <>
+              <rect x={band.x - 4} y={band.y - 4} width={band.w + 8} height={band.h + 8} rx={(band.h + 8) / 2} fill={BLUE} fillOpacity={0.32} filter={`url(#${ids.soft})`} />
+              <rect x={band.x} y={band.y} width={band.w} height={band.h} rx={Math.min(band.h / 2, 8)} fill={BLUE} fillOpacity={0.08} stroke={BLUE} strokeOpacity={0.5} strokeWidth={1} />
+            </>
+          ) : null}
+        </g>
         {regionPos ? (
-          <text x={regionPos.x} y={regionPos.y} fontSize={regionFont} fontWeight={600} fill={BLUE} style={HALO}>
+          <text x={regionPos.x} y={regionPos.y} fontSize={regionFont} fontWeight={600} fill={BLUE} style={{ ...HALO, letterSpacing: "0.01em" }}>
             {REGION_TEXT}
           </text>
         ) : null}
 
         {/* this cabin's range, when it has one */}
         {showBox ? (
-          <rect x={boxX0} y={boxY0} width={Math.max(boxX1 - boxX0, 1)} height={Math.max(boxY1 - boxY0, 1)} fill={INK} fillOpacity={0.06} stroke={INK} strokeWidth={1.25} strokeDasharray="4 3" />
+          <rect
+            x={boxX0}
+            y={boxY0}
+            width={Math.max(boxX1 - boxX0, 1)}
+            height={Math.max(boxY1 - boxY0, 1)}
+            rx={4}
+            fill={YELLOW}
+            fillOpacity={0.07}
+            stroke={YELLOW}
+            strokeOpacity={0.75}
+            strokeWidth={1.25}
+            strokeDasharray="1.5 4"
+            strokeLinecap="round"
+          />
         ) : null}
 
-        {/* test results */}
+        {/* test results: filled = kept burning, hollow = went out */}
         {dots.map((d) =>
           d.burned ? (
-            <circle key={d.id} cx={x(d.x)} cy={y(d.y)} r={3.4} fill={BLUE} fillOpacity={0.8} />
+            <circle key={d.id} cx={x(d.x)} cy={y(d.y)} r={3.4} fill={BLUE} fillOpacity={0.92} stroke="var(--surface)" strokeOpacity={0.6} strokeWidth={0.75} />
           ) : (
-            <circle key={d.id} cx={x(d.x)} cy={y(d.y)} r={3.2} fill="var(--surface)" fillOpacity={0.35} stroke={BLUE} strokeWidth={1.4} />
+            <circle key={d.id} cx={x(d.x)} cy={y(d.y)} r={3.1} fill="var(--surface)" fillOpacity={0.55} stroke={BLUE} strokeWidth={1.4} />
           ),
         )}
 
         {/* other cabins: small unlabelled dots; the name shows on hover or tap, and every cabin is in the table */}
         {clusters.map((c, i) => (
-          <g key={`oc${i}`} onPointerEnter={() => setHover(i)} onPointerLeave={() => setHover((h) => (h === i ? null : h))} onClick={() => setHover((h) => (h === i ? null : i))}>
+          <g
+            key={`oc${i}`}
+            onPointerEnter={() => setHover(i)}
+            // A touch "leave" fires right after the tap, so only a mouse or pen leaving hides the name.
+            onPointerLeave={(e) => {
+              if (e.pointerType !== "touch") setHover((h) => (h === i ? null : h));
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              setHover(i);
+            }}
+            className="cursor-pointer"
+          >
             <circle cx={c.x} cy={c.y} r={18} fill="transparent" />
-            <circle cx={c.x} cy={c.y} r={hover === i ? 5 : 3.5} fill={MUTED} fillOpacity={hover === i ? 0.95 : 0.6} stroke="var(--surface)" strokeWidth={1} />
+            {hover === i ? <circle cx={c.x} cy={c.y} r={8} fill="none" stroke={MUTED} strokeOpacity={0.5} strokeWidth={1} /> : null}
+            <circle cx={c.x} cy={c.y} r={hover === i ? 4.5 : 3} fill={MUTED} fillOpacity={hover === i ? 0.95 : 0.55} />
             <title>{c.names.join(", ")}</title>
           </g>
         ))}
-        {/* this cabin */}
-        <circle cx={cx} cy={cy} r={7.5} fill={INK} stroke="var(--surface)" strokeWidth={2.5} />
-        {(() => {
-          const l =
-            labels.get("cabin") ??
-            ({ x: Math.min(Math.max(cx, 40), iw - 40), y: Math.max(cy - 18, 8), anchor: "middle", text: "This cabin" } as const);
-          return l ? (
-            <text x={l.x} y={l.y} textAnchor={l.anchor} dominantBaseline="central" fontSize={narrow ? 13 : 14} fontWeight={700} fill={INK} style={HALO}>
-              {l.text}
-            </text>
-          ) : null;
-        })()}
+
+        {/* this cabin: signal-yellow marker with a soft glow */}
+        <g pointerEvents="none">
+          <circle cx={cx} cy={cy} r={narrow ? 24 : 30} fill={`url(#${ids.glow})`} />
+          <circle cx={cx} cy={cy} r={11} fill="none" stroke={YELLOW} strokeOpacity={0.45} strokeWidth={1} />
+          <circle cx={cx} cy={cy} r={6.5} fill={YELLOW} stroke="var(--surface)" strokeWidth={2} />
+          <text x={cabinLabel.x} y={cabinLabel.y} textAnchor={cabinLabel.anchor} dominantBaseline="central" fontSize={cabinFont} fontWeight={600} fill={YELLOW} style={{ ...HALO, letterSpacing: "0.01em" }}>
+            {cabinLabel.text}
+          </text>
+        </g>
 
         {hot ? (
           <g pointerEvents="none">
-            <rect x={hotX} y={hotY} width={hotW} height={20} rx={4} fill="var(--surface)" stroke="var(--border-strong)" />
-            <text x={hotX + hotW / 2} y={hotY + 10} textAnchor="middle" dominantBaseline="central" fontSize={labelFont} fontWeight={600} fill={INK}>
+            <rect x={hotX} y={hotY} width={hotW} height={22} rx={11} fill="var(--subtle)" stroke="var(--border-strong)" />
+            <text ref={hotRef} x={hotX + hotW / 2} y={hotY + 11} textAnchor="middle" dominantBaseline="central" fontSize={labelFont} fontWeight={500} fill={INK}>
               {hotText}
             </text>
           </g>
         ) : null}
 
-        {/* axes */}
-        <line x1={0} x2={iw} y1={ih} y2={ih} stroke="var(--border-strong)" />
-        <line x1={0} x2={0} y1={0} y2={ih} stroke="var(--border-strong)" />
+        {/* axes: a faint baseline, muted numbers */}
+        <line x1={0} x2={iw} y1={ih} y2={ih} stroke="var(--border-strong)" strokeOpacity={0.8} />
         {xTicks.map((t) => (
           <g key={`tx${t}`}>
             <line x1={x(t)} x2={x(t)} y1={ih} y2={ih + 4} stroke="var(--border-strong)" />
-            <text x={x(t)} y={ih + 18} textAnchor="middle" fontSize={12} fill={MUTED}>
+            <text x={x(t)} y={ih + 18} textAnchor="middle" fontSize={12} fill={MUTED} style={NUM}>
               {trim(t)}
             </text>
           </g>
         ))}
         {yTicks.map((t) => (
-          <text key={`ty${t}`} x={-8} y={y(t)} textAnchor="end" dominantBaseline="central" fontSize={12} fill={MUTED}>
+          <text key={`ty${t}`} x={-10} y={y(t)} textAnchor="end" dominantBaseline="central" fontSize={12} fill={MUTED} style={NUM}>
             {trim(t)}
           </text>
         ))}
-        <text x={iw / 2} y={ih + (narrow ? 36 : 38)} textAnchor="middle" fontSize={12} fontWeight={500} fill={INK}>
+        <text x={iw / 2} y={ih + (narrow ? 36 : 38)} textAnchor="middle" fontSize={12} fontWeight={500} fill={MUTED} style={{ letterSpacing: "0.02em" }}>
           Oxygen (%)
         </text>
-        <text transform={`translate(${-m.l + 12},${ih / 2}) rotate(-90)`} textAnchor="middle" fontSize={12} fontWeight={500} fill={INK}>
+        <text transform={`translate(${-m.l + 12},${ih / 2}) rotate(-90)`} textAnchor="middle" fontSize={12} fontWeight={500} fill={MUTED} style={{ letterSpacing: "0.02em" }}>
           Pressure (kPa)
         </text>
       </g>
