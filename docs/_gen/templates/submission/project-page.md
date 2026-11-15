@@ -14,15 +14,13 @@ Blind Spots
 
 ## High-Level Project Summary (limit 150 words)
 
-Blind Spots is an SI-powered dashboard that shows where NASA's microgravity flame evidence ends, for the air crews will
-breathe in spacecraft and Moon or Mars habitats. We turned {{ENV_N_EXP}} ISS BASS and BASS-II tests from NASA PSI into a
-provenance-checked dataset: every value links to its source cell. For each material and flame type, a Gaussian-process
-model predicts whether a flame keeps burning, separates lack of data from outcome variability, and abstains where
-comparable evidence is missing. Active learning ranks the computations that would teach us most about the chosen
-atmosphere. Headline: NASA's 8.2 psia / 34 % O2 Exploration Atmosphere has {{H_EXPL_COMPARABLE}} comparable integrated
-observations in all {{H_N_GROUPS}} material groups, against {{H_ISS_COMPARABLE}} for the ISS cabin; every integrated test
-ran near 1 atm. It publishes its own validation, including where a simple baseline does as well. Research-planning tool;
-not a fire-safety assessment or NASA product.
+NASA burned materials aboard the ISS to learn when flames keep burning, but those tests all ran in ISS-like air. Blind Spots
+shows, for any crew cabin (ISS, Artemis Moon habitat, NASA Exploration Atmosphere, Orion, past spacecraft), whether the ISS
+tests cover its air, and which next experiment would teach the most. Pick a cabin, read a one-line answer and a simple
+chart, then see the top research candidates that machine learning picks. We turned {{ENV_N_EXP}} ISS BASS and BASS-II tests
+from NASA PSI into a provenance-checked dataset; a Gaussian-process model says when it does not know. Headline: the ISS
+cabin has {{H_ISS_COMPARABLE}} nearby ISS test results; NASA's 8.2 psia / 34 % O2 Exploration Atmosphere has {{H_EXPL_COMPARABLE}}
+across all {{H_N_GROUPS}} material setups. Research-planning tool; not a fire-safety assessment or NASA product.
 
 ---
 
@@ -55,11 +53,12 @@ documented NASA cabin atmosphere, and then asks which next computation or experi
 ### Key findings (computed from the artifacts)
 
 1. **The evidence ends at 1 atm.** All {{ENV_N_EXP}} integrated ISS BASS/BASS-II tests ran at {{ENV_O2}} % O2 and
-   {{ENV_P}} kPa (`data/normalized/observations.json`).
+   {{ENV_P}} kPa (`data/normalized/observations.json`). BASS measured the pressure; BASS-II did not record it, so the
+   dataset assumes the ISS cabin's 101.353 kPa for those tests and flags it.
 2. **ISS air is covered; exploration air is not.** Summed over the {{H_N_GROUPS}} material and flame-configuration
    groups, the ISS cabin has {{H_ISS_COMPARABLE}} comparable observations (in {{H_ISS_GROUPS_WITH}} of the {{H_N_GROUPS}}
    groups); the NASA Exploration Atmosphere has {{H_EXPL_COMPARABLE}}, in every group (nearest {{H_EXPL_NN_MIN}} to
-   {{H_EXPL_NN_MAX}} reference distances). {{H_N_ZERO}} of the {{H_N_PROFILES_ANALYSED}} documented NASA atmospheres
+   {{H_EXPL_NN_MAX}} reference distances, the model's unit of distance, where one or less counts as "nearby"). {{H_N_ZERO}} of the {{H_N_PROFILES_ANALYSED}} documented NASA atmospheres
    analysed have none, including all {{H_N_REDUCED}} below 1 atm ({{H_REDUCED_SHORT}}).
 3. **The model says when it does not know.** For thin PMMA films (the default group), {{DX_PTS_WITH}} of {{DX_NPTS}}
    Exploration Atmosphere target points have a comparable observation; the app answers "Insufficient experimental evidence
@@ -75,9 +74,13 @@ documented NASA cabin atmosphere, and then asks which next computation or experi
 
 ### What it does
 
-1. **Coverage map.** For one material and flame configuration, where integrated experiments exist in oxygen x airflow and
-   oxygen x pressure space, and how far any point is from the nearest comparable observation. Documented tests that are not
-   integrated into the model (Saffire-I and III to VI, DARTFire, the Glenn drop-tower limits) form a separate context layer.
+1. **Cabins page: three steps.** Pick a cabin; read the answer (a one-line verdict, a simple oxygen-against-pressure chart of
+   NASA's test results and this cabin, and a material picker); see what to test next (the top three computational research
+   candidates and "What would we learn?"). Cards say Covered, Barely covered or Not covered by nearby ISS test results.
+   A 30-second tour walks through it. The **Explorer** is the expert workspace: for one material and flame configuration,
+   where integrated experiments exist in oxygen x airflow and oxygen x pressure space, and how far any point is from the
+   nearest comparable observation. Documented tests that are not integrated into the model (Saffire-I and III to VI,
+   DARTFire, the Glenn drop-tower limits) form a separate "Related NASA work" layer.
 2. **Target assessment.** Pick one of {{H_N_PROFILES_ANALYSED}} documented NASA cabin atmospheres (each with verbatim NASA quotes,
    machine-checked against the downloaded documents) or a user-defined hypothetical (live service only): comparable
    observations, nearest distance, a verdict (supported, extrapolation, insufficient evidence) and the documented NASA work
@@ -88,8 +91,8 @@ documented NASA cabin atmosphere, and then asks which next computation or experi
 4. **Active learning.** Ranks computational research candidates by expected reduction of the model's uncertainty about the
    chosen target, next to random, uncertainty-sampling and nearest-gap baselines, with a pressure-assumption sensitivity check
    and "what if it burned / did not burn" previews. No test or apparatus procedures are produced.
-5. **Experiment explorer, research brief and guided demo.** Every integrated test with the quoted source token behind each
-   value; a printable research brief; a guided demo of the coverage-to-candidate story.
+5. **Experiments, How it works, research brief.** Every integrated test with the quoted source token behind each value;
+   a plain-language explanation of the data, model, validation and limits; a printable research brief.
 
 ### How it works
 

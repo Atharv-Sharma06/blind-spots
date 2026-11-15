@@ -6,11 +6,11 @@ import "@/styles/globals.css";
 import { Providers } from "./providers";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
+import { SITE_DESCRIPTION, SITE_TITLE } from "@/lib/copy";
 
-// Site title and description (LEAD_DECISIONS D1). Plain words: what it is about, and the method.
-const TITLE = "Blind Spots — where NASA's microgravity fire evidence ends";
-const DESCRIPTION =
-  "Fire safety in crew cabins (spacecraft, Moon and Mars habitats): see where NASA's microgravity burning experiments give reliable evidence, where it ends, and which next experiment would teach the most. A Gaussian-process model that says when it does not know, plus active learning, on open NASA data.";
+// Site title and description (plain-language redesign, see lib/copy.ts).
+const TITLE = SITE_TITLE;
+const DESCRIPTION = SITE_DESCRIPTION;
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL;
 
 // The diamond mark as an inline SVG favicon (no extra file, no logo of any agency).

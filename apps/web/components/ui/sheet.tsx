@@ -40,7 +40,7 @@ export const SheetContent = React.forwardRef<React.ElementRef<typeof DialogPrimi
             ) : null}
           </div>
           <DialogPrimitive.Close
-            className="-mt-1 -mr-1.5 inline-flex size-8 shrink-0 items-center justify-center rounded-md text-muted transition-colors hover:bg-subtle hover:text-fg"
+            className="-mt-1 -mr-1.5 inline-flex size-8 shrink-0 items-center justify-center max-md:size-10 rounded-md text-muted transition-colors hover:bg-subtle hover:text-fg"
             aria-label="Close"
           >
             <X className="size-4" aria-hidden />

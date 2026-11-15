@@ -383,3 +383,9 @@ Append-only log. Format: `D-NNN (date, author): decision. Why. Consequence.`
   - Demo scene 3 caption adapts to the API verdict (supported / extrapolation / insufficient_evidence); gaps are phrased "not represented in the integrated records" and name not-integrated investigations (first two + count).
   - Brief page renders the API `sections` with a small text-only Markdown renderer (no HTML); "min None"/"max None" from the API is displayed as "not given".
   - Brief link: /brief?group=&target=&candidate=<o2>,<airflow>,<pressure>.
+
+- D-053 (2026-11-15, docs-redesign): Documentation aligned with the first-glance redesign (Cabins home page, Explorer at `/explore`).
+  - Wording: README, demo script, project page and slides outline use the app's plain words ("test results", "nearby", "material setups", "Covered / Barely covered / Not covered"). A "material setup" is an analysis group (a material plus how air flows past it); the chip rule is `COVERED_MIN_SHARE` (0.9) in `apps/web/components/home/cabins.ts`, so "Barely covered" means nearby ISS test results but not for nearly all setups.
+  - Counts: the README states how the counts fit (experiments in the dataset, ISS glovebox tests, test results = airflow settings, training subset and exclusions), all from generator keys.
+  - Scope caveats repeated where a headline is quoted: "covered" concerns the air only (ISS tests are microgravity; PSI holds no partial-gravity combustion data), and the BASS-II test pressure is an assumed ISS nominal, flagged, not a measurement.
+  - README screenshots (`docs/img/cabins-pick.png`, `docs/img/cabins-answer.png`) are headless captures of the real Cabins page on the snapshot build, replacing the old Explorer still.

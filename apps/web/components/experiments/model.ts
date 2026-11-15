@@ -1,41 +1,22 @@
 /** Pure helpers for the experiment explorer: row derivation, filtering, sorting, plain-word glossaries. */
 import type { ApiExperiment, GroupSummary } from "@/lib/types";
-import { fmtFixed, isNum, MISSING } from "@/lib/format";
+import { isNum, MISSING } from "@/lib/format";
 import { loadSnapshotManifest, normalizeKey, snapshotFileUrl, snapshotKeyCandidates } from "@/lib/snapshot";
 
 export const ALL = "all";
 
+export type ResultKind = "burned" | "out" | "other";
+
+/** The three filters on the page: free text, material (family) and result. */
 export interface Filters {
   q: string;
-  investigation: string;
-  platform: string;
-  group: string;
-  outcome: string;
-  training: string; // all | included | excluded
-  confidence: string;
+  material: string;
+  result: string; // all | burned | out | other
 }
 
-export const EMPTY_FILTERS: Filters = {
-  q: "",
-  investigation: ALL,
-  platform: ALL,
-  group: ALL,
-  outcome: ALL,
-  training: ALL,
-  confidence: ALL,
-};
+export const EMPTY_FILTERS: Filters = { q: "", material: ALL, result: ALL };
 
-export type SortKey =
-  | "experiment"
-  | "material"
-  | "configuration"
-  | "oxygen"
-  | "pressure"
-  | "airflow"
-  | "outcome"
-  | "steps"
-  | "quality"
-  | "training";
+export type SortKey = "source" | "material" | "oxygen" | "pressure" | "airflow" | "result";
 
 /** Last-resort plain words for a code we have no label for (never shows snake_case). */
 export function humanize(s: string | null | undefined): string {
@@ -54,11 +35,11 @@ export function humanize(s: string | null | undefined): string {
 }
 
 const MATERIAL_LABEL: Record<string, string> = {
-  pmma_thin_film: "Thin PMMA film",
-  pmma_slab: "PMMA slab",
-  pmma_rod: "PMMA rod",
-  pmma_sphere: "PMMA sphere",
-  sibal_fabric: "SIBAL fabric",
+  pmma_thin_film: "Thin acrylic film (PMMA)",
+  pmma_slab: "Acrylic slab (PMMA)",
+  pmma_rod: "Acrylic rod (PMMA)",
+  pmma_sphere: "Acrylic sphere (PMMA)",
+  sibal_fabric: "Cotton/fibreglass fabric (SIBAL)",
   nomex_fabric: "Nomex fabric",
   ultem_sheet: "Ultem sheet",
   wax_candle: "Wax candle",
@@ -67,15 +48,16 @@ const MATERIAL_LABEL: Record<string, string> = {
 };
 export const materialLabel = (f: string | null | undefined): string => (f ? (MATERIAL_LABEL[f] ?? humanize(f)) : MISSING);
 
+/** Plain wording for how air moved past the sample (muted text under the material name). */
 const CONFIG_LABEL: Record<string, string> = {
-  opposed: "Opposed flow",
-  concurrent: "Concurrent flow",
-  stagnation: "Axial stagnation",
-  wake: "Wake ignition",
-  mixed: "Mixed",
-  unknown: "Not recorded",
+  opposed: "air flowing against the flame",
+  concurrent: "air flowing with the flame",
+  stagnation: "air flowing straight at the sample",
+  wake: "flame lit in the wake of the sample",
+  mixed: "mixed airflow",
+  unknown: "setup not recorded",
 };
-export const configurationLabel = (c: string | null | undefined): string => (c ? (CONFIG_LABEL[c] ?? humanize(c)) : MISSING);
+export const configurationLabel = (c: string | null | undefined): string => (c ? (CONFIG_LABEL[c] ?? humanize(c).toLowerCase()) : MISSING);
 
 /** Final outcome codes assigned during curation (CONTRACTS 2.1 terminal_event) and printed context words. */
 const OUTCOME_LABEL: Record<string, string> = {
@@ -88,7 +70,7 @@ const OUTCOME_LABEL: Record<string, string> = {
   ignition_failed: "Did not ignite",
   brief_flame_only: "Brief flame only",
   test_aborted: "Test aborted",
-  unknown: "Not stated",
+  unknown: "Result not stated",
   extinguished: "Extinguished",
   burns: "Burns",
 };
@@ -113,13 +95,78 @@ export const outcomeBucket = (o: string | null | undefined): string => {
   return isOutcomeCode(v) ? v : OUTCOME_DESCRIBED;
 };
 
+
+/**
+ * Plain result of a test. "burned" = the flame kept burning (until the sample was used up), "out" = the flame went
+ * out, "other" = no flame result to compare (did not ignite, stopped early, put out with nitrogen, not stated).
+ * Built only from the recorded outcome code; nothing is inferred.
+ */
+export interface TestResult {
+  kind: ResultKind;
+  label: string;
+  /** Muted second line, e.g. "when airflow dropped". */
+  detail: string | null;
+}
+const RESULT: Record<string, TestResult> = {
+  burnout: { kind: "burned", label: "Flame kept burning", detail: "until the sample was used up" },
+  burns: { kind: "burned", label: "Flame kept burning", detail: null },
+  extinguished_low_flow: { kind: "out", label: "Flame went out", detail: "when the airflow dropped" },
+  blowoff: { kind: "out", label: "Flame went out", detail: "blown off by strong airflow" },
+  self_extinguished: { kind: "out", label: "Flame went out", detail: "on its own" },
+  extinguished: { kind: "out", label: "Flame went out", detail: null },
+  flow_turned_off: { kind: "out", label: "Flame went out", detail: "after the airflow was switched off" },
+  brief_flame_only: { kind: "out", label: "Flame went out", detail: "after a brief flame" },
+  ignition_failed: { kind: "other", label: "Did not ignite", detail: null },
+  n2_suppressed: { kind: "other", label: "Put out with nitrogen", detail: "not a flammability result" },
+  test_aborted: { kind: "other", label: "Test stopped early", detail: null },
+  unknown: { kind: "other", label: "Result not stated", detail: null },
+};
+export function resultOf(o: string | null | undefined): TestResult {
+  const v = o ?? "unknown";
+  const known = RESULT[v];
+  if (known) return known;
+  return isOutcomeCode(v)
+    ? { kind: "other", label: humanize(v), detail: null }
+    : { kind: "other", label: "Described in words", detail: "open it to read it" };
+}
+/** Result label of a test whose outcome is only given airflow step by airflow step. */
+export const PER_STEP_LABEL = "Per airflow step";
+/** Result of an experiment record: like resultOf, but says where to look when the test has airflow steps but no summary. */
+export function resultOfExperiment(e: Pick<ApiExperiment, "observed_outcome" | "n_observations">): TestResult {
+  const r = resultOf(e.observed_outcome);
+  if ((e.observed_outcome ?? "unknown") === "unknown" && e.n_observations > 0) return { kind: "other", label: PER_STEP_LABEL, detail: "open it to see each step" };
+  return r;
+}
+export const RESULT_FILTER_LABEL: Record<string, string> = {
+  burned: "Flame kept burning",
+  out: "Flame went out",
+  steps: PER_STEP_LABEL,
+  other: "Other or not stated",
+};
+/** Which Result-filter option an experiment belongs to: the filter's options match the chips one to one. */
+export function resultFilterKey(e: Pick<ApiExperiment, "observed_outcome" | "n_observations">): "burned" | "out" | "steps" | "other" {
+  const r = resultOfExperiment(e);
+  return r.kind === "other" && r.label === PER_STEP_LABEL ? "steps" : r.kind;
+}
+
+/** "BASS-II · test O15b"; a label that already names the investigation stands alone. */
+export const sourceLabel = (e: { investigation_acronym: string; test_label: string }): string =>
+  e.test_label.startsWith(e.investigation_acronym) ? e.test_label : `${e.investigation_acronym} · test ${e.test_label}`;
+
 const STATE_LABEL: Record<string, string> = {
-  sustained: "Flame sustained",
+  sustained: "Flame kept burning",
   extinguished: "Flame went out",
-  brief_flame_no_sustain: "Brief flame, not sustained",
+  brief_flame_no_sustain: "Brief flame, did not keep burning",
   not_ignited: "Did not ignite",
 };
 export const flameStateText = (s: string): string => STATE_LABEL[s] ?? humanize(s);
+/** Marker kind for a flow step: kept burning (filled), went out (hollow), anything else (dash). */
+export const flameStateKind = (s: string): ResultKind => (s === "sustained" ? "burned" : s === "extinguished" || s === "brief_flame_no_sustain" ? "out" : "other");
+
+/** Trim trailing zeros: 21 -> "21", 101.325 -> "101.3", 0.35 -> "0.35" (digits = max decimals). */
+export function fmtPlain(v: number | null | undefined, digits = 1): string {
+  return isNum(v) ? String(Number(v.toFixed(digits))) : MISSING;
+}
 
 const EXTINCTION_LABEL: Record<string, string> = {
   quench_low_flow: "quenched at low flow",
@@ -160,8 +207,8 @@ export function airflowOf(e: ApiExperiment): { lo: number | null; hi: number | n
 export function fmtAirflow(e: ApiExperiment): string {
   const { lo, hi } = airflowOf(e);
   if (!isNum(lo) && !isNum(hi)) return MISSING;
-  if (isNum(lo) && isNum(hi)) return lo === hi ? fmtFixed(lo, 1) : `${fmtFixed(lo, 1)}–${fmtFixed(hi, 1)}`;
-  return fmtFixed(lo ?? hi, 1);
+  if (isNum(lo) && isNum(hi) && lo !== hi) return `${fmtPlain(lo, 2)}–${fmtPlain(hi, 2)}`;
+  return fmtPlain(lo ?? hi, 2);
 }
 
 export function groupLabel(groups: GroupSummary[] | undefined, id: string | null): string {
@@ -288,20 +335,23 @@ export function tmPage(method: string | null | undefined): string | null {
   return m ? m[1]! : null;
 }
 
-const CONF_RANK: Record<string, number> = { low: 0, medium: 1, high: 2 };
-
 export function applyFilters(rows: ApiExperiment[], f: Filters): ApiExperiment[] {
   const q = f.q.trim().toLowerCase();
   return rows.filter((e) => {
-    if (f.investigation !== ALL && e.investigation_id !== f.investigation) return false;
-    if (f.platform !== ALL && e.experimental_platform !== f.platform) return false;
-    if (f.group !== ALL && e.group_id !== f.group) return false;
-    if (f.outcome !== ALL && outcomeBucket(e.observed_outcome) !== f.outcome) return false;
-    if (f.training === "included" && !e.included_in_training) return false;
-    if (f.training === "excluded" && e.included_in_training) return false;
-    if (f.confidence !== ALL && e.extraction_confidence !== f.confidence) return false;
+    if (f.material !== ALL && (e.material_family ?? "") !== f.material) return false;
+    if (f.result !== ALL && resultFilterKey(e) !== f.result) return false;
     if (q) {
-      const hay = [e.test_label, e.experiment_id, e.material_type, e.material_family, e.notes_raw, e.investigation_acronym, e.sample_id]
+      const hay = [
+        e.test_label,
+        e.experiment_id,
+        e.material_type,
+        materialLabel(e.material_family),
+        e.notes_raw,
+        e.investigation_acronym,
+        e.investigation_name,
+        e.sample_id,
+        resultOf(e.observed_outcome).label,
+      ]
         .filter(Boolean)
         .join(" ")
         .toLowerCase();
@@ -317,26 +367,18 @@ function naturalCmp(a: string, b: string): number {
 
 function sortValue(e: ApiExperiment, key: SortKey): number | string | null {
   switch (key) {
-    case "experiment":
+    case "source":
       return `${e.investigation_acronym} ${e.test_label}`;
     case "material":
-      return `${materialLabel(e.material_family)} ${e.group_id ?? ""}`;
-    case "configuration":
-      return configurationLabel(e.flame_configuration);
+      return `${materialLabel(e.material_family)} ${e.flame_configuration}`;
     case "oxygen":
       return oxygenOf(e);
     case "pressure":
       return pressureOf(e).kpa;
     case "airflow":
       return airflowOf(e).lo;
-    case "outcome":
-      return outcomeLabel(e.observed_outcome);
-    case "steps":
-      return e.n_observations;
-    case "quality":
-      return (CONF_RANK[e.extraction_confidence] ?? 0) * 100 - e.quality_flags.length;
-    case "training":
-      return e.included_in_training ? 1 : 0;
+    case "result":
+      return `${resultOf(e.observed_outcome).label} ${resultOf(e.observed_outcome).detail ?? ""}`;
   }
 }
 

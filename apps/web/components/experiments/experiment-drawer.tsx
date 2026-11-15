@@ -3,42 +3,48 @@
 import * as React from "react";
 import { ExternalLink, SearchX } from "lucide-react";
 import { useExperiment } from "@/hooks/api";
-import { fmtFixed, isNum, MISSING } from "@/lib/format";
-import { Badge } from "@/components/ui/badge";
+import { MISSING } from "@/lib/format";
+import { cn } from "@/lib/cn";
 import { Button } from "@/components/ui/button";
+import { Disclosure } from "@/components/ui/disclosure";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { Sheet, SheetClose, SheetContent } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { ApiExperiment, ApiObservation, GroupSummary, Investigation } from "@/lib/types";
+import { FlameDot, ResultChip } from "./result-chip";
 import {
   BASIS_TEXT,
   calibrationText,
   confidenceLabel,
   configurationLabel,
   exclusionText,
-  experimentTitle,
   extinctionText,
   flagText,
+  flameStateKind,
   flameStateText,
   fmtAirflow,
+  fmtPlain,
   groupLabel,
   humanize,
   isContextReason,
+  isOutcomeCode,
   materialLabel,
   outcomeLabel,
   oxygenOf,
   plainDefinition,
   pressureOf,
   rawFlowText,
+  PER_STEP_LABEL,
+  resultOfExperiment,
+  sourceLabel,
   tmPage,
 } from "./model";
 
 /** Optional step evidence (requested from the backend; rendered when present). */
 type StepEvidence = { evidence_source?: string | null; evidence_page?: string | null; evidence_quote?: string | null };
 
-const titleOf = (e: ApiExperiment) => experimentTitle(e);
+const TM_ID = "NASA/TM-20210011385";
 
 export function ExperimentDrawer(props: {
   id: string | null;
@@ -58,9 +64,9 @@ export function ExperimentDrawer(props: {
   return (
     <Sheet open={!!id} onOpenChange={(o) => !o && onClose()}>
       <SheetContent
-        title={exp ? titleOf(exp) : notFound ? "No experiment with this id" : "Experiment"}
-        description={exp ? (inv?.title ?? exp.investigation_name) : undefined}
-        className="sm:max-w-[820px]"
+        title={exp ? materialLabel(exp.material_family) : notFound ? "No experiment with this id" : "Experiment details"}
+        description={exp ? sourceLabel(exp) : undefined}
+        className="sm:max-w-[640px]"
         aria-describedby={undefined}
         onCloseAutoFocus={onCloseAutoFocus}
       >
@@ -71,13 +77,12 @@ export function ExperimentDrawer(props: {
               title="No experiment with this id"
               description={
                 <>
-                  <span className="num text-fg">{id}</span> is not one of the experiments in the integrated records. Check the link, or
-                  pick a row in the table.
+                  <span className="num text-fg">{id}</span> is not one of the experiments in our data. Check the link, or pick one from the list.
                 </>
               }
               action={
                 <SheetClose asChild>
-                  <Button>Back to the table</Button>
+                  <Button>Back to the list</Button>
                 </SheetClose>
               }
             />
@@ -85,7 +90,7 @@ export function ExperimentDrawer(props: {
         ) : q.isError ? (
           <ErrorState code={q.error.code} error={q.error} message={q.error.message} onRetry={() => void q.refetch()} compact />
         ) : !q.data ? (
-          <div className="space-y-2" role="status" aria-label="Loading experiment">
+          <div className="space-y-2" role="status" aria-label="Loading experiment details">
             {Array.from({ length: 8 }, (_, i) => (
               <Skeleton key={i} className="h-6 w-full" />
             ))}
@@ -100,8 +105,8 @@ export function ExperimentDrawer(props: {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="border-b border-border py-4 first:pt-0 last:border-b-0">
-      <h3 className="mb-2 text-xs font-medium tracking-wide text-muted uppercase">{title}</h3>
+    <section className="border-b border-border py-5 first:pt-0 last:border-b-0">
+      <h3 className="mb-3 text-prose font-semibold text-fg">{title}</h3>
       {children}
     </section>
   );
@@ -109,10 +114,10 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function Fields({ items }: { items: [string, React.ReactNode][] }) {
   return (
-    <dl className="grid grid-cols-1 gap-x-3 gap-y-0.5 text-[13px] sm:grid-cols-[10rem_1fr] sm:gap-y-1.5">
+    <dl className="grid grid-cols-1 gap-x-4 gap-y-0.5 text-ui sm:grid-cols-[9rem_1fr] sm:gap-y-2">
       {items.map(([k, v]) => (
         <React.Fragment key={k}>
-          <dt className="pt-1.5 text-muted first:pt-0 sm:pt-0">{k}</dt>
+          <dt className="pt-2 text-muted first:pt-0 sm:pt-0">{k}</dt>
           <dd className="min-w-0 break-words">{v ?? MISSING}</dd>
         </React.Fragment>
       ))}
@@ -120,12 +125,27 @@ function Fields({ items }: { items: [string, React.ReactNode][] }) {
   );
 }
 
-const num = (v: number | null, d = 1) => <span className="num">{fmtFixed(v, d)}</span>;
-
-const TM_ID = "NASA/TM-20210011385";
+function Fact({ label, value, unit, note, className }: { label: string; value: string; unit: string; note?: React.ReactNode; className?: string }) {
+  return (
+    <div className={cn("rounded-lg border border-border bg-subtle/50 px-3.5 py-3", className)}>
+      <p className="text-xs text-muted">{label}</p>
+      <p className="mt-0.5">
+        {value === MISSING ? (
+          <span className="text-heading text-muted">{MISSING}</span>
+        ) : (
+          <>
+            <span className="num text-heading font-semibold">{value}</span> <span className="text-ui text-muted">{unit}</span>
+          </>
+        )}
+      </p>
+      {note ? <p className="mt-0.5 text-xs text-muted">{note}</p> : null}
+    </div>
+  );
+}
 
 function Details({ e, obs, groups, inv }: { e: ApiExperiment; obs: ApiObservation[]; groups: GroupSummary[] | undefined; inv: Investigation | undefined }) {
   const p = pressureOf(e);
+  const r = resultOfExperiment(e);
   const doi = e.source_doi ?? inv?.doi ?? null;
   const isPsi = e.investigation_id.startsWith("PSI-");
   const ntrsId = /^NTRS-(\d+)$/.exec(e.investigation_id)?.[1] ?? null;
@@ -133,29 +153,110 @@ function Details({ e, obs, groups, inv }: { e: ApiExperiment; obs: ApiObservatio
   const nUsed = obs.filter((o) => o.included_in_training).length;
   const page = tmPage(e.measurement_method);
   const tmNotes = e.quality_flags.includes("notes_from_nasa_tm_20210011385");
+  const described = e.observed_outcome && !isOutcomeCode(e.observed_outcome) ? e.observed_outcome : null;
 
   const training = context
-    ? exclusionText(e.exclusion_reason)
+    ? `No. ${exclusionText(e.exclusion_reason)}`
     : obs.length === 0
       ? e.included_in_training
-        ? "Included."
-        : exclusionText(e.exclusion_reason) || "Not used for training."
+        ? "Yes."
+        : exclusionText(e.exclusion_reason) || "No."
       : nUsed === obs.length
-        ? `All ${obs.length} flow ${obs.length === 1 ? "step is" : "steps are"} used to train the model.`
+        ? `Yes. All ${obs.length} ${obs.length === 1 ? "step is" : "steps are"} used to teach the model.`
         : nUsed === 0
-          ? `None of its ${obs.length} flow steps is used for training. ${exclusionText(e.exclusion_reason)}`.trim()
-          : `${nUsed} of ${obs.length} flow steps are used for training; the others are held out (reason on each step below).`;
+          ? `No. None of its ${obs.length} ${obs.length === 1 ? "step is" : "steps are"} used. ${exclusionText(e.exclusion_reason)}`.trim()
+          : `Partly. ${nUsed} of ${obs.length} steps are used; the others are held out (the reason is on each step).`;
+
+  // The assumed pressure and the context-only status are already explained in their own boxes above.
+  const shownFlags = e.quality_flags.filter((f) => f !== "pressure_assumed" && f !== "context_only" && f !== "context_record");
+
+  const sample: [string, React.ReactNode][] = [
+    ["Material", [e.material_type, materialLabel(e.material_family)].filter(Boolean).join(" · ")],
+    ["Airflow setup", configurationLabel(e.flame_configuration)],
+  ];
+  if (e.material_thickness_mm !== null) sample.push(["Thickness", <span key="t" className="num">{fmtPlain(e.material_thickness_mm, 2)} mm</span>]);
+  if (e.specimen_diameter_mm !== null) sample.push(["Diameter", <span key="d" className="num">{fmtPlain(e.specimen_diameter_mm, 1)} mm</span>]);
+  if (e.test_date) sample.push(["Test date", <span key="td" className="num">{e.test_date}</span>]);
 
   return (
     <div>
-      <Section title="Identifiers">
+      <Section title="Result">
+        <ResultChip
+          kind={r.kind}
+          label={r.label}
+          detail={r.label === PER_STEP_LABEL ? "the result is given for each airflow step, below" : r.detail}
+          large
+        />
+        {described ? (
+          <blockquote className="mt-3 rounded-md border border-border bg-subtle p-3 text-ui">
+            <span className="mb-1 block text-xs text-muted">NASA&apos;s description (verbatim)</span>
+            {described}
+          </blockquote>
+        ) : null}
+        {context ? (
+          <p className="mt-3 rounded-md bg-gap-tint px-3 py-2 text-ui text-gap-fg">
+            Context only: this test used different apparatus or a different test length, so the model does not use it.
+          </p>
+        ) : null}
+      </Section>
+
+      <Section title="Test conditions">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          <Fact label="Oxygen" value={fmtPlain(oxygenOf(e), 1)} unit="%" note={e.oxygen_percent_final !== null ? <>at the end: <span className="num">{fmtPlain(e.oxygen_percent_final, 1)}</span> %</> : undefined} />
+          <Fact label="Pressure" value={fmtPlain(p.kpa, 1)} unit="kPa" note={p.assumed ? "assumed, not recorded" : p.kpa !== null ? "recorded" : undefined} />
+          <Fact className="col-span-2 sm:col-span-1" label="Airflow" value={fmtAirflow(e)} unit="cm/s" note={fmtAirflow(e).includes("–") ? "range across the steps" : undefined} />
+        </div>
+        {p.assumed ? (
+          <p className="mt-3 rounded-md bg-gap-tint px-3 py-2 text-ui text-gap-fg">
+            The NASA source does not record the pressure of this test. We assume the documented ISS cabin pressure and keep it in a separate field, so it is never mistaken for a
+            measurement.
+          </p>
+        ) : null}
+        <div className="mt-4">
+          <Fields items={sample} />
+        </div>
+      </Section>
+
+      <Section title={`Flame at each airflow step (${obs.length})`}>
+        {obs.length === 0 ? (
+          <p className="text-ui text-muted">
+            {context
+              ? "Context tests keep only the printed test-level values; they have no airflow steps."
+              : "No airflow steps could be read from the source for this test."}
+          </p>
+        ) : (
+          <>
+            <ol className="space-y-2">
+              {obs.map((o) => (
+                <StepItem key={o.observation_id} o={o} testLabel={e.test_label} />
+              ))}
+            </ol>
+            <p className="mt-2 text-xs text-muted">
+              Each step is one airflow setting within the experiment. Steps are numbered from 1. Greyed steps are not used by the model.
+            </p>
+          </>
+        )}
+      </Section>
+
+      <Section title="Does the model use this experiment?">
+        <p className="text-ui">{training}</p>
+      </Section>
+
+      {e.notes_raw ? (
+        <Section title="What NASA's notes say">
+          <blockquote className="max-h-48 overflow-auto rounded-md border border-border bg-subtle p-3 font-mono text-xs whitespace-pre-wrap">{e.notes_raw}</blockquote>
+          <p className="mt-1.5 text-xs text-muted">
+            Verbatim from the source{tmNotes ? `: ${TM_ID} Appendix A${page ? `, printed page ${page}` : ""}` : ""}.
+          </p>
+        </Section>
+      ) : null}
+
+      <Section title="Where this comes from">
         <Fields
           items={[
             ["Investigation", inv?.title ?? e.investigation_name],
-            ["Experiment id", <span key="i" className="num">{e.experiment_id}</span>],
-            ["Test label", <span key="t" className="num">{e.test_label}</span>],
-            ["Sample", e.sample_id ? <span className="num">{e.sample_id}</span> : MISSING],
-            [isPsi ? "PSI accession" : ntrsId ? "NTRS document" : "Accession", <span key="a" className="num">{ntrsId ?? e.investigation_id}</span>],
+            ["Test", <span key="t" className="num">{sourceLabel(e)}</span>],
+            ["Spreadsheet row", e.source_sheet ? <span className="num">{e.source_sheet} · row {e.source_row ?? MISSING}</span> : MISSING],
             [
               "DOI",
               doi ? (
@@ -166,145 +267,62 @@ function Details({ e, obs, groups, inv }: { e: ApiExperiment; obs: ApiObservatio
                 MISSING
               ),
             ],
-            ["Test date", e.test_date ? <span className="num">{e.test_date}</span> : MISSING],
-            ["Platform", e.experimental_platform],
-            ["Material", [e.material_type, materialLabel(e.material_family)].filter(Boolean).join(" · ")],
-            ["Flame configuration", configurationLabel(e.flame_configuration)],
-            ["Analysis group", e.group_id ? groupLabel(groups, e.group_id) : "None"],
           ]}
         />
-      </Section>
-
-      <Section title="Conditions">
-        <Fields
-          items={[
-            ["O₂ initial / final (%)", <span key="o">{num(oxygenOf(e))} / {num(e.oxygen_percent_final)}</span>],
-            [
-              "Total pressure (kPa)",
-              p.assumed ? (
-                <span key="p">
-                  {num(p.kpa, 1)} <Badge>assumed</Badge>
-                  <span className="mt-1 block text-xs text-muted">
-                    Not recorded in the source; the documented ISS cabin nominal is used and kept in a separate field.
-                  </span>
-                </span>
-              ) : (
-                <span key="p">
-                  {num(p.kpa, 1)} <span className="text-muted">recorded</span>
-                </span>
-              ),
-            ],
-            ["Airflow range (cm/s)", <span key="f" className="num">{fmtAirflow(e)}</span>],
-            ["Flow restrictors", isNum(e.flow_restrictor) ? <span className="num">{e.flow_restrictor}</span> : MISSING],
-            ["CO₂ initial / final (%)", <span key="c">{num(e.co2_percent_initial, 2)} / {num(e.co2_percent_final, 2)}</span>],
-          ]}
-        />
-      </Section>
-
-      <Section title="Recorded outcome">
-        <Fields
-          items={[
-            ["Outcome", outcomeLabel(e.observed_outcome)],
-            ["How it was assigned", plainDefinition(e.outcome_definition)],
-            ["Measurement method", plainDefinition(e.measurement_method)],
-          ]}
-        />
-      </Section>
-
-      <Section title="Training">
-        <p className="text-[13px]">
-          <span className="font-medium">{e.included_in_training ? "Included" : "Excluded"}.</span> {training}
-        </p>
-      </Section>
-
-      <Section title={`Flow steps (${obs.length})`}>
-        {obs.length === 0 ? (
-          <p className="text-[13px] text-muted">
-            {context
-              ? "Context records keep the printed test-level values only; they have no flow steps."
-              : "No flow steps could be read from the source for this test, so it has no observations."}
+        <div className="mt-3">
+          <Button asChild className="h-10 sm:h-8">
+            <a href={e.source_url} target="_blank" rel="noreferrer">
+              Open the NASA record <ExternalLink aria-hidden />
+            </a>
+          </Button>
+          <p className="mt-1.5 text-xs text-muted">
+            {isPsi
+              ? `Opens the NASA Physical Sciences Informatics page for ${e.investigation_id}, which hosts the source files.`
+              : ntrsId
+                ? `Opens the NASA Technical Reports Server record (${ntrsId}) the values were transcribed from.`
+                : "Opens the NASA source record."}
           </p>
-        ) : (
-          <>
-            <Table containerClassName="max-h-[28rem]" aria-label="Flow steps">
-              <TableHeader>
-                <TableRow className="hover:bg-transparent">
-                  <TableHead numeric>Step</TableHead>
-                  <TableHead>Airflow cm/s</TableHead>
-                  <TableHead numeric>O₂ %</TableHead>
-                  <TableHead>Flame</TableHead>
-                  <TableHead numeric>Label</TableHead>
-                  <TableHead>Source quote</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {obs.map((o) => (
-                  <StepRow key={o.observation_id} o={o} testLabel={e.test_label} />
-                ))}
-              </TableBody>
-            </Table>
-            <p className="mt-2 text-xs text-muted">
-              Label 1 = flame sustained, 0 = flame not sustained, {MISSING} = no curated outcome; greyed = not used for training (hover for the reason). Steps are numbered
-              from 1, as on the map.
-            </p>
-          </>
-        )}
+        </div>
       </Section>
 
-      {e.notes_raw ? (
-        <Section title={tmNotes ? "Observation notes (NASA technical memorandum)" : "Notes as recorded (verbatim)"}>
-          <blockquote className="max-h-48 overflow-auto rounded-md border border-border bg-subtle p-2.5 font-mono text-xs whitespace-pre-wrap">
-            {e.notes_raw}
-          </blockquote>
-          {tmNotes ? (
-            <p className="mt-1.5 text-xs text-muted">
-              Quoted verbatim from {TM_ID} Appendix A{page ? `, printed page ${page}` : ""}. The PSI-25 workbook has no observation column.
-            </p>
-          ) : null}
-        </Section>
-      ) : null}
-
-      <Section title="Provenance and quality">
-        <Fields
-          items={[
-            ["Source file", e.source_file ? <span className="num break-all text-xs">{e.source_file}</span> : MISSING],
-            ["Sheet · row", e.source_sheet ? <span className="num">{e.source_sheet} · row {e.source_row ?? MISSING}</span> : MISSING],
-            ["Extraction", `${e.extraction_method === "derived_computation" ? "Computed from the sensor file" : e.extraction_method === "manually_transcribed" ? "Transcribed by hand" : humanize(e.extraction_method)} · confidence ${confidenceLabel(e.extraction_confidence).toLowerCase()}`],
-          ]}
-        />
-        <h4 className="mt-3 mb-1 text-xs text-muted">Quality flags</h4>
-        {e.quality_flags.length === 0 ? (
-          <p className="text-[13px] text-muted">No quality flags.</p>
-        ) : (
-          <ul className="list-disc space-y-1 pl-4 text-[13px] marker:text-muted">
-            {e.quality_flags.map((f) => (
+      {shownFlags.length > 0 ? (
+        <Section title="Things to know about this record">
+          <ul className="list-disc space-y-1.5 pl-4 text-ui marker:text-muted">
+            {shownFlags.map((f) => (
               <li key={f} title={`Flag code: ${f}`}>
                 {flagText(f)}
               </li>
             ))}
           </ul>
-        )}
-      </Section>
+        </Section>
+      ) : null}
 
-      <Section title="Original record">
-        <Button asChild>
-          <a href={e.source_url} target="_blank" rel="noreferrer">
-            View original NASA record <ExternalLink aria-hidden />
-          </a>
-        </Button>
-        <p className="mt-1.5 text-xs text-muted">
-          {isPsi
-            ? `Opens the NASA Physical Sciences Informatics page for ${e.investigation_id}, which hosts the source files.`
-            : ntrsId
-              ? `Opens the NASA Technical Reports Server record (${ntrsId}) for the document the values were transcribed from.`
-              : "Opens the NASA source record."}
-        </p>
-      </Section>
+      <div className="pt-4">
+        <Disclosure summary="Technical details" tone="strong">
+          <Fields
+            items={[
+              ["Experiment id", <span key="i" className="num">{e.experiment_id}</span>],
+              ["Sample", e.sample_id ? <span className="num">{e.sample_id}</span> : MISSING],
+              [isPsi ? "PSI accession" : ntrsId ? "NTRS document" : "Accession", <span key="a" className="num">{ntrsId ?? e.investigation_id}</span>],
+              ["Apparatus", e.experimental_platform],
+              ["Comparison group", e.group_id ? groupLabel(groups, e.group_id) : "None"],
+              ["Recorded outcome", outcomeLabel(e.observed_outcome)],
+              ["How it was assigned", plainDefinition(e.outcome_definition)],
+              ["Measurement method", plainDefinition(e.measurement_method)],
+              ["Source file", e.source_file ? <span className="num break-all text-xs">{e.source_file}</span> : MISSING],
+              [
+                "Extraction",
+                `${e.extraction_method === "derived_computation" ? "Computed from the sensor file" : e.extraction_method === "manually_transcribed" ? "Transcribed by hand" : humanize(e.extraction_method)} · confidence ${confidenceLabel(e.extraction_confidence).toLowerCase()}`,
+              ],
+            ]}
+          />
+        </Disclosure>
+      </div>
     </div>
   );
 }
 
-function StepRow({ o, testLabel }: { o: ApiObservation; testLabel: string }) {
+function StepItem({ o, testLabel }: { o: ApiObservation; testLabel: string }) {
   const ev = o as ApiObservation & StepEvidence;
   const tm = o.raw_column === "TM Appendix A observation";
   const raw = rawFlowText(o.flow_raw_value, o.flow_raw_unit);
@@ -318,48 +336,41 @@ function StepRow({ o, testLabel }: { o: ApiObservation; testLabel: string }) {
         : "the source supports this step only with low confidence."
       : exclusionText(o.exclusion_reason) || "no reason recorded.";
   return (
-    <TableRow className={used ? "align-top" : "align-top text-muted"} title={used ? undefined : `Not used for training: ${why}`} data-used={used ? "true" : "false"}>
-      <TableCell numeric className="h-auto py-2">{o.step_index + 1}</TableCell>
-      <TableCell className="h-auto min-w-36 py-2">
-        <span className="num">{fmtFixed(o.airflow_cm_s, 2)}</span>
-        {isNum(o.airflow_uncertainty_cm_s) ? <span className="num text-muted"> ±{fmtFixed(o.airflow_uncertainty_cm_s, 2)}</span> : null}
-        <span className="block text-xs text-muted">
-          {BASIS_TEXT[o.airflow_basis] ?? humanize(o.airflow_basis)}
-          {raw ? `; ${raw}` : ""}
-          {cal ? `; ${cal}` : ""}
+    <li
+      data-used={used ? "true" : "false"}
+      className={used ? "rounded-lg border border-border bg-surface p-3" : "rounded-lg border border-dashed border-border bg-subtle/40 p-3 text-muted"}
+    >
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+        <span className="text-ui font-medium text-fg">Step {o.step_index + 1}</span>
+        <span className="inline-flex items-center gap-2 text-ui font-medium">
+          <FlameDot kind={flameStateKind(o.flame_state)} />
+          {flameStateText(o.flame_state)}
         </span>
-      </TableCell>
-      <TableCell numeric className="h-auto py-2">{fmtFixed(o.oxygen_percent, 1)}</TableCell>
-      <TableCell className="h-auto min-w-32 py-2">
-        {flameStateText(o.flame_state)}
-        {o.extinction_mode ? <span className="block text-xs text-muted">{extinctionText(o.extinction_mode)}</span> : null}
-        <span className="block text-xs text-muted">confidence {confidenceLabel(o.confidence).toLowerCase()}</span>
-      </TableCell>
-      <TableCell numeric className="h-auto py-2">
-        {used ? (
-          <span className="num">{o.label}</span>
-        ) : (
-          <span className="text-muted" title={`Not used for training: ${why}`}>
-            <span className="num">{o.label ?? MISSING}</span>
-            <span className="sr-only">, not used for training</span>
-          </span>
-        )}
-      </TableCell>
-      <TableCell className="h-auto min-w-52 py-2">
-        <q className="font-mono text-xs">{o.raw_token}</q>
-        <span className="block text-xs text-muted">
-          {tm ? `${TM_ID} Appendix A, test ${testLabel}` : <span className="num">row {o.source_row} · {o.raw_column}</span>}
-        </span>
-        {ev.evidence_quote ? (
-          <span className="mt-1 block text-xs text-muted">
-            {TM_ID}
-            {ev.evidence_page ? `, p. ${ev.evidence_page}` : ""}: <q className="text-fg">{ev.evidence_quote}</q>
-          </span>
-        ) : o.quality_flags.includes("outcome_evidence_nasa_tm_20210011385") && !tm ? (
-          <span className="mt-1 block text-xs text-muted">Flame state confirmed by {TM_ID} Appendix A.</span>
-        ) : null}
-        {!used ? <span className="mt-1 block text-xs text-muted">Not used for training: {why}</span> : null}
-      </TableCell>
-    </TableRow>
+      </div>
+      <p className="mt-1 text-ui">
+        Airflow <span className="num">{fmtPlain(o.airflow_cm_s, 2)}</span> cm/s
+        {o.airflow_uncertainty_cm_s !== null ? <span className="text-muted"> (±<span className="num">{fmtPlain(o.airflow_uncertainty_cm_s, 2)}</span>)</span> : null}
+        {" · "}Oxygen <span className="num">{fmtPlain(o.oxygen_percent, 1)}</span> %
+        {o.extinction_mode ? <span className="text-muted"> · {extinctionText(o.extinction_mode)}</span> : null}
+      </p>
+      <p className="mt-1 text-xs text-muted">
+        Airflow from: {BASIS_TEXT[o.airflow_basis] ?? humanize(o.airflow_basis)}
+        {raw ? `; ${raw}` : ""}
+        {cal ? `; ${cal}` : ""}
+      </p>
+      <p className="mt-1 text-xs text-muted">
+        Source cell: <q className="font-mono">{o.raw_token}</q>{" "}
+        {tm ? `(${TM_ID} Appendix A, test ${testLabel})` : <span className="num">(row {o.source_row}, column “{o.raw_column}”)</span>}
+      </p>
+      {ev.evidence_quote ? (
+        <p className="mt-1 text-xs text-muted">
+          {TM_ID}
+          {ev.evidence_page ? `, p. ${ev.evidence_page}` : ""}: <q className="text-fg">{ev.evidence_quote}</q>
+        </p>
+      ) : o.quality_flags.includes("outcome_evidence_nasa_tm_20210011385") && !tm ? (
+        <p className="mt-1 text-xs text-muted">Flame state confirmed by {TM_ID} Appendix A.</p>
+      ) : null}
+      {!used ? <p className="mt-1 text-xs">Not used by the model: {why}</p> : null}
+    </li>
   );
 }

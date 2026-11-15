@@ -45,7 +45,22 @@ SPARSE_THRESHOLD = 1.0
 PRESSURE_LENGTH_SCALE_DEFAULT = 0.3
 PRESSURE_LENGTH_SCALE_SENSITIVITY = [0.15, 0.3, 0.6]
 REPOSITORY_ENV = "BLINDSPOTS_REPOSITORY_URL"  # set only once the public repository exists; never invented
-HEADLINE_PROFILES = ["iss_cabin_nominal", "exploration_atmosphere_8p2_34"]
+HEADLINE_PROFILES = ["iss_cabin_nominal", "exploration_atmosphere_8p2_34"]  # always present, in this order
+# Display order of the default GET /api/headline (the cabin cards of the home page): ISS first, then today's
+# and next cabins, then the past spacecraft. Operating-point profiles not listed follow in manifest order.
+HEADLINE_ORDER = [
+    "iss_cabin_nominal",
+    "artemis_surface_habitat_10p2_26p5",
+    "exploration_atmosphere_8p2_34",
+    "orion_cm_lunar_design_10p2",
+    "orion_cm_14p7_o2_limit",
+    "shuttle_nominal",
+    "shuttle_staged_pre_eva",
+    "skylab",
+    "apollo_cm",
+    "iss_materials_worst_case",
+    "eawg_2006_8p0_32",
+]
 DASH = "\u2013"
 
 AXIS_MAX = 1000.0  # kPa on the pressure axis, cm/s on the airflow axis
@@ -523,10 +538,13 @@ def coverage(
 
 @router.get("/headline", response_model=HeadlineResponse)
 def headline(profiles: str | None = None) -> dict[str, Any]:
-    """Comparable observations for headline targets across all groups, plus the integrated envelope.
+    """Comparable observations per cabin profile and analysis group, plus the integrated envelope.
 
-    Always includes the ISS nominal profile and the NASA Exploration Atmosphere; ``profiles`` adds more
-    operating-point profile ids (comma-separated).
+    Default (no ``profiles``): EVERY operating-point profile of the manifest (envelope/context profiles are
+    not analysis targets and are left out), in the display order ``HEADLINE_ORDER`` then manifest order; ISS
+    nominal first. ``profiles`` (comma-separated ids) keeps the earlier finding-strip behaviour: the two
+    guaranteed profiles (ISS nominal, NASA Exploration Atmosphere) followed by the listed ids (404 for an
+    unknown id, 422 for an envelope id).
     """
     from blindspots.acquisition.targets import target_points
     from blindspots.api.models import Target
@@ -535,11 +553,20 @@ def headline(profiles: str | None = None) -> dict[str, Any]:
     from blindspots.models.groups import training_rows
 
     store = deps.require_store()
-    ids = list(HEADLINE_PROFILES)
-    for pid in (profiles or "").split(","):
-        if pid.strip() and pid.strip() not in ids:
-            ids.append(pid.strip())
-    known = {p["profile_id"] for p in deps.profiles_manifest().get("profiles", [])}
+    manifest = deps.profiles_manifest().get("profiles", [])
+    known = {p["profile_id"] for p in manifest}
+    operating = [
+        p["profile_id"] for p in manifest if str(p.get("kind") or "operating_point") == "operating_point"
+    ]
+    requested = [x.strip() for x in (profiles or "").split(",") if x.strip()]
+    if requested:
+        ids = list(HEADLINE_PROFILES)
+    else:
+        ids = [pid for pid in HEADLINE_ORDER if pid in operating]
+        ids += [pid for pid in operating if pid not in ids]
+    for pid in requested:
+        if pid not in ids:
+            ids.append(pid)
     groups = deps.groups_with_status(store)
     out_profiles = []
     for pid in ids:

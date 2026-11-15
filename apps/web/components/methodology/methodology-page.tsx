@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useContextEvidence, useGroups, useMethodology, useModelMetadata, useSources, useValidation, type ApiQuery } from "@/hooks/api";
+import { useContextEvidence, useGroups, useHeadline, useMethodology, useModelMetadata, useSources, useValidation, type ApiQuery } from "@/hooks/api";
 import { PageContainer } from "@/components/layout/page-container";
 import { SectionHeader } from "@/components/ui/section-header";
 import { ActiveLearningSection } from "./section-active";
@@ -12,12 +12,14 @@ import { ReproducibilitySection } from "./section-reproducibility";
 import { SourcesSection } from "./section-sources";
 import { ValidationSection } from "./section-validation";
 import { TrustSection } from "./section-trust";
-import { BuiltSection } from "./section-built";
+import { BuiltSection, SiNote } from "./section-built";
+import { FourSteps } from "./four-steps";
+import { setSectionOpen } from "./primitives";
 import { Toc, type TocItem } from "./toc";
 import type { ExtValidation } from "./types";
 
+/** Anchors of the numbered sections under "Technical details" (the page's trust summary sits above them). */
 const TOC: TocItem[] = [
-  { id: "trust", label: "Can you trust it?" },
   { id: "data", label: "Data" },
   { id: "modelling", label: "Modelling" },
   { id: "active-learning", label: "Active learning" },
@@ -49,37 +51,64 @@ export function MethodologyPage() {
   const metadata = useModelMetadata(group);
   const groupLabel = groups.data?.data.find((g) => g.group_id === group)?.label ?? null;
 
+  const headline = useHeadline();
+
   return (
-    <PageContainer className="flex flex-1 flex-col gap-6">
-      <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
+    <PageContainer className="flex flex-1 flex-col gap-14">
+      <div className="mx-auto w-full max-w-[1100px] space-y-10">
         <SectionHeader
           as="h1"
-          className="min-w-0 flex-1 basis-[28rem]"
-          title="Methodology"
-          description="How the NASA records were integrated, how the model is fitted and checked, and how research candidates are ranked. Every number on this page comes from the analysis outputs (the live service or its precomputed snapshot)."
+          title="How it works"
+          description="Four steps, from NASA's ISS flame records to the experiment that would teach the most."
         />
+        <FourSteps headline={headline} validation={validation} methodology={methodology} />
+        <TrustSection
+          validation={validation}
+          groups={groups.data?.data}
+          headline={headline}
+          onShowGroup={(g) => {
+            setPicked(g);
+            setSectionOpen("validation", true);
+            window.setTimeout(() => document.getElementById("validation-detail")?.scrollIntoView({ block: "start" }), 80);
+          }}
+        />
+        <SiNote />
       </div>
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[210px_minmax(0,1fr)] lg:gap-10">
-        <Toc items={TOC} />
-        <div className="min-w-0 max-w-[920px] space-y-12">
-          <TrustSection
-            validation={validation}
-            groups={groups.data?.data}
-            onShowGroup={(g) => {
-              setPicked(g);
-              requestAnimationFrame(() => document.getElementById("validation-detail")?.scrollIntoView({ block: "start" }));
-            }}
-          />
-          <DataSection methodology={methodology} sources={sources} groups={groups} />
-          <ModellingSection methodology={methodology} metadata={metadata} groupLabel={groupLabel} />
-          <ActiveLearningSection methodology={methodology} />
-          <ValidationSection validation={validation} groups={groups.data?.data} group={group} onGroupChange={setPicked} />
-          <ReproducibilitySection methodology={methodology} validation={validation} />
-          <SourcesSection sources={sources} context={context} />
-          <LimitationsSection methodology={methodology} />
-          <BuiltSection />
+
+      <section id="technical" aria-labelledby="technical-h" className="mx-auto w-full max-w-[1100px] scroll-mt-[calc(var(--header-h)+16px)] border-t border-border-strong pt-10">
+        <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+          <div className="min-w-0">
+            <p className="text-xs font-medium uppercase tracking-wide text-muted">For scientists and reviewers</p>
+            <h2 id="technical-h" className="mt-1 text-[24px] font-semibold tracking-[-0.02em]">
+              Technical details
+            </h2>
+            <p className="mt-2 max-w-[68ch] text-[14px] leading-relaxed text-muted">
+              The data, the model, the checks, the sources and how this was built, in eight numbered sections. You do not need them to use the site.
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <button type="button" onClick={() => setSectionOpen("*", true)} className="inline-flex min-h-10 items-center rounded-md border border-border bg-surface px-3 text-[13px] font-medium hover:bg-subtle">
+              Open all sections
+            </button>
+            <button type="button" onClick={() => setSectionOpen("*", false)} className="inline-flex min-h-10 items-center rounded-md border border-border bg-surface px-3 text-[13px] font-medium hover:bg-subtle">
+              Close all
+            </button>
+          </div>
         </div>
-      </div>
+        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[210px_minmax(0,1fr)] lg:gap-10">
+          <Toc items={TOC} />
+          <div className="min-w-0 border-y border-border">
+            <DataSection methodology={methodology} sources={sources} groups={groups} />
+            <ModellingSection methodology={methodology} metadata={metadata} groupLabel={groupLabel} />
+            <ActiveLearningSection methodology={methodology} />
+            <ValidationSection validation={validation} groups={groups.data?.data} group={group} onGroupChange={setPicked} />
+            <ReproducibilitySection methodology={methodology} validation={validation} />
+            <SourcesSection sources={sources} context={context} />
+            <LimitationsSection methodology={methodology} />
+            <BuiltSection />
+          </div>
+        </div>
+      </section>
     </PageContainer>
   );
 }

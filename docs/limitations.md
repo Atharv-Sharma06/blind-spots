@@ -8,7 +8,7 @@ Read together with [validation.md](validation.md) and [evidence-report.md](evide
    16 investigations are catalogued in `data/manifests/known_investigations_not_integrated.json` as known but not integrated (for example SoFIE-GEL, Saffire-V/VI); some have documented envelopes that overlap cabin-relevant targets.
 2. **Not a certification.** Blind Spots is not a fire-safety assessment, makes no claim of NASA approval or endorsement, and produces no combustion-test, ignition or apparatus procedures.
    Candidates are computational research candidates requiring qualified scientific review, established safety procedures and formal feasibility assessment. "Within the demonstrated envelope" means only that conditions of that kind were already run in the integrated investigations.
-3. **Microgravity only.** No partial-gravity data are integrated; ground (normal-gravity) thresholds are context and are never mixed into the model.
+3. **Microgravity only.** No partial-gravity data are integrated (NASA's PSI states it holds none); ground (normal-gravity) thresholds are context and are never mixed into the model. The Moon and Mars have partial gravity, so "Covered" on the Cabins page is about the air only.
 
 ## Data limitations
 

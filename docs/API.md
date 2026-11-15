@@ -244,20 +244,33 @@ calibration (not borrowed); the airflow-provenance limitation sentence uses the 
 stationarity of the kernel). `repository_url` comes from the env var `BLINDSPOTS_REPOSITORY_URL` (null if unset).
 
 ### GET /api/headline?profiles=
-Finding strip data, computed from the store. Always the ISS nominal profile and the NASA Exploration Atmosphere;
-`profiles` (comma-separated ids) appends more (404 for an unknown id).
+Per-cabin coverage summary, computed from the store (about 10 ms for all profiles, no caching needed).
+**Default (no parameter): every operating-point profile of the atmosphere manifest** (the cabin cards of the home
+page). Envelope profiles (`kind: "envelope"`, e.g. `nasa_std_3001_crew_envelope`) are context only and are not
+listed. Order: `iss_cabin_nominal`, `artemis_surface_habitat_10p2_26p5`, `exploration_atmosphere_8p2_34`,
+`orion_cm_lunar_design_10p2`, `orion_cm_14p7_o2_limit`, `shuttle_nominal`, `shuttle_staged_pre_eva`, `skylab`,
+`apollo_cm`, `iss_materials_worst_case`, `eawg_2006_8p0_32`, then any other operating-point profile in manifest
+order. A profile missing from the manifest is omitted, never invented. The response shape does not depend on the
+number of profiles. With `profiles` (comma-separated ids) the earlier subset behaviour is kept: the two guaranteed
+profiles (ISS nominal, NASA Exploration Atmosphere) followed by the listed ids (404 for an unknown id, 422 for an
+envelope id). The snapshot exporter stores the default (no-parameter) response as `GET /api/headline`.
 ```json
 {"profiles": [{"profile_id": "iss_cabin_nominal", "label": "...", "status": "documented_nasa",
    "oxygen_percent": 21, "total_pressure_kpa": 101.353, "n_target_points": 27,
    "comparable_observations": 241, "groups_with_comparable": 19, "n_groups": 20,
    "by_group": [{"group_id", "label", "comparable_observations", "points_with_comparable"}]}],
- "envelope": {"investigations": ["BASS-II", "BASS"], "n_experiments": 210, "n_steps": 566,
+ "envelope": {"investigations": ["BASS-II", "BASS"], "n_experiments": 210, "n_steps": 565,
    "oxygen_percent": [13.5, 22.7], "pressure_kpa": [98.3, 102.2], "pressure_measured_kpa": [98.3, 102.2],
-   "n_steps_pressure_assumed": 420, "airflow_cm_s": [0.0, 53.3]}}
+   "n_steps_pressure_assumed": 419, "airflow_cm_s": [0.0, 53.3]}}
 ```
 `comparable_observations` = training observations (any analysis group, each compared within its group) within
-one reference distance of the profile's target region; `n_groups` = groups with training evidence. The envelope
-spans all training observations (`pressure_kpa` uses the documented 101.353 kPa assumption for BASS-II rows,
+one reference distance of the profile's target region; `n_groups` = groups with training evidence;
+`groups_with_comparable` = groups with at least one such observation; `by_group` is sorted by
+`comparable_observations` descending, then `group_id`. The home page status chip derives from these three numbers
+only: 0 comparable = "Not covered", `groups_with_comparable / n_groups < 0.9` = "Barely covered", else "Covered" (the
+share is `COVERED_MIN_SHARE` in `apps/web/components/home/cabins.ts`; a stricter-than-half rule keeps a green chip from
+contradicting the per-material answer, as for the ISS worst case with 12 of 20 materials).
+The `envelope` spans all training observations (`pressure_kpa` uses the documented 101.353 kPa assumption for BASS-II rows,
 counted in `n_steps_pressure_assumed`; `pressure_measured_kpa` spans measured values only).
 
 ### GET /api/sources

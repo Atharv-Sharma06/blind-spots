@@ -1,4 +1,5 @@
 import { Fragment, type ReactNode } from "react";
+import { materialFullName } from "@/components/home/cabins";
 
 /**
  * Minimal renderer for the subset of Markdown that POST /api/brief emits: paragraphs, "- " bullets nested
@@ -21,8 +22,20 @@ const BAND_WORDS: Record<string, string> = {
   ventilation_standard: "NASA-STD-3001 ventilation range",
   default_band: "default analysis band",
 };
+const GROUP_ID = "[a-z0-9]+(?:_[a-z0-9]+)*__[a-z0-9_]+";
 export function cleanBriefText(text: string): string {
   return text
+    // The material line: plain material name and setup instead of "Analysis group: <label> (<raw group id>)", counts in plain words.
+    .replace(new RegExp(`Analysis group: (.+?) \\((${GROUP_ID})\\); (\\d+) experiments?, (\\d+) training observations \\((\\d+) sustained, (\\d+) not sustained; (\\d+) % sustained\\)`, "g"),
+      (_m, label: string, id: string, ne: string, nt: string, ns: string, nn: string, pct: string) =>
+        `Material and setup: ${materialFullName(id, label)}; ${ne} experiments, ${nt} training results (${ns} flame kept burning, ${nn} went out; ${pct} % kept burning)`)
+    .replace(new RegExp(` \\((${GROUP_ID})\\)`, "g"), "")
+    .replace(/Analysis group:/g, "Material and setup:")
+    .replace(/\bCandidate c(\d+)\b/g, "Candidate $1")
+    .replace(
+      /materially change the estimated probability of a sustained flame over the target region, and how sensitive is that estimate to the assumed pressure correlation\?/g,
+      "materially reduce the model's uncertainty about the target region, and how sensitive is that to the assumed pressure correlation?",
+    )
     .replace(/ \(min None, max None\)/g, "")
     .replace(/\b(min|max) None\b/g, "$1 not given")
     .replace(/\(status: ([a-z_]+)\)/g, (m, c: string) => (STATUS_WORDS[c] ? `(${STATUS_WORDS[c]})` : m))

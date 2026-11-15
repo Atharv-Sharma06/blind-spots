@@ -30,8 +30,20 @@ export const badgeVariants = cva(
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement>, VariantProps<typeof badgeVariants> {}
 
+/** A badge that can be pressed or focused (onClick, tabIndex, role="button") keeps its small look but gets a 40 px tall
+ *  hit area from an invisible extension, so it is a fair touch target on phones. Static badges are not extended. */
 export function Badge({ className, tone, ...props }: BadgeProps) {
-  return <span className={cn(badgeVariants({ tone }), className)} {...props} />;
+  const interactive = props.onClick !== undefined || props.tabIndex !== undefined || props.role === "button";
+  return (
+    <span
+      className={cn(
+        badgeVariants({ tone }),
+        interactive && "relative before:absolute before:inset-x-0 before:-inset-y-[10px] before:content-['']",
+        className,
+      )}
+      {...props}
+    />
+  );
 }
 
 export type VerdictKind = "supported" | "extrapolation" | "insufficient_evidence";

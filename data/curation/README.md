@@ -1,4 +1,4 @@
-# Curation tables: how they were made (AI-assistance metadata)
+# Curation tables: how they were made (SI-assistance metadata)
 
 These tables are interpretations of NASA source documents, not NASA data. They were produced with an AI assistant
 (Claude, Anthropic) and checked by code.

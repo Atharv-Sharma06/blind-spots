@@ -18,7 +18,7 @@ export const Switch = React.forwardRef<React.ElementRef<typeof SwitchPrimitive.R
         ref={ref}
         id={sid}
         className={cn(
-          "inline-flex h-4 w-7 shrink-0 items-center rounded-full border border-transparent bg-border-strong p-0.5 transition-colors",
+          "relative inline-flex h-4 w-7 shrink-0 items-center rounded-full border border-transparent bg-border-strong p-0.5 transition-colors before:absolute before:-inset-1 before:content-[''] max-md:before:-inset-3",
           "data-[state=checked]:bg-accent disabled:cursor-not-allowed disabled:opacity-50",
           className,
         )}

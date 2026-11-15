@@ -9,7 +9,7 @@ screenshots of the app only, no NASA logos, no AI-generated images, at most abou
 ## Slide 1: The blind spot (title)
 
 **On the slide:** Blind Spots: where NASA's microgravity fire evidence ends, and what to learn next. Full-width still of the
-oxygen x pressure map: every ISS flame test at about 1 atm, the exploration-cabin target far away.
+Cabins page (hero and cabin cards: `docs/img/cabins-pick.png`), or of the oxygen x pressure chart (`docs/img/cabins-answer.png`): every ISS flame test at about 1 atm, the exploration cabin far away.
 
 **Speaker notes:** Fire safety in crew cabins (spacecraft, Moon and Mars habitats) depends on flame behaviour at the cabin's
 oxygen and pressure. NASA Space Apps 2026, "Flame in Freefall". Research-planning tool; not endorsed by NASA.
@@ -18,7 +18,7 @@ oxygen and pressure. NASA Space Apps 2026, "Flame in Freefall". Research-plannin
 
 ## Slide 2: The question
 
-**On the slide:** Exploration cabins: 8.2 psia, 34 % O2. ISS: 14.7 psia, 21 %. Does NASA's flame evidence cover the new air?
+**On the slide:** Do NASA's space-station fire tests cover this cabin's air? Exploration cabins: 8.2 psia, 34 % O2. ISS: 14.7 psia, 21 %.
 
 **Speaker notes:** NASA adopted the 8.2 psia / 34 % O2 exploration atmosphere "for future spacecraft that will be used for
 high-frequency EVAs" (NTRS 20140000417); Artemis habitat parameters "have not been finalized" (NTRS 20220011152). {{LUNAR_SENTENCE}}
@@ -27,11 +27,11 @@ high-frequency EVAs" (NTRS 20140000417); Artemis habitat parameters "have not be
 
 ## Slide 3: The finding
 
-**On the slide:** ISS cabin: {{H_ISS_COMPARABLE}} comparable observations. Exploration Atmosphere: {{H_EXPL_COMPARABLE}},
-in all {{H_N_GROUPS}} material groups. Every test ran near 1 atm.
+**On the slide:** ISS cabin: {{H_ISS_COMPARABLE}} nearby ISS test results, "Covered". Exploration Atmosphere:
+{{H_EXPL_COMPARABLE}}, "Not covered", in all {{H_N_GROUPS}} material setups. Every test ran near 1 atm.
 
-**Speaker notes:** Integrated records span {{ENV_O2}} % O2 and {{ENV_P}} kPa. {{H_N_ZERO}} of {{H_N_PROFILES_ANALYSED}}
-documented NASA atmospheres have no comparable observation in any group, including all below 1 atm. Say "not represented in
+**Speaker notes:** Integrated records span {{ENV_O2}} % O2 and {{ENV_P}} kPa (BASS pressure measured; BASS-II pressure not recorded, so an assumed 101.353 kPa, flagged). {{H_N_ZERO}} of {{H_N_PROFILES_ANALYSED}}
+documented NASA atmospheres have no comparable observation in any group, including all below 1 atm. All ISS tests ran in microgravity and NASA's PSI holds no partial-gravity combustion data, so "covered" is about the air only. Say "not represented in
 the integrated records", never "NASA has not studied this": SoFIE-GEL, Saffire-V/VI and the Glenn drop-tower tests exist
 but have no public per-test table.
 
@@ -56,14 +56,14 @@ reliable estimate."
 **Speaker notes:** One model per material and flame configuration ({{N_MODELLED}} groups). It separates knowledge
 uncertainty (lack of data) from outcome variability and shows a probability only where evidence supports it. Pressure is
 fixed near 1 atm in the data, so anything else rests on the model's stationarity assumption, which the app states.
-Screenshot: uncertainty layer with the target.
+Screenshot: the answer card (verdict line and chart) for the Exploration Atmosphere (`docs/img/cabins-answer.png`), or the Explorer uncertainty layer.
 
 ---
 
 ## Slide 6: What to learn next
 
-**On the slide:** Top research candidate: {{TC_O2}} % O2, {{TC_P}} kPa, {{TC_U}} cm/s; {{TC_EVR}} less model uncertainty
-about the target.
+**On the slide:** What to test next: {{TC_O2}} % O2, {{TC_P}} kPa, {{TC_U}} cm/s would cut the model's uncertainty about
+this cabin by {{TC_EVR}}. Hypothetical model updates, not experimental results.
 
 **Speaker notes:** Active learning ranks candidates by expected uncertainty reduction about the chosen atmosphere; the
 baselines' picks, scored with the same model: random {{TB_RANDOM}}, uncertainty sampling {{TB_UNC}}, nearest gap
@@ -75,9 +75,9 @@ baselines' picks, scored with the same model: random {{TB_RANDOM}}, uncertainty 
 
 ## Slide 7: Try it
 
-**On the slide:** {{DEPLOYED_URL}} · {{GITHUB_URL}}. For combustion scientists and cabin designers. Built with AI
-assistance; the app uses no generative AI. Not endorsed by NASA.
+**On the slide:** {{DEPLOYED_URL}} · {{GITHUB_URL}}. For combustion scientists and cabin designers. Built with SI (super intelligence)
+assistance (Claude, by Anthropic); the app itself uses no generative AI. Not endorsed by NASA.
 
-**Speaker notes:** Press Guided demo (30 s). Next steps (not implemented): integrate SoFIE-GEL and Saffire-V/VI when per-test
+**Speaker notes:** Press the 30-second tour on the Cabins page (about 29 s: ISS cabin, Exploration Atmosphere, the answer, the next test, what we would learn). Next steps (not implemented): integrate SoFIE-GEL and Saffire-V/VI when per-test
 tables exist, add partial-gravity data, prospective validation with qualified reviewers. Credits: NASA PSI and NTRS; open
 source libraries listed on the project page.

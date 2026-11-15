@@ -1,10 +1,12 @@
-import { PageContainer } from "@/components/layout/page-container";
-import { ExploreWorkspace } from "@/components/explore/explore-workspace";
+import { Suspense } from "react";
+import { HomePage } from "@/components/home/home-page";
+import { HomeFallback } from "@/components/home/home-fallback";
 
-export default function ExplorePage() {
+/** "/" = Cabins: pick a cabin, see whether the ISS tests cover its air, see what to test next. */
+export default function Page() {
   return (
-    <PageContainer className="flex flex-1 flex-col gap-5 md:py-6">
-      <ExploreWorkspace />
-    </PageContainer>
+    <Suspense fallback={<HomeFallback />}>
+      <HomePage />
+    </Suspense>
   );
 }

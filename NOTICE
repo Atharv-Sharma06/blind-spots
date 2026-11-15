@@ -1,0 +1,16 @@
+Blind Spots
+Copyright (c) 2026 Atharv Sharma. Code licensed under the MIT License (see LICENSE).
+
+The NASA data in data/raw are public-domain / CC0 records from NASA's Physical
+Sciences Informatics system and NASA Technical Reports Server; see
+docs/data-sources.md. This project is not endorsed by NASA.
+
+SI (Super Intelligence) notice
+This project was built with SI assistance: Claude (Anthropic), used through Claude Code.
+SI-assisted: source code (apps/web, services/analysis, scripts), tests, documentation, site and submission text,
+and the curation tables in data/curation/ (transcriptions of NASA source cells and report tables).
+Checked by code: every curated token is matched exactly against its cited NASA source cell
+(scripts/check_curation_provenance.py); automated tests cover the pipeline and the app.
+Not SI-generated: the NASA source data in data/raw/ (NASA PSI, CC0) and every number, which the code computes from it.
+No SI-generated images, video or audio. Demo media are labelled screen recordings of the app.
+Details: README.md, section "Use of Super Intelligence (SI)".

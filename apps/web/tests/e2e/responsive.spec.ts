@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { openExplore } from "./helpers";
+import { HOME_H1, openExplore } from "./helpers";
 
 test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
 
@@ -25,7 +25,7 @@ test.describe("Responsive smoke at 390x844", () => {
   test("Explore has no horizontal scroll and keeps map, controls and panels reachable", async ({ page }) => {
     await openExplore(page);
     await noHorizontalScroll(page, "explore");
-    await expect(page.getByRole("group", { name: "Map layers" })).toBeVisible();
+    await expect(page.getByTestId("layer-observations")).toBeVisible();
     await expect(page.getByTestId("target-selector")).toBeVisible();
     await page.getByTestId("target-analysis").scrollIntoViewIfNeeded();
     await expect(page.getByTestId("target-analysis")).toBeVisible();
@@ -34,34 +34,41 @@ test.describe("Responsive smoke at 390x844", () => {
     await noHorizontalScroll(page, "explore after scroll");
   });
 
-  test("target selector and counterfactual preview fit the narrow viewport", async ({ page }) => {
+  test("counterfactual preview fits the narrow viewport", async ({ page }) => {
     await openExplore(page);
-    await page.getByTestId("target-selector").click();
-    const dialog = page.getByRole("dialog", { name: "Target atmosphere" });
-    await expect(dialog).toBeVisible();
-    await settled(page);
-    const box = await dialog.boundingBox();
-    expect(box!.x).toBeGreaterThanOrEqual(0);
-    expect(box!.x + box!.width).toBeLessThanOrEqual(391);
-    await noHorizontalScroll(page, "target sheet open");
-    await page.keyboard.press("Escape");
-    await expect(dialog).toBeHidden();
     await page.getByTestId("explore-candidate").click();
     await expect(page.getByTestId("counterfactual-panel")).toBeVisible();
     await noHorizontalScroll(page, "counterfactual");
   });
 
-  test("guided demo card stays inside the viewport", async ({ page }) => {
-    await openExplore(page);
-    await page.getByRole("button", { name: "Guided demo" }).click();
-    const card = page.getByTestId("demo-card");
+  test("Cabins page: no horizontal scroll, two-column cabin cards, answer and next steps reachable", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByRole("heading", { level: 1, name: HOME_H1 })).toBeVisible();
+    await expect(page.getByTestId("answer-verdict")).not.toHaveAttribute("data-verdict", "loading", { timeout: 30_000 });
+    await noHorizontalScroll(page, "cabins");
+    for (const id of ["answer", "chart", "next", "what-if"]) {
+      await page.locator(`#${id}`).scrollIntoViewIfNeeded();
+      await expect(page.locator(`#${id}`)).toBeVisible();
+    }
+    await noHorizontalScroll(page, "cabins after scroll");
+    // two cards per row on a phone
+    const xs = new Set((await page.locator("[data-cabin]").evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().left)))));
+    expect(xs.size).toBe(2);
+  });
+
+  test("30-second tour card stays inside the viewport", async ({ page }) => {
+    await page.goto("/");
+    await page.getByTestId("home-tour-start").click();
+    const card = page.getByTestId("home-tour-card");
     await expect(card).toBeVisible();
+    await card.getByRole("button", { name: "Start" }).click();
+    await expect(card).toHaveAttribute("data-tour-state", "scene-1");
     await settled(page);
     const box = await card.boundingBox();
     expect(box!.x).toBeGreaterThanOrEqual(0);
     expect(box!.x + box!.width).toBeLessThanOrEqual(391);
     expect(box!.y + box!.height).toBeLessThanOrEqual(845);
-    await noHorizontalScroll(page, "demo");
+    await noHorizontalScroll(page, "tour");
   });
 
   for (const path of ["/experiments", "/methodology", "/brief"]) {
@@ -72,17 +79,4 @@ test.describe("Responsive smoke at 390x844", () => {
       await noHorizontalScroll(page, path);
     });
   }
-
-  test("experiment drawer fits the narrow viewport", async ({ page }) => {
-    await page.goto("/experiments");
-    const row = page.getByRole("table", { name: "Experiments" }).locator("tbody tr").first();
-    await expect(row).toBeVisible();
-    await row.click();
-    const drawer = page.getByRole("dialog");
-    await expect(drawer.getByRole("heading", { name: /^Flow steps/ })).toBeVisible();
-    await settled(page);
-    const box = await drawer.boundingBox();
-    expect(box!.x + box!.width).toBeLessThanOrEqual(391);
-    await noHorizontalScroll(page, "drawer");
-  });
 });

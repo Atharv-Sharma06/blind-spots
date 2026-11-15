@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Explore workspace state (zustand) + shareable-link sync (?group=&target=&plane=).
+ * Explorer (/explore) state (zustand) + shareable-link sync (?group=&target=&plane=; ?material= and ?cabin= are accepted as aliases).
  * Runtime imports are limited to react/zustand so `node --test` can exercise the pure parts.
  */
 import { useEffect } from "react";
@@ -20,7 +20,7 @@ export const DEFAULT_SLICE = { o2_flow: 101.3, o2_pressure: 10 } as const;
  * (8.2 psia / 34 % O2) on the O2 x pressure plane. Validated against /api/targets before use.
  */
 export const PREFERRED_TARGET_PROFILE_ID = "exploration_atmosphere_8p2_34";
-/** UI constant: the ISS view, one click away from the default (finding strip). */
+/** UI constant: the ISS cabin, the fallback default profile when the preferred one is missing. */
 export const ISS_TARGET_PROFILE_ID = "iss_cabin_nominal";
 export const DEFAULT_PLANE: Plane = "o2_pressure";
 
@@ -319,10 +319,14 @@ export const useExploreStore = create<ExploreStore>((set, get) => ({
     if (changed) set({ slice, sliceFor });
   },
   hydrate: (q) => {
+    const s = get();
     const patch: Partial<ExploreState> = {};
     if (q.group) patch.groupId = q.group;
     if (q.plane) patch.plane = q.plane;
     if (q.target) patch.target = q.target;
+    // A link that changes the group or target starts from a clean selection (no stale candidate or what-if from the last visit).
+    const changed = (q.group && q.group !== s.groupId) || (q.target && encodeTarget(q.target) !== encodeTarget(s.target));
+    if (changed) Object.assign(patch, clearedSelection(), { selectedObservationId: null, viewDomain: null });
     if (Object.keys(patch).length > 0) set(patch);
   },
   reset: () => set(initialState()),
@@ -436,14 +440,15 @@ export function decodeTarget(value: string): Target | null {
   }
 }
 
+/** Aliases from the Cabins page: ?cabin= is the target profile, ?material= the group. */
 export function parseExploreQuery(search: string): ParsedExploreQuery {
   const p = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
   const out: ParsedExploreQuery = {};
-  const group = p.get("group");
+  const group = p.get("group") ?? p.get("material");
   if (group) out.group = group;
   const plane = p.get("plane");
   if (plane === "o2_flow" || plane === "o2_pressure") out.plane = plane;
-  const target = p.get("target");
+  const target = p.get("target") ?? p.get("cabin");
   if (target) {
     const t = decodeTarget(target);
     if (t) out.target = t;
@@ -460,6 +465,8 @@ export function serializeExploreQuery(state: Pick<ExploreState, "groupId" | "pla
   p.delete("group");
   p.delete("target");
   p.delete("plane");
+  p.delete("cabin");
+  p.delete("material");
   if (state.groupId) p.set("group", state.groupId);
   p.set("target", encodeTarget(state.target));
   p.set("plane", state.plane);
@@ -467,8 +474,9 @@ export function serializeExploreQuery(state: Pick<ExploreState, "groupId" | "pla
 }
 
 /**
- * Call once in the Explore page: reads ?group=&target=&plane= into the store on mount, then mirrors
- * store changes back into the URL with history.replaceState (shareable links; no navigation).
+ * Call once in the Explorer (/explore): reads ?group=&target=&plane= into the store on mount, then mirrors
+ * store changes back into the URL with history.replaceState (shareable links; no navigation). The path is read
+ * from window.location, so it works on any route.
  */
 export function useExploreUrlSync(): void {
   useEffect(() => {
@@ -488,8 +496,18 @@ export function useExploreUrlSync(): void {
       }
     };
     write(useExploreStore.getState());
-    return useExploreStore.subscribe((s, prev) => {
+    // Back/forward (or a link to /explore?... from inside the Explorer) changes the URL without remounting: read it again.
+    const onPop = () => {
+      last = "";
+      useExploreStore.getState().hydrate(parseExploreQuery(window.location.search));
+    };
+    window.addEventListener("popstate", onPop);
+    const unsubscribe = useExploreStore.subscribe((s, prev) => {
       if (s.groupId !== prev.groupId || s.plane !== prev.plane || s.target !== prev.target) write(s);
     });
+    return () => {
+      window.removeEventListener("popstate", onPop);
+      unsubscribe();
+    };
   }, []);
 }

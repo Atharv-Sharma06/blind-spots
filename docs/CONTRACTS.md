@@ -442,9 +442,11 @@ Next.js rewrite `/api/*` → `${ANALYSIS_API_ORIGIN:-http://127.0.0.1:8000}/api/
 
 ## 9. Frontend contract
 
-Routes: `/` Explore (main workspace), `/experiments` (table + details drawer, `?id=` deep link),
-`/methodology` (data, modeling, active learning, validation, reproducibility, sources),
-`/brief` (printable research brief for the current selection). Guided demo: `/?demo=1`.
+Routes (first-glance redesign, 2026-11-15): `/` Cabins (three numbered steps: pick a cabin, the answer, what to test
+next; selection in the URL as `?cabin=` and `?material=`), `/explore` (the full expert workspace, formerly `/`; old
+`/?group=...`, `/?target=...`, `/?plane=...` links redirect there), `/experiments` (table + details drawer, `?id=` deep
+link), `/methodology` (nav label "How it works": data, modeling, active learning, validation, reproducibility, sources),
+`/brief` (printable research brief for the current selection). 30-second tour: `/?demo=1`.
 
 Design language: Linear × Vercel × scientific software. Warm near-white background, charcoal/near-black
 type, hairline borders, minimal elevation, small radii (4–6 px), 4/8 px spacing scale, Geist Sans +

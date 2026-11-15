@@ -6,66 +6,82 @@ import { Select } from "@/components/ui/select";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { Slider } from "@/components/ui/slider";
 import { Tooltip } from "@/components/ui/tooltip";
-import { fmtFixed, fmtPair, fmtPsia, kpaToPsia, modelStatusLabel, planeAxes } from "@/lib/format";
+import { fmtFixed, fmtPair, fmtPsia, kpaToPsia, planeAxes } from "@/lib/format";
+import { materialFullName } from "@/components/home/cabins";
+import { CHART_OPTIONS, SHOW_HELP, heldHelp, heldLabel } from "./plain";
 import type { LayerName, Layers } from "@/lib/explore-store";
 import type { GroupSummary, Plane } from "@/lib/types";
 import { groupBalance, SLICE_LIMITS } from "./model";
 
 const CHIPS: Array<{ layer: LayerName; label: string; swatch: string; needsModel?: boolean }> = [
-  { layer: "observations", label: "Observed data", swatch: "var(--observed)" },
-  { layer: "prediction", label: "Model prediction", swatch: "var(--fg)", needsModel: true },
+  { layer: "observations", label: "Test results", swatch: "var(--observed)" },
+  { layer: "prediction", label: "Prediction", swatch: "var(--fg)", needsModel: true },
   { layer: "uncertainty", label: "Uncertainty", swatch: "var(--plum-5)", needsModel: true },
   { layer: "coverage", label: "Coverage", swatch: "var(--gap)" },
-  { layer: "context", label: "Context", swatch: "var(--muted)" },
+  { layer: "context", label: "Related NASA work", swatch: "var(--muted)" },
 ];
+
+/** A control's visible label plus its one short helper line (the helper is tied to the control with aria-describedby). */
+export function ControlLabel({ id, label, helpId, help }: { id: string; label: string; helpId?: string; help?: string }) {
+  return (
+    <div className="mb-1">
+      <p id={id} className="text-[13px] font-medium text-fg">{label}</p>
+      {help ? <p id={helpId} className="mt-0.5 text-xs leading-snug text-muted">{help}</p> : null}
+    </div>
+  );
+}
 
 export function LayerChips({ layers, onToggle, modelled }: { layers: Layers; onToggle: (l: LayerName) => void; modelled: boolean }) {
   return (
-    <div role="group" aria-label="Map layers" className="flex flex-wrap gap-1.5">
-      {CHIPS.map((c) => {
-        const disabled = !!c.needsModel && !modelled;
-        const on = layers[c.layer] && !disabled;
-        const btn = (
-          <button
-            key={c.layer}
-            type="button"
-            aria-pressed={on}
-            disabled={disabled}
-            onClick={() => onToggle(c.layer)}
-            data-testid={`layer-${c.layer}`}
-            className={cn(
-              "inline-flex h-7 items-center gap-1.5 rounded-md border px-2.5 text-[13px] transition-colors",
-              on ? "border-fg bg-surface font-medium text-fg" : "border-border bg-subtle text-muted hover:text-fg",
-              "disabled:cursor-not-allowed disabled:opacity-50",
-            )}
-          >
-            <span aria-hidden className="size-2 rounded-full" style={{ background: c.swatch, opacity: on ? 1 : 0.45 }} />
-            {c.label}
-          </button>
-        );
-        return disabled ? (
-          <Tooltip key={c.layer} content="This group has too few training observations for a model.">
-            <span tabIndex={0} className="inline-flex rounded-md">{btn}</span>
-          </Tooltip>
-        ) : (
-          btn
-        );
-      })}
+    <div>
+      <ControlLabel
+        id="show-label"
+        label="Show"
+        helpId="show-help"
+        help="Prediction, Uncertainty and Coverage show one at a time."
+      />
+      <div role="group" aria-labelledby="show-label" aria-describedby="show-help" className="flex flex-wrap gap-1.5">
+        {CHIPS.map((c) => {
+          const disabled = !!c.needsModel && !modelled;
+          const on = layers[c.layer] && !disabled;
+          const btn = (
+            <button
+              key={c.layer}
+              type="button"
+              aria-pressed={on}
+              disabled={disabled}
+              onClick={() => onToggle(c.layer)}
+              data-testid={`layer-${c.layer}`}
+              title={SHOW_HELP[c.layer]}
+              className={cn(
+                "inline-flex h-10 items-center gap-1.5 rounded-md border px-3 text-[13px] transition-colors md:h-8 md:px-2.5",
+                on ? "border-fg bg-surface font-medium text-fg" : "border-border bg-subtle text-muted hover:text-fg",
+                "disabled:cursor-not-allowed disabled:opacity-50",
+              )}
+            >
+              <span aria-hidden className="size-2 rounded-full" style={{ background: c.swatch, opacity: on ? 1 : 0.45 }} />
+              {c.label}
+            </button>
+          );
+          return disabled ? (
+            <Tooltip key={c.layer} content="This material has too few test results for a model.">
+              <span tabIndex={0} className="inline-flex rounded-md">{btn}</span>
+            </Tooltip>
+          ) : (
+            btn
+          );
+        })}
+      </div>
     </div>
   );
 }
 
 export function PlaneSwitch({ plane, onChange }: { plane: Plane; onChange: (p: Plane) => void }) {
   return (
-    <SegmentedControl
-      aria-label="Map plane"
-      value={plane}
-      onValueChange={(v) => onChange(v as Plane)}
-      options={[
-        { value: "o2_flow", label: "O₂ × airflow" },
-        { value: "o2_pressure", label: "O₂ × pressure" },
-      ]}
-    />
+    <div>
+      <ControlLabel id="chart-label" label="Chart" helpId="chart-help" help="Which two conditions to plot." />
+      <SegmentedControl aria-label="Chart" value={plane} onValueChange={(v) => onChange(v as Plane)} options={CHART_OPTIONS} />
+    </div>
   );
 }
 
@@ -98,35 +114,39 @@ export function SliceControl({
   const [draft, setDraft] = useState<number | null>(null);
   const local = draft ?? value;
 
+  const label = heldLabel(plane);
+  const help = heldHelp(plane);
+
   if (snapValues && snapValues.length > 0) {
     return (
-      <div className="min-w-[150px]">
-        <label id={id} className="mb-1 block text-xs text-muted">{ax.title} slice</label>
+      <div className="w-full min-w-[150px] sm:w-[250px]">
+        <ControlLabel id={id} label={label} helpId={`${id}-help`} help={help} />
         <Select
-          aria-label={`${ax.title} slice`}
+          aria-label={label}
           value={String(dedupeSlices(snapValues).reduce((b, v) => (Math.abs(v - value) < Math.abs(b - value) ? v : b), snapValues[0] as number))}
           onValueChange={(v) => onCommit(Number(v))}
-          options={dedupeSlices(snapValues).map((v) => ({ value: String(v), label: `${fmtFixed(v, 1)} ${ax.unit}` }))}
+          options={dedupeSlices(snapValues).map((v) => ({ value: String(v), label: `${fmtFixed(v, 1)} ${ax.unit}${plane === "o2_flow" ? ` (${fmtPsia(kpaToPsia(v))})` : ""}` }))}
         />
       </div>
     );
   }
   return (
-    <div className="min-w-[200px] max-w-[320px] flex-1">
-      <div className="mb-1 flex items-baseline justify-between gap-2">
-        <label id={id} className="text-xs text-muted">{ax.title} slice</label>
+    <div className="w-full min-w-[200px] sm:w-[250px]">
+      <div className="flex items-baseline justify-between gap-2">
+        <p id={id} className="text-[13px] font-medium text-fg">{label}</p>
         <span className="num text-xs text-fg" data-testid="slice-value">
           {fmtFixed(local, 1)} {ax.unit}
           {plane === "o2_flow" ? <span className="text-muted"> ({fmtPsia(kpaToPsia(local))})</span> : null}
         </span>
       </div>
+      <p className="mt-0.5 mb-2 text-xs leading-snug text-muted">{help}</p>
       <Slider
         aria-labelledby={id}
         min={lim.min}
         max={lim.max}
         step={lim.step}
         value={[Math.min(lim.max, Math.max(lim.min, local))]}
-        thumbLabels={[`${ax.title} slice, ${ax.unit}`]}
+        thumbLabels={[`${label}, ${ax.unit}`]}
         onValueChange={(v) => setDraft(v[0] ?? local)}
         onValueCommit={(v) => {
           setDraft(null);
@@ -147,23 +167,23 @@ export function MaterialSelect({
   onChange: (id: string) => void;
 }) {
   return (
-    <div className="min-w-[220px] max-w-[400px] flex-[1_1_260px]">
-      <label className="mb-1 block text-xs text-muted" id="material-label">Material and flame configuration</label>
+    <div className="min-w-[220px] max-w-[460px] flex-[2_1_300px]">
+      <ControlLabel id="material-label" label="Material" helpId="material-help" help="Which material's ISS test results to use." />
       <Select
-        aria-label="Material and flame configuration"
+        aria-label="Material"
         value={value ?? ""}
         onValueChange={onChange}
         options={groups.map((x) => ({
           value: x.group_id,
-          label: `${x.label} · ${x.n_experiments} exp. · ${x.model_status === "modeled" ? "modelled" : "coverage only"}`,
+          label: `${materialFullName(x.group_id, x.label)}${x.model_status === "modeled" ? "" : " (no prediction)"}`,
         }))}
-        placeholder={groups.length ? "Select group" : "Loading groups…"}
+        placeholder={groups.length ? "Select material" : "Loading materials…"}
       />
     </div>
   );
 }
 
-/** One sans line of group facts (numbers in mono only on the values). */
+/** One plain line about the material; technical counts (training split, pressure basis) follow in muted text. */
 export function GroupFacts({ group }: { group: GroupSummary }) {
   const bal = groupBalance(group);
   const pr = group.pressure_kpa_range;
@@ -171,17 +191,16 @@ export function GroupFacts({ group }: { group: GroupSummary }) {
   const basis = group.pressure_measured ? "measured" : degenerate ? "assumed, not recorded" : "partly assumed";
   return (
     <p className="text-xs text-muted" data-testid="group-facts">
-      <span className="text-fg">{group.label}</span> · {modelStatusLabel(group.model_status)} · <span className="num">{group.n_experiments}</span> experiments,{" "}
-      <span className="num">{group.n_observations}</span> observations
+      <span className="text-fg">{materialFullName(group.group_id, group.label)}</span>: <span className="num">{group.n_experiments}</span> experiments,{" "}
+      <span className="num">{group.n_observations}</span> test results.
       {bal.n > 0 ? (
         <>
-          {" "}· <span className="num">{group.n_training}</span> training observations (<span className="num">{bal.sustained}</span> sustained /{" "}
-          <span className="num">{bal.notSustained}</span> not sustained)
+          {" "}{group.n_training < group.n_observations ? <>Of the <span className="num">{group.n_training}</span> the model uses, the</> : "The"} flame kept burning in <span className="num">{bal.sustained}</span> and went out in <span className="num">{bal.notSustained}</span>.
         </>
       ) : null}
       {pr ? (
         <>
-          {" "}· pressure <span className="num">{degenerate ? `${fmtFixed(pr[0], 1)} kPa` : fmtPair(pr, "kPa", 1)}</span> ({basis})
+          {" "}Pressure <span className="num">{degenerate ? `${fmtFixed(pr[0], 1)} kPa` : fmtPair(pr, "kPa", 1)}</span> ({basis}).
         </>
       ) : null}
     </p>

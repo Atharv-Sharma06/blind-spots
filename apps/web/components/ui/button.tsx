@@ -4,7 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/cn";
 
 export const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border text-ui font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-3.5 [&_svg]:shrink-0",
+  "inline-flex max-w-full shrink-0 items-center justify-center gap-1.5 rounded-md border text-center text-ui max-md:leading-tight md:whitespace-nowrap font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-3.5 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -13,10 +13,12 @@ export const buttonVariants = cva(
         ghost: "border-transparent bg-transparent text-fg hover:bg-subtle",
       },
       size: {
-        sm: "h-7 px-2.5",
-        md: "h-8 px-3",
-        lg: "h-9 px-4 text-prose",
-        icon: "size-8 p-0",
+        // Compact desktop sizes. On phones (max-md) every size is at least 40 px tall, even when a caller passes its own
+        // h-*; the label may wrap instead of forcing sideways scroll. max-md rules are emitted after plain utilities.
+        sm: "h-7 px-2.5 max-md:h-auto max-md:min-h-10 max-md:px-3 max-md:py-1",
+        md: "h-8 px-3 max-md:h-auto max-md:min-h-10 max-md:px-3.5 max-md:py-1",
+        lg: "h-9 px-4 text-prose max-md:h-auto max-md:min-h-11 max-md:py-1",
+        icon: "size-8 p-0 max-md:size-10",
       },
     },
     defaultVariants: { variant: "secondary", size: "md" },

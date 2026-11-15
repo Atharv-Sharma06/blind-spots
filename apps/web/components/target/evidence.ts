@@ -43,27 +43,27 @@ export function verdictSentence(a: AssessResponse): string {
   const k = a.coverage.points_with_comparable;
   const s = pointsSupported(a);
   const nn = a.coverage.nn_distance_min;
-  const nnText = nn !== null ? ` The nearest integrated observation is ${nn.toFixed(1)} reference distances away.` : "";
+  const nnText = nn !== null ? ` The nearest ISS test result is ${nn.toFixed(1)} steps away.` : "";
   if (a.model.model_status !== "modeled") {
     return k === 0
-      ? `This group has too few training observations for a model, and no target point has a comparable observation.${nnText}`
-      : `This group has too few training observations for a model; ${k} of ${n} target points have comparable observations.`;
+      ? `This group has too few training observations for a model, and no cabin condition has a nearby test result.${nnText}`
+      : `This group has too few training observations for a model; ${k} of ${n} cabin conditions have nearby test results.`;
   }
   const v: Verdict = a.verdict;
   if (v === "supported") {
     return s !== null
-      ? `${s} of ${n} target points have comparable observations close by and low knowledge uncertainty.`
-      : `Comparable observations lie close to the target and the model's knowledge uncertainty is low there.`;
+      ? `${s} of ${n} cabin conditions have nearby test results and low knowledge uncertainty.`
+      : `Nearby test results lie close to this cabin and the model's knowledge uncertainty is low there.`;
   }
-  if (k === 0) return `No target point has a comparable observation.${nnText}`;
+  if (k === 0) return `No cabin condition has a nearby test result.${nnText}`;
   if (v === "extrapolation") {
     return s !== null
       ? s === 0
-        ? `Comparable observations reach ${k} of ${n} target points, but the model is not confident at any of them; estimates there depend on model assumptions.`
-        : `Comparable observations reach ${k} of ${n} target points, but the model is confident at only ${s}; elsewhere estimates depend on model assumptions.`
-      : `Comparable observations reach ${k} of ${n} target points, but the model is not confident across enough of the target; estimates there depend on model assumptions.`;
+        ? `Nearby test results reach ${k} of ${n} cabin conditions, but the model is not confident at any of them; estimates there depend on model assumptions.`
+        : `Nearby test results reach ${k} of ${n} cabin conditions, but the model is confident at only ${s}; elsewhere estimates depend on model assumptions.`
+      : `Nearby test results reach ${k} of ${n} cabin conditions, but the model is not confident across enough of the target; estimates there depend on model assumptions.`;
   }
-  return `Comparable observations reach only ${k} of ${n} target points.`;
+  return `Nearby test results reach only ${k} of ${n} cabin conditions.`;
 }
 
 // ---- Distance from a candidate to the target region (reference distances, CONTRACTS section 4) -------------
@@ -124,12 +124,12 @@ function roleOf(v: unknown): RelevanceRole {
 }
 
 const OVERLAP_TEXT: Record<string, string> = {
-  contains_target_nominal: "Documented envelope contains the target",
-  overlaps_target_region: "Documented envelope overlaps the target",
-  contains_target: "Documented envelope contains the target",
-  overlaps_target: "Documented envelope overlaps the target",
-  none: "No documented overlap with the target",
-  outside_target_region: "Documented envelope does not reach the target",
+  contains_target_nominal: "Its tested conditions include this cabin's air",
+  overlaps_target_region: "Its tested conditions overlap this cabin's air",
+  contains_target: "Its tested conditions include this cabin's air",
+  overlaps_target: "Its tested conditions overlap this cabin's air",
+  none: "Its tested conditions do not overlap this cabin's air",
+  outside_target_region: "Its tested conditions do not reach this cabin's air",
 };
 
 /** Rows from the backend's investigation_relevance (any of its likely shapes), else from documented_context. */

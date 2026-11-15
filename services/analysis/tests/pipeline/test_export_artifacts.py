@@ -82,3 +82,9 @@ def test_discovery_exports_parameterless_get_routes(tmp_path: Path) -> None:
             assert f"GET {path}" in e.w.entries or f"GET {path}" in live_only, path
     if "/api/headline" in schema_paths:
         assert "GET /api/headline" in e.w.entries
+        # the exported default response lists every operating-point profile (the home page cabin cards)
+        exported = json.loads((tmp_path / e.w.entries["GET /api/headline"]).read_text())
+        assert {p["profile_id"] for p in exported["profiles"]} == {
+            p["profile_id"] for p in ex.operating_profiles()
+        }
+        assert exported["profiles"][0]["profile_id"] == "iss_cabin_nominal"

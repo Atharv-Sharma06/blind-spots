@@ -160,11 +160,26 @@ def test_targets_context_sources_methodology(client: TestClient) -> None:
     assert not any("borrowed fan and pot" in x for x in m["limitations"])
 
 
+HEADLINE_DEFAULT_ORDER = [
+    "iss_cabin_nominal",
+    "artemis_surface_habitat_10p2_26p5",
+    "exploration_atmosphere_8p2_34",
+    "orion_cm_lunar_design_10p2",
+    "orion_cm_14p7_o2_limit",
+    "shuttle_nominal",
+    "shuttle_staged_pre_eva",
+    "skylab",
+    "apollo_cm",
+    "iss_materials_worst_case",
+    "eawg_2006_8p0_32",
+]
+
+
 def test_headline(client: TestClient) -> None:
     h = models.HeadlineResponse.model_validate(client.get("/api/headline").json())
-    ids = [p.profile_id for p in h.profiles]
-    assert ids[:2] == ["iss_cabin_nominal", "exploration_atmosphere_8p2_34"]
-    iss, expl = h.profiles[0], h.profiles[1]
+    by_id = {p.profile_id: p for p in h.profiles}
+    iss, expl = by_id["iss_cabin_nominal"], by_id["exploration_atmosphere_8p2_34"]
+    assert h.profiles[0].profile_id == "iss_cabin_nominal"
     assert iss.comparable_observations == sum(g.comparable_observations for g in iss.by_group) > 0
     assert expl.comparable_observations == 0 and expl.groups_with_comparable == 0
     env = h.envelope
@@ -174,9 +189,44 @@ def test_headline(client: TestClient) -> None:
         and env.oxygen_percent[0] < 21 < env.oxygen_percent[1]
     )
     assert set(env.investigations) == {"BASS", "BASS-II"}
+    # the earlier finding-strip behaviour with an explicit `profiles` list is unchanged
     extra = client.get("/api/headline", params={"profiles": "shuttle_nominal"}).json()
-    assert [p["profile_id"] for p in extra["profiles"]][-1] == "shuttle_nominal"
+    assert [p["profile_id"] for p in extra["profiles"]] == [
+        "iss_cabin_nominal",
+        "exploration_atmosphere_8p2_34",
+        "shuttle_nominal",
+    ]
+    assert extra["profiles"][2] == next(
+        p.model_dump() for p in h.profiles if p.profile_id == "shuttle_nominal"
+    )
     assert client.get("/api/headline", params={"profiles": "nope"}).status_code == 404
+    assert client.get("/api/headline", params={"profiles": "nasa_std_3001_crew_envelope"}).status_code == 422
+
+
+def test_headline_default_lists_every_operating_profile_in_display_order(client: TestClient) -> None:
+    h = models.HeadlineResponse.model_validate(client.get("/api/headline").json())
+    manifest = deps.profiles_manifest()["profiles"]
+    operating = [
+        p["profile_id"] for p in manifest if (p.get("kind") or "operating_point") == "operating_point"
+    ]
+    ids = [p.profile_id for p in h.profiles]
+    assert set(ids) == set(operating) and len(ids) == len(set(ids))  # all of them, once, no envelope
+    assert "nasa_std_3001_crew_envelope" not in ids
+    listed = [pid for pid in HEADLINE_DEFAULT_ORDER if pid in operating]
+    assert ids[: len(listed)] == listed  # the documented display order first
+    assert ids[len(listed) :] == [pid for pid in operating if pid not in listed]  # others in manifest order
+    for p in h.profiles:  # every card has its numbers: counts are consistent with the per-material rows
+        assert p.n_groups == len(p.by_group) > 0 and p.n_target_points > 0
+        assert p.comparable_observations == sum(g.comparable_observations for g in p.by_group)
+        assert p.groups_with_comparable == sum(1 for g in p.by_group if g.comparable_observations > 0)
+        assert p.groups_with_comparable <= p.n_groups
+
+
+def test_headline_is_fast(client: TestClient) -> None:
+    client.get("/api/headline")  # warm
+    t0 = time.perf_counter()
+    assert client.get("/api/headline").status_code == 200
+    assert time.perf_counter() - t0 < 2.0
 
 
 def test_non_finite_and_out_of_range_inputs_are_422(client: TestClient, group_ids: list[str]) -> None:

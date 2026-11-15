@@ -7,6 +7,7 @@ import { defineConfig, devices } from "@playwright/test";
  *   npx playwright test --project live    live mode: real API on 8205 + web on 3305
  *   npx playwright test --project snapshot  snapshot mode: no API, web on 3306
  *   npx playwright test --project a11y    axe scan against the live web server
+ *   E2E_BASE_URL=http://localhost:3700 E2E_SNAPSHOT_URL=http://localhost:3709 npx playwright test   shared servers, nothing started
  *
  * Servers (started by Playwright, reused when already running outside CI):
  *   API   uv run uvicorn ... --port 8205   (PYTHONPATH=src: the editable-install .pth file is sometimes flagged hidden on this Mac)
@@ -22,6 +23,16 @@ const LIVE_PORT = 3305;
 const SNAP_PORT = 3306;
 const DEAD_BACKEND = "http://127.0.0.1:9";
 const dev = process.env.E2E_DEV === "1";
+/**
+ * Shared servers: set E2E_BASE_URL (live mode) and/or E2E_SNAPSHOT_URL (snapshot mode), for example
+ *   E2E_BASE_URL=http://localhost:3700 E2E_SNAPSHOT_URL=http://localhost:3709 npx playwright test
+ * and no server is started or built (webServer is skipped); the suite runs against what is already listening.
+ */
+const sharedLive = process.env.E2E_BASE_URL?.replace(/\/$/, "");
+const sharedSnap = process.env.E2E_SNAPSHOT_URL?.replace(/\/$/, "");
+const useShared = Boolean(sharedLive || sharedSnap);
+const LIVE_URL = sharedLive ?? `http://localhost:${LIVE_PORT}`;
+const SNAP_URL = sharedSnap ?? `http://localhost:${SNAP_PORT}`;
 
 const webCommand = (port: number, distDir: string, mode: "live" | "snapshot") => {
   const env = `NEXT_DIST_DIR=${distDir} NEXT_PUBLIC_DATA_MODE=${mode}`;
@@ -52,20 +63,20 @@ export default defineConfig({
     {
       name: "live",
       testIgnore: [/snapshot(\..*)?\.spec\.ts/, /a11y\.spec\.ts/],
-      use: { ...devices["Desktop Chrome"], headless: true, baseURL: `http://localhost:${LIVE_PORT}` },
+      use: { ...devices["Desktop Chrome"], headless: true, baseURL: LIVE_URL },
     },
     {
       name: "snapshot",
       testMatch: /snapshot(\..*)?\.spec\.ts/,
-      use: { ...devices["Desktop Chrome"], headless: true, baseURL: `http://localhost:${SNAP_PORT}` },
+      use: { ...devices["Desktop Chrome"], headless: true, baseURL: SNAP_URL },
     },
     {
       name: "a11y",
       testMatch: /a11y\.spec\.ts/,
-      use: { ...devices["Desktop Chrome"], headless: true, baseURL: `http://localhost:${LIVE_PORT}` },
+      use: { ...devices["Desktop Chrome"], headless: true, baseURL: LIVE_URL },
     },
   ],
-  webServer: [
+  webServer: useShared ? [] : [
     {
       command: `PYTHONPATH=src uv run uvicorn blindspots.api.app:create_app --factory --host 127.0.0.1 --port ${API_PORT}`,
       cwd: "../../services/analysis",

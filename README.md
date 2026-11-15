@@ -1,16 +1,51 @@
 # Blind Spots
 
-**Blind Spots: where NASA's microgravity fire evidence ends, and what to learn next.**
+**Do NASA's space-station fire tests cover this cabin's air?**
 
-NASA's next crew cabins are planned at 8.2 psia and 34 % O2. All 250 integrated ISS flame tests (BASS, BASS-II)
-ran at about 1 atm. Blind Spots measures that gap: 241 comparable observations for the ISS cabin,
-0 for the Exploration Atmosphere in every material group. There, a Gaussian-process model answers
-"Insufficient experimental evidence for a reliable estimate." and active learning ranks what would teach the most.
+NASA burned materials aboard the ISS to learn when flames keep burning. Those tests all ran in ISS-like air (about 1 atm,
+250 integrated tests from BASS and BASS-II). The air planned for Moon and Mars cabins, thinner with more oxygen, is
+missing from those records. Blind Spots shows, for any crew cabin, whether the ISS tests cover its air, and which next
+experiment would teach the most (machine learning picks it, and says so when it does not know).
+The ISS cabin has 241 nearby ISS test results; NASA's Exploration Atmosphere (8.2 psia, 34 % oxygen) has
+0 across all 20 material setups.
 Built for NASA Space Apps Challenge 2026, "Flame in Freefall"; not endorsed by NASA.
 
-**Try it:** [live app](https://blind-spots-kappa.vercel.app) (press **Guided demo**) · [30-second video](https://blind-spots-kappa.vercel.app/video/blind-spots-demo-30s.webm) · [source code](https://github.com/Atharv-Sharma06/blind-spots)
+> SI-assisted project: built with Claude (Anthropic). See [Use of SI](#use-of-si-super-intelligence).
 
-![Coverage map, oxygen against pressure: every integrated ISS flame observation sits at about 1 atm, far from a reduced-pressure cabin target](submission/stills/1-explore-default.png)
+**Try it:** [live app](https://blind-spots-kappa.vercel.app) (press **30-second tour**) · [30-second video](https://blind-spots-kappa.vercel.app/video/blind-spots-demo-30s.webm) · [source code](https://github.com/Atharv-Sharma06/blind-spots)
+
+![Cabins page: the question, then one card per crew cabin showing its air and whether the ISS flame tests cover it](docs/img/cabins-pick.png)
+
+![Cabins page, step 2: the verdict for NASA's Exploration Atmosphere and a chart of oxygen against pressure in which every ISS test sits near 1 atm, far from the cabin](docs/img/cabins-answer.png)
+
+## How to use it in 3 steps
+
+The home page, **Cabins**, is one scrolling page with three numbered steps:
+
+1. **Pick a cabin.** Cards for today and next ISS, Artemis Moon habitat, NASA Exploration Atmosphere, the Orion capsule and
+   past spacecraft (Shuttle, Skylab, Apollo). Each shows its air (oxygen in %, pressure in kPa) and a chip: **Covered**,
+   **Barely covered** (nearby ISS test results, but not for nearly all of the 20 material setups) or **Not covered** (none). A "material setup" is a material plus the way air flows past it; the model works with 9 of the 20, the ones with enough test results.
+   8 of the 11 cabin atmospheres have no nearby ISS test results, including all
+   7 below 1 atm (Shuttle pre-EVA, Exploration Atmosphere, Artemis Surface Habitat, EAWG 2006, Orion lunar, Skylab, Apollo).
+2. **Read the answer.** One coloured line says blind spot, partly covered or covered. A simple chart (oxygen against
+   pressure) shows NASA's test results for the chosen material, where the ISS tests ran, and where this cabin sits. Pick the
+   material just under the verdict. No probability is shown unless the data support it.
+3. **See what to test next.** The three most informative computational research candidates for that cabin and material,
+   and "What would we learn?": how the model's uncertainty would change if a candidate came out one way or the other
+   (hypothetical model updates, not experimental results).
+
+More: **Explorer** (`/explore`) is the full expert workspace (layers, chart planes, the target and candidate panels);
+**Experiments** (`/experiments`) lists every integrated test with the source cell behind each value; **How it works**
+(`/methodology`) explains the data, the model, the validation and the limits; **Research brief** (`/brief`) is a printable
+summary. In the default view (NASA Exploration Atmosphere, Thin PMMA films · opposed flow) 0 of 9 sampled
+conditions have a nearby test result, and the top research candidate is 34.0 % O2, 56.5 kPa, 1.71 cm/s with an
+expected reduction of the model's uncertainty of 19.3%.
+
+**How the counts fit together.** The dataset lists 276 experiments. 250 are ISS glovebox tests (BASS and
+BASS-II); one test has one or more airflow steps, and each airflow step is one "test result" in the app (the dataset has 749 in all).
+The model learns from 565 test results from 210 experiments; 184 are left out (most often
+because the curated reading had low confidence: 165). Counts by reason are in
+[docs/data-sources.md](docs/data-sources.md).
 
 ## The 60-second pitch
 
@@ -21,10 +56,11 @@ Built for NASA Space Apps Challenge 2026, "Flame in Freefall"; not endorsed by N
   observations in which every value links to its NASA source cell. For a chosen cabin atmosphere, Blind Spots shows the
   comparable evidence, what an uncertainty-aware model predicts, where it refuses to guess, and which computation would
   reduce its uncertainty about that atmosphere the most.
-- **The finding.** All integrated ISS records lie at 13.5 to 22.7 % O2 and 98.3 to 102.2 kPa. The ISS cabin has
+- **The finding.** All integrated ISS records lie at 13.5 to 22.7 % O2 and 98.3 to 102.2 kPa (BASS measured the pressure; BASS-II
+  did not record it, so the dataset assumes the ISS cabin's 101.353 kPa for those tests). The ISS cabin has
   241 comparable observations, in 19 of the 20 material and flame-configuration groups; the NASA
   Exploration Atmosphere has 0, in every group (nearest 8.1 to 10.3
-  reference distances). So the app answers "Insufficient experimental evidence for a reliable estimate." instead of
+  reference distances; the Explorer shows this unit as "steps", and one step or less counts as "nearby"). So the app answers "Insufficient experimental evidence for a reliable estimate." instead of
   printing a probability.
 - **What is different.** Most dashboards show what was tested. Blind Spots shows where the integrated evidence stops for the
   air a crew will breathe, keeps "lack of data" apart from "outcome variability", withholds estimates outside its
@@ -63,6 +99,8 @@ snapshot serves), dataset `4fe55f76142a`, model `gp-laplace-v1+4fe55f76.adfbbd`:
 - It is a research-planning tool, not a fire-safety assessment or a certification, and it contains no test or apparatus
   procedures. Candidates are "computational research candidates requiring qualified scientific review, established safety
   procedures and formal feasibility assessment".
+- **Air, not gravity.** Every integrated ISS test ran in microgravity (free fall). The Moon and Mars have partial gravity, and
+  NASA's PSI states that it holds no partial-gravity combustion data, so "covered" is about the air only.
 - A gap means "not represented in the integrated records", never "NASA has not studied this". Documented NASA and partner
   work that is not integrated (for example SoFIE-GEL, Saffire-V/VI, the Glenn drop-tower exploration-atmosphere tests) is
   listed beside every assessment.
@@ -71,12 +109,23 @@ snapshot serves), dataset `4fe55f76142a`, model `gp-laplace-v1+4fe55f76.adfbbd`:
 - Predictions away from 1 atm rest on an assumption (the model's correlation depends only on distance, "stationarity"),
   because every integrated observation is near 1 atm. No NASA approval or endorsement is claimed.
 
-## AI-assistance disclosure
+## Use of SI (super intelligence)
 
-Blind Spots was built with extensive use of Claude (Anthropic) as an AI coding, transcription, review and writing
+- **Inside the app: machine learning, no language model.** A Gaussian-process model gives the probability that a flame keeps
+  burning only where nearby ISS test results support it, and says "Insufficient experimental evidence for a reliable
+  estimate." otherwise. Active learning ranks the next experiment by how much it would cut the model's uncertainty about the
+  chosen cabin. Every sentence the app shows is a deterministic template filled with computed numbers.
+- **To build it: Claude (Anthropic)** wrote and reviewed code, double-transcribed and checked the curation tables, extracted
+  the NASA quotes and drafted the documentation (details below). SI output was checked by code, tests and provenance checks
+  rather than trusted.
+- **No SI-generated images, video or audio.** The demo video and screenshots are headless recordings of the real app.
+
+Details of how SI was used to build it:
+
+Blind Spots was built with extensive use of Claude (Anthropic) as an SI coding, transcription, review and writing
 assistant:
 - code (Python analysis service, FastAPI API, Next.js app, tests);
-- the curation tables that turn free-text BASS/BASS-II matrix cells into values: two independent AI transcriptions per
+- the curation tables that turn free-text BASS/BASS-II matrix cells into values: two independent SI transcriptions per
   chunk, adjudicated, with every quoted token machine-checked as an exact substring of the cited NASA cell
   (0 provenance failures in this build); see [data/curation/README.md](data/curation/README.md);
 - transcription of tables from NASA reports (BASS-II Summary Report Appendix A, DARTFire, the Glenn drop-tower limits,
@@ -84,10 +133,19 @@ assistant:
 - extraction of the verbatim NASA quotes behind the 12 atmosphere profiles, machine-checked against the
   downloaded documents;
 - research summaries, code and science reviews, this documentation, and the scripted headless capture of the demo video
-  and screenshots (recordings of the real app; no AI-generated images, video or audio).
+  and screenshots (recordings of the real app; no SI-generated images, video or audio).
+
+**What the people did:** the project owner directed the work, made the design and scientific decisions (each logged with
+its rationale in [docs/decisions.md](docs/decisions.md) and `docs/decisions.d/`), reviewed the outputs and decided what
+went into the final project. Claude (Anthropic) wrote and transcribed under that direction; its output was checked by
+code (`scripts/check_curation_provenance.py`, the pytest and Playwright test suites) and not trusted on its own.
+
+**No NASA branding:** no NASA logos, flags, insignia or mission patches are used in the app, the demo video or the
+screenshots. NASA datasets and experiments are named only as citations of where the data comes from. No NASA approval or
+endorsement is claimed.
 
 Decisions and their rationale are logged in [docs/decisions.md](docs/decisions.md). The app itself uses no generative
-AI: predictions come from a Gaussian-process classifier, rankings from expected-variance-reduction active learning, and
+SI: predictions come from a Gaussian-process classifier, rankings from expected-variance-reduction active learning, and
 every explanation it shows is a deterministic template filled with computed numbers
 (`services/analysis/src/blindspots/uncertainty/explanations.py`).
 
@@ -100,7 +158,7 @@ would teach us the most?*
 
 ## What the product does
 
-- **Coverage map**: for one material and flame-configuration group ("analysis group"), shows where integrated experiments exist in oxygen /
+- **Coverage map (Explorer for experts, simplified chart on the Cabins page)**: for one material and flame-configuration group ("analysis group"), shows where integrated experiments exist in oxygen /
   airflow (and oxygen / pressure) space and how far any point is from the nearest comparable observation.
 - **Predictive model with uncertainty (the machine learning)**: a Gaussian-process classifier (logit link, Laplace approximation) per group predicts the probability that a flame
   is sustained and splits uncertainty into epistemic (lack of data) and aleatoric (outcome variability). Where evidence is missing it answers
@@ -110,8 +168,8 @@ would teach us the most?*
   counterfactual "what if this came out sustained / not sustained" views.
 - **Honest context**: NASA investigations that are *not* integrated (for example SoFIE-GEL, Saffire-V/VI) are listed alongside every target assessment as
   "not represented in the integrated records"; this is never phrased as "NASA has not studied this".
-- **Experiment explorer**: every integrated test with the source cell behind each value.
-- **Guided demo and defaults**: the default analysis group is data-driven (`is_default` on `/api/groups`, currently Thin PMMA films · opposed flow, id `pmma_thin_film__opposed`) and the context layer is on by default; the built-in guided demo walks through coverage, target, gap, candidate and counterfactual in about a minute.
+- **Experiments**: every integrated test with the source cell behind each value.
+- **Cabins page and 30-second tour**: the home page answers the question in three steps (pick a cabin, read the answer, see what to test next); the default material is data-driven (`is_default` on `/api/groups`, currently Thin PMMA films · opposed flow, id `pmma_thin_film__opposed`), and the built-in 30-second tour walks through the ISS cabin, the Exploration Atmosphere, the answer, the top candidate and the counterfactual.
 
 ## Key differentiator
 

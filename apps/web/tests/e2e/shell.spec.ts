@@ -1,10 +1,11 @@
 import { expect, test } from "@playwright/test";
-import { EXPLORE_H1 } from "./helpers";
+import { EXPLORE_H1, HOME_H1 } from "./helpers";
 
 const PAGES = [
-  { path: "/", nav: "Explore", heading: EXPLORE_H1 },
+  { path: "/", nav: "Cabins", heading: HOME_H1 },
+  { path: "/explore", nav: "Explorer", heading: EXPLORE_H1 },
   { path: "/experiments", nav: "Experiments", heading: "Experiments" },
-  { path: "/methodology", nav: "Methodology", heading: "Methodology" },
+  { path: "/methodology", nav: "How it works", heading: /^(How it works|Methodology)/ },
 ] as const;
 
 test.describe("App shell", () => {
@@ -15,12 +16,13 @@ test.describe("App shell", () => {
     }
   });
 
-  test("primary navigation works and marks the active page", async ({ page }) => {
+  test("primary navigation reads Cabins, Explorer, Experiments, How it works and marks the active page", async ({ page }) => {
     await page.goto("/");
     const nav = page.getByRole("navigation", { name: "Primary" });
-    for (const p of [PAGES[1], PAGES[2], PAGES[0]]) {
+    await expect(nav.getByRole("link")).toHaveText(PAGES.map((p) => p.nav));
+    for (const p of [PAGES[1], PAGES[2], PAGES[3], PAGES[0]]) {
       await nav.getByRole("link", { name: p.nav }).click();
-      await expect(page).toHaveURL(new RegExp(p.path === "/" ? "/(\\?.*)?$" : `${p.path}$`));
+      await expect(page).toHaveURL(new RegExp(p.path === "/" ? "/(\\?.*)?$" : `${p.path}(\\?.*)?$`)); // the Explorer mirrors its state into the query
       await expect(page.getByRole("heading", { level: 1, name: p.heading })).toBeVisible();
       await expect(nav.getByRole("link", { name: p.nav })).toHaveAttribute("aria-current", "page");
     }
@@ -30,7 +32,8 @@ test.describe("App shell", () => {
     for (const p of PAGES) {
       await page.goto(p.path);
       const footer = page.getByRole("contentinfo");
-      await expect(footer).toContainText("Computational research-planning tool. Not a certified fire-safety assessment. Not endorsed by NASA.");
+      await expect(footer).toContainText("Not a certified fire-safety assessment");
+      await expect(footer).toContainText("Not endorsed by NASA");
       await expect(footer).toContainText("Data: NASA Physical Sciences Informatics (CC0)");
     }
   });

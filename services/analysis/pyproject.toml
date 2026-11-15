@@ -1,7 +1,7 @@
 [project]
 name = "blindspots"
 version = "0.1.0"
-description = "Blind Spots analysis service: microgravity combustion evidence mapping, calibrated uncertainty and computational research candidates."
+description = "Blind Spots analysis service: microgravity combustion evidence mapping, calibrated uncertainty and computational research candidates. SI-assisted: built with Claude (Anthropic); see README, Use of Super Intelligence (SI)."
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 dependencies = [

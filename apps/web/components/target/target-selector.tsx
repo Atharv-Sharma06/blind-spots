@@ -12,6 +12,7 @@ import { useTargets, useDataMode } from "@/hooks/api";
 import { useExploreStore, analysisProfiles } from "@/lib/explore-store";
 import { fmtPressure, fmtRange } from "@/lib/format";
 import { pressureAnchor } from "@/components/explore/model";
+import { shortCabinName } from "@/components/home/cabins";
 import type { AtmosphereProfile, CustomTarget } from "@/lib/types";
 
 export const CUSTOM_LABEL = "User-selected hypothetical conditions";
@@ -35,7 +36,7 @@ function profileSourceLink(p: AtmosphereProfile) {
   return s?.url ? { url: s.url, title: s.title } : null;
 }
 
-export function TargetSelector() {
+export function TargetSelector({ className }: { className?: string } = {}) {
   const targets = useTargets();
   const dm = useDataMode();
   const target = useExploreStore((s) => s.target);
@@ -47,7 +48,7 @@ export function TargetSelector() {
   const usable = useMemo(() => analysisProfiles(profiles), [profiles]);
   const envelope = profiles.filter((p) => p.kind === "envelope");
   const current = "profile_id" in target ? profiles.find((p) => p.profile_id === target.profile_id) : null;
-  const currentLabel = "custom" in target ? CUSTOM_LABEL : current?.name ?? (targets.isPending ? "Loading targets…" : "Select target");
+  const currentLabel = "custom" in target ? CUSTOM_LABEL : (current ? shortCabinName(current.profile_id, current.name) : null) ?? (targets.isPending ? "Loading cabins…" : "Select a cabin");
 
   return (
     <Sheet
@@ -58,17 +59,16 @@ export function TargetSelector() {
       }}
     >
       <SheetTrigger asChild>
-        <Button variant="secondary" size="md" className="max-w-full min-w-0 shrink justify-between gap-2" data-testid="target-selector">
-          <span className="text-muted">Target</span>{" "}
+        <Button variant="secondary" size="md" className={cn("max-w-full min-w-0 shrink justify-between gap-2", className)} data-testid="target-selector">
           <span className="truncate font-medium">{currentLabel}</span>
-          <span className="sr-only">, change target</span>
+          <span className="sr-only">, change cabin</span>
           <ChevronDown aria-hidden />
         </Button>
       </SheetTrigger>
-      <SheetContent title={view === "list" ? "Target atmosphere" : "Custom target"} description={view === "list" ? "Choose a documented cabin atmosphere to analyse." : CUSTOM_LABEL}>
+      <SheetContent title={view === "list" ? "Choose a cabin" : "Custom conditions"} description={view === "list" ? "Pick a spacecraft or habitat air to check against the ISS tests." : CUSTOM_LABEL}>
         {view === "list" ? (
           <div className="space-y-5">
-            {targets.isError ? <Callout variant="warning" title="Targets could not be loaded">The analysis service did not return the documented profiles.</Callout> : null}
+            {targets.isError ? <Callout variant="warning" title="Cabins could not be loaded">The analysis service did not return the documented cabin profiles.</Callout> : null}
             {STATUS_ORDER.map(({ status, title }) => {
               const list = usable.filter((p) => p.status === status);
               if (list.length === 0) return null;
@@ -124,13 +124,13 @@ export function TargetSelector() {
                 </ul>
               </section>
             ) : null}
-            <section aria-label="Custom target">
+            <section aria-label="Custom conditions">
               <h3 className="mb-1.5 text-xs font-medium tracking-wide text-muted uppercase">Custom</h3>
               <Button variant="secondary" onClick={() => setView("custom")} disabled={dm.isSnapshot} className="w-full justify-start">
-                Custom target…
+                Enter your own conditions…
               </Button>
               {dm.isSnapshot ? (
-                <p className="mt-1.5 text-xs text-muted">Custom targets are computed on demand; this version serves precomputed results for the documented atmospheres only.</p>
+                <p className="mt-1.5 text-xs text-muted">Your own conditions are computed on demand; this version serves precomputed results for the documented cabins only.</p>
               ) : null}
             </section>
           </div>
@@ -221,7 +221,7 @@ function CustomTargetForm({ onCancel, onApply }: { onCancel: () => void; onApply
       </fieldset>
       {err ? <p role="alert" className="text-[13px] text-warn">{err}</p> : null}
       <div className="flex gap-2">
-        <Button type="submit" variant="primary">Analyse target</Button>
+        <Button type="submit" variant="primary">Check these conditions</Button>
         <Button variant="ghost" onClick={onCancel}>Back</Button>
       </div>
     </form>

@@ -1,13 +1,14 @@
 "use client";
 
 import { Crosshair, GitCompareArrows } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PanelSkeleton } from "@/components/explore/query-state";
 import { cn } from "@/lib/cn";
 import { feasibilityLabel, fmtCmS, fmtFixed, fmtFractionPercent, fmtKpa, fmtOxygen, fmtProbability, fmtPsia, kpaToPsia, reasonLabel } from "@/lib/format";
+import { CANDIDATE_FRAMING } from "@/lib/copy";
+import { pct } from "@/components/explore/plain";
 import type { Candidate, GroupSummary, RankResponse } from "@/lib/types";
 import type { ApiQuery } from "@/hooks/api";
 import { candidatePAllowed, distanceToTarget } from "@/components/target/evidence";
@@ -59,7 +60,7 @@ function CompareToggle({ id, ids, onToggle }: { id: string; ids: [string | null,
   return (
     <Button variant={on ? "primary" : "secondary"} size="sm" aria-pressed={on} onClick={() => onToggle(id)}>
       <GitCompareArrows aria-hidden />
-      {on ? "In comparison" : "Compare"}
+      {on ? "Added to compare" : "Compare"}
     </Button>
   );
 }
@@ -70,8 +71,8 @@ export function CandidatePanel(p: CandidatePanelProps) {
     return (
       <EmptyState
         compact
-        title="No candidates for this group"
-        description={`${group?.label ?? "This group"} has too few training observations for a model (${group?.model_reason ?? "insufficient data"}). Coverage is still shown on the map.`}
+        title="No prediction for this material"
+        description={`There are too few test results for a model (${group?.model_reason ?? "insufficient data"}). Try another material; the chart still shows where tests exist.`}
       />
     );
   }
@@ -86,10 +87,10 @@ export function CandidatePanel(p: CandidatePanelProps) {
           title={r.status === "model_unavailable" ? "Model unavailable" : r.status === "no_informative_candidates" ? "No informative candidates" : "No eligible candidates"}
           description={
             r.status === "model_unavailable"
-              ? "No trained model is available for this group."
+              ? "No trained model is available for this material. Try another material."
               : r.status === "no_informative_candidates"
-                ? "Under the model, no candidate in the analysis domain is correlated with this target, so none would reduce its uncertainty and a ranking would only reflect tie-breaking."
-                : "No candidate in the analysis domain adds information about this target."
+                ? "Under the model, no candidate is correlated with this cabin, so none would reduce its uncertainty and a ranking would only reflect tie-breaking. Try another material."
+                : "No candidate adds information about this cabin. Try another material."
           }
         />
       </Updating>
@@ -120,27 +121,71 @@ export function CandidatePanel(p: CandidatePanelProps) {
           data-testid="top-candidate"
           className={cn("space-y-3 rounded-md border bg-surface p-3", selectedId === top.candidate_id ? "border-accent" : "border-border")}
         >
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="flex items-center gap-1.5 text-[13px] font-semibold">
-              <span aria-hidden className="inline-block size-2.5 rotate-45 bg-accent" />
-              Candidate {top.rank}
-            </h3>
-            <Badge tone="neutral">{fe.label}</Badge>
-          </div>
+          <h3 className="flex items-center gap-1.5 text-[13px] font-semibold">
+            <span aria-hidden className="inline-block size-2.5 rotate-45 bg-accent" />
+            Test {top.rank}: the most informative
+          </h3>
           <Conditions c={top} />
 
           <div>
-            <p className="text-xs text-muted">Expected reduction of target uncertainty</p>
-            <p className="mt-0.5 flex flex-wrap items-baseline gap-2">
-              <span className="num text-xl font-medium tracking-[-0.01em]" data-testid="evr-value">{fmtFractionPercent(top.evr_fraction)}</span>
-              {isAssumptionDependent(top) ? <span className="text-xs text-muted">depends on the assumed pressure correlation</span> : null}
+            <p className="text-[15px] leading-snug text-fg">
+              Would cut the model&apos;s uncertainty about this cabin by{" "}
+              <span className="num text-xl font-medium tracking-[-0.01em] whitespace-nowrap" data-testid="evr-value">{fmtFractionPercent(top.evr_fraction)}</span>.
             </p>
-            <p className="mt-0.5 text-xs text-muted">Share of the target&apos;s current knowledge uncertainty that one hypothetical observation here would remove. A model estimate.</p>
+            {isAssumptionDependent(top) ? <p className="mt-0.5 text-xs text-muted">This depends on the assumed pressure correlation.</p> : null}
+            <p className="mt-0.5 text-xs text-muted">A model estimate: the share of the cabin&apos;s uncertainty one new test result here would remove.</p>
           </div>
 
-          <div className="space-y-1.5 text-xs">
+          {atTarget ? <p className="text-xs text-fg">{AT_TARGET_TEXT}</p> : null}
+          <p className="text-xs text-muted">
+            {far
+              ? `The closest ISS test result is ${fmtFixed(top.nn_distance, 1)} steps away.`
+              : `The closest ISS test result is ${fmtFixed(top.nn_distance, 1)} steps away, so nearby evidence exists.`}
+            {showP ? <> The model puts the chance of a flame at <span className="num text-fg">{pct(top.p_sustained)}</span>.</> : " The model gives no estimate of whether a flame keeps burning here: the evidence does not support one."}
+          </p>
+
+          <div className="flex flex-wrap gap-2">
+            <Button variant="primary" size="sm" onClick={() => onExplore(top)} data-testid="explore-candidate">
+              <Crosshair aria-hidden />
+              What would we learn?
+            </Button>
+            <CompareToggle id={top.candidate_id} ids={compareIds} onToggle={onToggleCompare} />
+          </div>
+        </article>
+
+        {rest.length > 0 ? (
+          <ul className="divide-y divide-border rounded-md border border-border" aria-label="Other ranked candidates">
+            {rest.map((c) => (
+              <li key={c.candidate_id} className={cn("space-y-2 p-3", selectedId === c.candidate_id && "bg-accent-tint")}>
+                <div className="flex items-baseline justify-between gap-2">
+                  <span className="text-[13px] font-medium">Test {c.rank}</span>
+                  <span className="text-xs text-muted">
+                    cuts uncertainty by <span className="num text-fg">{fmtFractionPercent(c.evr_fraction)}</span> on its own
+                  </span>
+                </div>
+                <p className="num text-xs text-fg">{shortCond(c)}</p>
+                <div className="flex flex-wrap gap-2">
+                  <Button size="sm" variant="ghost" onClick={() => onExplore(c)} aria-label={`What would we learn? Test ${c.rank}`}>
+                    <Crosshair aria-hidden />
+                    What would we learn?
+                  </Button>
+                  <CompareToggle id={c.candidate_id} ids={compareIds} onToggle={onToggleCompare} />
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+
+        {compareIds[0] !== null || compareIds[1] !== null ? (
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs text-muted">{compareReady ? "Two candidates are ready to compare." : "Add one more candidate to compare."}</p>
+            <Button size="sm" variant="secondary" disabled={!compareReady} onClick={onOpenCompare} data-testid="open-compare">Compare side by side</Button>
+          </div>
+        ) : null}
+
+        <Disclosure summary="Technical details">
+          <section aria-label="Why this candidate" className="space-y-1.5">
             <p className="font-medium text-fg">Why this candidate</p>
-            {atTarget ? <p className="text-fg">{AT_TARGET_TEXT}</p> : null}
             {why.length > 0 ? (
               <ul className="space-y-1">
                 {why.map((x) => (
@@ -152,63 +197,16 @@ export function CandidatePanel(p: CandidatePanelProps) {
             ) : !atTarget ? (
               <p className="text-muted">It has the highest expected uncertainty reduction among the candidates in the analysis domain.</p>
             ) : null}
-            <p className="text-muted">
-              {far
-                ? `No integrated observation within one reference distance; the nearest is ${fmtFixed(top.nn_distance, 1)} away.`
-                : `Nearby evidence: the nearest integrated observation is ${fmtFixed(top.nn_distance, 1)} reference distances away.`}
-              {showP ? (
-                <> Model P(sustained) here <span className="num">{fmtProbability(top.p_sustained)}</span> (a model estimate).</>
-              ) : (
-                " No P(sustained) is shown here: the evidence does not support an estimate at this point."
-              )}
-            </p>
+            {showP ? <p className="text-muted">Model P(sustained) here <span className="num text-fg">{fmtProbability(top.p_sustained)}</span> (a model estimate).</p> : null}
             {top.related_documented_investigations.length > 0 ? (
               <p className="text-muted">
                 Inside the documented test envelope of {top.related_documented_investigations.map((i) => i.name.split(" (")[0]).join("; ")} (not integrated); existing data may already inform this candidate.
               </p>
             ) : null}
-            <p className="text-muted">{fe.disclaimer}</p>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            <Button variant="primary" size="sm" onClick={() => onExplore(top)} data-testid="explore-candidate">
-              <Crosshair aria-hidden />
-              Explore candidate
-            </Button>
-            <CompareToggle id={top.candidate_id} ids={compareIds} onToggle={onToggleCompare} />
-          </div>
-        </article>
-
-        {rest.length > 0 ? (
-          <ul className="divide-y divide-border rounded-md border border-border" aria-label="Other ranked candidates">
-            {rest.map((c) => (
-              <li key={c.candidate_id} className={cn("space-y-2 p-3", selectedId === c.candidate_id && "bg-accent-tint")}>
-                <div className="flex items-baseline justify-between gap-2">
-                  <span className="text-[13px] font-medium">Candidate {c.rank}</span>
-                  <span className="text-xs text-muted">
-                    <span className="num text-fg">{fmtFractionPercent(c.evr_fraction)}</span> expected reduction
-                  </span>
-                </div>
-                <p className="num text-xs text-fg">{shortCond(c)}</p>
-                <div className="flex gap-2">
-                  <Button size="sm" variant="ghost" onClick={() => onExplore(c)} aria-label={`Explore candidate ${c.rank}`}>
-                    <Crosshair aria-hidden />
-                    Explore
-                  </Button>
-                  <CompareToggle id={c.candidate_id} ids={compareIds} onToggle={onToggleCompare} />
-                </div>
-              </li>
-            ))}
-          </ul>
-        ) : null}
-
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-xs text-muted">Pick two candidates to compare side by side.</p>
-          <Button size="sm" variant="secondary" disabled={!compareReady} onClick={onOpenCompare} data-testid="open-compare">Compare selected</Button>
-        </div>
-
-        <Disclosure summary="How this ranking compares with simpler rules">
+            <p className="text-muted"><span className="font-medium text-fg">{fe.label}.</span> {fe.disclaimer}</p>
+          </section>
           <section aria-label="Baseline comparison">
+            <p className="mb-1.5 font-medium text-fg">How this ranking compares with simpler rules</p>
             <p className="mb-1.5 text-muted">
               Each rule&apos;s pick is scored with the same measure: the expected uncertainty reduction if this baseline&apos;s pick were tested instead.
             </p>
@@ -240,7 +238,7 @@ export function CandidatePanel(p: CandidatePanelProps) {
             </Table>
             <p className="mt-1 text-muted">
               The random baseline is a single seeded draw. Picks far from the target remove almost none of its uncertainty, hence values near 0%. On held-out data the advantage is modest and not uniform; see{" "}
-              <a className="underline" href="/methodology#trust">Methodology</a>.
+              <a className="underline" href="/methodology#trust">How it works</a>.
             </p>
           </section>
           {r.sensitivity.length > 0 ? (
@@ -269,7 +267,7 @@ export function CandidatePanel(p: CandidatePanelProps) {
           ) : null}
         </Disclosure>
 
-        <p className="border-t border-border pt-3 text-xs text-muted">{r.disclaimer}</p>
+        <p className="border-t border-border pt-3 text-xs text-muted">{CANDIDATE_FRAMING}</p>
       </div>
     </Updating>
   );

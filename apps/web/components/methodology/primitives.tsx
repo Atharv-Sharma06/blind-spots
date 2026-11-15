@@ -1,22 +1,69 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { ExternalLink } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { DisclosureChevron } from "@/components/ui/disclosure";
 import { ErrorState } from "@/components/ui/error-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { ApiQuery } from "@/hooks/api";
 
-/** Top-level page section with an anchor target for the table of contents. */
+const SECTION_EVENT = "hiw:section";
+
+/** Open ("*" = all) or close a technical section from anywhere (table of contents, group links, expand-all). */
+export function setSectionOpen(id: string, open: boolean): void {
+  if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent(SECTION_EVENT, { detail: { id, open } }));
+}
+
+/**
+ * One numbered technical section. Collapsed by default: the title and its one-line intro are always in the page
+ * (so anchors work), the body is mounted only when opened (charts measure a visible container, nothing heavy renders
+ * for readers who stop at the summary). A `#id` or `#id-sub` hash, the table of contents and "Show all" open it.
+ */
 export function Section({ id, number, title, intro, children }: { id: string; number: number; title: string; intro?: ReactNode; children: ReactNode }) {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const fromHash = () => {
+      const h = window.location.hash.slice(1);
+      if (h !== id && !h.startsWith(`${id}-`)) return;
+      setOpen(true);
+      if (h !== id) window.setTimeout(() => document.getElementById(h)?.scrollIntoView({ block: "start" }), 60);
+    };
+    fromHash();
+    const onCommand = (e: Event) => {
+      const d = (e as CustomEvent<{ id: string; open: boolean }>).detail;
+      if (d.id === "*" || d.id === id) setOpen(d.open);
+    };
+    window.addEventListener("hashchange", fromHash);
+    window.addEventListener(SECTION_EVENT, onCommand);
+    return () => {
+      window.removeEventListener("hashchange", fromHash);
+      window.removeEventListener(SECTION_EVENT, onCommand);
+    };
+  }, [id]);
+
   return (
-    <section id={id} aria-labelledby={`${id}-h`} className="scroll-mt-[calc(var(--header-h)+16px)] border-t border-border pt-8 first:border-t-0 first:pt-0">
-      <h2 id={`${id}-h`} className="text-[20px] font-semibold tracking-[-0.015em]">
-        <span className="num mr-2 text-muted">{number}</span>
-        {title}
+    <section id={id} aria-labelledby={`${id}-h`} className="scroll-mt-[calc(var(--header-h)+16px)] border-t border-border first:border-t-0">
+      <h2 id={`${id}-h`} className="m-0">
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-controls={`${id}-body`}
+          onClick={() => setOpen((o) => !o)}
+          className="group/section flex min-h-12 w-full items-center gap-3 rounded-md py-3.5 text-left text-[18px] font-semibold tracking-[-0.015em] hover:text-accent focus-visible:outline-2 focus-visible:outline-accent"
+        >
+          <span className="num w-5 shrink-0 text-[15px] font-normal text-muted">{number}</span>
+          <span className="min-w-0 flex-1">{title}</span>
+          <DisclosureChevron open={open} className="size-4" />
+        </button>
       </h2>
-      {intro ? <p className="mt-2 max-w-[68ch] text-[14px] leading-relaxed text-muted">{intro}</p> : null}
-      <div className="mt-5 space-y-6">{children}</div>
+      {intro ? <p className="-mt-1.5 max-w-[68ch] pb-4 pl-8 text-[13px] leading-relaxed text-muted">{intro}</p> : null}
+      {open ? (
+        <div id={`${id}-body`} className="space-y-6 pb-10 pl-0 pt-1 sm:pl-8">
+          {children}
+        </div>
+      ) : null}
     </section>
   );
 }

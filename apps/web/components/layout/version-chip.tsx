@@ -21,14 +21,11 @@ function Dot({ state }: { state: BackendState }) {
 }
 
 const short = (v: string | null | undefined) => (v ? v.slice(0, 12) : null);
-/** Chip shows the model family only (e.g. gp-laplace-v1); the full id sits in the tooltip. */
-const modelFamily = (v: string | null | undefined) => (v ? (v.split("+")[0] ?? v) : null);
 
-/** Dataset / model version chip fed by GET /api/health. */
+/** Dataset version chip fed by GET /api/health. The model id is not printed on the page (it is technical); the tooltip and the accessible name carry both full versions. */
 export function VersionChip({ className }: { className?: string }) {
   const { state, health, error } = useHealth();
   const data = short(health?.dataset_version);
-  const model = modelFamily(health?.model_version) ?? short(health?.model_version);
 
   let label: React.ReactNode;
   let detail: string;
@@ -36,15 +33,14 @@ export function VersionChip({ className }: { className?: string }) {
     label = <span>Checking</span>;
     detail = "Checking the analysis service";
   } else if (state === "unavailable") {
-    label = <span>Backend unavailable</span>;
+    label = <span>Analysis service unavailable</span>;
     detail = error?.message ?? "The analysis service could not be reached";
   } else {
     label = (
       <>
         {state === "degraded" ? <span className="mr-1">Degraded</span> : null}
         <span>
-          data <span className="num">{data ?? "n/a"}</span>
-          <span> &middot; model <span className="num">{model ?? "n/a"}</span></span>
+          Data version <span className="num">{data ?? "n/a"}</span>
         </span>
       </>
     );
@@ -59,9 +55,9 @@ export function VersionChip({ className }: { className?: string }) {
         type="button"
         data-testid="version-chip"
         data-state={state}
-        aria-label={state === "ok" || state === "degraded" ? `data ${data ?? "n/a"}, model ${model ?? "n/a"}. ${detail}` : `${state === "loading" ? "Checking" : "Backend unavailable"}. ${detail}`}
+        aria-label={state === "ok" || state === "degraded" ? `Data version ${data ?? "n/a"}. ${detail}` : `${state === "loading" ? "Checking" : "Analysis service unavailable"}. ${detail}`}
         className={cn(
-          "-mx-1.5 inline-flex h-6 items-center gap-1.5 rounded-sm border border-transparent px-1.5 text-label text-muted transition-colors hover:border-border hover:text-fg",
+          "-mx-1.5 inline-flex h-10 items-center gap-1.5 rounded-sm border border-transparent px-1.5 text-label text-muted transition-colors hover:border-border hover:text-fg md:h-6",
           className,
         )}
       >

@@ -12,14 +12,14 @@ export default function NotFound() {
       <h1 className="sr-only">Page not found</h1>
       <ErrorState
         code="not_found"
-        description="This address does not match a page in Blind Spots. Check the link, or start from Explore."
+        description="This address does not match a page in Blind Spots. Check the link, or start from the Cabins page."
         action={
           <>
             <Button asChild size="sm" variant="primary">
-              <Link href="/">Back to Explore</Link>
+              <Link href="/">Back to Cabins</Link>
             </Button>
             <Button asChild size="sm" variant="ghost">
-              <Link href="/methodology">Methodology</Link>
+              <Link href="/methodology">How it works</Link>
             </Button>
           </>
         }

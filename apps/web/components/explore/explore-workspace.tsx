@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Map as MapIcon } from "lucide-react";
+import Link from "next/link";
+import { ArrowLeft, Map as MapIcon } from "lucide-react";
 import ParameterMap from "@/components/visualization/parameter-map";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
@@ -24,8 +25,8 @@ import {
   useTargets,
 } from "@/hooks/api";
 import { isApiError } from "@/lib/api";
+import { materialName } from "@/components/home/cabins";
 import { snapSlice } from "@/lib/snapshot";
-import { verdictLabel } from "@/lib/format";
 import {
   exploreActions,
   useExploreCandidateState,
@@ -39,8 +40,7 @@ import {
 } from "@/lib/explore-store";
 import type { Candidate, GridQuery, Plane } from "@/lib/types";
 import { FooterStrip } from "./footer-strip";
-import { GroupFacts, LayerChips, MaterialSelect, PlaneSwitch, SliceControl } from "./map-controls";
-import { FindingStrip } from "./finding-strip";
+import { ControlLabel, GroupFacts, LayerChips, MaterialSelect, PlaneSwitch, SliceControl } from "./map-controls";
 import {
   DEFAULT_X,
   DEFAULT_Y,
@@ -55,18 +55,19 @@ import {
   xDomainFor,
 } from "./model";
 import { PanelSkeleton } from "./query-state";
-import { DemoLauncher, DemoOverlay } from "@/components/demo/guided-demo";
+import { EXPLORER_INTRO } from "./plain";
 
 // Plot height set by CSS (phones 340, tablets 440, lg+: fits the sticky map card in the viewport), so the server
 // render already has the final height and phones do not jump at load (a04-02).
-const MAP_PLOT_CLASS = "h-[340px] sm:h-[440px] lg:h-[clamp(380px,calc(100vh-450px),640px)]";
+const MAP_PLOT_CLASS = "h-[340px] sm:h-[440px] lg:h-[clamp(360px,calc(100vh-510px),640px)]";
 
-const Panel = ({ id, title, children, busy = false }: { id: string; title: string; children: React.ReactNode; busy?: boolean }) => (
+const Panel = ({ id, title, children, busy = false, lead }: { id: string; title: string; children: React.ReactNode; busy?: boolean; lead?: React.ReactNode }) => (
   <section aria-labelledby={id} aria-busy={busy} className="rounded-lg border border-border bg-surface p-4">
     <div className="flex items-baseline justify-between gap-3">
       <h2 id={id} tabIndex={-1} className="text-[15px] font-semibold tracking-[-0.01em] text-fg outline-none">{title}</h2>
       {busy ? <span className="text-xs text-muted motion-safe:animate-[fade-in_120ms_ease-out_150ms_both]">Updating…</span> : null}
     </div>
+    {lead ? <div className="mt-3">{lead}</div> : null}
     {/* Previous content stays (dimmed, inert) while the new answer loads: no collapse, no stale clicks. */}
     <div className={busy ? "mt-3 opacity-50 transition-opacity delay-150 duration-200" : "mt-3 transition-opacity duration-150"} inert={busy}>
       {children}
@@ -100,7 +101,6 @@ export function ExploreWorkspace() {
   const { selectedCandidateId, compareIds, counterfactualOpen, hypotheticalOutcome } = useExploreCandidateState();
   const viewDomain = useExploreStore((x) => x.viewDomain);
   const selectedObservationId = useExploreStore((x) => x.selectedObservationId);
-  const demoActive = useExploreStore((x) => x.demo.active);
 
   const groupsQ = useGroups();
   const targetsQ = useTargets();
@@ -224,7 +224,7 @@ export function ExploreWorkspace() {
   const onPlane = useCallback((p: Plane) => exploreActions().setPlane(p), []);
   const onSlice = useCallback((v: number) => exploreActions().setSlice(v), []);
   const onToggleCompare = useCallback((id: string) => exploreActions().toggleCompare(id), []);
-  const onOpenCompare = useCallback(() => setCompareOpen(true), []);
+  const onOpenCompare = useCallback(() => setCompareOpen(true), [setCompareOpen]);
   const onCloseCounterfactual = useCallback(() => {
     const a = exploreActions();
     a.setCounterfactualOpen(false);
@@ -242,8 +242,8 @@ export function ExploreWorkspace() {
     [layers, modelled],
   );
   const ariaLabel = group
-    ? `Coverage map for ${group.label}: ${plane === "o2_flow" ? "oxygen versus airflow" : "oxygen versus pressure"} at ${plane === "o2_flow" ? "pressure" : "airflow"} ${slice}`
-    : "Coverage map (loading)";
+    ? `Coverage chart for ${materialName(group.group_id, group.label)}: ${plane === "o2_flow" ? "oxygen versus airflow" : "oxygen versus pressure"} at ${plane === "o2_flow" ? "pressure" : "airflow"} ${slice}`
+    : "Coverage chart (loading)";
 
   // ---- one consistent map frame: shown only when coverage, observations, target and (if needed) surface all belong to the current request
   const obsSettled = !!obsQ.data && !obsQ.isPlaceholderData;
@@ -276,7 +276,7 @@ export function ExploreWorkspace() {
     covQ.isError && !cov && !heldView ? (
       <ErrorState compact code={isApiError(covQ.error) ? covQ.error.code : "backend_unavailable"} message={covQ.error?.message} onRetry={() => void covQ.refetch()} />
     ) : groupsQ.data && groups.length === 0 ? (
-      <EmptyState icon={<MapIcon aria-hidden />} title="No analysis groups available" description="The analysis service returned no groups." />
+      <EmptyState icon={<MapIcon aria-hidden />} title="No materials available" description="The analysis service returned no materials." />
     ) : (
       <div className="relative">
         <div className={mapBusy ? "opacity-55 transition-opacity delay-150 duration-200" : "transition-opacity duration-150"}>
@@ -316,85 +316,72 @@ export function ExploreWorkspace() {
       </div>
     );
 
-  const scrollToMap = () => {
-    const el = document.querySelector('[data-testid="map-region"]');
-    if (!el) return;
-    const top = el.getBoundingClientRect().top;
-    if (top < 0 || top > window.innerHeight * 0.6) el.scrollIntoView({ block: "start", behavior: "smooth" });
-  };
-
   return (
-    <div className={`flex flex-col gap-4 ${demoActive ? "pb-[42vh] lg:pb-0" : ""}`}>
-      <header className="flex flex-col gap-2">
-        <h1 className="text-[22px] font-semibold leading-tight tracking-[-0.02em] text-fg md:text-[26px]">
-          Blind Spots: where NASA&apos;s microgravity fire evidence ends, and what to learn next.
-        </h1>
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between lg:gap-8">
-          <div className="min-w-0 max-w-[760px]">
-            <p className="text-[15px] text-fg">
-              Fire safety in crew cabins on spacecraft and in Moon and Mars habitats. This maps which cabin atmospheres NASA&apos;s ISS flame experiments cover, and which they do not.
-            </p>
-            <p className="mt-1 text-[13px] text-muted">
-              Machine learning: a Gaussian-process model that says when it does not know, plus active learning that ranks the most informative next experiment.
-            </p>
-          </div>
-          <div className="flex min-w-0 max-w-full flex-wrap items-center gap-2 lg:flex-nowrap">
-            <DemoLauncher />
-            <TargetSelector />
-          </div>
+    <div className="flex flex-col gap-4">
+      <header className="flex flex-col gap-1.5">
+        <div className="flex flex-wrap items-center justify-between gap-x-4">
+          <h1 className="text-[22px] font-semibold leading-tight tracking-[-0.02em] text-fg md:text-[26px]">Explorer</h1>
+          <Link
+            href="/"
+            className="-mr-1 inline-flex h-10 items-center gap-1.5 rounded-md px-2 text-[13px] text-muted hover:text-fg md:h-8"
+            data-testid="back-to-cabins"
+          >
+            <ArrowLeft className="size-3.5" aria-hidden />
+            Cabins
+          </Link>
         </div>
+        <p className="max-w-[760px] text-[15px] text-muted">{EXPLORER_INTRO}</p>
+        <a href="#explorer-map" className="inline-flex min-h-10 items-center text-sm text-fg underline underline-offset-2 lg:hidden">Jump to the chart ↓</a>
       </header>
 
-      <FindingStrip groups={groups} profiles={profiles} onShowMap={scrollToMap} />
-      <p className="sr-only" aria-live="polite" aria-atomic="true">
-        {assess && group && !assessQ.isPlaceholderData ? `${assess.target.label}, ${group.label}: ${verdictLabel(assess.verdict)}.` : ""}
-      </p>
-
+      {/* Phones read top to bottom: the answer first, then the chart, then what to test next. At lg the map spans both rows of the left column. */}
       <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_380px] xl:grid-cols-[minmax(0,1fr)_420px]">
         <section
+          id="explorer-map"
           aria-labelledby="map-heading"
           data-testid="map-region"
-          className="min-w-0 rounded-lg border border-border bg-surface lg:sticky lg:top-[calc(var(--header-h)+12px)] lg:z-10 lg:max-h-[calc(100vh-var(--header-h)-24px)] lg:overflow-y-auto"
+          className="order-2 min-w-0 scroll-mt-20 rounded-lg border border-border bg-surface lg:order-none lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:sticky lg:top-[calc(var(--header-h)+12px)] lg:z-10 lg:max-h-[calc(100vh-var(--header-h)-24px)] lg:overflow-y-auto"
         >
           <div className="space-y-3 border-b border-border px-4 py-3">
-            <div className="flex flex-wrap items-end gap-x-4 gap-y-3">
-              <h2 id="map-heading" className="sr-only">Coverage map</h2>
+            <div className="flex flex-wrap items-start gap-x-4 gap-y-3">
+              <h2 id="map-heading" className="sr-only">Coverage chart</h2>
               <MaterialSelect groups={groups} value={groupId} onChange={onGroup} />
-              <div>
-                <p className="mb-1 text-xs text-muted">Plane</p>
-                <PlaneSwitch plane={plane} onChange={onPlane} />
-              </div>
-              <SliceControl plane={plane} value={slice} onCommit={onSlice} snapValues={dm.isSnapshot ? dm.slices?.[plane] ?? null : null} />
+              <PlaneSwitch plane={plane} onChange={onPlane} />
             </div>
-            <LayerChips layers={layers} onToggle={onLayer} modelled={!!modelled} />
+            <div className="flex flex-wrap items-start gap-x-8 gap-y-3">
+              <SliceControl plane={plane} value={slice} onCommit={onSlice} snapValues={dm.isSnapshot ? dm.slices?.[plane] ?? null : null} />
+              <LayerChips layers={layers} onToggle={onLayer} modelled={!!modelled} />
+            </div>
           </div>
+          <p className="px-4 pt-3 text-xs text-muted" data-testid="chart-caption">
+            Each dot is one ISS test of this material. The dashed box is this cabin; numbered markers are the suggested next tests.
+          </p>
           <div className="p-2 sm:p-3" aria-busy={mapBusy}>
             {mapNode}
           </div>
           {group && !modelled ? (
             <p className="border-t border-border px-4 py-2 text-xs text-muted">
-              <span className="font-medium text-fg">Coverage only.</span> {group.label} has too few training observations for a model ({group.model_reason ?? "insufficient data"}). Prediction, uncertainty and candidates are unavailable; the map shows observations and coverage.
+              <span className="font-medium text-fg">No prediction for this material.</span> It has too few test results for a model ({group.model_reason ?? "insufficient data"}). The chart shows test results and coverage only. Try another material.
             </p>
           ) : null}
           <div className="space-y-1 border-t border-border px-4 py-2">
             {group ? <GroupFacts group={group} /> : <p className="text-xs text-muted">&nbsp;</p>}
             {cov ? (
               <p className="text-xs text-muted" data-testid="obs-note">
-                <span className="num">{obsResult.points.length}</span> of <span className="num">{obsResult.total}</span> observations in this group are plotted: only those within one reference distance of the{" "}
-                {plane === "o2_flow" ? "pressure" : "airflow"} slice
+                Showing <span className="num">{obsResult.points.length}</span> of <span className="num">{obsResult.total}</span> test results: those close to the {plane === "o2_flow" ? "pressure" : "airflow"} value held above
                 {obsResult.points.length === 0
-                  ? `. No integrated observation lies within this slice${assess?.coverage.nn_distance_min != null ? `; the nearest to the target is ${assess.coverage.nn_distance_min.toFixed(1)} reference distances away` : ""}`
+                  ? `. None is close to it${assess?.coverage.nn_distance_min != null ? `; the nearest to this cabin is ${assess.coverage.nn_distance_min.toFixed(1)} steps away` : ""}`
                   : ""}
-                {obsResult.hiddenZeroFlow > 0 ? `; ${obsResult.hiddenZeroFlow} zero-flow steps cannot be drawn on the log axis` : ""}.
+                {obsResult.hiddenZeroFlow > 0 ? `; ${obsResult.hiddenZeroFlow} zero-airflow results cannot be drawn on the log axis` : ""}.
               </p>
             ) : null}
-            {dm.snapshotOnly ? <p className="text-xs text-muted">Precomputed snapshot: slices are limited to the exported values; custom targets are available in the full (local) version.</p> : null}
+            {dm.snapshotOnly ? <p className="text-xs text-muted">Precomputed version: held values are limited to the precomputed set. Your own cabin conditions need the full (local) version.</p> : null}
           </div>
           {mapLayers.context && ctx.envelopes.length > 0 ? (
             <details className="group border-t border-border px-4 py-2 text-xs" data-testid="context-list">
               <summary className="cursor-pointer list-none text-muted hover:text-fg [&::-webkit-details-marker]:hidden">
                 <span aria-hidden className="mr-1 inline-block transition-transform group-open:rotate-90">›</span>
-                Dotted boxes: documented work not integrated into the model ({ctx.envelopes.length})
+                Related NASA work on the chart ({ctx.envelopes.length}): dotted boxes the model does not use
               </summary>
               <ul className="mt-1 space-y-0.5 text-muted">
                 {ctx.envelopes.map((e) => (
@@ -411,13 +398,25 @@ export function ExploreWorkspace() {
           ) : null}
         </section>
 
-        <aside aria-label="Analysis" className="flex min-w-0 flex-col gap-4">
-          <DemoOverlay />
-          <Panel id="target-heading" title="Target analysis" busy={ready && assessQ.isPlaceholderData}>
+        <div className="order-1 min-w-0 lg:order-none lg:col-start-2 lg:row-start-1">
+          <Panel
+            id="target-heading"
+            title="Is this cabin covered?"
+            busy={ready && assessQ.isPlaceholderData}
+            lead={
+              <div>
+                <ControlLabel id="cabin-label" label="Cabin" helpId="cabin-help" help="The air to check against the ISS tests." />
+                <TargetSelector className="w-full" />
+              </div>
+            }
+          >
             {!ready ? <PanelSkeleton /> : <TargetAnalysis query={assessQ} group={group} pending={false} />}
           </Panel>
+        </div>
 
-          <Panel id="candidate-heading" title="Next research candidate" busy={ready && !!modelled && rankQ.isPlaceholderData}>
+        <aside aria-label="What to test next" className="order-3 flex min-w-0 flex-col gap-4 lg:order-none lg:col-start-2 lg:row-start-2">
+
+          <Panel id="candidate-heading" title="What to test next" busy={ready && !!modelled && rankQ.isPlaceholderData}>
             {!ready ? (
               <PanelSkeleton />
             ) : (
@@ -437,7 +436,7 @@ export function ExploreWorkspace() {
           </Panel>
 
           {exploring && group && selectedCandidate ? (
-            <Panel id="cf-heading" title="Counterfactual preview">
+            <Panel id="cf-heading" title="What would we learn?">
               <CounterfactualPanel
                 groupId={group.group_id}
                 target={target}
@@ -456,7 +455,7 @@ export function ExploreWorkspace() {
 
       {groups.length > 0 && ready ? (
         <Panel id="material-heading" title="Coverage by material">
-          <p className="mb-2 text-xs text-muted">The selected target assessed in every analysis group. Select a row to switch the map.</p>
+          <p className="mb-2 text-xs text-muted">This cabin checked against every material. Select a row to switch the chart.</p>
           <MaterialCoverage groups={groups} target={target} selectedGroupId={groupId} onSelect={onGroup} />
         </Panel>
       ) : null}

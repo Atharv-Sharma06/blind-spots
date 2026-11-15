@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/cn";
+import { setSectionOpen } from "./primitives";
 
 export interface TocItem {
   id: string;
@@ -27,21 +28,24 @@ export function Toc({ items }: { items: TocItem[] }) {
   }, [items]);
 
   return (
-    <nav aria-label="Methodology sections" className="lg:sticky lg:top-[calc(var(--header-h)+24px)]">
-      <p className="mb-2 hidden text-xs font-medium uppercase tracking-wide text-muted lg:block">On this page</p>
+    <nav aria-label="Technical details sections" className="hidden lg:sticky lg:top-[calc(var(--header-h)+24px)] lg:block">
+      <p className="mb-2 hidden text-xs font-medium uppercase tracking-wide text-muted lg:block">Technical details</p>
       <ol className="flex gap-1 overflow-x-auto pb-2 lg:flex-col lg:gap-0.5 lg:overflow-visible lg:pb-0">
         {items.map((it, i) => (
           <li key={it.id} className="shrink-0">
             <a
               href={`#${it.id}`}
               aria-current={active === it.id ? "location" : undefined}
-              onClick={() => setActive(it.id)}
+              onClick={() => {
+                setActive(it.id);
+                setSectionOpen(it.id, true);
+              }}
               className={cn(
                 "flex items-baseline gap-2 whitespace-nowrap rounded-md border-l-2 px-2.5 py-1.5 text-[13px] transition-colors lg:whitespace-normal",
                 active === it.id ? "border-accent bg-accent-tint font-medium text-fg" : "border-transparent text-muted hover:bg-subtle hover:text-fg",
               )}
             >
-              <span className="num w-3 text-xs text-muted">{i === 0 ? "" : i}</span>
+              <span className="num w-3 text-xs text-muted">{i + 1}</span>
               {it.label}
             </a>
           </li>

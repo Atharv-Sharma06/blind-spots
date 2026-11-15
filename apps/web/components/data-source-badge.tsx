@@ -2,7 +2,9 @@
 
 import { CloudOff, Database, Radio } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip } from "@/components/ui/tooltip";
 import { useDataMode } from "@/hooks/api/use-data-mode";
+import { cn } from "@/lib/cn";
 import type { ResponseMeta } from "@/lib/types";
 
 export interface DataSourceBadgeProps {
@@ -11,11 +13,15 @@ export interface DataSourceBadgeProps {
   className?: string;
 }
 
+/** "2026-11-15T19:54:30Z" becomes "2026-11-15" (same text on server and client, no locale formatting). */
+const dateOnly = (iso: string) => (/^\d{4}-\d{2}-\d{2}/.test(iso) ? iso.slice(0, 10) : iso);
+
 type View = { kind: "live" | "snapshot" | "unavailable" | "connecting"; modelVersion: string | null; generatedAt: string | null };
 
 /**
- * "Live analysis" / "Precomputed snapshot · <model_version>" / "Analysis service unavailable".
- * In snapshot mode the snapshot badge is always visible (docs/API.md, Data modes).
+ * Small, quiet chip in the header: "Precomputed data" / "Live analysis" / "Analysis unavailable". The details (when
+ * saved results were computed, what they cannot do) appear on hover and keyboard focus, and are read
+ * by screen readers. `data-source` carries the state for tests.
  */
 export function DataSourceBadge({ meta, className }: DataSourceBadgeProps) {
   const dm = useDataMode();
@@ -37,49 +43,52 @@ export function DataSourceBadge({ meta, className }: DataSourceBadgeProps) {
   }
 
   let text: string;
-  let version: string | null = null;
-  let title: string;
+  let details: string;
   let icon: React.ReactNode;
   switch (view.kind) {
     case "live":
       text = "Live analysis";
-      title = "Results are computed by the running analysis service.";
+      details = "Results are computed on request.";
       icon = <Radio aria-hidden />;
       break;
-    case "snapshot":
-      text = "Precomputed snapshot";
-      version = view.modelVersion;
-      title =
-        (dm.mode === "auto" ? "The analysis service did not respond, so results come from the precomputed snapshot" : "Results are precomputed") +
-        `${view.generatedAt ? ` (generated ${view.generatedAt})` : ""}; custom targets and arbitrary candidates are available in the full (local) version.`;
+    case "snapshot": {
+      const saved = view.generatedAt ? `These answers were computed on ${dateOnly(view.generatedAt)} and saved with the site.` : "These answers were computed ahead of time and saved with the site.";
+      details =
+        (dm.mode === "auto" ? "The live service did not respond, so you see saved results. " : "") +
+        saved +
+        " Custom cabins and custom experiments need the full local version.";
+      text = "Precomputed data";
       icon = <Database aria-hidden />;
       break;
+    }
     case "unavailable":
-      text = "Analysis service unavailable";
-      title = "The analysis service could not be reached and no precomputed snapshot could be used.";
+      text = "Analysis unavailable";
+      details = "The live service could not be reached and no saved results could be used.";
       icon = <CloudOff aria-hidden />;
       break;
     default:
-      text = "Connecting to analysis";
-      title = "Waiting for the first response from the analysis service.";
+      text = "Connecting";
+      details = "Waiting for the first response.";
       icon = <Radio aria-hidden />;
   }
 
   return (
-    <Badge
-      role="status"
-      title={title}
-      data-testid="data-source-badge"
-      data-source={view.kind}
-      className={className}
-    >
-      {icon}
-      <span>{text}</span>
-      {version ? (
-        <span data-part="version" className="num">
-          {` · ${version}`}
-        </span>
-      ) : null}
-    </Badge>
+    <Tooltip content={details} side="bottom" align="end">
+      <Badge
+        role="status"
+        tabIndex={0}
+        data-testid="data-source-badge"
+        data-source={view.kind}
+        data-version={view.modelVersion ?? undefined}
+        className={cn(
+          "h-10 gap-1.5 rounded-md border-transparent bg-transparent px-1.5 font-normal md:h-6 text-muted transition-colors hover:border-border hover:text-fg",
+          className,
+        )}
+      >
+        {icon}
+        <span>{text}</span>
+        <span className="sr-only">. {details}</span>
+      </Badge>
+    </Tooltip>
   );
 }

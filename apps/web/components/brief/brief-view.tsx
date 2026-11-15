@@ -12,17 +12,19 @@ import { useBrief, useGroups, useTargets } from "@/hooks/api";
 import { pickDefaultGroup, pickDefaultProfile } from "@/lib/explore-store";
 import { DISCLAIMER } from "@/lib/copy";
 import { shortVersion } from "@/lib/format";
+import { materialName, shortCabinName } from "@/components/home/cabins";
 import type { BriefResponse } from "@/lib/types";
 import { MarkdownLite, cleanBriefText } from "./markdown-lite";
 import { parseBriefQuery } from "./link";
+import { InShort } from "./in-short";
 
 /** Section order and headings follow the API's `sections` keys (UI constants; text comes from the API). */
 const SECTIONS: { key: keyof BriefResponse["sections"]; title: string }[] = [
-  { key: "target", title: "1. Target atmosphere" },
-  { key: "coverage", title: "2. Coverage of the target" },
-  { key: "model", title: "3. Model and validation" },
-  { key: "candidate", title: "4. Candidate research question" },
-  { key: "historical_investigations", title: "5. Relevant historical investigations" },
+  { key: "target", title: "1. Target atmosphere (the cabin's air)" },
+  { key: "coverage", title: "2. Do the ISS tests cover it?" },
+  { key: "model", title: "3. The model and how it was checked" },
+  { key: "candidate", title: "4. What to test next (research candidate)" },
+  { key: "historical_investigations", title: "5. Nearby ISS results and related NASA work" },
   { key: "citations", title: "6. Citations" },
   { key: "limitations", title: "7. Limitations" },
 ];
@@ -68,8 +70,21 @@ export function BriefView() {
     if (groupId) p.set("group", groupId);
     if (params.get("target")) p.set("target", params.get("target") as string);
     const s = p.toString();
-    return s ? `/?${s}` : "/";
+    return s ? `/explore?${s}` : "/explore";
   }, [groupId, params]);
+
+  // Named cabins also link back to the Cabins page; a custom target only exists in the Explorer.
+  const profileId = target && "profile_id" in target ? target.profile_id : null;
+  const profile = profileId ? profiles?.find((p) => p.profile_id === profileId) ?? null : null;
+  const group = groupId ? groups?.find((g) => g.group_id === groupId) ?? null : null;
+  const cabinsHref = useMemo(() => {
+    if (!profileId) return null;
+    const p = new URLSearchParams({ cabin: profileId });
+    if (groupId) p.set("material", groupId);
+    return `/?${p.toString()}`;
+  }, [profileId, groupId]);
+  // Plain heading from the same names the Cabins page uses; the API's full title stays underneath as the exact name.
+  const plainTitle = profile && group ? `${materialName(group.group_id, group.label)} in ${shortCabinName(profile.profile_id, profile.name)}` : null;
 
   return (
     <article className="brief-root mx-auto w-full max-w-[760px] px-4 py-8 md:py-12" data-testid="brief">
@@ -93,8 +108,13 @@ export function BriefView() {
 
       <div className="no-print brief-ui mb-6 flex flex-wrap items-center gap-2">
         <Button asChild variant="ghost" size="sm">
-          <Link href={exploreHref}><ArrowLeft aria-hidden />Back to Explore</Link>
+          <Link href={exploreHref}><ArrowLeft aria-hidden />Back to Explorer</Link>
         </Button>
+        {cabinsHref ? (
+          <Button asChild variant="ghost" size="sm">
+            <Link href={cabinsHref}><ArrowLeft aria-hidden />Cabins</Link>
+          </Button>
+        ) : null}
         <div className="ml-auto flex flex-wrap gap-2">
           <Button variant="secondary" disabled={!brief} onClick={() => brief && download(`blind-spots-brief-${slug(groupId ?? "group")}.md`, cleanBriefText(brief.markdown))}>
             <Download aria-hidden />Download .md
@@ -110,7 +130,7 @@ export function BriefView() {
       ) : briefQ.isError && !brief ? (
         <QueryError error={briefQ.error} onRetry={() => void briefQ.refetch()} />
       ) : !brief ? (
-        <div role="status" aria-label="Generating research brief" className="space-y-3">
+        <div role="status" aria-label="Generating research brief" className="min-h-[100svh] space-y-3">
           <Skeleton className="h-8 w-3/4" />
           <Skeleton className="h-4 w-1/2" />
           <Skeleton className="h-4 w-full" />
@@ -121,13 +141,20 @@ export function BriefView() {
         <div className="brief-prose">
           <header className="border-b border-border-strong pb-5">
             <p className="brief-ui text-xs font-medium uppercase tracking-[0.08em] text-muted">Blind Spots · Research brief</p>
-            <h1 className="mt-2 text-[28px] font-semibold leading-tight tracking-[-0.02em]">{brief.title.replace(/^Research brief:\s*/, "")}</h1>
+            <h1 className="mt-2 text-[28px] font-semibold leading-tight tracking-[-0.02em]">{plainTitle ?? brief.title.replace(/^Research brief:\s*/, "")}</h1>
+            {plainTitle ? <p className="brief-ui mt-1 text-[13px] text-muted">{brief.title.replace(/^Research brief:\s*/, "")}</p> : null}
+            <p className="brief-ui mt-3 max-w-[62ch] text-[15px] leading-relaxed">
+              A short summary for this cabin and material: whether NASA&apos;s ISS flame tests cover its air, and which research candidate would teach the model the most. The sections below keep the exact technical terms; see{" "}
+              <Link href="/methodology#nearby" className="text-accent underline underline-offset-2">How it works</Link> for what &quot;nearby&quot; means.
+            </p>
             <dl className="brief-ui num mt-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted">
               <div className="flex gap-1.5"><dt>Generated</dt><dd className="text-fg">{fmtGenerated(brief.generated_at)}</dd></div>
               <div className="flex gap-1.5"><dt>Dataset</dt><dd className="text-fg">{shortVersion(brief.dataset_version)}</dd></div>
               <div className="flex gap-1.5"><dt>Model</dt><dd className="text-fg">{brief.model_version}</dd></div>
             </dl>
           </header>
+
+          <InShort profileId={profileId} groupId={groupId} />
 
           <Callout variant="info" title="Computational research-planning output" className="brief-ui my-5">
             {DISCLAIMER} Candidate conditions are computational research candidates requiring qualified scientific review, established safety procedures and formal feasibility assessment. This brief contains no test procedures.
@@ -147,6 +174,10 @@ export function BriefView() {
           <footer className="mt-10 border-t border-border-strong pt-4 text-[13px] text-muted">
             <p>{DISCLAIMER}</p>
             <p className="mt-1">Data: NASA Physical Sciences Informatics (CC0). Generated by the Blind Spots analysis service from the integrated records listed above; numbers are model-based and carry the uncertainty stated in section 3.</p>
+            <p className="mt-1">
+              Code and text were written with SI assistance (Claude, by Anthropic); every number comes from NASA data processed by that code.{" "}
+              <Link href="/methodology#si" className="no-print text-accent underline underline-offset-2">How it works</Link>
+            </p>
           </footer>
         </div>
       )}

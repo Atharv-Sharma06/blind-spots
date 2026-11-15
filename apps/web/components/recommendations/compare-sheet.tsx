@@ -42,7 +42,7 @@ export function CompareSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         title="Compare candidates"
-        description="Computational research candidates; hypothetical model estimates only."
+        description="Two candidates side by side. Hypothetical model estimates only."
         className="sm:max-w-[640px]"
         onCloseAutoFocus={(e) => {
           // Return focus to the button that opened the sheet (WCAG 2.4.3, a11-05).
@@ -59,20 +59,20 @@ export function CompareSheet({
           <div className="space-y-4" data-testid="compare-sheet">
             <div className="flex items-center gap-2">
               <Badge tone={d.preferred === "indistinguishable" ? "neutral" : "accent"} data-testid="compare-verdict">{verdict}</Badge>
-              <span className="text-xs text-muted">Both together: <span className="num text-fg">{fmtFractionPercent(d.both_evr_fraction)}</span> expected uncertainty reduction</span>
+              <span className="text-xs text-muted">Both together would cut uncertainty by <span className="num text-fg">{fmtFractionPercent(d.both_evr_fraction)}</span></span>
             </div>
             <div className="grid grid-cols-2 gap-2 sm:gap-3">
               {([["a", d.a], ["b", d.b]] as const).map(([k, c]) => {
                 const fe = feasibilityLabel(c.feasibility_status);
                 return (
                   <article key={k} className={`min-w-0 rounded-md border p-2.5 sm:p-3 ${d.preferred === k ? "border-accent" : "border-border"}`}>
-                    <h3 className="text-[13px] font-semibold">Candidate {k === "a" ? a?.rank : b?.rank}</h3>
+                    <h3 className="text-[13px] font-semibold">Test {k === "a" ? a?.rank : b?.rank}</h3>
                     <dl className="mt-2 space-y-1.5 text-xs">
                       <div><dt className="text-muted">Oxygen</dt><dd className="num">{fmtOxygen(c.oxygen_percent)}</dd></div>
                       <div><dt className="text-muted">Pressure</dt><dd className="num">{fmtPressure(c.pressure_kpa)}</dd></div>
                       <div><dt className="text-muted">Airflow</dt><dd className="num">{fmtCmS(c.airflow_cm_s)}</dd></div>
-                      <div><dt className="text-muted">Expected reduction</dt><dd className="num text-sm font-medium">{fmtFractionPercent(c.evr_fraction)}</dd></div>
-                      <div><dt className="text-muted">P(sustained)</dt><dd>{showEstimate && candidatePAllowed(c) ? <span className="num">{fmtProbability(c.p_sustained)}</span> : "Not shown: the evidence does not support an estimate here"}</dd></div>
+                      <div><dt className="text-muted">Cuts uncertainty by</dt><dd className="num text-sm font-medium">{fmtFractionPercent(c.evr_fraction)}</dd></div>
+                      <div><dt className="text-muted">Chance the flame burns</dt><dd>{showEstimate && candidatePAllowed(c) ? <span className="num">{fmtProbability(c.p_sustained)}</span> : "Not shown: the evidence does not support an estimate here"}</dd></div>
                       <div><dt className="text-muted">Feasibility</dt><dd>{fe.label}. {fe.disclaimer}</dd></div>
                     </dl>
                   </article>
@@ -80,7 +80,7 @@ export function CompareSheet({
               })}
             </div>
             <section>
-              <h3 className="mb-1 text-xs font-medium">Reasons</h3>
+              <h3 className="mb-1 text-xs font-medium">Why</h3>
               <ul className="space-y-1">
                 {d.reasons.filter((r) => showEstimate || r.code !== "near_decision_boundary").map((r, i) => (
                   <li key={`${r.code}-${i}`} className="text-xs">
@@ -90,7 +90,7 @@ export function CompareSheet({
               </ul>
             </section>
             <details className="rounded-md border border-border px-3 py-2 text-xs">
-              <summary className="cursor-pointer text-[13px] font-medium">Assumptions</summary>
+              <summary className="cursor-pointer text-[13px] font-medium">Technical details: assumptions</summary>
               <ul className="mt-2 list-disc space-y-1 pl-4 text-muted">
                 {d.assumptions.map((s, i) => <li key={i}>{s}</li>)}
               </ul>

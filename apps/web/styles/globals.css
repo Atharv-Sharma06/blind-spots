@@ -37,7 +37,7 @@
   --plum-7: #5b2a6e;
 
   --shadow-popover: 0 0 0 1px var(--border), 0 6px 20px -4px rgb(23 23 26 / 0.12);
-  --header-h: 48px;
+  --header-h: 52px;
 }
 
 @theme inline {
@@ -152,6 +152,10 @@
     line-height: var(--text-prose--line-height);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+  }
+  /* In-page links (the step anchors on the Cabins page) glide instead of jumping. */
+  @media (prefers-reduced-motion: no-preference) {
+    html { scroll-behavior: smooth; }
   }
   h1, h2, h3 { text-wrap: balance; }
   p { text-wrap: pretty; }

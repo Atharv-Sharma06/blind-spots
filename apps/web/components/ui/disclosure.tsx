@@ -48,7 +48,7 @@ export function Disclosure({
       <summary
         data-disclosure=""
         className={cn(
-          "inline-flex min-h-6 items-center gap-1.5 rounded-sm text-ui transition-colors select-none",
+          "inline-flex min-h-6 items-center gap-1.5 rounded-sm text-ui transition-colors select-none max-md:min-h-10 max-md:py-1",
           tone === "muted" ? "text-muted hover:text-fg" : "font-medium text-fg",
           summaryClassName,
         )}
@@ -56,7 +56,7 @@ export function Disclosure({
         <DisclosureChevron />
         <span className="min-w-0">{summary}</span>
       </summary>
-      <div className={cn("mt-1.5 pl-5 text-ui text-muted", contentClassName)}>{children}</div>
+      <div className={cn("mt-1.5 pl-5 text-ui text-muted max-md:mt-1", contentClassName)}>{children}</div>
     </details>
   );
 }

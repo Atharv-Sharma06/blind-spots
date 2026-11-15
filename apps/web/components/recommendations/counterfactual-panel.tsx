@@ -9,7 +9,8 @@ import { PanelSkeleton } from "@/components/explore/query-state";
 import { PanelError } from "@/components/target/panel-bits";
 import { candidatePAllowed } from "@/components/target/evidence";
 import { useCounterfactual } from "@/hooks/api";
-import { fmtCmS, fmtFractionPercent, fmtOxygen, fmtPressure, fmtProbability, fmtSigned } from "@/lib/format";
+import { pct, pctSigned } from "@/components/explore/plain";
+import { fmtCmS, fmtFractionPercent, fmtOxygen, fmtPressure, fmtProbability } from "@/lib/format";
 import type { Candidate, HypotheticalOutcome, Plane, Target } from "@/lib/types";
 
 export const HYPOTHETICAL_LABEL = "Hypothetical outcome — not an experimental result";
@@ -41,7 +42,7 @@ export function CounterfactualPanel({ groupId, target, candidate, plane, slice, 
   }, [candidate.candidate_id]);
   const close = () => {
     onClose();
-    const sel = candidate.rank === 1 ? '[data-testid="explore-candidate"]' : `button[aria-label="Explore candidate ${candidate.rank}"]`;
+    const sel = candidate.rank === 1 ? '[data-testid="explore-candidate"]' : `button[aria-label="What would we learn? Test ${candidate.rank}"]`;
     requestAnimationFrame(() => document.querySelector<HTMLElement>(sel)?.focus());
   };
   // Placeholder data belongs to the previous candidate: never show it under this heading (a05-08).
@@ -54,64 +55,61 @@ export function CounterfactualPanel({ groupId, target, candidate, plane, slice, 
     <section id="counterfactual-preview" aria-label="Counterfactual preview" className="space-y-3" data-testid="counterfactual-panel">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <h3 ref={headingRef} tabIndex={-1} className="text-[13px] font-semibold outline-none">What if this were measured?</h3>
+          <h3 ref={headingRef} tabIndex={-1} className="text-[13px] font-semibold outline-none">If test {candidate.rank} were done</h3>
           <p className="mt-0.5 text-xs text-muted">
-            Candidate {candidate.rank}: {fmtOxygen(candidate.oxygen_percent)}, {fmtPressure(candidate.pressure_kpa)}, {fmtCmS(candidate.airflow_cm_s)}
+            {fmtOxygen(candidate.oxygen_percent)}, {fmtPressure(candidate.pressure_kpa)}, {fmtCmS(candidate.airflow_cm_s)}. How would the model&apos;s uncertainty about this cabin change?
           </p>
         </div>
-        <Button variant="ghost" size="icon" aria-label="Close counterfactual preview" onClick={close} className="-mt-1 -mr-1.5 size-7">
+        <Button variant="ghost" size="icon" aria-label="Close counterfactual preview" onClick={close} className="-mt-1 -mr-1.5 size-8">
           <X aria-hidden />
         </Button>
       </div>
-      <Badge tone="neutral" data-testid="hypothetical-label">{HYPOTHETICAL_LABEL}</Badge>
 
       {q.isError && !d ? <PanelError error={q.error} onRetry={() => void q.refetch()} what="This counterfactual preview" /> : null}
       {!d && !q.isError ? <PanelSkeleton label="Computing hypothetical outcomes" /> : null}
       {d ? (
         <>
-          <p className="text-xs text-muted">
-            {candP ? <>Model P(sustained) at the candidate: <span className="num text-fg">{fmtProbability(pAtCandidate)}</span>. </> : "No P(sustained) is shown at the candidate: the evidence does not support an estimate there. "}
-            {targetP ? <>Target P(sustained) now <span className="num text-fg">{fmtProbability(d.current.target_p_mean)}</span>.</> : "Only the change in the target's uncertainty is reported."}
-          </p>
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
+          <ul className="space-y-1.5">
             {d.scenarios.map((s) => (
-              <div key={s.outcome} className="rounded-md border border-border p-2.5" data-testid={`scenario-${s.outcome}`}>
-                <p className="text-xs font-medium text-fg">{s.outcome === "sustained" ? "If the flame is sustained" : "If the flame is not sustained"}</p>
-                {candP ? <p className="mt-1 text-[13px]">Probability <span className="num">{fmtFractionPercent(s.probability)}</span></p> : null}
-                <dl className="mt-1 space-y-0.5 text-xs text-muted">
+              <li key={s.outcome} className="flex items-baseline justify-between gap-3 rounded-md border border-border px-3 py-2" data-testid={`scenario-${s.outcome}`}>
+                <span className="text-[13px] text-fg">
+                  {s.outcome === "sustained" ? "If the flame keeps burning" : "If it goes out"}
+                  {candP ? <span className="block text-xs text-muted">{fmtFractionPercent(s.probability)} likely under the model</span> : null}
+                </span>
+                <span className="text-right">
+                  <span className="text-xs text-muted">uncertainty </span>
+                  <span className="num text-[15px] font-medium text-fg">{pctSigned(-s.variance_reduction_fraction)}</span>
                   {targetP ? (
-                    <div className="flex justify-between gap-2">
-                      <dt>Target P(sustained)</dt>
-                      <dd className="num text-fg">
-                        {fmtProbability(s.target_p_mean)} ({fmtSigned(s.target_p_mean - d.current.target_p_mean)})
-                      </dd>
-                    </div>
+                    <span className="num block text-xs text-muted">
+                      chance a flame keeps burning {pct(s.target_p_mean)} ({pctSigned(s.target_p_mean - d.current.target_p_mean)})
+                    </span>
                   ) : null}
-                  <div className="flex justify-between gap-2">
-                    <dt>Change in target uncertainty</dt>
-                    <dd className="num text-fg">{fmtFractionPercent(-s.variance_reduction_fraction)}</dd>
-                  </div>
-                </dl>
-              </div>
+                </span>
+              </li>
             ))}
-          </div>
-          <p className="text-xs text-muted">Expected uncertainty reduction, averaged over both outcomes: <span className="num text-fg">{fmtFractionPercent(d.expected_variance_reduction_fraction)}</span>.</p>
+          </ul>
+          <p className="text-xs text-muted">
+            On average over both outcomes, uncertainty about this cabin drops by <span className="num text-fg">{pct(d.expected_variance_reduction_fraction)}</span>.
+            {candP ? <> Model P(sustained) at the candidate: <span className="num text-fg">{fmtProbability(pAtCandidate)}</span>.</> : " The model gives no estimate of whether a flame keeps burning there: the evidence does not support one."}
+            {targetP ? <> Chance of burning in this cabin now: <span className="num text-fg">{pct(d.current.target_p_mean)}</span>.</> : null}
+          </p>
+          <Badge tone="neutral" data-testid="hypothetical-label">{HYPOTHETICAL_LABEL}</Badge>
           <div>
-            <p className="mb-1 text-xs font-medium">Show on map</p>
+            <p className="mb-1 text-xs font-medium">Show on the chart</p>
             <SegmentedControl
               size="sm"
-              aria-label="Hypothetical surface on the map"
+              aria-label="Hypothetical surface on the chart"
               value={outcome ?? "off"}
               onValueChange={(v) => onOutcome(v === "off" ? null : (v as HypotheticalOutcome))}
               options={[
                 { value: "off", label: "Current model" },
-                { value: "sustained", label: "If sustained" },
-                { value: "not_sustained", label: "If not sustained" },
+                { value: "sustained", label: "If it burns" },
+                { value: "not_sustained", label: "If it goes out" },
               ]}
             />
             {outcome ? (
               <p className="mt-1.5 text-xs text-muted" data-testid="hypothetical-map-note">
-                Map shows the model after a hypothetical outcome{candP ? ` (${fmtFractionPercent(d.scenarios.find((s) => s.outcome === outcome)?.probability)} likely under the model)` : ""}. {HYPOTHETICAL_LABEL}.
+                The chart shows the model after a hypothetical outcome. {HYPOTHETICAL_LABEL}.
               </p>
             ) : null}
           </div>

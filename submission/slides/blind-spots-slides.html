@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Blind Spots slides</title>
+<meta name="viewport" content="width=1920">
+<!--
+  Backup demo for NASA Space Apps 2026 (7 slides, 1920x1080). Render: node build/render.js
+  Every number on these slides comes from the Blind Spots API (dataset 4fe55f76142a,
+  model gp-laplace-v1+4fe55f76.adfbbd), docs/validation.md or docs/evidence-report.md.
+  Screenshots in img/ were taken headless from the snapshot-mode site (what judges get).
+-->
+<style>
+  @page { size: 1920px 1080px; margin: 0; }
+  :root {
+    --ink: #16181d; --muted: #5b616e; --faint: #8a909c; --line: #e4e2dc;
+    --bg: #fbfaf7; --card: #ffffff; --accent: #0f766e; --accent-soft: #e6f2f0;
+    --blind: #6b2a7a; --blind-soft: #f4ecf6; --ok: #0f766e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--ink); }
+  body { font-family: "Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+         -webkit-font-smoothing: antialiased; }
+  .slide { width: 1920px; height: 1080px; position: relative; overflow: hidden; background: var(--bg);
+           padding: 96px 120px 120px; page-break-after: always; break-after: page; display: flex; flex-direction: column; }
+  .slide:last-child { page-break-after: auto; break-after: auto; }
+  .kicker { font-size: 26px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); font-weight: 600; margin-bottom: 28px; }
+  h1 { font-size: 132px; line-height: 1.0; letter-spacing: -0.03em; font-weight: 700; }
+  h2 { font-size: 72px; line-height: 1.08; letter-spacing: -0.02em; font-weight: 700; max-width: 1600px; }
+  .lead { font-size: 40px; line-height: 1.35; color: var(--ink); max-width: 1500px; }
+  .muted { color: var(--muted); }
+  .small { font-size: 26px; line-height: 1.45; color: var(--muted); }
+  .footer { position: absolute; left: 120px; right: 120px; bottom: 44px; display: flex; justify-content: space-between;
+            font-size: 21px; color: var(--faint); border-top: 1px solid var(--line); padding-top: 18px; }
+  .shot { border: 1px solid var(--line); border-radius: 18px; overflow: hidden; background: #fff;
+          box-shadow: 0 24px 60px rgba(22,24,29,.10), 0 2px 6px rgba(22,24,29,.06); }
+  .shot img { display: block; width: 100%; height: auto; }
+  .row { display: flex; gap: 72px; align-items: flex-start; flex: 1; min-height: 0; }
+  .col-text { flex: 0 0 600px; display: flex; flex-direction: column; gap: 30px; padding-top: 8px; }
+  .col-text p { font-size: 34px; line-height: 1.38; }
+  .col-text p.small { font-size: 25px; }
+  .col-shot { flex: 1; min-width: 0; display: flex; justify-content: center; }
+  .pill { display: inline-flex; align-items: center; gap: 12px; font-weight: 600; border-radius: 999px; padding: 8px 22px; font-size: 28px; }
+  .pill.blind { background: var(--blind-soft); color: var(--blind); }
+  .pill.ok { background: var(--accent-soft); color: var(--ok); }
+  .num { display: flex; align-items: baseline; gap: 22px; }
+  .num b { font-size: 88px; font-weight: 700; letter-spacing: -0.03em; line-height: 1; }
+  .num span { font-size: 30px; line-height: 1.3; }
+  .num.blind b { color: var(--blind); } .num.ok b { color: var(--ok); }
+  .col-shot .shot img { max-height: 800px; width: auto; max-width: 100%; }
+  /* slide 1 */
+  .title-wrap { margin-top: auto; margin-bottom: auto; }
+  .title-wrap .lead { font-size: 50px; line-height: 1.3; margin-top: 44px; max-width: 1480px; }
+  .title-wrap .meta { margin-top: 56px; font-size: 30px; color: var(--muted); }
+  .mark { display: inline-block; width: 22px; height: 22px; border: 4px solid var(--accent); transform: rotate(45deg); margin-right: 26px; vertical-align: 0.32em; }
+  /* slide 2 */
+  .air { display: flex; gap: 40px; margin-top: 52px; }
+  .air-card { flex: 1; background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 36px 44px; }
+  .air-card .name { font-size: 34px; font-weight: 600; }
+  .air-card .val { font-size: 64px; font-weight: 700; letter-spacing: -0.02em; margin-top: 14px; line-height: 1.05; white-space: nowrap; }
+  .air-card .val span { font-size: 34px; font-weight: 500; color: var(--muted); }
+  .air-card .note { font-size: 27px; color: var(--muted); margin-top: 18px; line-height: 1.4; }
+  .air-card.target { border: 3px solid var(--blind); }
+  .bottom-line { margin-top: 44px; font-size: 34px; line-height: 1.38; max-width: 1640px; }
+  /* slide 6 */
+  .stats { display: flex; gap: 36px; margin-top: 44px; }
+  .stat { flex: 1; background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 34px 38px; }
+  .stat .big { font-size: 84px; font-weight: 700; letter-spacing: -0.03em; line-height: 1; color: var(--accent); }
+  .stat .what { font-size: 29px; line-height: 1.35; margin-top: 18px; }
+  .stat .src { font-size: 22px; color: var(--faint); margin-top: 16px; line-height: 1.4; }
+  .limits { margin-top: 36px; }
+  .limits h3 { font-size: 30px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; margin-bottom: 18px; }
+  .limits ul { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 14px 56px; }
+  .limits li { font-size: 27px; line-height: 1.38; padding-left: 30px; position: relative; }
+  .limits li::before { content: ""; position: absolute; left: 0; top: .55em; width: 12px; height: 12px; border-radius: 2px; background: var(--faint); }
+  /* slide 7 */
+  .links { margin-top: 60px; display: flex; flex-direction: column; gap: 30px; }
+  .links .l { font-size: 30px; color: var(--muted); }
+  .links .u { font-size: 50px; font-weight: 600; color: var(--accent); letter-spacing: -0.01em; margin-top: 6px; }
+  .credits { margin-top: 64px; font-size: 27px; line-height: 1.5; color: var(--muted); max-width: 1680px; }
+  .credits b { color: var(--ink); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- 1. Title -->
+<section class="slide">
+  <div class="title-wrap">
+    <div class="kicker">NASA Space Apps 2026 · Flame in Freefall</div>
+    <h1><span class="mark"></span>Blind Spots</h1>
+    <p class="lead">Do NASA's ISS flame tests cover the air planned for Moon and Mars cabins? Machine learning that says when it does not know, and which experiment would teach the most next.</p>
+    <p class="meta">Team Yareed · data: NASA Physical Science Informatics (BASS, BASS-II)</p>
+  </div>
+  <div class="footer"><span>SI-assisted project · built with Claude (Anthropic) · Not endorsed by NASA</span><span>1 / 7</span></div>
+</section>
+
+<!-- 2. Problem -->
+<section class="slide">
+  <div class="kicker">The problem</div>
+  <h2 style="font-size:64px">ISS flame tests ran in ISS air. Moon and Mars cabins plan thinner air with more oxygen.</h2>
+  <div class="air">
+    <div class="air-card">
+      <div class="name">ISS today</div>
+      <div class="val">21 % <span>oxygen</span></div>
+      <div class="val">101 kPa <span>14.7 psia</span></div>
+      <div class="note">Where the BASS and BASS-II flame tests ran.</div>
+    </div>
+    <div class="air-card">
+      <div class="name">Artemis Moon habitat</div>
+      <div class="val">26.5 % <span>oxygen</span></div>
+      <div class="val">70.3 kPa <span>10.2 psia</span></div>
+      <div class="note">NASA lunar Surface Habitat nominal air.</div>
+    </div>
+    <div class="air-card target">
+      <div class="name">Moon/Mars Exploration Atmosphere</div>
+      <div class="val">34 % <span>oxygen</span></div>
+      <div class="val">56.5 kPa <span>8.2 psia</span></div>
+      <div class="note">NASA's exploration atmosphere for frequent spacewalks.</div>
+    </div>
+  </div>
+  <p class="bottom-line">Fire behaviour depends on oxygen and pressure. The integrated ISS records span 13.5–22.7 % oxygen and 98–102 kPa where pressure was recorded.</p>
+  <p class="small" style="margin-top:22px">Cabin air: NASA design documents on NTRS (20140000417, 20220000245). Test ranges: integrated BASS/BASS-II records (NASA PSI).</p>
+  <div class="footer"><span>SI-assisted project · built with Claude (Anthropic) · Not endorsed by NASA</span><span>2 / 7</span></div>
+</section>
+
+<!-- 3. Cabins page -->
+<section class="slide">
+  <div class="kicker">The product</div>
+  <div class="row">
+    <div class="col-text" style="flex-basis:560px">
+      <h2 style="font-size:64px">Pick a cabin. Get a plain answer.</h2>
+      <p>11 crew cabins from NASA documents, from Apollo to Artemis.</p>
+      <p>Each card shows the cabin's air and whether the ISS flame tests cover it.</p>
+      <div class="num blind"><b>8</b><span>of 11 cabins:<br>Not covered</span></div>
+    </div>
+    <div class="col-shot"><div class="shot"><img src="img/1-cabins.png" alt="Blind Spots Cabins page: the question, and cards for 11 crew cabins labelled Covered, Barely covered or Not covered"></div></div>
+  </div>
+  <div class="footer"><span>SI-assisted project · built with Claude (Anthropic) · Not endorsed by NASA</span><span>3 / 7</span></div>
+</section>
+
+<!-- 4. The blind spot -->
+<section class="slide">
+  <div class="kicker">The blind spot</div>
+  <div class="row">
+    <div class="col-text" style="flex-basis:560px">
+      <h2 style="font-size:54px">Moon/Mars air sits far from every ISS test.</h2>
+      <div class="num ok"><b>241</b><span>nearby ISS test results<br>for ISS today</span></div>
+      <div class="num blind"><b>0</b><span>for the Exploration Atmosphere,<br>in all 20 material setups</span></div>
+      <p style="font-size:30px">So the model does not guess there.</p>
+      <p class="small">Not represented in the integrated records. Related NASA ground tests exist; the model does not use them.</p>
+    </div>
+    <div class="col-shot"><div class="shot"><img src="img/2-answer-chart.png" alt="Answer card: Blind spot, none of the ISS flame tests ran in air like this, with a chart of oxygen versus pressure showing ISS tests near 101 kPa and the cabin at 34 % oxygen, 56.5 kPa"></div></div>
+  </div>
+  <div class="footer"><span>SI-assisted project · built with Claude (Anthropic) · Not endorsed by NASA</span><span>4 / 7</span></div>
+</section>
+
+<!-- 5. Machine learning -->
+<section class="slide">
+  <div class="kicker">The machine learning</div>
+  <div class="row">
+    <div class="col-text" style="flex-basis:540px; gap:26px">
+      <h2 style="font-size:54px">It says when it does not know. Then it picks what to test next.</h2>
+      <p style="font-size:29px">A Gaussian-process model per material and flame setup (9 modelled). Without nearby data it reports "insufficient evidence", not a probability.</p>
+      <p style="font-size:29px">Active learning ranks candidates by how much they cut the model's uncertainty about the chosen cabin.</p>
+      <div class="num ok"><b>19 %</b><span>less uncertainty<br>from the top pick</span></div>
+      <p class="small" style="font-size:22px">Computational research candidates requiring qualified scientific review, established safety procedures and formal feasibility assessment.</p>
+    </div>
+    <div class="col-shot"><div class="shot"><img src="img/3-next-tests.png" alt="What to test next: three ranked research candidates for the Exploration Atmosphere and the hypothetical effect of the first one"></div></div>
+  </div>
+  <div class="footer"><span>SI-assisted project · built with Claude (Anthropic) · Not endorsed by NASA</span><span>5 / 7</span></div>
+</section>
+
+<!-- 6. Validation + limits -->
+<section class="slide">
+  <div class="kicker">How we know it works</div>
+  <h2 style="font-size:60px">Tested against simple baselines, with the limits stated.</h2>
+  <div class="stats">
+    <div class="stat">
+      <div class="big">749</div>
+      <div class="what">ISS flow-step results from 276 experiments, each traced to its source cell. 565 used for training.</div>
+      <div class="src">docs/evidence-report.md</div>
+    </div>
+    <div class="stat">
+      <div class="big">6 of 9</div>
+      <div class="what">material groups where the model beats a majority-class guess (95 % CI excludes 0). 3 too close to call, 0 worse.</div>
+      <div class="src">Grouped cross-validation by experiment · docs/validation.md</div>
+    </div>
+    <div class="stat">
+      <div class="big">11 of 18</div>
+      <div class="what">retrospective scenarios where its ranking beat random picks. 5 too close to call, 2 worse.</div>
+      <div class="src">Held-out pseudo-targets, 20 seeds · docs/validation.md</div>
+    </div>
+  </div>
+  <div class="limits">
+    <h3>Honest limits</h3>
+    <ul>
+      <li>Every integrated test ran near 1 atm; other pressures rest on a model assumption the app states.</li>
+      <li>Small samples: 12 to 25 experiments per material group.</li>
+      <li>No partial-gravity data in the records.</li>
+      <li>Not a certified fire-safety assessment.</li>
+    </ul>
+  </div>
+  <div class="footer"><span>SI-assisted project · built with Claude (Anthropic) · Not endorsed by NASA</span><span>6 / 7</span></div>
+</section>
+
+<!-- 7. Links + credits -->
+<section class="slide">
+  <div class="kicker">Try it</div>
+  <h2>Open it, pick a cabin, see the answer.</h2>
+  <div class="links">
+    <div><div class="l">Live app (no login)</div><div class="u">https://blind-spots-kappa.vercel.app</div></div>
+    <div><div class="l">Source code, data provenance and validation</div><div class="u">https://github.com/Atharv-Sharma06/blind-spots</div></div>
+  </div>
+  <div class="credits">
+    <p><b>Data:</b> NASA Physical Science Informatics: BASS (PSI-26) and BASS-II (PSI-25), CC0; Saffire I–III as context. Cabin atmospheres from NASA Technical Reports Server documents.</p>
+    <p style="margin-top:16px"><b>Credits:</b> Team Yareed. Code written with AI assistance (Claude, Anthropic); the app itself uses no generative AI. Open-source libraries listed in the repository.</p>
+    <p style="margin-top:16px">Not endorsed by NASA. Not a certified fire-safety assessment.</p>
+  </div>
+  <div class="footer"><span>SI-assisted project · built with Claude (Anthropic) · Not endorsed by NASA</span><span>7 / 7</span></div>
+</section>
+
+</body>
+</html>

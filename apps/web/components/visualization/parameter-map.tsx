@@ -63,9 +63,14 @@ export type ParameterMapProps = {
   ariaLabel: string;
 };
 
-const M = { l: 58, r: 18, t: 12, b: 46 };
+/** Plot margins: tighter on phones so the plot itself keeps most of the 390 px width. */
+const M_WIDE = { l: 58, r: 18, t: 12, b: 46 };
+const M_NARROW = { l: 50, r: 10, t: 8, b: 42 };
+const NARROW_PX = 520;
 const CONTOUR_LEVELS = [0.1, 0.5, 0.9];
-const CONTOUR_LABEL = "model p = 0.5 (supported region)";
+const CONTOUR_LABEL = "Model's 50 % line";
+/** Candidate marker label: every rank at a merged point up to three, then the top rank plus a count. */
+const candLabel = (ranks: number[]): string => (ranks.length <= 3 ? ranks.join(", ") : `${ranks[0]} +${ranks.length - 1}`);
 
 type Grid = number[][];
 type Item = { key: string; kind: "obs" | "cand"; id: string; px: number; py: number };
@@ -73,6 +78,7 @@ type Hover =
   | { kind: "obs"; id: string; x: number; y: number }
   | { kind: "cand"; id: string; x: number; y: number }
   | { kind: "ctx"; id: string; x: number; y: number }
+  | { kind: "tgt"; x: number; y: number }
   | { kind: "cell"; i: number; j: number; x: number; y: number };
 
 type CandMember = { id: string; rank: number; x: number; y: number; title: string; slice?: number | null; off: boolean };
@@ -301,10 +307,13 @@ export default function ParameterMap(props: ParameterMapProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const zoomRef = useRef<SVGGElement>(null);
   const [width, setWidth] = useState(800);
+  const M = width < NARROW_PX ? M_NARROW : M_WIDE;
   const [internalRaw, setInternalRaw] = useState<{ key: string; v: ViewDomain } | null>(null);
   const [hover, setHover] = useState<Hover | null>(null);
   const [activeKey, setActiveKey] = useState<string | null>(null);
   const [focusKey, setFocusKey] = useState<string | null>(null);
+  // Related-NASA-work markers share one Tab stop (roving): arrow keys move between them.
+  const [ctxActive, setCtxActive] = useState<string | null>(null);
   const [asTable, setAsTable] = useState(false);
   const tipRef = useRef<HTMLDivElement>(null);
   const [wrapFocus, setWrapFocus] = useState(false);
@@ -518,7 +527,7 @@ export default function ParameterMap(props: ParameterMapProps) {
       }
     }
     ctx.restore();
-  }, [rasters, sparse, layers.uncertainty, layers.prediction, layers.coverage, px, py, width, height, iw, ih, asTable]);
+  }, [rasters, sparse, layers.uncertainty, layers.prediction, layers.coverage, px, py, width, height, iw, ih, asTable, M.l, M.t]);
 
   // ---- vector overlays derived from the grids
   // linear interpolation in cell-centre space (edges are in axis space; centres are midpoints in the scale space,
@@ -630,8 +639,8 @@ export default function ParameterMap(props: ParameterMapProps) {
     }
     for (const g of groups) {
       g.anyOn = g.members.some((m) => !m.off);
-      g.label = g.members.map((m) => m.rank).join(", ");
-      g.half = g.members.length > 1 ? Math.max(11, textW(g.label, 10, 600) / 2 + 9) : 11;
+      g.label = candLabel(g.members.map((m) => m.rank));
+      g.half = g.label.length > 1 ? Math.max(11, textW(g.label, 10, 600) / 2 + 9) : 11;
     }
     return groups;
   }, [vis.cands, xs, ys, plane, sliceInfo?.value, scales?.p, scales?.flow]);
@@ -741,8 +750,8 @@ export default function ParameterMap(props: ParameterMapProps) {
     setHover({ kind: "cell", i, j: jj, x: lx + M.l, y: ly + M.t });
   };
 
-  const xLabel = "Oxygen (% by volume)";
-  const yLabel = plane === "o2_flow" ? "Airflow (cm/s, log scale)" : "Total pressure (kPa)";
+  const xLabel = "Oxygen in the air (%)";
+  const yLabel = plane === "o2_flow" ? "Airflow (cm/s, log scale)" : "Air pressure (kPa)";
   const yName = plane === "o2_flow" ? "Airflow" : "Pressure";
   const yUnit = plane === "o2_flow" ? "cm/s" : "kPa";
   const sliceName = plane === "o2_flow" ? "pressure" : "airflow";
@@ -757,7 +766,7 @@ export default function ParameterMap(props: ParameterMapProps) {
     }
     return { s, n };
   }, [vis.obs]);
-  const summary = `${ariaLabel}. ${vis.obs.length} of ${observations.length} observations in view (${counts.s} flame sustained, ${counts.n} flame not sustained). Oxygen ${fmt(lo(view.x), 1)} to ${fmt(hi(view.x), 1)} percent, ${yName.toLowerCase()} ${fmt(lo(view.y))} to ${fmt(hi(view.y))} ${yUnit}.`;
+  const summary = `${ariaLabel}. ${vis.obs.length} of ${observations.length} test results in view (${counts.s} flame kept burning, ${counts.n} flame went out). Oxygen ${fmt(lo(view.x), 1)} to ${fmt(hi(view.x), 1)} percent, ${yName.toLowerCase()} ${fmt(lo(view.y))} to ${fmt(hi(view.y))} ${yUnit}.${target ? ` This cabin: ${target.label}.` : ""}`;
   const kbdHint = "Arrows pan · + / − zoom · 0 reset · Tab to points, arrows between points, Enter select, Esc clear";
 
   const hasAssumed = vis.obs.some((o) => o.pressureAssumed);
@@ -776,7 +785,7 @@ export default function ParameterMap(props: ParameterMapProps) {
           <div className="font-medium text-fg">{o.title}</div>
           <dl className="mt-1 grid grid-cols-[auto_1fr] gap-x-3 text-[12px]">
             <dt className="text-muted">Outcome</dt>
-            <dd>{o.label === 1 ? "Flame sustained" : o.label === 0 ? "Flame not sustained" : "Not used for training"}</dd>
+            <dd>{o.label === 1 ? "Flame kept burning" : o.label === 0 ? "Flame went out" : "Outcome not determined"}</dd>
             <dt className="text-muted">O₂</dt><dd className="num">{fmt(o.x, 1)} %</dd>
             {plane === "o2_flow" ? (
               <><dt className="text-muted">Airflow</dt><dd className="num">{fmt(o.y)} cm/s</dd></>
@@ -798,7 +807,7 @@ export default function ParameterMap(props: ParameterMapProps) {
       if (!members.length) return null;
       return (
         <>
-          <div className="font-medium text-fg">{members.length > 1 ? `Research candidates ${g?.label}` : `Research candidate ${members[0]!.rank}`}</div>
+          <div className="font-medium text-fg">{members.length > 1 ? `Research candidates ${members.map((m) => m.rank).join(", ")}` : `Research candidate ${members[0]!.rank}`}</div>
           <div className="num text-[11px] text-muted">O₂ {fmt(members[0]!.x, 1)} %, {yName.toLowerCase()} {fmt(members[0]!.y)} {yUnit}</div>
           {members.length > 1 || members.some((m) => m.off) ? (
             <ul className="mt-1 space-y-0.5 text-[12px]">
@@ -806,11 +815,21 @@ export default function ParameterMap(props: ParameterMapProps) {
                 <li key={m.id}>
                   <span className="num">{m.rank}</span>
                   {m.slice != null ? <span className="num"> · {sliceName} {fmt(m.slice)} {sliceUnit}</span> : null}
-                  {m.off ? <span className="text-muted"> · off this slice</span> : null}
+                  {m.off ? <span className="text-muted"> · at a different {sliceName} than this map shows</span> : null}
                 </li>
               ))}
             </ul>
           ) : null}
+        </>
+      );
+    }
+    if (hover.kind === "tgt") {
+      if (!target) return null;
+      return (
+        <>
+          <div className="font-medium text-fg">This cabin</div>
+          <div className="text-muted">{target.label}</div>
+          <div className="num text-[11px] text-muted">O₂ {fmt(target.nominal[0], 1)} %, {yName.toLowerCase()} {fmt(target.nominal[1], plane === "o2_flow" ? 2 : 1)} {yUnit}</div>
         </>
       );
     }
@@ -822,7 +841,7 @@ export default function ParameterMap(props: ParameterMapProps) {
           <div className="font-medium text-fg">{c.investigation}</div>
           <div className="text-muted">{c.label}</div>
           <div className="font-mono text-[11px] tabular-nums">O2 {fmt(c.x, 1)} %, {yName.toLowerCase()} {fmt(c.y)} {yUnit}</div>
-          <div className="mt-1 text-muted">Context: different apparatus, not used for modelling.</div>
+          <div className="mt-1 text-muted">Related NASA test. The model does not use it.</div>
         </>
       );
     }
@@ -839,23 +858,38 @@ export default function ParameterMap(props: ParameterMapProps) {
       <dl className="grid grid-cols-[auto_1fr] gap-x-3 text-[12px]">
         <dt className="text-muted">O₂</dt><dd className="num">{typeof cx === "number" ? fmt(cx, 1) : "n/a"} %</dd>
         <dt className="text-muted">{yName}</dt><dd className="num">{typeof cy === "number" ? fmt(cy) : "n/a"} {yUnit}</dd>
-        {layers.prediction && (<><dt className="text-muted">P(sustained)</dt><dd className="num">{typeof p === "number" && v === "supported" ? fmt(p) : "not shown (not supported)"}</dd></>)}
+        {layers.prediction && (<><dt className="text-muted">Flame keeps burning</dt><dd className="num">{typeof p === "number" && v === "supported" ? `${Math.round(p * 100)} % (model)` : "no estimate here"}</dd></>)}
         {layers.prediction && v && (<><dt className="text-muted">Verdict</dt><dd>{verdictLabel(v)}</dd></>)}
-        {layers.uncertainty && (<><dt className="text-muted">Knowledge uncertainty</dt><dd className="num">{typeof u === "number" ? fmt(u) : "n/a"}</dd></>)}
-        {layers.coverage && (<><dt className="text-muted">Nearest observation</dt><dd className="num">{typeof nn === "number" ? `${fmt(nn)} ref. dist.${threshold != null && nn > threshold ? " (sparse)" : ""}` : "n/a"}</dd></>)}
+        {layers.uncertainty && (<><dt className="text-muted">Model uncertainty</dt><dd className="num">{typeof u === "number" ? fmt(u) : "n/a"}</dd></>)}
+        {layers.coverage && (<><dt className="text-muted">Nearest test result</dt><dd className="num">{typeof nn === "number" ? `${fmt(nn)} steps${threshold != null && nn > threshold ? " (far)" : ""}` : "n/a"}</dd></>)}
       </dl>
     );
   })();
 
-  const kb = "Ctrl/Cmd + scroll or pinch to zoom, drag to pan";
+  const kb = "Ctrl/Cmd + scroll to zoom, drag to pan";
 
   const clampX = (v: number) => Math.max(0, Math.min(iw, v));
   const clampY = (v: number) => Math.max(0, Math.min(ih, v));
-  // ---- label layout: candidates are fixed obstacles; then the target label, the contour label, context labels
+  // Short in-plot notes, stacked from the bottom centre (never overlapping each other or the labels below).
+  const notes: string[] = [];
+  if (layers.prediction && rasters && !rasters.supportedRuns.length) notes.push("The model makes no estimate on this slice.");
+  if (wholeGap) notes.push("Few nearby test results across this whole slice");
+  if (hypotheticalSurface && (layers.prediction || layers.uncertainty)) notes.push("What-if view: a hypothetical test result is added");
+
+  // ---- label layout: markers are fixed obstacles; then the target label, the contour label, context labels (each once)
   const labelLayout = (() => {
-    const placed: Box[] = candGroups.map((g) => ({ x: g.X - g.half - 2, y: g.Y - 13, w: g.half * 2 + 4 + (g.members.some((m) => m.off) ? 70 : 0), h: 26 }));
-    const free = (b: Box) => b.x >= 0 && b.x + b.w <= iw && b.y >= 0 && b.y + b.h <= ih && !placed.some((q) => hit(q, b));
     const YYl = (v: number) => ys(yScale === "log" ? Math.max(v, 1e-3) : v);
+    const placed: Box[] = [
+      ...candGroups.map((g) => ({ x: g.X - g.half - 3, y: g.Y - 14, w: g.half * 2 + 6, h: 28 })),
+      ...vis.obs.map((o) => ({ x: xs(o.x) - 7, y: ys(o.y) - 7, w: 14, h: 14 })),
+      ...(layers.context ? contextPoints.map((c) => ({ x: xs(c.x) - 6, y: YYl(c.y) - 6, w: 12, h: 12 })) : []),
+    ];
+    notes.forEach((t, k) => {
+      const w = textW(t, 12) + 8;
+      placed.push({ x: iw / 2 - w / 2, y: ih - 24 - k * 16, w, h: 16 });
+    });
+    if (modelMissing) placed.push({ x: iw / 2 - 150, y: ih / 2 - 14, w: 300, h: 20 });
+    const free = (b: Box) => b.x >= 0 && b.x + b.w <= iw && b.y >= 0 && b.y + b.h <= ih && !placed.some((q) => hit(q, b));
     let tgt: { rx: number; ry: number; rw: number; rh: number; nx: number; ny: number; lab: { x: number; y: number; text: string } | null } | null = null;
     if (target) {
       const x0 = xs(target.xRange[0]);
@@ -868,19 +902,22 @@ export default function ParameterMap(props: ParameterMapProps) {
       const rh = Math.abs(y1 - y0);
       const nx = xs(target.nominal[0]);
       const ny = YYl(target.nominal[1]);
-      let text = `Target: ${target.label}`;
-      const maxW = Math.max(40, iw - 8);
-      while (text.length > 10 && textW(text, 11, 500) > maxW) text = `${text.slice(0, -2)}…`;
-      const tw = textW(text, 11, 500);
+      // Short on purpose: the full cabin name is in the tooltip and the accessible name.
+      const text = "This cabin";
+      const tw = textW(text, 12, 700);
+      placed.push({ x: nx - 9, y: ny - 9, w: 18, h: 18 });
       const cl = (x: number) => Math.max(2, Math.min(iw - tw - 2, x));
+      // Prefer the spot right next to the cross (so the label reads as the cross's name), then the box corner.
       const options: Box[] = [
         ...(rw >= tw + 8 && rh >= 22 ? [{ x: rx + 4, y: ry + 3, w: tw, h: 14 }] : []),
+        { x: cl(nx + 14), y: ny - 7, w: tw, h: 14 },
+        { x: cl(nx - tw - 14), y: ny - 7, w: tw, h: 14 },
+        { x: cl(nx - tw / 2), y: ny - 32, w: tw, h: 14 },
+        { x: cl(nx - tw / 2), y: ny + 18, w: tw, h: 14 },
         { x: cl(rx), y: Math.min(ry, ny - 10) - 18, w: tw, h: 14 },
-        { x: cl(rx), y: Math.min(ry, ny) - 32, w: tw, h: 14 },
-        { x: cl(nx - tw / 2), y: Math.max(ry + rh, ny) + 18, w: tw, h: 14 },
-        { x: cl(rx), y: Math.max(ry + rh, ny + 10) + 4, w: tw, h: 14 },
-        { x: cl(nx + 16), y: ny - 7, w: tw, h: 14 },
-        { x: cl(nx - tw - 16), y: ny - 7, w: tw, h: 14 },
+        { x: cl(nx - tw / 2), y: Math.max(ry + rh, ny + 10) + 6, w: tw, h: 14 },
+        { x: cl(nx - tw / 2), y: ny - 50, w: tw, h: 14 },
+        { x: cl(nx - tw / 2), y: ny + 36, w: tw, h: 14 },
       ];
       const pick = options.find(free) ?? options.find((b) => b.y >= 0 && b.y + b.h <= ih) ?? options[0]!;
       placed.push(pick);
@@ -911,7 +948,8 @@ export default function ParameterMap(props: ParameterMapProps) {
         }
       }
     }
-    const env = contextEnvelopes.flatMap((e, ei) => {
+    const labelled = new Set<string>();
+    const boxes = contextEnvelopes.flatMap((e, ei) => {
       const x0 = clampX(xs(e.xRange[0] ?? lo(fullX)));
       const x1 = clampX(xs(e.xRange[1] ?? hi(fullX)));
       const y0 = clampY(YYl(e.yRange[1] ?? hi(fullY)));
@@ -919,23 +957,23 @@ export default function ParameterMap(props: ParameterMapProps) {
       const w = Math.abs(x1 - x0);
       const h = Math.abs(y1 - y0);
       if (w < 1 || h < 1) return [];
-      const x = Math.min(x0, x1);
-      const y = Math.min(y0, y1);
-      // Readable tag (e.g. "Saffire-VI") instead of a numbered code; drawn only where it fits, full name on hover.
-      const badge = e.short || `C${ei + 1}`;
-      const bw = textW(badge, 10) + 2;
-      let lab: { x: number; y: number } | null = null;
-      if (w >= bw + 6 && h >= 16) {
-        for (const b of [{ x: x + 3, y: y + 2, w: bw, h: 12 }, { x: x + w - bw - 3, y: y + 2, w: bw, h: 12 }, { x: x + 3, y: y + h - 14, w: bw, h: 12 }]) {
-          if (free(b)) {
-            placed.push(b);
-            lab = { x: b.x + 1, y: b.y + 10 };
-            break;
-          }
+      return [{ ei, id: e.id, x: Math.min(x0, x1), y: Math.min(y0, y1), w, h, badge: e.short || `C${ei + 1}`, label: e.label, lab: null as { x: number; y: number } | null }];
+    });
+    // Few labels: at most four, one per source ("NASA Glenn" once, not once per box), largest boxes first; the rest stay unlabelled.
+    for (const bx of [...boxes].sort((a, b) => b.w * b.h - a.w * a.h)) {
+      if (labelled.size >= 4) break;
+      const bw = textW(bx.badge, 10) + 2;
+      if (labelled.has(bx.badge) || bx.w < bw + 6 || bx.h < 16) continue;
+      for (const b of [{ x: bx.x + 3, y: bx.y + 2, w: bw, h: 12 }, { x: bx.x + bx.w - bw - 3, y: bx.y + 2, w: bw, h: 12 }, { x: bx.x + 3, y: bx.y + bx.h - 14, w: bw, h: 12 }]) {
+        if (free(b)) {
+          placed.push(b);
+          labelled.add(bx.badge);
+          bx.lab = { x: b.x + 1, y: b.y + 10 };
+          break;
         }
       }
-      return [{ id: e.id, x, y, w, h, badge, label: e.label, lab }];
-    });
+    }
+    const env = boxes;
     return { tgt, contour, env };
   })();
   const tgt = labelLayout.tgt;
@@ -948,16 +986,17 @@ export default function ParameterMap(props: ParameterMapProps) {
   return (
     <div className="w-full">
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-        <p className="text-[12px] text-muted" id={`${uid}-hint`}>{asTable ? "Table of observations currently in view." : wrapFocus ? kbdHint : `${kb}; focus the map for keyboard controls`}</p>
-        <div className="flex items-center gap-1.5">
+        {/* Visible on wide screens only; always in the accessible description of the map. */}
+        <p className="sr-only text-[12px] text-muted sm:not-sr-only" id={`${uid}-hint`}>{asTable ? "Table of test results currently in view." : wrapFocus ? kbdHint : kb}</p>
+        <div className="flex flex-wrap items-center gap-1.5 max-sm:w-full">
           {!asTable && (
             <>
-              <Button size="sm" aria-label="Zoom in" onClick={() => zoomBy(1.4)}>+</Button>
-              <Button size="sm" aria-label="Zoom out" onClick={() => zoomBy(1 / 1.4)}>&minus;</Button>
-              <Button size="sm" onClick={resetView}>Reset view</Button>
+              <Button size="sm" className="max-sm:h-10 max-sm:min-w-10" aria-label="Zoom in" onClick={() => zoomBy(1.4)}>+</Button>
+              <Button size="sm" className="max-sm:h-10 max-sm:min-w-10" aria-label="Zoom out" onClick={() => zoomBy(1 / 1.4)}>&minus;</Button>
+              <Button size="sm" className="max-sm:h-10" onClick={resetView}>Reset view</Button>
             </>
           )}
-          <Button size="sm" aria-pressed={asTable} onClick={() => setAsTable((v) => !v)}>
+          <Button size="sm" className="max-sm:h-10" aria-pressed={asTable} onClick={() => setAsTable((v) => !v)}>
             {asTable ? "View as map" : "View as table"}
           </Button>
         </div>
@@ -969,14 +1008,14 @@ export default function ParameterMap(props: ParameterMapProps) {
             <caption className="sr-only">{summary}</caption>
             <thead className="sticky top-0 bg-subtle text-left">
               <tr>
-                {["Observation", "Experiment", "O2 (%)", `${yName} (${yUnit})`, "Outcome", "Pressure"].map((h) => (
+                {["Test result", "Experiment", "Oxygen (%)", `${yName} (${yUnit})`, "Outcome", "Pressure"].map((h) => (
                   <th key={h} scope="col" className="border-b border-border px-2 py-1.5 font-medium text-muted">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody className="font-mono tabular-nums">
               {vis.obs.length === 0 && (
-                <tr><td colSpan={6} className="px-2 py-3 font-sans text-muted">No observations in the current view or layer selection.</td></tr>
+                <tr><td colSpan={6} className="px-2 py-3 font-sans text-muted">No test results in the current view or layer selection.</td></tr>
               )}
               {vis.obs.map((o) => (
                 <tr key={o.id} className={o.id === selectedObservationId ? "bg-accent-tint" : "border-b border-border"}>
@@ -986,7 +1025,7 @@ export default function ParameterMap(props: ParameterMapProps) {
                   <td className="px-2 py-1 font-sans">{o.experimentId}</td>
                   <td className="px-2 py-1">{fmt(o.x, 1)}</td>
                   <td className="px-2 py-1">{fmt(o.y)}</td>
-                  <td className="px-2 py-1 font-sans">{o.label === 1 ? "sustained" : o.label === 0 ? "not sustained" : "not determined"}</td>
+                  <td className="px-2 py-1 font-sans">{o.label === 1 ? "kept burning" : o.label === 0 ? "went out" : "not determined"}</td>
                   <td className="px-2 py-1 font-sans">{o.pressureAssumed ? "assumed" : "measured"}</td>
                 </tr>
               ))}
@@ -1021,21 +1060,21 @@ export default function ParameterMap(props: ParameterMapProps) {
             <g transform={`translate(${M.l},${M.t})`} aria-hidden>
               {xT.map((t) => (
                 <g key={`x${t}`}>
-                  <line x1={xs(t)} x2={xs(t)} y1={0} y2={ih} stroke="var(--border)" strokeWidth={1} opacity={0.7} />
+                  <line x1={xs(t)} x2={xs(t)} y1={0} y2={ih} stroke="var(--border)" strokeWidth={1} opacity={0.55} />
                   <line x1={xs(t)} x2={xs(t)} y1={ih} y2={ih + 4} stroke="var(--border-strong)" />
-                  <text x={xs(t)} y={ih + 17} textAnchor="middle" fontSize={11} className="font-mono" fill={MUTED} style={{ fontVariantNumeric: "tabular-nums" }}>{fmtTick(t)}</text>
+                  <text x={xs(t)} y={ih + 17} textAnchor="middle" fontSize={12} fill={MUTED} style={{ fontVariantNumeric: "tabular-nums" }}>{fmtTick(t)}</text>
                 </g>
               ))}
               {yT.map((t) => (
                 <g key={`y${t}`}>
-                  <line y1={ys(t)} y2={ys(t)} x1={0} x2={iw} stroke="var(--border)" strokeWidth={1} opacity={0.7} />
+                  <line y1={ys(t)} y2={ys(t)} x1={0} x2={iw} stroke="var(--border)" strokeWidth={1} opacity={0.55} />
                   <line y1={ys(t)} y2={ys(t)} x1={-4} x2={0} stroke="var(--border-strong)" />
-                  <text x={-8} y={ys(t) + 4} textAnchor="end" fontSize={11} className="font-mono" fill={MUTED} style={{ fontVariantNumeric: "tabular-nums" }}>{fmtTick(t)}</text>
+                  <text x={-8} y={ys(t) + 4} textAnchor="end" fontSize={12} fill={MUTED} style={{ fontVariantNumeric: "tabular-nums" }}>{fmtTick(t)}</text>
                 </g>
               ))}
               <rect x={0} y={0} width={iw} height={ih} fill="none" stroke="var(--border-strong)" />
-              <text x={iw / 2} y={ih + 38} textAnchor="middle" fontSize={12} fill={INK}>{xLabel}</text>
-              <text transform={`translate(${-44},${ih / 2}) rotate(-90)`} textAnchor="middle" fontSize={12} fill={INK}>{yLabel}</text>
+              <text x={iw / 2} y={ih + (M.b - 8)} textAnchor="middle" fontSize={12} fontWeight={500} fill={INK}>{xLabel}</text>
+              <text transform={`translate(${-(M.l - 14)},${ih / 2}) rotate(-90)`} textAnchor="middle" fontSize={12} fontWeight={500} fill={INK}>{yLabel}</text>
             </g>
 
             {/* interactive plot group (zoom target) */}
@@ -1054,38 +1093,62 @@ export default function ParameterMap(props: ParameterMapProps) {
 
                 {layers.context && envBoxes.map((b) => (
                   <g key={b.id} pointerEvents="none">
-                    <rect x={b.x} y={b.y} width={b.w} height={b.h} fill="none" stroke={MUTED} strokeOpacity={0.45} strokeWidth={1} strokeDasharray="2 3" />
+                    <rect x={b.x} y={b.y} width={b.w} height={b.h} fill="none" stroke={MUTED} strokeOpacity={0.3} strokeWidth={1} strokeDasharray="2 4" />
                     {b.lab && (
-                      <text x={b.lab.x} y={b.lab.y} fontSize={10} fill={MUTED} stroke="var(--surface)" strokeWidth={3} paintOrder="stroke" strokeLinejoin="round">{b.badge}<title>{`${b.label}: documented test conditions, not integrated into the model`}</title></text>
+                      <text x={b.lab.x} y={b.lab.y} fontSize={10} fill={MUTED} fillOpacity={0.85} stroke="var(--surface)" strokeWidth={3} paintOrder="stroke" strokeLinejoin="round">{b.badge}<title>{`${b.label}: related NASA tests, not used by the model`}</title></text>
                     )}
                   </g>
                 ))}
 
                 {layers.target && tgt && (
-                  <g pointerEvents="none">
-                    <rect x={tgt.rx} y={tgt.ry} width={tgt.rw} height={tgt.rh} fill="none" stroke={INK} strokeWidth={1.5} strokeDasharray="6 3" />
-                    <path d={`M${tgt.nx - 8},${tgt.ny}H${tgt.nx + 8}M${tgt.nx},${tgt.ny - 8}V${tgt.ny + 8}`} stroke={INK} strokeWidth={1.5} />
+                  <g>
+                    <rect pointerEvents="none" x={tgt.rx} y={tgt.ry} width={tgt.rw} height={tgt.rh} fill={INK} fillOpacity={0.06} stroke={INK} strokeWidth={1.5} strokeDasharray="6 3" />
+                    {/* same marker as the Cabins chart: an ink dot (drawn before the candidate diamonds, which may sit on it) */}
+                    <circle pointerEvents="none" cx={tgt.nx} cy={tgt.ny} r={5.5} fill={INK} stroke="var(--surface)" strokeWidth={2} />
+                    <circle
+                      cx={tgt.nx}
+                      cy={tgt.ny}
+                      r={12}
+                      fill="transparent"
+                      pointerEvents="all"
+                      onPointerEnter={() => setHover({ kind: "tgt", x: tgt.nx + M.l, y: tgt.ny + M.t })}
+                      onPointerLeave={() => setHover(null)}
+                    />
                   </g>
                 )}
 
                 {layers.context && contextPoints.map((c) => {
                   const X = xs(c.x);
                   const Y = YY(c.y);
+                  const ctxIds = contextPoints.map((q) => q.id);
+                  const ctxTab = ctxActive && ctxIds.includes(ctxActive) ? ctxActive : ctxIds[0];
                   return (
                     <g
                       key={c.id}
-                      tabIndex={0}
+                      data-ctx-id={c.id}
+                      tabIndex={ctxTab === c.id ? 0 : -1}
+                      onKeyDown={(e) => {
+                        const k = e.key;
+                        const i = ctxIds.indexOf(c.id);
+                        const j = k === "ArrowRight" || k === "ArrowDown" ? (i + 1) % ctxIds.length : k === "ArrowLeft" || k === "ArrowUp" ? (i - 1 + ctxIds.length) % ctxIds.length : k === "Home" ? 0 : k === "End" ? ctxIds.length - 1 : -1;
+                        if (j < 0) return;
+                        e.preventDefault();
+                        const nextId = ctxIds[j]!;
+                        setCtxActive(nextId);
+                        const el = wrapRef.current?.querySelector<SVGGElement>(`[data-ctx-id="${CSS.escape(nextId)}"]`);
+                        el?.focus();
+                      }}
                       role="img"
-                      aria-label={`Context test (not modelled): ${c.investigation}, ${c.label}, oxygen ${fmt(c.x, 1)} percent, ${yName.toLowerCase()} ${fmt(c.y)} ${yUnit}`}
+                      aria-label={`Related NASA test (not used by the model): ${c.investigation}, ${c.label}, oxygen ${fmt(c.x, 1)} percent, ${yName.toLowerCase()} ${fmt(c.y)} ${yUnit}`}
                       style={{ outline: "none" }}
                       onPointerEnter={() => setHover({ kind: "ctx", id: c.id, x: X + M.l, y: Y + M.t })}
                       onPointerLeave={() => setHover(null)}
-                      onFocus={() => { setFocusKey(`x:${c.id}`); setHover({ kind: "ctx", id: c.id, x: X + M.l, y: Y + M.t }); }}
+                      onFocus={() => { setCtxActive(c.id); setFocusKey(`x:${c.id}`); setHover({ kind: "ctx", id: c.id, x: X + M.l, y: Y + M.t }); }}
                       onBlur={() => { setFocusKey(null); setHover(null); }}
                     >
                       {focusKey === `x:${c.id}` && <circle cx={X} cy={Y} r={9} fill="none" stroke={ACCENT} strokeWidth={2} />}
                       <circle cx={X} cy={Y} r={9} fill="transparent" />
-                      <path d={`M${X},${Y - 4.5}L${X + 4},${Y + 3}H${X - 4}Z`} fill="var(--surface)" stroke={MUTED} strokeWidth={1} />
+                      <path d={`M${X},${Y - 4}L${X + 3.5},${Y + 2.5}H${X - 3.5}Z`} fill="var(--surface)" stroke={MUTED} strokeOpacity={0.75} strokeWidth={1} />
                     </g>
                   );
                 })}
@@ -1104,7 +1167,7 @@ export default function ParameterMap(props: ParameterMapProps) {
                       role="button"
                       tabIndex={tabKey === key ? 0 : -1}
                       aria-pressed={sel}
-                      aria-label={`${o.title}, oxygen ${fmt(o.x, 1)} percent, ${yName.toLowerCase()} ${fmt(o.y)} ${yUnit}, ${o.label === 1 ? "flame sustained" : o.label === 0 ? "not sustained" : "outcome not determined"}${o.pressureAssumed ? ", pressure assumed" : ""}`}
+                      aria-label={`${o.title}, oxygen ${fmt(o.x, 1)} percent, ${yName.toLowerCase()} ${fmt(o.y)} ${yUnit}, ${o.label === 1 ? "flame kept burning" : o.label === 0 ? "flame went out" : "outcome not determined"}${o.pressureAssumed ? ", pressure assumed" : ""}`}
                       style={{ outline: "none", cursor: "pointer" }}
                       onClick={(e) => { e.stopPropagation(); onSelectObservation?.(sel ? null : o.id); }}
                       onKeyDown={(e) => onItemKey(e, items.find((i) => i.key === key) ?? { key, kind: "obs", id: o.id, px: X, py: Y })}
@@ -1115,7 +1178,7 @@ export default function ParameterMap(props: ParameterMapProps) {
                     >
                       <circle cx={X} cy={Y} r={10} fill="transparent" />
                       {o.pressureAssumed && <circle cx={X} cy={Y} r={7} fill="none" stroke={OBSERVED} strokeWidth={0.75} strokeOpacity={0.45} strokeDasharray="2 2" />}
-                      <circle cx={X} cy={Y} r={4.5} fill={fill} stroke={o.label === 1 ? "var(--surface)" : OBSERVED} strokeWidth={o.label === 1 ? 1 : 1.5} />
+                      <circle cx={X} cy={Y} r={4.5} fill={fill} fillOpacity={o.label === 1 ? 0.85 : 1} stroke={o.label === 1 ? "var(--surface)" : OBSERVED} strokeWidth={o.label === 1 ? 1 : 1.5} />
                       {hl && <circle cx={X} cy={Y} r={9.5} fill="none" stroke={ACCENT} strokeWidth={1.5} />}
                       {(sel || focusKey === key) && <circle cx={X} cy={Y} r={12} fill="none" stroke={ACCENT} strokeWidth={2.5} />}
                     </g>
@@ -1126,11 +1189,10 @@ export default function ParameterMap(props: ParameterMapProps) {
                   const { key, X, Y, half } = g;
                   const top = g.members[0]!;
                   const sel = g.members.some((m) => m.id === selectedCandidateId);
-                  const offRanks = g.members.filter((m) => m.off).map((m) => m.rank);
-                  const offText = offRanks.length === 0 ? "" : offRanks.length === g.members.length ? "off-slice" : `rank ${offRanks.join(", ")} off-slice`;
+                  const allOff = g.members.every((m) => m.off);
                   const shape = (h: number, e: number) => `M${X - h - e},${Y}L${X - h + 11},${Y - 11 - e}H${X + h - 11}L${X + h + e},${Y}L${X + h - 11},${Y + 11 + e}H${X - h + 11}Z`;
                   const desc = g.members
-                    .map((m) => `Research candidate ${m.rank}${m.slice != null ? `, ${sliceName} ${fmt(m.slice)} ${sliceUnit}` : ""}${m.off ? ", off this slice" : ""}`)
+                    .map((m) => `Research candidate ${m.rank}${m.slice != null ? `, ${sliceName} ${fmt(m.slice)} ${sliceUnit}` : ""}${m.off ? ", at a different " + sliceName + " than this map shows" : ""}`)
                     .join("; ");
                   return (
                     <g
@@ -1139,7 +1201,7 @@ export default function ParameterMap(props: ParameterMapProps) {
                       role="button"
                       tabIndex={tabKey === key ? 0 : -1}
                       aria-pressed={sel}
-                      aria-label={`${g.label}${offText ? " " + offText : ""}: ${desc}. Oxygen ${fmt(top.x, 1)} percent, ${yName.toLowerCase()} ${fmt(top.y)} ${yUnit}`}
+                      aria-label={`${g.label}: ${desc}. Oxygen ${fmt(top.x, 1)} percent, ${yName.toLowerCase()} ${fmt(top.y)} ${yUnit}`}
                       style={{ outline: "none", cursor: "pointer" }}
                       onClick={(e) => { e.stopPropagation(); onSelectCandidate?.(sel ? null : top.id); }}
                       onKeyDown={(e) => onItemKey(e, items.find((i) => i.key === key) ?? { key, kind: "cand", id: top.id, px: X, py: Y })}
@@ -1152,19 +1214,9 @@ export default function ParameterMap(props: ParameterMapProps) {
                         d={shape(half, 0)}
                         fill={g.anyOn ? ACCENT : "var(--surface)"}
                         stroke={g.anyOn ? "var(--surface)" : ACCENT}
-                        strokeWidth={1.5}
+                        strokeWidth={allOff ? 1.75 : 1.5}
                       />
-                      <text aria-hidden="true" x={X} y={Y + 3.5} textAnchor="middle" fontSize={10} fontWeight={600} fill={g.anyOn ? "#fff" : ACCENT} pointerEvents="none" style={{ fontVariantNumeric: "tabular-nums" }}>{g.label}</text>
-                      {offRanks.length > 0 && (() => {
-                        const offLabel = offText;
-                        // Flip the label to the left of the marker when it would run past the plot's right edge (narrow maps).
-                        const flip = X + half + 5 + offLabel.length * 5.6 > iw;
-                        return (
-                          <text aria-hidden="true" x={flip ? X - half - 5 : X + half + 5} y={Y + 3.5} textAnchor={flip ? "end" : "start"} fontSize={10} fill={MUTED} stroke="var(--surface)" strokeWidth={3} paintOrder="stroke" strokeLinejoin="round" pointerEvents="none">
-                            {offLabel}
-                          </text>
-                        );
-                      })()}
+                      <text aria-hidden="true" x={X} y={Y + 3.5} textAnchor="middle" fontSize={11} fontWeight={700} fill={g.anyOn ? "#fff" : ACCENT} pointerEvents="none" style={{ fontVariantNumeric: "tabular-nums" }}>{g.label}</text>
                       {(sel || focusKey === key) && <path d={shape(half, 4)} fill="none" stroke={INK} strokeWidth={2} />}
                     </g>
                   );
@@ -1175,22 +1227,16 @@ export default function ParameterMap(props: ParameterMapProps) {
             {/* labels that must sit above everything */}
             <g transform={`translate(${M.l},${M.t})`} pointerEvents="none" clipPath={`url(#${uid}-plot)`}>
               {layers.target && tgt?.lab && (
-                <text x={tgt.lab.x} y={tgt.lab.y} fontSize={11} fontWeight={500} fill={INK} stroke="var(--surface)" strokeWidth={3} paintOrder="stroke" strokeLinejoin="round">{tgt.lab.text}</text>
+                <text x={tgt.lab.x} y={tgt.lab.y} fontSize={12} fontWeight={700} fill={INK} stroke="var(--surface)" strokeWidth={3} paintOrder="stroke" strokeLinejoin="round">{tgt.lab.text}</text>
               )}
               {contourLabel && (
                 <text x={contourLabel.x} y={contourLabel.y} fontSize={11} fontWeight={500} fill={INK} stroke="var(--surface)" strokeWidth={3.5} paintOrder="stroke" strokeLinejoin="round">{CONTOUR_LABEL}</text>
               )}
-              {layers.prediction && rasters && !rasters.supportedRuns.length && (
-                <text x={iw / 2} y={ih - 12} textAnchor="middle" fontSize={12} fill={MUTED} stroke="var(--surface)" strokeWidth={4} paintOrder="stroke" strokeLinejoin="round">No supported model estimate on this slice; P(sustained) is not drawn.</text>
-              )}
-              {wholeGap && (
-                <text x={iw / 2} y={ih - 12} textAnchor="middle" fontSize={12} fill={MUTED} stroke="var(--surface)" strokeWidth={4} paintOrder="stroke" strokeLinejoin="round">Sparse coverage across this whole slice</text>
-              )}
+              {notes.map((t, k) => (
+                <text key={t} x={iw / 2} y={ih - 12 - k * 16} textAnchor="middle" fontSize={12} fill={MUTED} stroke="var(--surface)" strokeWidth={4} paintOrder="stroke" strokeLinejoin="round">{t}</text>
+              ))}
               {modelMissing && (
-                <text x={iw / 2} y={ih / 2} textAnchor="middle" fontSize={13} fill={MUTED} stroke="var(--surface)" strokeWidth={4} paintOrder="stroke" strokeLinejoin="round">No fitted model grid for this group: prediction and uncertainty are not available.</text>
-              )}
-              {hypotheticalSurface && (layers.prediction || layers.uncertainty) && (
-                <text x={8} y={ih - 30} fontSize={11} fill={INK} stroke="var(--surface)" strokeWidth={3} paintOrder="stroke" strokeLinejoin="round">What-if surface (hypothetical observation added)</text>
+                <text x={iw / 2} y={ih / 2} textAnchor="middle" fontSize={13} fill={MUTED} stroke="var(--surface)" strokeWidth={4} paintOrder="stroke" strokeLinejoin="round">No model for this material: estimate and uncertainty not shown.</text>
               )}
             </g>
           </svg>
@@ -1208,7 +1254,7 @@ export default function ParameterMap(props: ParameterMapProps) {
       )}
       <MapLegend
         className="mt-3"
-        layers={layers}
+        layers={{ ...layers, prediction: layers.prediction && !!rasters && rasters.supportedRuns.length > 0 }}
         plane={plane}
         sparseThreshold={threshold}
         hasAssumed={hasAssumed}
@@ -1218,6 +1264,7 @@ export default function ParameterMap(props: ParameterMapProps) {
         hasContextPoints={contextPoints.length > 0}
         hasTarget={!!target}
         hasCandidates={candidates.length > 0}
+        hasOffSlice={candGroups.some((g) => !g.anyOn)}
         modelMissing={modelMissing}
       />
     </div>

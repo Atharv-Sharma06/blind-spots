@@ -2,24 +2,28 @@ import { expect, type Locator, type Page } from "@playwright/test";
 
 /** Locators and waits shared by the Explore specs. Nothing here hard-codes a group, count or metric. */
 
-export const mapGroup = (page: Page): Locator => page.locator('[role="group"][aria-label^="Coverage map"]');
+export const mapGroup = (page: Page): Locator => page.locator('[role="group"][aria-label*="test results in view"]');
 export const obsMarks = (page: Page): Locator =>
-  mapGroup(page).locator('g[role="button"][aria-label*="flame sustained"], g[role="button"][aria-label*="not sustained"], g[role="button"][aria-label*="outcome not determined"]');
+  mapGroup(page).locator('g[role="button"][aria-label*="flame kept burning"], g[role="button"][aria-label*="flame went out"], g[role="button"][aria-label*="outcome not determined"]');
 /** One marker per position: coincident candidates share a marker whose label lists each rank (LEAD_DECISIONS D3). */
-export const candidateMarks = (page: Page): Locator => mapGroup(page).locator('g[role="button"][aria-label^="Research candidate"]');
+export const candidateMarks = (page: Page): Locator => mapGroup(page).locator('g[role="button"][aria-label*="Research candidate"]');
 /** Context layer marks: documented-but-not-integrated test envelopes (<title>) and point markers (triangles). */
 export const contextEnvelopes = (page: Page): Locator => mapGroup(page).locator("title", { hasText: "not integrated" });
 export const contextPoints = (page: Page): Locator => mapGroup(page).locator('g:has(> path[stroke-width="1.2"])');
 
-/** Explore h1 (LEAD_DECISIONS D1 product line). */
-export const EXPLORE_H1 = "Blind Spots: where NASA's microgravity fire evidence ends, and what to learn next.";
+/** Explorer h1 (the expert workspace, route /explore). */
+export const EXPLORE_H1 = "Explorer";
+/** Cabins page h1 (route /, the default for everyone). */
+export const HOME_H1 = "Do NASA's space-station fire tests cover this cabin's air?";
+/** Profile the Cabins page selects when the URL has no ?cabin= (the blind spot is the story). */
+export const DEFAULT_CABIN = "exploration_atmosphere_8p2_34";
 
 export const layerChip = (page: Page, layer: string): Locator => page.getByTestId(`layer-${layer}`);
 export const groupSelect = (page: Page): Locator => page.getByRole("combobox", { name: "Material and flame configuration" });
 
-/** Open Explore and wait until the map, target analysis and candidate panel have real content. */
+/** Open the Explorer (/explore) and wait until the map, target analysis and candidate panel have real content. */
 export async function openExplore(page: Page, query = ""): Promise<void> {
-  await page.goto(`/${query}`);
+  await page.goto(`/explore${query}`);
   await expect(page.getByRole("heading", { level: 1, name: EXPLORE_H1 })).toBeVisible();
   await expect(mapGroup(page)).toBeVisible();
   await expect(page.getByTestId("target-analysis")).toBeVisible();
@@ -32,10 +36,10 @@ export async function waitForCandidates(page: Page): Promise<void> {
   await expect(page.getByTestId("top-candidate")).toBeVisible();
 }
 
-/** Number N from the note "N of M observations in this group are plotted". */
+/** Number N from the note "N of M ... are plotted". */
 export async function plottedCount(page: Page): Promise<{ plotted: number; total: number }> {
   const text = (await page.getByTestId("obs-note").innerText()).replace(/,/g, "");
-  const m = /(\d+) of (\d+) observations/.exec(text);
+  const m = /(\d+) of (\d+) test results/.exec(text);
   if (!m) throw new Error(`unexpected obs-note: ${text}`);
   return { plotted: Number(m[1]), total: Number(m[2]) };
 }
