@@ -50,7 +50,7 @@ export function paddedDomain(values: readonly number[], opts: { minSpan: number;
   const pad = Math.max(hi - lo, opts.minSpan) * (opts.padFrac ?? 0.08);
   lo -= pad;
   hi += pad;
-  const [nlo, nhi] = scaleLinear().domain([lo, hi]).nice(6).domain() as Domain;
+  const [nlo, nhi] = scaleLinear().domain([lo, hi]).nice(4).domain() as Domain;
   return [Math.max(nlo, opts.min ?? -Infinity), Math.min(nhi, opts.max ?? Infinity)];
 }
 

@@ -9,8 +9,8 @@ export function HomeFallback() {
     <div className={HOME_CONTAINER}>
       <HeroText />
       <section aria-labelledby="cabins-h-fallback">
-        <StepHeading n={1} id="cabins-h-fallback" title="Pick a cabin" hint="Each card shows the cabin's air and whether the ISS flame tests cover it." hintOnPhone={false} hintInline />
-        <div className="mt-5 md:mt-5">
+        <StepHeading n={1} id="cabins-h-fallback" title="Pick a cabin" />
+        <div className="mt-5">
           <PickerSkeleton />
         </div>
       </section>

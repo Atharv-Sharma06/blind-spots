@@ -37,33 +37,33 @@ export function candidatePAllowed(c: Pick<Candidate, "p_sustained" | "latent_std
   return c.p_sustained !== null && Number.isFinite(c.latent_std_ratio) && c.latent_std_ratio < SUPPORT_LATENT_RATIO;
 }
 
-/** One plain sentence explaining the verdict, derived from the numbers (never empty). */
+/** One short sentence explaining the verdict, derived from the numbers (never empty). */
 export function verdictSentence(a: AssessResponse): string {
   const n = a.coverage.n_target_points;
   const k = a.coverage.points_with_comparable;
   const s = pointsSupported(a);
   const nn = a.coverage.nn_distance_min;
-  const nnText = nn !== null ? ` The nearest ISS test result is ${nn.toFixed(1)} steps away.` : "";
+  const nnText = nn !== null ? ` The nearest ISS test is ${nn.toFixed(1)} steps away.` : "";
   if (a.model.model_status !== "modeled") {
     return k === 0
-      ? `This group has too few training observations for a model, and no cabin condition has a nearby test result.${nnText}`
-      : `This group has too few training observations for a model; ${k} of ${n} cabin conditions have nearby test results.`;
+      ? `Too few test results for a model, and none nearby.${nnText}`
+      : `Too few test results for a model. ${k} of ${n} cabin conditions have a nearby test.`;
   }
   const v: Verdict = a.verdict;
   if (v === "supported") {
     return s !== null
-      ? `${s} of ${n} cabin conditions have nearby test results and low knowledge uncertainty.`
-      : `Nearby test results lie close to this cabin and the model's knowledge uncertainty is low there.`;
+      ? `${s} of ${n} cabin conditions have a nearby test and low uncertainty.`
+      : `Nearby tests are close to this cabin and uncertainty is low.`;
   }
-  if (k === 0) return `No cabin condition has a nearby test result.${nnText}`;
+  if (k === 0) return `No cabin condition has a nearby test.${nnText}`;
   if (v === "extrapolation") {
     return s !== null
       ? s === 0
-        ? `Nearby test results reach ${k} of ${n} cabin conditions, but the model is not confident at any of them; estimates there depend on model assumptions.`
-        : `Nearby test results reach ${k} of ${n} cabin conditions, but the model is confident at only ${s}; elsewhere estimates depend on model assumptions.`
-      : `Nearby test results reach ${k} of ${n} cabin conditions, but the model is not confident across enough of the target; estimates there depend on model assumptions.`;
+        ? `Tests are nearby for ${k} of ${n} cabin conditions, but the model is not confident at any. Estimates rest on assumptions.`
+        : `Tests are nearby for ${k} of ${n} cabin conditions. The model is confident at only ${s}; the rest rely on assumptions.`
+      : `Tests are nearby for ${k} of ${n} cabin conditions, but the model is not confident enough. Estimates rest on assumptions.`;
   }
-  return `Nearby test results reach only ${k} of ${n} cabin conditions.`;
+  return `Tests are nearby for only ${k} of ${n} cabin conditions.`;
 }
 
 // ---- Distance from a candidate to the target region (reference distances, CONTRACTS section 4) -------------

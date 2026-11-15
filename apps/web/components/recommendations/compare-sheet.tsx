@@ -8,6 +8,7 @@ import { PanelError } from "@/components/target/panel-bits";
 import { candidatePAllowed } from "@/components/target/evidence";
 import { useCompareCandidates } from "@/hooks/api";
 import { feasibilityLabel, fmtCmS, fmtFractionPercent, fmtOxygen, fmtPressure, fmtProbability, reasonLabel } from "@/lib/format";
+import { CANDIDATE_FRAMING } from "@/lib/copy";
 import type { Candidate, Target } from "@/lib/types";
 
 const pt = (c: Candidate) => ({ oxygen_percent: c.oxygen_percent, airflow_cm_s: c.airflow_cm_s, pressure_kpa: c.pressure_kpa });
@@ -36,13 +37,13 @@ export function CompareSheet({
   // Placeholder data belongs to the previous pair: never show it under the new headings (a05-08).
   const d = q.isPlaceholderData ? undefined : q.data?.data;
   const verdict =
-    d?.preferred === "indistinguishable" ? "Indistinguishable" : d?.preferred === "a" ? `Candidate ${a?.rank} preferred` : d?.preferred === "b" ? `Candidate ${b?.rank} preferred` : null;
+    d?.preferred === "indistinguishable" ? "No clear winner" : d?.preferred === "a" ? `Test ${a?.rank} is better` : d?.preferred === "b" ? `Test ${b?.rank} is better` : null;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
-        title="Compare candidates"
-        description="Two candidates side by side. Hypothetical model estimates only."
+        title="Compare two tests"
+        description="Model estimates, not test results."
         className="sm:max-w-[640px]"
         onCloseAutoFocus={(e) => {
           // Return focus to the button that opened the sheet (WCAG 2.4.3, a11-05).
@@ -54,48 +55,43 @@ export function CompareSheet({
         }}
       >
         {q.isError && !d ? <PanelError error={q.error} onRetry={() => void q.refetch()} what="This comparison" /> : null}
-        {!d && !q.isError ? <PanelSkeleton label="Comparing candidates" /> : null}
+        {!d && !q.isError ? <PanelSkeleton label="Comparing tests" /> : null}
         {d ? (
           <div className="space-y-4" data-testid="compare-sheet">
             <div className="flex items-center gap-2">
               <Badge tone={d.preferred === "indistinguishable" ? "neutral" : "accent"} data-testid="compare-verdict">{verdict}</Badge>
-              <span className="text-xs text-muted">Both together would cut uncertainty by <span className="num text-fg">{fmtFractionPercent(d.both_evr_fraction)}</span></span>
+              <span className="text-xs text-muted">Both together cut uncertainty by <span className="num text-fg">{fmtFractionPercent(d.both_evr_fraction)}</span></span>
             </div>
             <div className="grid grid-cols-2 gap-2 sm:gap-3">
               {([["a", d.a], ["b", d.b]] as const).map(([k, c]) => {
-                const fe = feasibilityLabel(c.feasibility_status);
                 return (
                   <article key={k} className={`min-w-0 rounded-md border p-2.5 sm:p-3 ${d.preferred === k ? "border-accent" : "border-border"}`}>
                     <h3 className="text-[13px] font-semibold">Test {k === "a" ? a?.rank : b?.rank}</h3>
+                    <p className="num mt-1.5 text-xs text-muted">{fmtOxygen(c.oxygen_percent)}, {fmtPressure(c.pressure_kpa)}, {fmtCmS(c.airflow_cm_s)}</p>
                     <dl className="mt-2 space-y-1.5 text-xs">
-                      <div><dt className="text-muted">Oxygen</dt><dd className="num">{fmtOxygen(c.oxygen_percent)}</dd></div>
-                      <div><dt className="text-muted">Pressure</dt><dd className="num">{fmtPressure(c.pressure_kpa)}</dd></div>
-                      <div><dt className="text-muted">Airflow</dt><dd className="num">{fmtCmS(c.airflow_cm_s)}</dd></div>
                       <div><dt className="text-muted">Cuts uncertainty by</dt><dd className="num text-sm font-medium">{fmtFractionPercent(c.evr_fraction)}</dd></div>
-                      <div><dt className="text-muted">Chance the flame burns</dt><dd>{showEstimate && candidatePAllowed(c) ? <span className="num">{fmtProbability(c.p_sustained)}</span> : "Not shown: the evidence does not support an estimate here"}</dd></div>
-                      <div><dt className="text-muted">Feasibility</dt><dd>{fe.label}. {fe.disclaimer}</dd></div>
+                      <div><dt className="text-muted">Flame chance</dt><dd>{showEstimate && candidatePAllowed(c) ? <span className="num">{fmtProbability(c.p_sustained)}</span> : "No estimate: too little evidence"}</dd></div>
                     </dl>
                   </article>
                 );
               })}
             </div>
-            <section>
-              <h3 className="mb-1 text-xs font-medium">Why</h3>
-              <ul className="space-y-1">
+            <details className="rounded-md border border-border px-3 py-2 text-xs">
+              <summary className="cursor-pointer text-[13px] font-medium">Technical details</summary>
+              <ul className="mt-2 list-disc space-y-1 pl-4 text-muted">
                 {d.reasons.filter((r) => showEstimate || r.code !== "near_decision_boundary").map((r, i) => (
-                  <li key={`${r.code}-${i}`} className="text-xs">
-                    <span className="font-medium">{reasonLabel(r.code)}.</span> <span className="text-muted">{r.message}</span>
+                  <li key={`${r.code}-${i}`}>
+                    <span className="font-medium text-fg">{reasonLabel(r.code)}.</span> {r.message}
                   </li>
                 ))}
-              </ul>
-            </section>
-            <details className="rounded-md border border-border px-3 py-2 text-xs">
-              <summary className="cursor-pointer text-[13px] font-medium">Technical details: assumptions</summary>
-              <ul className="mt-2 list-disc space-y-1 pl-4 text-muted">
+                {([d.a, d.b] as const).map((c, i) => {
+                  const fe = feasibilityLabel(c.feasibility_status);
+                  return <li key={`fe-${i}`}>Test {i === 0 ? a?.rank : b?.rank}: {fe.label}. {fe.disclaimer}</li>;
+                })}
                 {d.assumptions.map((s, i) => <li key={i}>{s}</li>)}
               </ul>
             </details>
-            <Callout variant="info">Computational research candidates requiring qualified scientific review, established safety procedures and formal feasibility assessment.</Callout>
+            <Callout variant="info">{CANDIDATE_FRAMING}</Callout>
           </div>
         ) : null}
       </SheetContent>

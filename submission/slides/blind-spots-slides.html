@@ -79,6 +79,8 @@
   .links .u { font-size: 50px; font-weight: 600; color: var(--accent); letter-spacing: -0.01em; margin-top: 6px; }
   .credits { margin-top: 64px; font-size: 27px; line-height: 1.5; color: var(--muted); max-width: 1680px; }
   .credits b { color: var(--ink); font-weight: 600; }
+  .limit-line { margin-top: 40px; font-size: 32px; line-height: 1.4; color: var(--ink); max-width: 1640px; }
+  .limit-line b { font-weight: 600; }
 </style>
 </head>
 <body>
@@ -88,8 +90,8 @@
   <div class="title-wrap">
     <div class="kicker">NASA Space Apps 2026 · Flame in Freefall</div>
     <h1><span class="mark"></span>Blind Spots</h1>
-    <p class="lead">Do NASA's ISS flame tests cover the air planned for Moon and Mars cabins? Machine learning that says when it does not know, and which experiment would teach the most next.</p>
-    <p class="meta">Team Yareed · data: NASA Physical Science Informatics (BASS, BASS-II)</p>
+    <p class="lead">Do NASA's ISS flame tests cover the air in Moon and Mars cabins?</p>
+    <p class="meta">Team Yareed · data: NASA (BASS, BASS-II)</p>
   </div>
   <div class="footer"><span>SI-assisted project · built with Claude (Anthropic) · Not endorsed by NASA</span><span>1 / 7</span></div>
 </section>
@@ -97,29 +99,26 @@
 <!-- 2. Problem -->
 <section class="slide">
   <div class="kicker">The problem</div>
-  <h2 style="font-size:64px">ISS flame tests ran in ISS air. Moon and Mars cabins plan thinner air with more oxygen.</h2>
+  <h2 style="font-size:64px">Moon and Mars cabins plan thinner air with more oxygen than the ISS.</h2>
   <div class="air">
     <div class="air-card">
       <div class="name">ISS today</div>
       <div class="val">21 % <span>oxygen</span></div>
-      <div class="val">101 kPa <span>14.7 psia</span></div>
-      <div class="note">Where the BASS and BASS-II flame tests ran.</div>
+      <div class="val">101 kPa <span>pressure</span></div>
     </div>
     <div class="air-card">
       <div class="name">Artemis Moon habitat</div>
       <div class="val">26.5 % <span>oxygen</span></div>
-      <div class="val">70.3 kPa <span>10.2 psia</span></div>
-      <div class="note">NASA lunar Surface Habitat nominal air.</div>
+      <div class="val">70.3 kPa <span>pressure</span></div>
     </div>
     <div class="air-card target">
-      <div class="name">Moon/Mars Exploration Atmosphere</div>
+      <div class="name">Exploration Atmosphere</div>
       <div class="val">34 % <span>oxygen</span></div>
-      <div class="val">56.5 kPa <span>8.2 psia</span></div>
-      <div class="note">NASA's exploration atmosphere for frequent spacewalks.</div>
+      <div class="val">56.5 kPa <span>pressure</span></div>
     </div>
   </div>
-  <p class="bottom-line">Fire behaviour depends on oxygen and pressure. The integrated ISS records span 13.5–22.7 % oxygen and 98–102 kPa where pressure was recorded.</p>
-  <p class="small" style="margin-top:22px">Cabin air: NASA design documents on NTRS (20140000417, 20220000245). Test ranges: integrated BASS/BASS-II records (NASA PSI).</p>
+  <p class="bottom-line">ISS tests covered 13.5–22.7 % oxygen and 98–102 kPa.</p>
+  <p class="small" style="margin-top:22px">Cabin air: NASA reports on NTRS (20140000417, 20220000245).</p>
   <div class="footer"><span>SI-assisted project · built with Claude (Anthropic) · Not endorsed by NASA</span><span>2 / 7</span></div>
 </section>
 
@@ -129,8 +128,7 @@
   <div class="row">
     <div class="col-text" style="flex-basis:560px">
       <h2 style="font-size:64px">Pick a cabin. Get a plain answer.</h2>
-      <p>11 crew cabins from NASA documents, from Apollo to Artemis.</p>
-      <p>Each card shows the cabin's air and whether the ISS flame tests cover it.</p>
+      <p>11 crew cabins, from Apollo to Artemis.</p>
       <div class="num blind"><b>8</b><span>of 11 cabins:<br>Not covered</span></div>
     </div>
     <div class="col-shot"><div class="shot"><img src="img/1-cabins.png" alt="Blind Spots Cabins page: the question, and cards for 11 crew cabins labelled Covered, Barely covered or Not covered"></div></div>
@@ -143,11 +141,10 @@
   <div class="kicker">The blind spot</div>
   <div class="row">
     <div class="col-text" style="flex-basis:560px">
-      <h2 style="font-size:54px">Moon/Mars air sits far from every ISS test.</h2>
-      <div class="num ok"><b>241</b><span>nearby ISS test results<br>for ISS today</span></div>
+      <h2 style="font-size:54px">Moon/Mars air is far from every ISS test.</h2>
+      <div class="num ok"><b>241</b><span>nearby ISS test results<br>for ISS air</span></div>
       <div class="num blind"><b>0</b><span>for the Exploration Atmosphere,<br>in all 20 material setups</span></div>
-      <p style="font-size:30px">So the model does not guess there.</p>
-      <p class="small">Not represented in the integrated records. Related NASA ground tests exist; the model does not use them.</p>
+      <p style="font-size:30px">So the model does not guess there. Other NASA ground tests are not used.</p>
     </div>
     <div class="col-shot"><div class="shot"><img src="img/2-answer-chart.png" alt="Answer card: Blind spot, none of the ISS flame tests in our data ran in air like this, with a chart of oxygen versus pressure showing ISS tests near 101 kPa and the cabin at 34 % oxygen, 56.5 kPa"></div></div>
   </div>
@@ -160,9 +157,7 @@
   <div class="row">
     <div class="col-text" style="flex-basis:540px; gap:26px">
       <h2 style="font-size:54px">It says when it does not know. Then it picks what to test next.</h2>
-      <p style="font-size:29px">A Gaussian-process model per material and flame setup (9 modelled). Without nearby data it reports "insufficient evidence", not a probability.</p>
-      <p style="font-size:29px">Active learning ranks candidates by how much they cut the model's uncertainty about the chosen cabin.</p>
-      <div class="num ok"><b>19 %</b><span>less uncertainty<br>from the top pick</span></div>
+      <div class="num ok"><b>19 %</b><span>less uncertainty from<br>the top pick (hypothetical)</span></div>
       <p class="small" style="font-size:22px">Computational research candidates requiring qualified scientific review, established safety procedures and formal feasibility assessment.</p>
     </div>
     <div class="col-shot"><div class="shot"><img src="img/3-next-tests.png" alt="What to test next: three ranked research candidates for the Exploration Atmosphere and the hypothetical effect of the first one"></div></div>
@@ -173,33 +168,25 @@
 <!-- 6. Validation + limits -->
 <section class="slide">
   <div class="kicker">How we know it works</div>
-  <h2 style="font-size:60px">Tested against simple baselines, with the limits stated.</h2>
+  <h2 style="font-size:60px">Checked against simple baselines.</h2>
   <div class="stats">
     <div class="stat">
       <div class="big">749</div>
-      <div class="what">ISS flow-step results from 276 experiments, each traced to its source cell. 565 used for training.</div>
+      <div class="what">ISS test results from 276 experiments.</div>
       <div class="src">docs/evidence-report.md</div>
     </div>
     <div class="stat">
       <div class="big">6 of 9</div>
-      <div class="what">material groups where the model beats a majority-class guess (95 % CI excludes 0). 3 too close to call, 0 worse.</div>
-      <div class="src">Grouped cross-validation by experiment · docs/validation.md</div>
+      <div class="what">material types where the model beats a simple guess. 3 too close to call.</div>
+      <div class="src">docs/validation.md</div>
     </div>
     <div class="stat">
       <div class="big">11 of 18</div>
-      <div class="what">retrospective scenarios where its ranking beat random picks. 5 too close to call, 2 worse.</div>
-      <div class="src">Held-out pseudo-targets, 20 seeds · docs/validation.md</div>
+      <div class="what">replayed scenarios where its picks beat random picks. 5 too close to call, 2 worse.</div>
+      <div class="src">docs/validation.md</div>
     </div>
   </div>
-  <div class="limits">
-    <h3>Honest limits</h3>
-    <ul>
-      <li>Every integrated test ran near 1 atm; other pressures rest on a model assumption the app states.</li>
-      <li>Small samples: 12 to 25 experiments per material group.</li>
-      <li>No partial-gravity data in the records.</li>
-      <li>Not a certified fire-safety assessment.</li>
-    </ul>
-  </div>
+  <p class="limit-line"><b>Limits:</b> every ISS test ran near sea-level pressure, and there is no partial-gravity data. Not a certified fire-safety assessment.</p>
   <div class="footer"><span>SI-assisted project · built with Claude (Anthropic) · Not endorsed by NASA</span><span>6 / 7</span></div>
 </section>
 
@@ -209,12 +196,11 @@
   <h2>Open it, pick a cabin, see the answer.</h2>
   <div class="links">
     <div><div class="l">Live app (no login)</div><div class="u">https://blind-spots-kappa.vercel.app</div></div>
-    <div><div class="l">Source code, data provenance and validation</div><div class="u">https://github.com/Atharv-Sharma06/blind-spots</div></div>
+    <div><div class="l">Code, data sources and validation</div><div class="u">https://github.com/Atharv-Sharma06/blind-spots</div></div>
   </div>
   <div class="credits">
-    <p><b>Data:</b> NASA Physical Science Informatics: BASS (PSI-26) and BASS-II (PSI-25), CC0; Saffire I–III as context. Cabin atmospheres from NASA Technical Reports Server documents.</p>
-    <p style="margin-top:16px"><b>Credits:</b> Team Yareed. Code written with AI assistance (Claude, Anthropic); the app itself uses no generative AI. Open-source libraries listed in the repository.</p>
-    <p style="margin-top:16px">Not endorsed by NASA. Not a certified fire-safety assessment.</p>
+    <p><b>Team Yareed.</b> Data: NASA Physical Science Informatics (BASS, BASS-II; CC0). Cabin air: NASA NTRS.</p>
+    <p style="margin-top:16px">Code written with Claude (Anthropic); the app uses no generative AI. Not endorsed by NASA. Not a certified fire-safety assessment.</p>
   </div>
   <div class="footer"><span>SI-assisted project · built with Claude (Anthropic) · Not endorsed by NASA</span><span>7 / 7</span></div>
 </section>

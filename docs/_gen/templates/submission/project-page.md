@@ -14,13 +14,14 @@ Blind Spots
 
 ## High-Level Project Summary (limit 150 words)
 
-NASA burned materials aboard the ISS to learn when flames keep burning, but those tests all ran in ISS-like air. Blind Spots
-shows, for any crew cabin (ISS, Artemis Moon habitat, NASA Exploration Atmosphere, Orion, past spacecraft), whether the ISS
-tests cover its air, and which next experiment would teach the most. Pick a cabin, read a one-line answer and a simple
-chart, then see the top research candidates that machine learning picks. We turned {{ENV_N_EXP}} ISS BASS and BASS-II tests
-from NASA PSI into a provenance-checked dataset; a Gaussian-process model says when it does not know. Headline: the ISS
-cabin has {{H_ISS_COMPARABLE}} nearby ISS test results; NASA's 8.2 psia / 34 % O2 Exploration Atmosphere has {{H_EXPL_COMPARABLE}}
-across all {{H_N_GROUPS}} material setups. Research-planning tool; not a fire-safety assessment or NASA product.
+NASA burned materials aboard the ISS to learn when flames keep burning, but every test ran in ISS-like air. Blind Spots shows,
+for any crew cabin (ISS, Artemis Moon habitat, NASA Exploration Atmosphere, Orion, past spacecraft), whether those tests
+cover its air, and which next experiment would teach the most. Pick a cabin, read a one-line answer and a simple chart,
+then see the top research candidates picked by machine learning. We turned {{ENV_N_EXP}} ISS BASS and BASS-II tests from
+NASA PSI into a dataset where every value traces to its source cell; the model says when it does not know. The ISS cabin
+has {{H_ISS_COMPARABLE}} nearby ISS test results; NASA's 8.2 psia / 34 % O2 Exploration Atmosphere has {{H_EXPL_COMPARABLE}}
+across all {{H_N_GROUPS}} material setups. A research-planning tool; not a certified fire-safety assessment, not endorsed
+by NASA.
 
 ---
 
@@ -43,127 +44,110 @@ across all {{H_N_GROUPS}} material setups. Research-planning tool; not a fire-sa
 
 Fire is one of the most serious hazards in a sealed crew cabin, and flames behave differently in microgravity. NASA has
 adopted an exploration atmosphere of 8.2 psia and 34 % O2 "for future spacecraft that will be used for high-frequency
-EVAs" (NTRS 20140000417). NASA's lunar Surface Habitat study assumes a nominal 10.2 psia / 26.5 % O2 cabin that can also
-operate at 8.2 psia / 34 % O2 (NTRS 20220000245); Artemis habitat atmospheric parameters have not been finalized (NTRS
-20220011152).
-Before anyone trusts a flammability number for such a cabin, on a spacecraft or in a Moon or Mars habitat, they need to
-know how much comparable experimental evidence exists. Blind Spots answers that question for any
-documented NASA cabin atmosphere, and then asks which next computation or experiment would teach the most.
+EVAs" (NTRS 20140000417). Artemis habitat atmospheres "have not been finalized" (NTRS 20220011152). Before anyone trusts a
+flammability number for such a cabin, they need to know how many nearby tests exist. Blind Spots answers that for any
+documented NASA cabin atmosphere, then asks which next experiment would teach the most.
 
 ### Key findings (computed from the artifacts)
 
-1. **The evidence ends at 1 atm.** All {{ENV_N_EXP}} integrated ISS BASS/BASS-II tests ran at {{ENV_O2}} % O2 and
-   {{ENV_P}} kPa (`data/normalized/observations.json`). BASS measured the pressure; BASS-II did not record it, so the
-   dataset assumes the ISS cabin's 101.353 kPa for those tests and flags it.
-2. **ISS air is covered; exploration air is not.** Summed over the {{H_N_GROUPS}} material and flame-configuration
-   groups, the ISS cabin has {{H_ISS_COMPARABLE}} comparable observations (in {{H_ISS_GROUPS_WITH}} of the {{H_N_GROUPS}}
-   groups); the NASA Exploration Atmosphere has {{H_EXPL_COMPARABLE}}, in every group (nearest {{H_EXPL_NN_MIN}} to
-   {{H_EXPL_NN_MAX}} reference distances, the model's unit of distance, where one or less counts as "nearby"). {{H_N_ZERO}} of the {{H_N_PROFILES_ANALYSED}} documented NASA atmospheres
-   analysed have none, including all {{H_N_REDUCED}} below 1 atm ({{H_REDUCED_SHORT}}).
-3. **The model says when it does not know.** For thin PMMA films (the default group), {{DX_PTS_WITH}} of {{DX_NPTS}}
-   Exploration Atmosphere target points have a comparable observation; the app answers "Insufficient experimental evidence
-   for a reliable estimate." instead of a probability.
-4. **What to learn next.** The top-ranked computational research candidate for that target is {{TC_O2}} % O2,
-   {{TC_P}} kPa, {{TC_U}} cm/s, with an expected reduction of the target's model uncertainty of {{TC_EVR}} (the baselines'
-   picks, scored with the same model: random {{TB_RANDOM}}, uncertainty sampling {{TB_UNC}}, nearest gap {{TB_GAP}}).
-   {{DEMO_TOP_SENTENCE}} The most relevant documented NASA work for that air (SoFIE-GEL; the Glenn drop-tower
-   exploration-atmosphere tests, NASA/TM-2008-215260) has no public per-test table; publishing one would close the gap
-   fastest.
-5. **Every value is traceable.** {{N_PROVENANCE_FAIL}} provenance failures across {{N_OBS}} flow-step observations: the
-   build re-reads the NASA workbooks and rejects any quoted token that is not in its cited cell.
+1. **The evidence ends at 1 atm.** All {{ENV_N_EXP}} ISS tests ran at {{ENV_O2}} % O2 and {{ENV_P}} kPa
+   (`data/normalized/observations.json`). BASS measured the pressure. BASS-II did not record it, so the dataset assumes
+   the ISS cabin's 101.353 kPa for those tests and flags it.
+2. **ISS air is covered; exploration air is not.** Across the {{H_N_GROUPS}} material setups, the ISS cabin has
+   {{H_ISS_COMPARABLE}} nearby ISS test results (in {{H_ISS_GROUPS_WITH}} setups). The NASA Exploration Atmosphere has
+   {{H_EXPL_COMPARABLE}}, in every setup (nearest: {{H_EXPL_NN_MIN}} to {{H_EXPL_NN_MAX}} reference distances, the model's
+   unit of distance; one or less counts as "nearby"). {{H_N_ZERO}} of {{H_N_PROFILES_ANALYSED}} documented NASA cabins have
+   none, including all {{H_N_REDUCED}} below 1 atm ({{H_REDUCED_SHORT}}).
+3. **The model says when it does not know.** For thin PMMA films (the default), {{DX_PTS_WITH}} of {{DX_NPTS}} sampled
+   points of the Exploration Atmosphere have a nearby test. The app answers "Insufficient experimental evidence for a
+   reliable estimate." instead of a probability.
+4. **What to learn next.** The top computational research candidate for that cabin is {{TC_O2}} % O2, {{TC_P}} kPa,
+   {{TC_U}} cm/s. It would cut the model's uncertainty by an expected {{TC_EVR}}. Same model, other strategies: random
+   {{TB_RANDOM}}, uncertainty sampling {{TB_UNC}}, nearest gap {{TB_GAP}}. {{DEMO_TOP_SENTENCE}} The most relevant NASA work
+   for that air (SoFIE-GEL; the Glenn drop-tower exploration-atmosphere tests, NASA/TM-2008-215260) has no public per-test
+   table; publishing one would close the gap fastest.
+5. **Every value is traceable.** {{N_PROVENANCE_FAIL}} provenance failures across {{N_OBS}} test steps: the build re-reads
+   the NASA workbooks and rejects any quoted text that is not in its cited cell.
 
 ### What it does
 
-1. **Cabins page: three steps.** Pick a cabin; read the answer (a one-line verdict, a simple oxygen-against-pressure chart of
-   NASA's test results and this cabin, and a material picker); see what to test next (the top three computational research
-   candidates and "What would we learn?"). Cards say Covered, Barely covered or Not covered by nearby ISS test results.
-   A 30-second tour walks through it. The **Explorer** is the expert workspace: for one material and flame configuration,
-   where integrated experiments exist in oxygen x airflow and oxygen x pressure space, and how far any point is from the
-   nearest comparable observation. Documented tests that are not integrated into the model (Saffire-I and III to VI,
-   DARTFire, the Glenn drop-tower limits) form a separate "Related NASA work" layer.
-2. **Target assessment.** Pick one of {{H_N_PROFILES_ANALYSED}} documented NASA cabin atmospheres (each with verbatim NASA quotes,
-   machine-checked against the downloaded documents) or a user-defined hypothetical (live service only): comparable
-   observations, nearest distance, a verdict (supported, extrapolation, insufficient evidence) and the documented NASA work
-   that is not integrated.
-3. **Machine learning that abstains.** A Gaussian-process classifier per group predicts the probability that a flame is
-   sustained and splits uncertainty into knowledge uncertainty (lack of data) and outcome variability. Probabilities are
-   shown only where the evidence supports them.
-4. **Active learning.** Ranks computational research candidates by expected reduction of the model's uncertainty about the
-   chosen target, next to random, uncertainty-sampling and nearest-gap baselines, with a pressure-assumption sensitivity check
-   and "what if it burned / did not burn" previews. No test or apparatus procedures are produced.
-5. **Experiments, How it works, research brief.** Every integrated test with the quoted source token behind each value;
-   a plain-language explanation of the data, model, validation and limits; a printable research brief.
+1. **Cabins page, three steps.** Pick a cabin. Read the answer: a one-line verdict, a simple oxygen-against-pressure chart
+   and a material picker. See what to test next: the top three computational research candidates and "What would we
+   learn?". Cards say Covered, Barely covered or Not covered. A 30-second tour walks through it.
+2. **Explorer, for experts.** For one material and flame setup, shows where ISS tests exist across oxygen, airflow and
+   pressure, and how far any point is from the nearest test. Documented studies we did not integrate (Saffire-I and III to
+   VI, DARTFire, the Glenn drop-tower limits) sit on a separate "Related NASA work" view.
+3. **Machine learning that abstains.** A Gaussian-process classifier predicts whether a flame keeps burning and separates
+   lack of data from outcome variability. It gives a probability only where tests support one.
+4. **Next-experiment ranking.** Ranks computational research candidates by expected cut in the model's uncertainty about
+   the chosen cabin, next to random, uncertainty-sampling and nearest-gap strategies, with a pressure-assumption check and
+   hypothetical what-ifs. It produces no test or apparatus procedures.
+5. **Experiments, How it works, research brief.** Every ISS test with the quoted source text behind each value; a plain
+   explanation of data, model, validation and limits; a printable brief.
 
 ### How it works
 
 - **Data.** NASA PSI BASS-II (PSI-25) and BASS (PSI-26), ISS Microgravity Science Glovebox (CC0-1.0). Free-text flow
-  schedules and outcomes were interpreted into curation tables; BASS-II outcomes are cross-checked against the BASS-II
-  Summary Report (NASA/TM-20210011385) Appendix A. {{N_EXP}} experiments and {{N_OBS}} flow-step observations;
-  {{N_TRAIN_EXP}} experiments and {{N_TRAIN_OBS}} observations train the model ({{POS}} sustained, {{NEG}} not sustained).
-  Airflow: {{FLOW_PROVENANCE}}
-- **Model.** {{N_MODELLED}} groups meet the modelling rule; {{N_NOT_MODELLED}} are coverage only. GP classifier with a
-  Laplace approximation, ARD squared-exponential kernel, constant mean fixed a priori, MAP-II hyperparameters. The pressure
-  length scale is fixed at {{LP}} (ln units) because pressure does not vary in the data; the model assumes its correlation
-  depends only on distance (stationarity), so anything away from 1 atm is assumption-driven and labelled as such.
-- **Validation.** Repeated grouped K-fold by experiment ({{CV_K}} x {{CV_REPEATS}}), group-bootstrap 95 % CIs, majority-class
-  and logistic baselines, leave-one-campaign-out, calibration (reported, not forced), sensitivity analyses and a
-  retrospective test of the ranking rule.
-- **Interface.** Next.js app on a precomputed static snapshot of the analysis API (FastAPI), so the public site needs no
-  server.
+  schedules and outcomes were interpreted into curation tables; BASS-II outcomes were cross-checked against the BASS-II
+  Summary Report (NASA/TM-20210011385) Appendix A. {{N_EXP}} experiments, {{N_OBS}} test steps; {{N_TRAIN_EXP}} experiments
+  and {{N_TRAIN_OBS}} steps train the model ({{POS}} flame kept burning, {{NEG}} went out). Airflow: {{FLOW_PROVENANCE}}
+- **Model.** {{N_MODELLED}} material setups have enough data to model; {{N_NOT_MODELLED}} are coverage only. Gaussian-process
+  classifier (Laplace approximation, ARD squared-exponential kernel, constant mean fixed in advance, MAP-II
+  hyperparameters). The pressure length scale is fixed at {{LP}} (ln units) because pressure barely varies in the data. The
+  model assumes correlation depends only on distance (stationarity), so anything away from 1 atm is assumption-driven and
+  labelled so.
+- **Validation.** Repeated grouped K-fold by experiment ({{CV_K}} x {{CV_REPEATS}}), group-bootstrap 95 % CIs,
+  majority-class and logistic baselines, leave-one-campaign-out, calibration (reported, not forced), sensitivity checks and
+  a retrospective test of the ranking rule.
+- **Interface.** A Next.js app on a precomputed snapshot of the analysis API (FastAPI), so the public site needs no server.
 
 ### Honest limits
 
-- The GP beats a majority-class guess (CI excludes 0) in {{N_GP_BETTER}} of {{N_MODELLED}} groups ({{GP_BETTER_GROUPS}});
-  elsewhere it is not distinguishable. Classes are imbalanced ({{POS_PCT}} sustained) and samples small ({{N_EXP_MIN}} to
-  {{N_EXP_MAX}} experiments per group).
-- In the sphere groups most negatives are flow-turned-off steps; grouped-CV AUC before and after dropping them:
+- The model beats a majority-class guess (CI excludes 0) in {{N_GP_BETTER}} of {{N_MODELLED}} setups ({{GP_BETTER_GROUPS}});
+  elsewhere it is not distinguishable. Classes are imbalanced ({{POS_PCT}} flame kept burning); setups have {{N_EXP_MIN}} to
+  {{N_EXP_MAX}} experiments.
+- In the sphere setups most negatives are flow-turned-off steps. Grouped-CV AUC before and after dropping them:
   {{FLOWOFF_AUC}}.
 - Retrospective test of the ranking ({{R_N}} scenarios): better than random in {{R_RAND_B}}, indistinguishable in
-  {{R_RAND_I}}, worse in {{R_RAND_W}}; modest small-sample evidence, not proof.
+  {{R_RAND_I}}, worse in {{R_RAND_W}}. Modest small-sample evidence, not proof.
 - Gaps are gaps in the integrated records, not in NASA's knowledge. Microgravity only; partial-gravity work (for example the
   Glenn drop-tower limits at Lunar and Martian gravity) is catalogued but not integrated.
 
 ### Benefits
 
-- Combustion scientists and cabin designers see at a glance which cabin conditions are backed by comparable, traceable NASA
-  records, and which are not.
-- The gap becomes a ranked, explained list of research questions with their assumptions shown.
-- The data are reusable: CSV/JSON/Parquet exports, a dataset version hash, deterministic rebuilds.
+- Combustion scientists and cabin designers see at a glance which cabin air is backed by nearby, traceable NASA tests.
+- The gap becomes a ranked list of research questions, with assumptions shown.
+- The data are reusable: CSV, JSON and Parquet exports, a dataset version hash, deterministic rebuilds.
 
 ### Tools and languages
 
-Python 3.12 (FastAPI, Pydantic, NumPy, SciPy, pandas, scikit-learn for the logistic baselines; the GP, Laplace
-approximation and active learning are implemented directly in NumPy/SciPy), TypeScript, Next.js, React, Tailwind CSS,
-D3 modules, Playwright and axe-core for headless end-to-end and accessibility tests. Full list with licences under
-References.
+Python 3.12 (FastAPI, Pydantic, NumPy, SciPy, pandas, scikit-learn for the logistic baselines; the Gaussian process, Laplace
+approximation and active learning are written directly in NumPy and SciPy), TypeScript, Next.js, React, Tailwind CSS, D3
+modules, Playwright and axe-core for headless end-to-end and accessibility tests. Full list with licences under References.
 
 ### How AI was used to build this
 
 Blind Spots was built with extensive use of Claude (Anthropic) as an AI coding, transcription, review and writing
-assistant. It helped write the code; transcribe free-text NASA test-matrix cells and NASA report tables into curation
-tables (two independent transcriptions per chunk, adjudicated; every quoted token machine-checked against the original NASA
-cell, {{N_PROVENANCE_FAIL}} provenance failures); extract the verbatim NASA quotes for the {{N_PROFILES}} atmosphere
-profiles (machine-checked against the documents); and produce research summaries, code and science reviews, the
-documentation and the scripted headless capture of the demo video and screenshots. Decisions and their rationale are logged
-in `docs/decisions.md`. The app itself contains no generative AI: predictions come from a Gaussian-process classifier,
-rankings from expected-variance-reduction active learning, and every explanation is a deterministic template filled with
-computed numbers. No AI-generated images, video or audio are used.
+assistant. It helped write the code; transcribe free-text NASA test-matrix cells and report tables into curation tables
+(two independent transcriptions per chunk, adjudicated; every quoted token machine-checked against the original NASA cell,
+{{N_PROVENANCE_FAIL}} provenance failures); extract the verbatim NASA quotes for the {{N_PROFILES}} atmosphere profiles
+(machine-checked against the documents); and produce research summaries, reviews, documentation and the scripted headless
+capture of the demo video and screenshots. Decisions are logged in `docs/decisions.md`. The app itself contains no
+generative AI: predictions come from a Gaussian-process classifier, rankings from active learning, and every explanation is
+a template filled with computed numbers. No AI-generated images, video or audio are used.
 
 ---
 
 ## Use of Super Intelligence (SI)
 
-**SI inside the app (plain words).** Machine learning: a Gaussian-process model that says when it does not know, plus
-active learning that ranks the most informative next experiment. The model gives the probability that a flame is sustained
-only where comparable evidence supports it and otherwise answers "Insufficient experimental evidence for a reliable
-estimate."; the active learning ranks computational research candidates by the expected reduction of the model's
-uncertainty about the chosen cabin atmosphere. No language model runs in the app or the API.
+**SI inside the app.** Machine learning only: a Gaussian-process model that says when it does not know, and active learning
+that ranks the most informative next experiment. It gives a probability only where nearby tests support one, and otherwise
+answers "Insufficient experimental evidence for a reliable estimate." No language model runs in the app or the API.
 
-**SI used to build it.** As described under "How AI was used to build this" above (Claude, Anthropic): code,
-double-transcribed and machine-checked curation, quote extraction, research summaries, reviews, documentation and the
-scripted capture of the demo media. AI output was checked by code rather than trusted: provenance checks against the NASA
-files, unit and end-to-end tests, and an independent re-derivation of the Gaussian-process core against a dense brute-force
-implementation.
+**SI used to build it.** Claude (Anthropic), as described under "How AI was used to build this": code, double-transcribed
+and machine-checked curation, quote extraction, research summaries, reviews, documentation and the scripted capture of the
+demo media. AI output was checked by code, not trusted: provenance checks against the NASA files, unit and end-to-end
+tests, and an independent re-derivation of the Gaussian-process core against a dense brute-force version.
 
 ---
 

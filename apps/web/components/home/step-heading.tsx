@@ -1,6 +1,6 @@
 import { cn } from "@/lib/cn";
 
-/** "1  Pick a cabin" heading with a numbered badge. Server-safe. `hintOnPhone: false` hides the hint below 640 px. */
+/** "1  Pick a cabin": a short heading with a numbered badge. The hint is optional; leave it out unless it adds something. Server-safe. */
 export function StepHeading({
   n,
   id,

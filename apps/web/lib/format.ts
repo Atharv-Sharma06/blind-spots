@@ -152,22 +152,22 @@ export const INSUFFICIENT_EVIDENCE_SENTENCE = "Insufficient experimental evidenc
 // ---- Canonical terms (LEAD_DECISIONS D5; .work/audit/a12-copy/glossary.md) -------------------------------
 
 export const TERMS = {
-  sustained: "flame sustained",
-  notSustained: "flame not sustained",
+  sustained: "flame kept burning",
+  notSustained: "flame went out",
   notUsed: "not used for training",
-  analysisGroup: "analysis group",
-  analysisGroupLabel: "Material and flame configuration",
-  comparable: "comparable observations",
-  referenceDistance: "reference distance",
-  evr: "expected uncertainty reduction",
+  analysisGroup: "material setup",
+  analysisGroupLabel: "Material and flame setup",
+  comparable: "nearby test results",
+  referenceDistance: "comparison distance",
+  evr: "uncertainty removed",
   epistemic: "knowledge uncertainty",
-  aleatoric: "outcome variability",
+  aleatoric: "mixed outcomes",
   candidate: "research candidate",
   candidateFirst: "computational research candidate",
-  latentStdRatio: "remaining uncertainty (latent std ratio)",
-  insideHull: "inside the observed region",
-  context: "context (not modelled)",
-  notIntegrated: "related NASA work, not integrated",
+  latentStdRatio: "remaining uncertainty",
+  insideHull: "inside tested conditions",
+  context: "context only",
+  notIntegrated: "related NASA work, not used",
 } as const;
 
 const VERDICT_LABELS: Record<Verdict, string> = {
@@ -182,8 +182,8 @@ export function verdictLabel(v: Verdict | null | undefined): string {
 }
 
 const VERDICT_TEXT: Record<Verdict, string> = {
-  supported: "Supported: inside the observed region or near 3 or more comparable observations, with low remaining model uncertainty.",
-  extrapolation: "Extrapolation: not well constrained by comparable observations; the estimate depends on model assumptions.",
+  supported: "Supported: inside tested conditions, or near 3 or more ISS test results, with low model uncertainty.",
+  extrapolation: "Extrapolation: few nearby test results, so the estimate leans on model assumptions.",
   insufficient_evidence: INSUFFICIENT_EVIDENCE_SENTENCE,
 };
 
@@ -205,10 +205,10 @@ export function outcomeLabel(outcome: HypotheticalOutcome | null | undefined): s
 }
 
 const FLAME_STATE_LABELS: Record<string, string> = {
-  sustained: "Flame sustained",
-  extinguished: "Flame extinguished",
-  brief_flame_no_sustain: "Brief flame, not sustained",
-  not_ignited: "Not ignited",
+  sustained: "Flame kept burning",
+  extinguished: "Flame went out",
+  brief_flame_no_sustain: "Brief flame, then out",
+  not_ignited: "Flame never lit",
 };
 
 /** Curated per-step flame state (CONTRACTS 2.2). */
@@ -217,11 +217,11 @@ export function flameStateText(state: string | null | undefined): string {
 }
 
 const EXTINCTION_MODE_LABELS: Record<string, string> = {
-  quench_low_flow: "Quenched at low flow",
-  blowoff_high_flow: "Blown off at high flow",
-  at_constant_flow: "Extinguished at constant flow",
-  flow_turned_off: "Flow turned off",
-  n2_suppression: "N₂ suppression",
+  quench_low_flow: "Went out: too little airflow",
+  blowoff_high_flow: "Went out: too much airflow",
+  at_constant_flow: "Went out at steady airflow",
+  flow_turned_off: "Airflow switched off",
+  n2_suppression: "Put out with nitrogen",
 };
 
 export function extinctionModeLabel(mode: string | null | undefined): string {
@@ -260,9 +260,9 @@ export function materialFamilyLabel(f: string | null | undefined): string {
 
 const AIRFLOW_BASIS_LABELS: Record<string, string> = {
   air_display: "Duct airflow reading",
-  stated_cm_s: "Airflow stated in the source",
-  fan_calibration: "Converted from fan setting (BASS-II calibration)",
-  pot_calibration: "Converted from pot setting (BASS-II calibration)",
+  stated_cm_s: "Airflow from the source",
+  fan_calibration: "Converted from fan setting",
+  pot_calibration: "Converted from dial setting",
   none: "No airflow recorded",
 };
 
@@ -287,9 +287,9 @@ export function atmosphereStatusLabel(s: string | null | undefined): string {
 }
 
 const INVESTIGATION_ROLE_LABELS: Record<string, string> = {
-  integrated_model: "Integrated (modelled)",
-  integrated_context: "Integrated as context (not modelled)",
-  catalogued_not_integrated: "Related NASA work, not integrated",
+  integrated_model: "Used in the model",
+  integrated_context: "Context only, not modelled",
+  catalogued_not_integrated: "Related NASA work, not used",
 };
 
 export function investigationRoleLabel(r: string | null | undefined): string {
@@ -298,9 +298,9 @@ export function investigationRoleLabel(r: string | null | undefined): string {
 
 const EXTRACTION_METHOD_LABELS: Record<string, string> = {
   structured_nasa_data: "Structured NASA data",
-  extracted_from_documentation: "Extracted from documentation",
-  manually_transcribed: "Manually transcribed",
-  derived_computation: "Derived computation",
+  extracted_from_documentation: "From documentation",
+  manually_transcribed: "Typed in by hand",
+  derived_computation: "Computed",
 };
 
 export function extractionMethodLabel(m: string | null | undefined): string {
@@ -309,9 +309,9 @@ export function extractionMethodLabel(m: string | null | undefined): string {
 
 const RANK_STATUS_LABELS: Record<string, string> = {
   ok: "Ranked",
-  no_eligible_candidates: "No eligible candidates in the candidate domain",
-  no_informative_candidates: "No candidate reduces the target uncertainty",
-  model_unavailable: "No model for this analysis group",
+  no_eligible_candidates: "No eligible tests to rank",
+  no_informative_candidates: "No test would cut the uncertainty",
+  model_unavailable: "No model for this material",
 };
 
 export function rankStatusLabel(s: string | null | undefined): string {
@@ -324,8 +324,8 @@ export function planeLabel(p: Plane | null | undefined): string {
 }
 
 const OVERLAP_LABELS: Record<string, string> = {
-  contains_target_nominal: "Documented range contains the target",
-  overlaps_target_region: "Documented range overlaps the target",
+  contains_target_nominal: "Range contains the target",
+  overlaps_target_region: "Range overlaps the target",
 };
 export function overlapLabel(o: string | null | undefined): string {
   return o ? OVERLAP_LABELS[o] ?? humanizeCode(o) : MISSING;
@@ -333,30 +333,30 @@ export function overlapLabel(o: string | null | undefined): string {
 
 export function modelStatusLabel(s: ModelStatus | null | undefined): string {
   if (s === "modeled") return "Modelled";
-  if (s === "insufficient_data") return "Coverage only (too few observations for a model)";
+  if (s === "insufficient_data") return "Coverage only: too few test results for a model";
   return MISSING;
 }
 
 const REASON_LABELS: Record<ReasonCode | CandidateReasonCode, string> = {
-  sparse_observations: "Sparse observations nearby",
-  outside_hull: "Outside the observed region",
-  unobserved_pressure: "Pressure not observed",
-  outcome_variability: "Mixed outcomes nearby",
-  model_instability: "Model unstable across resamples",
-  other_family_evidence_only: "Evidence from other material families only",
-  no_model: "No model for this analysis group",
-  high_knowledge_uncertainty: "High knowledge uncertainty",
-  target_points_not_supported: "Target points not supported",
-  high_target_covariance: "Strongly informs the target",
-  high_candidate_uncertainty: "High uncertainty at the candidate",
-  near_decision_boundary: "Near the predicted decision boundary",
-  fills_coverage_gap: "Fills a coverage gap",
-  assumption_dependent: "Depends on the assumed pressure correlation",
+  sparse_observations: "Few ISS tests nearby",
+  outside_hull: "Outside tested conditions",
+  unobserved_pressure: "No tests at this pressure",
+  outcome_variability: "Mixed results nearby",
+  model_instability: "Model answer is unstable",
+  other_family_evidence_only: "Only other materials tested",
+  no_model: "No model for this material",
+  high_knowledge_uncertainty: "High uncertainty",
+  target_points_not_supported: "Not enough nearby ISS tests",
+  high_target_covariance: "Tells us a lot about the target",
+  high_candidate_uncertainty: "High uncertainty here",
+  near_decision_boundary: "Near the model's 50 % line",
+  fills_coverage_gap: "Fills a gap in the data",
+  assumption_dependent: "Depends on a pressure assumption",
 };
 
 const EXTRA_REASON_LABELS: Record<string, string> = {
-  relative_evr_difference: "Difference in expected uncertainty reduction",
-  preference_flips_under_sensitivity: "Preference flips under the pressure-correlation check",
+  relative_evr_difference: "Difference in uncertainty removed",
+  preference_flips_under_sensitivity: "Ranking flips if the pressure assumption changes",
 };
 
 export function reasonLabel(code: string): string {
@@ -373,7 +373,7 @@ export const FEASIBILITY_DISCLAIMERS: Record<FeasibilityStatus, string> = {
 
 export function feasibilityLabel(status: FeasibilityStatus): { label: string; disclaimer: string } {
   return {
-    label: status === "within_demonstrated_envelope" ? "Within demonstrated envelope" : "Outside demonstrated envelope",
+    label: status === "within_demonstrated_envelope" ? "Within tested conditions" : "Outside tested conditions",
     disclaimer: FEASIBILITY_DISCLAIMERS[status],
   };
 }
@@ -385,15 +385,15 @@ export const CANDIDATE_DISCLAIMER =
 // ---- Target resolution notes -----------------------------------------------------------------------------
 
 const BAND_SOURCE_LABELS: Record<AirflowBandSource, { label: string; explanation: string }> = {
-  profile: { label: "Profile airflow", explanation: "Airflow band documented for this profile." },
+  profile: { label: "Profile airflow", explanation: "Documented for this profile." },
   ventilation_standard_with_near_quiescent_extension: {
-    label: "Ventilation standard with near-quiescent extension",
+    label: "Ventilation standard, extended to near-still air",
     explanation:
-      "The upper bound is the documented ventilation range (7.62–60.96 cm/s, NASA-STD-3001 Vol. 2 / HIDH). The band is extended down to 0.5 cm/s as an analysis choice (ventilation loss or dead zones; microgravity flame extinction happens at low flow); that extension is not a NASA requirement.",
+      "Upper bound: the documented ventilation range (7.62–60.96 cm/s, NASA-STD-3001 Vol. 2 / HIDH). We extend it down to 0.5 cm/s as an analysis choice, to cover ventilation loss and dead zones. NASA does not require this.",
   },
-  ventilation_standard: { label: "Ventilation standard", explanation: "Airflow band from the documented ventilation range." },
-  default_band: { label: "Default analysis band", explanation: "No documented airflow band; a default analysis band is used." },
-  custom: { label: "User-selected airflow band", explanation: "Airflow band entered for this custom target." },
+  ventilation_standard: { label: "Ventilation standard", explanation: "From the documented ventilation range." },
+  default_band: { label: "Default airflow band", explanation: "No documented band, so a default is used." },
+  custom: { label: "User-selected airflow band", explanation: "The band you entered." },
 };
 
 export function airflowBandSourceLabel(s: AirflowBandSource): { label: string; explanation: string } {
@@ -402,11 +402,11 @@ export function airflowBandSourceLabel(s: AirflowBandSource): { label: string; e
 
 const TARGET_FLAG_LABELS: Record<string, string> = {
   documented_upper_bound_used:
-    "Documented upper bound used (no nominal documented); higher O₂ is the worst case for flammability.",
-  documented_pressure_used: "Documented pressure value used (no nominal documented).",
-  documented_lower_bound_used: "Documented lower bound used (no nominal documented).",
-  documented_bound_used: "Documented bound used (no nominal documented).",
-  default_band: "No documented airflow band; the default analysis band is used.",
+    "Upper bound used (no typical value documented). Higher O₂ is the worst case for flammability.",
+  documented_pressure_used: "Documented pressure used (no typical value documented).",
+  documented_lower_bound_used: "Lower bound used (no typical value documented).",
+  documented_bound_used: "Bound used (no typical value documented).",
+  default_band: "No documented airflow band; a default is used.",
 };
 
 export function targetFlagLabel(flag: string): string {
@@ -420,7 +420,7 @@ export function targetFlagLabel(flag: string): string {
 export function notRepresentedText(names: readonly string[]): string {
   const base = "These conditions are not represented in the integrated records.";
   if (names.length === 0) return base;
-  return `${base} Documented NASA work that is not integrated here and may bear on them: ${names.join("; ")}.`;
+  return `${base} Related NASA work not used here: ${names.join("; ")}.`;
 }
 
 // ---- Axes ----------------------------------------------------------------------------------------------------

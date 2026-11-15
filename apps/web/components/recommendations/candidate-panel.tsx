@@ -1,12 +1,12 @@
 "use client";
 
-import { Crosshair, GitCompareArrows } from "lucide-react";
+import { Check, Crosshair, GitCompareArrows } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PanelSkeleton } from "@/components/explore/query-state";
 import { cn } from "@/lib/cn";
-import { feasibilityLabel, fmtCmS, fmtFixed, fmtFractionPercent, fmtKpa, fmtOxygen, fmtProbability, fmtPsia, kpaToPsia, reasonLabel } from "@/lib/format";
+import { feasibilityLabel, fmtCmS, fmtFixed, fmtFractionPercent, fmtKpa, fmtOxygen, reasonLabel } from "@/lib/format";
 import { CANDIDATE_FRAMING } from "@/lib/copy";
 import { pct } from "@/components/explore/plain";
 import type { Candidate, GroupSummary, RankResponse } from "@/lib/types";
@@ -31,7 +31,7 @@ export interface CandidatePanelProps {
 const isAssumptionDependent = (c: Candidate) => c.reasons.some((r) => r.code === "assumption_dependent");
 
 export const AT_TARGET_TEXT =
-  "The most informative single experiment is at the target conditions themselves; this follows from the model's distance-based (stationary) correlation assumption.";
+  "The best test is at the cabin's own conditions. That follows from the model's assumption that nearby air behaves alike.";
 
 function Conditions({ c }: { c: Candidate }) {
   return (
@@ -43,7 +43,6 @@ function Conditions({ c }: { c: Candidate }) {
       <div className="min-w-0">
         <dt className="text-muted">Pressure</dt>
         <dd className="num text-[13px] whitespace-nowrap text-fg">{fmtKpa(c.pressure_kpa)}</dd>
-        <dd className="num text-xs whitespace-nowrap text-muted">{fmtPsia(kpaToPsia(c.pressure_kpa))}</dd>
       </div>
       <div className="min-w-0">
         <dt className="text-muted">Airflow</dt>
@@ -55,12 +54,21 @@ function Conditions({ c }: { c: Candidate }) {
 
 const shortCond = (c: Candidate) => `${fmtOxygen(c.oxygen_percent, 1)}, ${fmtKpa(c.pressure_kpa)}, ${fmtCmS(c.airflow_cm_s)}`;
 
+function RowCompareToggle({ id, rank, ids, onToggle }: { id: string; rank: number; ids: [string | null, string | null]; onToggle: (id: string) => void }) {
+  const on = ids.includes(id);
+  return (
+    <Button variant={on ? "primary" : "secondary"} size="icon" aria-pressed={on} aria-label={`Compare test ${rank}`} title={on ? "Added to compare" : "Compare"} onClick={() => onToggle(id)}>
+      {on ? <Check aria-hidden /> : <GitCompareArrows aria-hidden />}
+    </Button>
+  );
+}
+
 function CompareToggle({ id, ids, onToggle }: { id: string; ids: [string | null, string | null]; onToggle: (id: string) => void }) {
   const on = ids.includes(id);
   return (
     <Button variant={on ? "primary" : "secondary"} size="sm" aria-pressed={on} onClick={() => onToggle(id)}>
       <GitCompareArrows aria-hidden />
-      {on ? "Added to compare" : "Compare"}
+      {on ? "Added" : "Compare"}
     </Button>
   );
 }
@@ -72,7 +80,7 @@ export function CandidatePanel(p: CandidatePanelProps) {
       <EmptyState
         compact
         title="No prediction for this material"
-        description={`There are too few test results for a model (${group?.model_reason ?? "insufficient data"}). Try another material; the chart still shows where tests exist.`}
+        description={`Too few test results for a model (${group?.model_reason ?? "insufficient data"}). Try another material.`}
       />
     );
   }
@@ -84,13 +92,11 @@ export function CandidatePanel(p: CandidatePanelProps) {
       <Updating active={pending}>
         <EmptyState
           compact
-          title={r.status === "model_unavailable" ? "Model unavailable" : r.status === "no_informative_candidates" ? "No informative candidates" : "No eligible candidates"}
+          title={r.status === "model_unavailable" ? "No model yet" : "No useful next test"}
           description={
             r.status === "model_unavailable"
-              ? "No trained model is available for this material. Try another material."
-              : r.status === "no_informative_candidates"
-                ? "Under the model, no candidate is correlated with this cabin, so none would reduce its uncertainty and a ranking would only reflect tie-breaking. Try another material."
-                : "No candidate adds information about this cabin. Try another material."
+              ? "There is no model for this material. Try another material."
+              : "No candidate would teach the model about this cabin. Try another material."
           }
         />
       </Updating>
@@ -109,7 +115,7 @@ export function CandidatePanel(p: CandidatePanelProps) {
   const why = top.reasons.filter((x) => x.code !== "assumption_dependent" && (showP || x.code !== "near_decision_boundary"));
   const baselines: Array<[string, Candidate | null]> = [
     ["Random", r.baselines.random],
-    ["Uncertainty sampling", r.baselines.uncertainty_sampling],
+    ["Most uncertain", r.baselines.uncertainty_sampling],
     ["Nearest gap", r.baselines.nearest_gap],
   ];
 
@@ -123,7 +129,7 @@ export function CandidatePanel(p: CandidatePanelProps) {
         >
           <h3 className="flex items-center gap-1.5 text-[13px] font-semibold">
             <span aria-hidden className="inline-block size-2.5 rotate-45 bg-accent" />
-            Test {top.rank}: the most informative
+            Test {top.rank}: most informative
           </h3>
           <Conditions c={top} />
 
@@ -132,16 +138,15 @@ export function CandidatePanel(p: CandidatePanelProps) {
               Would cut the model&apos;s uncertainty about this cabin by{" "}
               <span className="num text-xl font-medium tracking-[-0.01em] whitespace-nowrap" data-testid="evr-value">{fmtFractionPercent(top.evr_fraction)}</span>.
             </p>
-            {isAssumptionDependent(top) ? <p className="mt-0.5 text-xs text-muted">This depends on the assumed pressure correlation.</p> : null}
-            <p className="mt-0.5 text-xs text-muted">A model estimate: the share of the cabin&apos;s uncertainty one new test result here would remove.</p>
+            <p className="mt-0.5 text-xs text-muted">
+              A model estimate{isAssumptionDependent(top) ? ", based on an assumed pressure link" : ""}.
+            </p>
           </div>
 
           {atTarget ? <p className="text-xs text-fg">{AT_TARGET_TEXT}</p> : null}
           <p className="text-xs text-muted">
-            {far
-              ? `The closest ISS test result is ${fmtFixed(top.nn_distance, 1)} steps away.`
-              : `The closest ISS test result is ${fmtFixed(top.nn_distance, 1)} steps away, so nearby evidence exists.`}
-            {showP ? <> The model puts the chance of a flame at <span className="num text-fg">{pct(top.p_sustained)}</span>.</> : " The model gives no estimate of whether a flame keeps burning here: the evidence does not support one."}
+            Nearest ISS test: {fmtFixed(top.nn_distance, 1)} steps away{far ? "" : " (nearby)"}.
+            {showP ? <> Flame chance: <span className="num text-fg">{pct(top.p_sustained)}</span>.</> : " No flame estimate: too little evidence."}
           </p>
 
           <div className="flex flex-wrap gap-2">
@@ -156,20 +161,18 @@ export function CandidatePanel(p: CandidatePanelProps) {
         {rest.length > 0 ? (
           <ul className="divide-y divide-border rounded-md border border-border" aria-label="Other ranked candidates">
             {rest.map((c) => (
-              <li key={c.candidate_id} className={cn("space-y-2 p-3", selectedId === c.candidate_id && "bg-accent-tint")}>
-                <div className="flex items-baseline justify-between gap-2">
-                  <span className="text-[13px] font-medium">Test {c.rank}</span>
-                  <span className="text-xs text-muted">
-                    cuts uncertainty by <span className="num text-fg">{fmtFractionPercent(c.evr_fraction)}</span> on its own
-                  </span>
-                </div>
-                <p className="num text-xs text-fg">{shortCond(c)}</p>
-                <div className="flex flex-wrap gap-2">
-                  <Button size="sm" variant="ghost" onClick={() => onExplore(c)} aria-label={`What would we learn? Test ${c.rank}`}>
+              <li key={c.candidate_id} className={cn("flex items-center justify-between gap-2 p-3", selectedId === c.candidate_id && "bg-accent-tint")}>
+                <p className="min-w-0 text-[13px]">
+                  <span className="font-medium">Test {c.rank}</span>{" "}
+                  <span className="text-muted">cuts <span className="num text-fg">{fmtFractionPercent(c.evr_fraction)}</span></span>
+                  <span className="num block text-xs text-muted">{shortCond(c)}</span>
+                </p>
+                <div className="flex shrink-0 gap-1.5">
+                  <Button size="sm" variant="ghost" onClick={() => onExplore(c)} aria-label={`What if? Test ${c.rank}`}>
                     <Crosshair aria-hidden />
-                    What would we learn?
+                    What if?
                   </Button>
-                  <CompareToggle id={c.candidate_id} ids={compareIds} onToggle={onToggleCompare} />
+                  <RowCompareToggle id={c.candidate_id} rank={c.rank} ids={compareIds} onToggle={onToggleCompare} />
                 </div>
               </li>
             ))}
@@ -178,14 +181,14 @@ export function CandidatePanel(p: CandidatePanelProps) {
 
         {compareIds[0] !== null || compareIds[1] !== null ? (
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-xs text-muted">{compareReady ? "Two candidates are ready to compare." : "Add one more candidate to compare."}</p>
-            <Button size="sm" variant="secondary" disabled={!compareReady} onClick={onOpenCompare} data-testid="open-compare">Compare side by side</Button>
+            <p className="text-xs text-muted">{compareReady ? "Two tests ready." : "Add one more to compare."}</p>
+            <Button size="sm" variant="secondary" disabled={!compareReady} onClick={onOpenCompare} data-testid="open-compare">Compare the two</Button>
           </div>
         ) : null}
 
         <Disclosure summary="Technical details">
-          <section aria-label="Why this candidate" className="space-y-1.5">
-            <p className="font-medium text-fg">Why this candidate</p>
+          <section aria-label="Why this test" className="space-y-1.5">
+            <p className="font-medium text-fg">Why this test</p>
             {why.length > 0 ? (
               <ul className="space-y-1">
                 {why.map((x) => (
@@ -195,32 +198,28 @@ export function CandidatePanel(p: CandidatePanelProps) {
                 ))}
               </ul>
             ) : !atTarget ? (
-              <p className="text-muted">It has the highest expected uncertainty reduction among the candidates in the analysis domain.</p>
+              <p className="text-muted">It cuts the most uncertainty of all candidates.</p>
             ) : null}
-            {showP ? <p className="text-muted">Model P(sustained) here <span className="num text-fg">{fmtProbability(top.p_sustained)}</span> (a model estimate).</p> : null}
             {top.related_documented_investigations.length > 0 ? (
               <p className="text-muted">
-                Inside the documented test envelope of {top.related_documented_investigations.map((i) => i.name.split(" (")[0]).join("; ")} (not integrated); existing data may already inform this candidate.
+                Inside the range of {top.related_documented_investigations.map((i) => i.name.split(" (")[0]).join("; ")} (not in our data), so existing results may already help.
               </p>
             ) : null}
             <p className="text-muted"><span className="font-medium text-fg">{fe.label}.</span> {fe.disclaimer}</p>
           </section>
           <section aria-label="Baseline comparison">
             <p className="mb-1.5 font-medium text-fg">How this ranking compares with simpler rules</p>
-            <p className="mb-1.5 text-muted">
-              Each rule&apos;s pick is scored with the same measure: the expected uncertainty reduction if this baseline&apos;s pick were tested instead.
-            </p>
-            <Table aria-label="Expected reduction of target uncertainty by selection strategy">
+            <Table aria-label="Uncertainty cut by each way of picking a test">
               <TableHeader>
                 <tr>
-                  <TableHead>Strategy and its pick</TableHead>
-                  <TableHead numeric>Expected reduction</TableHead>
+                  <TableHead>Way of picking</TableHead>
+                  <TableHead numeric>Uncertainty cut</TableHead>
                 </tr>
               </TableHeader>
               <TableBody>
                 <TableRow>
                   <TableCell>
-                    Blind Spots (target-aware)
+                    Blind Spots
                     <span className="num block text-xs text-muted">{shortCond(top)}</span>
                   </TableCell>
                   <TableCell numeric>{fmtFractionPercent(top.evr_fraction, 1)}</TableCell>
@@ -237,19 +236,19 @@ export function CandidatePanel(p: CandidatePanelProps) {
               </TableBody>
             </Table>
             <p className="mt-1 text-muted">
-              The random baseline is a single seeded draw. Picks far from the target remove almost none of its uncertainty, hence values near 0%. On held-out data the advantage is modest and not uniform; see{" "}
+              Random is one seeded draw. On held-out data the gain is modest; see{" "}
               <a className="underline" href="/methodology#trust">How it works</a>.
             </p>
           </section>
           {r.sensitivity.length > 0 ? (
-            <section aria-label="Sensitivity to the assumed pressure correlation">
-              <p className="font-medium text-fg">Sensitivity to the assumed pressure correlation</p>
-              <p className="text-muted">Every integrated observation is near 1 atm, so the pressure length scale is fixed, not learned.</p>
+            <section aria-label="If the assumed pressure link changes">
+              <p className="font-medium text-fg">If the assumed pressure link changes</p>
+              <p className="text-muted">All ISS tests are near 1 atm, so this link is set, not learned.</p>
               <ul className="mt-1 space-y-0.5 text-muted">
                 {r.sensitivity.map((s) => (
                   <li key={s.pressure_length_scale}>
-                    Length scale <span className="num text-fg">{s.pressure_length_scale}</span>:{" "}
-                    {s.same_top_as_default ? "same top candidate" : s.top_candidate ? <>top candidate changes to <span className="num">{shortCond(s.top_candidate)}</span></> : "no candidate"}
+                    Setting <span className="num text-fg">{s.pressure_length_scale}</span>:{" "}
+                    {s.same_top_as_default ? "same top test" : s.top_candidate ? <>top test becomes <span className="num">{shortCond(s.top_candidate)}</span></> : "no test"}
                   </li>
                 ))}
               </ul>

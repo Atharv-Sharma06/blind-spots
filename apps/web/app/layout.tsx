@@ -6,11 +6,11 @@ import "@/styles/globals.css";
 import { Providers } from "./providers";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
-import { SITE_DESCRIPTION, SITE_TITLE } from "@/lib/copy";
+import { SITE_QUESTION } from "@/lib/copy";
 
-// Site title and description (plain-language redesign, see lib/copy.ts).
-const TITLE = SITE_TITLE;
-const DESCRIPTION = SITE_DESCRIPTION;
+// Short title and description: the product question, then one line.
+const TITLE = "Blind Spots";
+const DESCRIPTION = `${SITE_QUESTION} Pick a cabin and see.`;
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL;
 
 // The diamond mark as an inline SVG favicon (no extra file, no logo of any agency).

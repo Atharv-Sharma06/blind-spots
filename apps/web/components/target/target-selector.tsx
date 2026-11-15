@@ -18,9 +18,9 @@ import type { AtmosphereProfile, CustomTarget } from "@/lib/types";
 export const CUSTOM_LABEL = "User-selected hypothetical conditions";
 
 const STATUS_ORDER: Array<{ status: string; title: string }> = [
-  { status: "documented_nasa", title: "Documented NASA cabins" },
-  { status: "nasa_design_recommendation", title: "Exploration design recommendations" },
-  { status: "historical_nasa", title: "Earlier NASA cabins and designs" },
+  { status: "documented_nasa", title: "NASA cabins" },
+  { status: "nasa_design_recommendation", title: "Recommended designs" },
+  { status: "historical_nasa", title: "Earlier cabins" },
 ];
 
 const KPA_PER_PSI = 6.894757293168361;
@@ -65,10 +65,10 @@ export function TargetSelector({ className }: { className?: string } = {}) {
           <ChevronDown aria-hidden />
         </Button>
       </SheetTrigger>
-      <SheetContent title={view === "list" ? "Choose a cabin" : "Custom conditions"} description={view === "list" ? "Pick a spacecraft or habitat air to check against the ISS tests." : CUSTOM_LABEL}>
+      <SheetContent title={view === "list" ? "Choose a cabin" : "Custom conditions"} description={view === "list" ? "Pick the air to check against ISS tests." : CUSTOM_LABEL}>
         {view === "list" ? (
           <div className="space-y-5">
-            {targets.isError ? <Callout variant="warning" title="Cabins could not be loaded">The analysis service did not return the documented cabin profiles.</Callout> : null}
+            {targets.isError ? <Callout variant="warning" title="Could not load cabins">The analysis service did not respond.</Callout> : null}
             {STATUS_ORDER.map(({ status, title }) => {
               const list = usable.filter((p) => p.status === status);
               if (list.length === 0) return null;
@@ -90,7 +90,7 @@ export function TargetSelector({ className }: { className?: string } = {}) {
                             }}
                             className="min-w-0 flex-1 px-3 py-2 text-left hover:bg-subtle focus-visible:relative"
                           >
-                            <span className="block text-[13px] font-medium text-fg">{p.name}</span>
+                            <span className="block text-[13px] font-medium text-fg">{shortCabinName(p.profile_id, p.name)}</span>
                             <span className="num mt-0.5 block text-xs text-muted">{profileConditions(p)}</span>
                           </button>
                           {src ? (
@@ -98,7 +98,7 @@ export function TargetSelector({ className }: { className?: string } = {}) {
                               href={src.url}
                               target="_blank"
                               rel="noreferrer noopener"
-                              aria-label={`Source for ${p.name}: ${src.title}`}
+                              aria-label={`Source for ${shortCabinName(p.profile_id, p.name)}`}
                               className="flex items-center px-3 text-xs text-muted hover:text-fg"
                             >
                               <ExternalLink className="size-3.5" aria-hidden />
@@ -117,20 +117,20 @@ export function TargetSelector({ className }: { className?: string } = {}) {
                 <ul className="rounded-md border border-dashed border-border">
                   {envelope.map((p) => (
                     <li key={p.profile_id} className="px-3 py-2">
-                      <span className="block text-[13px] text-muted">{p.name}</span>
-                      <span className="mt-0.5 block text-xs text-muted">A crew-safety envelope, not an analysis target.</span>
+                      <span className="block text-[13px] text-muted">{shortCabinName(p.profile_id, p.name)}</span>
+                      <span className="mt-0.5 block text-xs text-muted">Crew-safety range. Not checked here.</span>
                     </li>
                   ))}
                 </ul>
               </section>
             ) : null}
             <section aria-label="Custom conditions">
-              <h3 className="mb-1.5 text-xs font-medium tracking-wide text-muted uppercase">Custom</h3>
+              <h3 className="mb-1.5 text-xs font-medium tracking-wide text-muted uppercase">Your own</h3>
               <Button variant="secondary" onClick={() => setView("custom")} disabled={dm.isSnapshot} className="w-full justify-start">
-                Enter your own conditions…
+                Enter your own air…
               </Button>
               {dm.isSnapshot ? (
-                <p className="mt-1.5 text-xs text-muted">Your own conditions are computed on demand; this version serves precomputed results for the documented cabins only.</p>
+                <p className="mt-1.5 text-xs text-muted">Your own air is not available in this saved version.</p>
               ) : null}
             </section>
           </div>
@@ -160,14 +160,14 @@ function CustomTargetForm({ onCancel, onApply }: { onCancel: () => void; onApply
   const submit = () => {
     const o2v = Number(o2);
     const pv = Number(pressure);
-    if (!o2.trim() || !Number.isFinite(o2v) || o2v < 1 || o2v > 100) return setErr("Oxygen must be between 1 and 100 %.");
+    if (!o2.trim() || !Number.isFinite(o2v) || o2v < 1 || o2v > 100) return setErr("Oxygen must be 1 to 100 %.");
     const pkpa = unit === "kpa" ? pv : pv * KPA_PER_PSI;
-    if (!pressure.trim() || !Number.isFinite(pkpa) || pkpa < 5 || pkpa > 300) return setErr("Pressure must be between 5 and 300 kPa (0.7 to 43.5 psia).");
+    if (!pressure.trim() || !Number.isFinite(pkpa) || pkpa < 5 || pkpa > 300) return setErr("Pressure must be 5 to 300 kPa (0.7 to 43.5 psia).");
     let airflow: CustomTarget["airflow_cm_s"] = null;
     if (fmin.trim() || fmax.trim()) {
       const lo = Number(fmin);
       const hi = Number(fmax);
-      if (!fmin.trim() || !fmax.trim() || !Number.isFinite(lo) || !Number.isFinite(hi) || lo <= 0 || hi <= lo) return setErr("Airflow band needs 0 < minimum < maximum (cm/s), or leave both empty for the default band.");
+      if (!fmin.trim() || !fmax.trim() || !Number.isFinite(lo) || !Number.isFinite(hi) || lo <= 0 || hi <= lo) return setErr("Airflow: enter a minimum above 0 and a larger maximum, or leave both empty.");
       airflow = { nominal: null, min: lo, max: hi };
     }
     setErr(null);
@@ -190,7 +190,7 @@ function CustomTargetForm({ onCancel, onApply }: { onCancel: () => void; onApply
     >
       <Badge tone="neutral">{CUSTOM_LABEL}</Badge>
       <div>
-        <label htmlFor={`${id}-o2`} className="mb-1 block text-xs text-muted">Oxygen (% by volume)</label>
+        <label htmlFor={`${id}-o2`} className="mb-1 block text-xs text-muted">Oxygen (%)</label>
         <input id={`${id}-o2`} inputMode="decimal" className={field} value={o2} onChange={(e) => setO2(e.target.value)} />
       </div>
       <div>
@@ -212,16 +212,16 @@ function CustomTargetForm({ onCancel, onApply }: { onCancel: () => void; onApply
         <input id={`${id}-p`} inputMode="decimal" className={field} value={pressure} onChange={(e) => setPressure(e.target.value)} />
       </div>
       <fieldset>
-        <legend className="mb-1 text-xs text-muted">Airflow band (cm/s), optional</legend>
+        <legend className="mb-1 text-xs text-muted">Airflow (cm/s), optional</legend>
         <div className="grid grid-cols-2 gap-2">
           <input aria-label="Airflow minimum, cm/s" placeholder="min" inputMode="decimal" className={field} value={fmin} onChange={(e) => setFmin(e.target.value)} />
           <input aria-label="Airflow maximum, cm/s" placeholder="max" inputMode="decimal" className={field} value={fmax} onChange={(e) => setFmax(e.target.value)} />
         </div>
-        <p className="mt-1 text-xs text-muted">Empty uses the ventilation-standard band with the near-quiescent extension.</p>
+        <p className="mt-1 text-xs text-muted">Empty uses the standard cabin airflow range.</p>
       </fieldset>
       {err ? <p role="alert" className="text-[13px] text-warn">{err}</p> : null}
       <div className="flex gap-2">
-        <Button type="submit" variant="primary">Check these conditions</Button>
+        <Button type="submit" variant="primary">Check this air</Button>
         <Button variant="ghost" onClick={onCancel}>Back</Button>
       </div>
     </form>

@@ -158,7 +158,7 @@ export function observationsForMap(plane: Plane, obs: readonly ApiObservation[],
       groupId: o.group_id ?? "",
       title: `${o.experiment_id} · step ${o.step_index + 1}`,
       detail: {
-        Outcome: o.label === 1 ? "Flame sustained" : o.label === 0 ? "Not sustained" : "Not used for training",
+        Outcome: o.label === 1 ? "Flame kept burning" : o.label === 0 ? "Flame went out" : "Outcome unknown",
         Oxygen: `${num(o.oxygen_percent)} %`,
         Airflow: `${num(o.airflow_cm_s, 2)} cm/s`,
         Pressure: `${num(pressure)} kPa${assumed ? " (assumed)" : ""}`,

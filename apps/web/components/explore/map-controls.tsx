@@ -13,11 +13,17 @@ import type { LayerName, Layers } from "@/lib/explore-store";
 import type { GroupSummary, Plane } from "@/lib/types";
 import { groupBalance, SLICE_LIMITS } from "./model";
 
-const CHIPS: Array<{ layer: LayerName; label: string; swatch: string; needsModel?: boolean }> = [
+type Chip = { layer: LayerName; label: string; swatch: string; needsModel?: boolean };
+
+/** Shown by default. */
+const MAIN_CHIPS: Chip[] = [
   { layer: "observations", label: "Test results", swatch: "var(--observed)" },
   { layer: "prediction", label: "Prediction", swatch: "var(--fg)", needsModel: true },
-  { layer: "uncertainty", label: "Uncertainty", swatch: "var(--plum-5)", needsModel: true },
   { layer: "coverage", label: "Coverage", swatch: "var(--gap)" },
+];
+/** Behind "More options". */
+const MORE_CHIPS: Chip[] = [
+  { layer: "uncertainty", label: "Uncertainty", swatch: "var(--plum-5)", needsModel: true },
   { layer: "context", label: "Related NASA work", swatch: "var(--muted)" },
 ];
 
@@ -32,46 +38,60 @@ export function ControlLabel({ id, label, helpId, help }: { id: string; label: s
 }
 
 export function LayerChips({ layers, onToggle, modelled }: { layers: Layers; onToggle: (l: LayerName) => void; modelled: boolean }) {
+  // Opens by default only when a "More options" layer the person chose (Uncertainty) is already on.
+  const [more, setMore] = useState(layers.uncertainty);
+  const moreId = useId();
+  const chip = (c: Chip) => {
+    const disabled = !!c.needsModel && !modelled;
+    const on = layers[c.layer] && !disabled;
+    const btn = (
+      <button
+        key={c.layer}
+        type="button"
+        aria-pressed={on}
+        disabled={disabled}
+        onClick={() => onToggle(c.layer)}
+        data-testid={`layer-${c.layer}`}
+        title={SHOW_HELP[c.layer]}
+        className={cn(
+          "inline-flex h-10 items-center gap-1.5 rounded-md border px-3 text-[13px] transition-colors md:h-8 md:px-2.5",
+          on ? "border-fg bg-surface font-medium text-fg" : "border-border bg-subtle text-muted hover:text-fg",
+          "disabled:cursor-not-allowed disabled:opacity-50",
+        )}
+      >
+        <span aria-hidden className="size-2 rounded-full" style={{ background: c.swatch, opacity: on ? 1 : 0.45 }} />
+        {c.label}
+      </button>
+    );
+    return disabled ? (
+      <Tooltip key={c.layer} content="Too few test results for a model.">
+        <span tabIndex={0} className="inline-flex rounded-md">{btn}</span>
+      </Tooltip>
+    ) : (
+      btn
+    );
+  };
   return (
     <div>
-      <ControlLabel
-        id="show-label"
-        label="Show"
-        helpId="show-help"
-        help="Prediction, Uncertainty and Coverage show one at a time."
-      />
-      <div role="group" aria-labelledby="show-label" aria-describedby="show-help" className="flex flex-wrap gap-1.5">
-        {CHIPS.map((c) => {
-          const disabled = !!c.needsModel && !modelled;
-          const on = layers[c.layer] && !disabled;
-          const btn = (
-            <button
-              key={c.layer}
-              type="button"
-              aria-pressed={on}
-              disabled={disabled}
-              onClick={() => onToggle(c.layer)}
-              data-testid={`layer-${c.layer}`}
-              title={SHOW_HELP[c.layer]}
-              className={cn(
-                "inline-flex h-10 items-center gap-1.5 rounded-md border px-3 text-[13px] transition-colors md:h-8 md:px-2.5",
-                on ? "border-fg bg-surface font-medium text-fg" : "border-border bg-subtle text-muted hover:text-fg",
-                "disabled:cursor-not-allowed disabled:opacity-50",
-              )}
-            >
-              <span aria-hidden className="size-2 rounded-full" style={{ background: c.swatch, opacity: on ? 1 : 0.45 }} />
-              {c.label}
-            </button>
-          );
-          return disabled ? (
-            <Tooltip key={c.layer} content="This material has too few test results for a model.">
-              <span tabIndex={0} className="inline-flex rounded-md">{btn}</span>
-            </Tooltip>
-          ) : (
-            btn
-          );
-        })}
+      <ControlLabel id="show-label" label="Show" />
+      <div role="group" aria-labelledby="show-label" className="flex flex-wrap items-center gap-1.5">
+        {MAIN_CHIPS.map(chip)}
+        <button
+          type="button"
+          aria-expanded={more}
+          aria-controls={moreId}
+          onClick={() => setMore((v) => !v)}
+          className="inline-flex h-10 items-center gap-1 rounded-md px-2 text-[13px] text-muted hover:text-fg md:h-8"
+        >
+          <span aria-hidden className={cn("inline-block transition-transform", more && "rotate-90")}>›</span>
+          More options
+        </button>
       </div>
+      {more ? (
+        <div id={moreId} role="group" aria-label="More options" className="mt-1.5 flex flex-wrap gap-1.5">
+          {MORE_CHIPS.map(chip)}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -79,7 +99,7 @@ export function LayerChips({ layers, onToggle, modelled }: { layers: Layers; onT
 export function PlaneSwitch({ plane, onChange }: { plane: Plane; onChange: (p: Plane) => void }) {
   return (
     <div>
-      <ControlLabel id="chart-label" label="Chart" helpId="chart-help" help="Which two conditions to plot." />
+      <ControlLabel id="chart-label" label="Chart" />
       <SegmentedControl aria-label="Chart" value={plane} onValueChange={(v) => onChange(v as Plane)} options={CHART_OPTIONS} />
     </div>
   );
@@ -168,7 +188,7 @@ export function MaterialSelect({
 }) {
   return (
     <div className="min-w-[220px] max-w-[460px] flex-[2_1_300px]">
-      <ControlLabel id="material-label" label="Material" helpId="material-help" help="Which material's ISS test results to use." />
+      <ControlLabel id="material-label" label="Material" />
       <Select
         aria-label="Material"
         value={value ?? ""}
@@ -177,18 +197,18 @@ export function MaterialSelect({
           value: x.group_id,
           label: `${materialFullName(x.group_id, x.label)}${x.model_status === "modeled" ? "" : " (no prediction)"}`,
         }))}
-        placeholder={groups.length ? "Select material" : "Loading materials…"}
+        placeholder={groups.length ? "Choose material" : "Loading…"}
       />
     </div>
   );
 }
 
-/** One plain line about the material; technical counts (training split, pressure basis) follow in muted text. */
+/** One plain line about the material. */
 export function GroupFacts({ group }: { group: GroupSummary }) {
   const bal = groupBalance(group);
   const pr = group.pressure_kpa_range;
   const degenerate = pr ? fmtFixed(pr[0], 1) === fmtFixed(pr[1], 1) : false;
-  const basis = group.pressure_measured ? "measured" : degenerate ? "assumed, not recorded" : "partly assumed";
+  const basis = group.pressure_measured ? "measured" : degenerate ? "assumed" : "partly assumed";
   return (
     <p className="text-xs text-muted" data-testid="group-facts">
       <span className="text-fg">{materialFullName(group.group_id, group.label)}</span>: <span className="num">{group.n_experiments}</span> experiments,{" "}

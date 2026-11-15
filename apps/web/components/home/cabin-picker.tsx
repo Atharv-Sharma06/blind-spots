@@ -9,13 +9,11 @@ import { cn } from "@/lib/cn";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   CABIN_ROW_LABEL,
-  COVERAGE_STATUS_HELP,
   COVERAGE_STATUS_LABEL,
   DEFAULT_CABIN,
   cabinOrderIndex,
   cabinRow,
   coverageStatus,
-  nearbyResultsText,
   shortCabinName,
   type CabinRow,
   type CoverageStatus,
@@ -90,7 +88,7 @@ export function CabinPicker({ cabin, onSelect }: CabinPickerProps) {
 
   return (
     <section id="cabins" data-tour="cabins" aria-labelledby="cabins-h" className="scroll-mt-16">
-      <StepHeading n={1} id="cabins-h" title="Pick a cabin" hint="Each card shows the cabin's air and whether the ISS flame tests cover it." hintOnPhone={false} hintInline />
+      <StepHeading n={1} id="cabins-h" title="Pick a cabin" hint="Each card shows its air and whether ISS tests cover it." hintOnPhone={false} hintInline />
 
       <div className="mt-5 space-y-6 md:mt-5 md:space-y-5">
         {targets.isPending ? (
@@ -126,9 +124,8 @@ export function CabinPicker({ cabin, onSelect }: CabinPickerProps) {
         )}
       </div>
 
-      <p className="mt-5 max-w-[78ch] text-label leading-5 text-muted">
-        <span className="font-medium text-fg/80">How to read the labels.</span> Not covered: no nearby ISS test results. Barely covered: nearby results, but
-        not for nearly all materials. Covered: nearby results for nearly all materials. &ldquo;Nearby&rdquo; means within the model&rsquo;s comparison distance.{" "}
+      <p className="mt-4 text-label leading-5 text-muted">
+        Covered: nearby ISS tests for nearly all materials. Barely: some. Not covered: none.{" "}
         <Link href="/methodology" className="underline underline-offset-2 hover:text-fg">
           How it works
         </Link>
@@ -205,29 +202,25 @@ function CabinCard({ profile, selected, tabbable, compact, stats, headlinePendin
         {name}
       </span>
 
-      <span className="mt-auto flex flex-col gap-2.5">
-        <span id={`cabin-${id}-air`} className="block text-ui leading-5 text-fg/85 tabular">
-          <span className="block">{air.oxygen ?? "Oxygen not stated"}</span>
-          <span className="block">
-            {air.pressure ?? "Pressure not stated"}
-            {air.psia ? (
-              <>
-                {" "}
-                <span className="whitespace-nowrap text-muted">({air.psia})</span>
-              </>
-            ) : null}
-          </span>
+      <span className="mt-auto flex flex-col gap-2">
+        <span id={`cabin-${id}-air`} className="text-ui leading-5 text-fg/85 tabular">
+          <span className="whitespace-nowrap">{air.oxygen ?? "Oxygen not stated"},</span>{" "}
+          <span className="whitespace-nowrap">{air.pressure ?? "Pressure not stated"}</span>
         </span>
 
-        <span id={`cabin-${id}-cover`} className="flex flex-col items-start gap-1.5">
+        <span id={`cabin-${id}-cover`} className="flex flex-col items-start gap-1">
           <CoverageChip status={status} pending={headlinePending} failed={headlineFailed} />
-          <span className="text-label leading-4 text-muted">
-            {stats ? nearbyResultsText(stats.comparable_observations) : headlinePending ? "\u00a0" : ""}
-          </span>
+          <span className="text-label leading-4 text-muted">{stats ? nearbyTests(stats.comparable_observations) : headlinePending ? "\u00a0" : ""}</span>
         </span>
       </span>
     </button>
   );
+}
+
+/** "241 nearby tests" / "1 nearby test" / "No nearby tests". */
+function nearbyTests(n: number): string {
+  if (n === 0) return "No nearby tests";
+  return `${n.toLocaleString("en-US")} nearby ${n === 1 ? "test" : "tests"}`;
 }
 
 const CHIP_STYLE: Record<CoverageStatus, { cls: string; Icon: typeof CircleCheck }> = {
@@ -242,7 +235,7 @@ function CoverageChip({ status, pending, failed }: { status: CoverageStatus | nu
   if (status) {
     const { cls, Icon } = CHIP_STYLE[status];
     return (
-      <span data-coverage={status} title={COVERAGE_STATUS_HELP} className={cn(base, cls)}>
+      <span data-coverage={status} className={cn(base, cls)}>
         <Icon className="size-3.5 shrink-0" aria-hidden />
         {COVERAGE_STATUS_LABEL[status]}
       </span>
@@ -252,7 +245,7 @@ function CoverageChip({ status, pending, failed }: { status: CoverageStatus | nu
   return (
     <span data-coverage="unknown" className={cn(base, "border-border bg-subtle font-medium text-muted")}>
       <CircleDashed className="size-3.5 shrink-0" aria-hidden />
-      {pending ? "Loading…" : failed ? "Coverage unavailable" : "Coverage not computed"}
+      {pending ? "Loading…" : failed ? "Not available" : "Not computed"}
     </span>
   );
 }
@@ -267,7 +260,7 @@ export function PickerSkeleton() {
           <Skeleton className="mb-2.5 h-3 w-28" />
           <div className={cn(GRID, GRID_COLS[row])}>
             {Array.from({ length: row === "now" ? 5 : 6 }, (_, i) => (
-              <Skeleton key={i} className={cn("rounded-lg border border-border bg-surface", row === "now" ? "h-[11rem] md:h-[13.25rem]" : "h-[11rem] md:h-[11.75rem]")} />
+              <Skeleton key={i} className={cn("rounded-lg border border-border bg-surface", row === "now" ? "h-[9.75rem] md:h-[11.875rem]" : "h-[9.75rem] md:h-[10.625rem]")} />
             ))}
           </div>
         </div>

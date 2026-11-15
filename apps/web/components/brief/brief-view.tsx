@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { flushSync } from "react-dom";
 import { useSearchParams } from "next/navigation";
 import { Download, Printer, ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -10,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { QueryError } from "@/components/explore/query-state";
 import { useBrief, useGroups, useTargets } from "@/hooks/api";
 import { pickDefaultGroup, pickDefaultProfile } from "@/lib/explore-store";
-import { DISCLAIMER } from "@/lib/copy";
+import { DATA_CREDIT, SI_NOTE } from "@/lib/copy";
 import { shortVersion } from "@/lib/format";
 import { materialName, shortCabinName } from "@/components/home/cabins";
 import type { BriefResponse } from "@/lib/types";
@@ -20,11 +21,11 @@ import { InShort } from "./in-short";
 
 /** Section order and headings follow the API's `sections` keys (UI constants; text comes from the API). */
 const SECTIONS: { key: keyof BriefResponse["sections"]; title: string }[] = [
-  { key: "target", title: "1. Target atmosphere (the cabin's air)" },
+  { key: "target", title: "1. Target atmosphere" },
   { key: "coverage", title: "2. Do the ISS tests cover it?" },
-  { key: "model", title: "3. The model and how it was checked" },
-  { key: "candidate", title: "4. What to test next (research candidate)" },
-  { key: "historical_investigations", title: "5. Nearby ISS results and related NASA work" },
+  { key: "model", title: "3. How the model was checked" },
+  { key: "candidate", title: "4. What to test next" },
+  { key: "historical_investigations", title: "5. Nearby ISS tests and NASA work" },
   { key: "citations", title: "6. Citations" },
   { key: "limitations", title: "7. Limitations" },
 ];
@@ -65,6 +66,20 @@ export function BriefView() {
   const briefQ = useBrief(groupId && target ? { group_id: groupId, target, candidate: q.candidate } : null);
   const brief = briefQ.isPlaceholderData ? null : briefQ.data?.data ?? null;
 
+  // Sections start closed behind the verdict; every section opens for print so the PDF is complete.
+  const [openMap, setOpenMap] = useState<Record<string, boolean>>({});
+  const [printing, setPrinting] = useState(false);
+  useEffect(() => {
+    const on = () => flushSync(() => setPrinting(true));
+    const off = () => setPrinting(false);
+    window.addEventListener("beforeprint", on);
+    window.addEventListener("afterprint", off);
+    return () => {
+      window.removeEventListener("beforeprint", on);
+      window.removeEventListener("afterprint", off);
+    };
+  }, []);
+
   const exploreHref = useMemo(() => {
     const p = new URLSearchParams();
     if (groupId) p.set("group", groupId);
@@ -84,6 +99,8 @@ export function BriefView() {
     return `/?${p.toString()}`;
   }, [profileId, groupId]);
   // Plain heading from the same names the Cabins page uses; the API's full title stays underneath as the exact name.
+  // Without the "In short" box (custom target, or no model for this material) the two answer sections start open.
+  const hasShort = !!profileId && (group ? group.model_status === "modeled" : !groups);
   const plainTitle = profile && group ? `${materialName(group.group_id, group.label)} in ${shortCabinName(profile.profile_id, profile.name)}` : null;
 
   return (
@@ -91,10 +108,14 @@ export function BriefView() {
       <style>{`
         .brief-prose,.brief-prose *{overflow-wrap:anywhere;min-width:0}
         .brief-prose pre{overflow-x:auto}
+        .brief-print-only{display:none}
+        .brief-sec>summary:focus-visible{outline:2px solid var(--fg);outline-offset:2px;border-radius:4px}
         .brief-prose{font-size:15px;line-height:1.65;color:var(--fg)}
         .brief-prose p,.brief-prose li{max-width:72ch}
         @media print{
           body>header,body>footer,body>a,.no-print{display:none!important}
+          .brief-print-only{display:block!important}
+          .brief-sec>summary::before{display:none}
           html,body{background:#fff!important}
           @page{size:A4;margin:18mm 16mm}
           .brief-root{max-width:none!important;padding:0!important}
@@ -106,21 +127,21 @@ export function BriefView() {
         }
       `}</style>
 
-      <div className="no-print brief-ui mb-4 flex flex-nowrap items-center gap-1.5 sm:mb-6 sm:flex-wrap sm:gap-2">
+      <div className="no-print brief-ui mb-4 flex flex-wrap items-center gap-x-1 gap-y-2 sm:mb-6 sm:gap-x-2">
         <Button asChild variant="ghost" size="sm" className="max-md:px-2">
-          <Link href={exploreHref} aria-label="Back to Explorer"><ArrowLeft aria-hidden />Back<span className="hidden sm:inline">&nbsp;to Explorer</span></Link>
+          <Link href={exploreHref} aria-label="Back to Explorer"><ArrowLeft aria-hidden />Explorer</Link>
         </Button>
         {cabinsHref ? (
           <Button asChild variant="ghost" size="sm" className="max-md:px-2">
             <Link href={cabinsHref}><ArrowLeft aria-hidden />Cabins</Link>
           </Button>
         ) : null}
-        <div className="ml-auto flex gap-1.5 sm:flex-wrap sm:gap-2">
-          <Button variant="secondary" aria-label="Download .md" className="max-md:px-2.5" disabled={!brief} onClick={() => brief && download(`blind-spots-brief-${slug(groupId ?? "group")}.md`, cleanBriefText(brief.markdown))}>
-            <Download aria-hidden />Download<span className="hidden sm:inline">&nbsp;.md</span>
+        <div className="ml-auto flex gap-1 sm:gap-2">
+          <Button variant="secondary" aria-label="Download .md" title="Save as a Markdown file" className="max-md:px-2.5" disabled={!brief} onClick={() => brief && download(`blind-spots-brief-${slug(groupId ?? "group")}.md`, cleanBriefText(brief.markdown))}>
+            <Download aria-hidden />Download
           </Button>
-          <Button variant="primary" aria-label="Print / Save as PDF" className="max-md:px-2.5" disabled={!brief} onClick={() => window.print()}>
-            <Printer aria-hidden />Print<span className="hidden sm:inline">&nbsp;/ Save as PDF</span>
+          <Button variant="primary" aria-label="Print / Save as PDF" title="Print or save as PDF" className="max-md:px-2.5" disabled={!brief} onClick={() => { flushSync(() => setPrinting(true)); window.print(); setPrinting(false); }}>
+            <Printer aria-hidden />Print
           </Button>
         </div>
       </div>
@@ -139,47 +160,53 @@ export function BriefView() {
         </div>
       ) : (
         <div className="brief-prose">
-          <header className="border-b border-border-strong pb-5">
-            <p className="brief-ui text-xs font-medium uppercase tracking-[0.08em] text-muted">Blind Spots · Research brief</p>
-            <h1 className="mt-2 text-[28px] font-semibold leading-tight tracking-[-0.02em]">{plainTitle ?? brief.title.replace(/^Research brief:\s*/, "")}</h1>
-            {plainTitle ? <p className="brief-ui mt-1 text-[13px] text-muted">{brief.title.replace(/^Research brief:\s*/, "")}</p> : null}
-            <p className="brief-ui mt-2 max-w-[62ch] text-[15px] leading-relaxed sm:mt-3">
-              Do NASA&apos;s ISS flame tests cover this cabin&apos;s air, and which research candidate would teach the model the most?
-              <span className="hidden sm:inline"> The sections below keep the exact technical terms; see{" "}
-              <Link href="/methodology#nearby" className="text-accent underline underline-offset-2">How it works</Link> for what &quot;nearby&quot; means.</span>
-            </p>
+          <header className="pb-1">
+            <p className="brief-ui text-xs font-medium uppercase tracking-[0.08em] text-muted">Research brief</p>
+            <h1 className="mt-1.5 text-[26px] font-semibold leading-tight tracking-[-0.02em]">{plainTitle ?? brief.title.replace(/^Research brief:\s*/, "")}</h1>
           </header>
 
           <InShort profileId={profileId} groupId={groupId} />
 
-          <dl className="brief-ui num mt-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted">
-            <div className="flex gap-1.5"><dt>Generated</dt><dd className="text-fg">{fmtGenerated(brief.generated_at)}</dd></div>
-            <div className="flex gap-1.5"><dt>Dataset</dt><dd className="text-fg">{shortVersion(brief.dataset_version)}</dd></div>
-            <div className="flex gap-1.5"><dt>Model</dt><dd className="text-fg">{brief.model_version}</dd></div>
-          </dl>
-
-          <Callout variant="info" title="Computational research-planning output" className="brief-ui my-5">
-            {DISCLAIMER} Candidate conditions are computational research candidates requiring qualified scientific review, established safety procedures and formal feasibility assessment. This brief contains no test procedures.
+          <Callout variant="info" title="Computational research-planning output" className="brief-ui my-4">
+            Not a certified fire-safety assessment. Not endorsed by NASA. This brief contains no test procedures.
           </Callout>
 
-          {SECTIONS.map(({ key, title }) => {
-            const text = brief.sections[key];
-            if (!text || text.trim() === "") return null;
-            return (
-              <section key={key} className="mt-7" aria-labelledby={`brief-${key}`}>
-                <h2 id={`brief-${key}`} className="mb-2 border-b border-border pb-1 text-[18px] font-semibold tracking-[-0.01em]">{title}</h2>
-                <MarkdownLite markdown={text} />
-              </section>
-            );
-          })}
+          <div className="mt-5 space-y-2">
+            {SECTIONS.map(({ key, title }) => {
+              const text = brief.sections[key];
+              if (!text || text.trim() === "") return null;
+              const open = printing || (openMap[key] ?? (!hasShort && (key === "coverage" || key === "candidate")));
+              return (
+                <details
+                  key={key}
+                  className="brief-sec rounded-lg border border-border bg-surface"
+                  open={open}
+                >
+                  <summary
+                    className="flex min-h-11 items-center gap-2 px-3 py-2"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setOpenMap((m) => ({ ...m, [key]: !open }));
+                    }}
+                  >
+                    <h2 id={`brief-${key}`} className="text-[16px] font-semibold tracking-[-0.01em]">{title}</h2>
+                  </summary>
+                  <div className="border-t border-border px-3 py-3">
+                    <MarkdownLite markdown={text} />
+                  </div>
+                </details>
+              );
+            })}
+          </div>
 
-          <footer className="mt-10 border-t border-border-strong pt-4 text-[13px] text-muted">
-            <p>{DISCLAIMER}</p>
-            <p className="mt-1">Data: NASA Physical Sciences Informatics (CC0). Generated by the Blind Spots analysis service from the integrated records listed above; numbers are model-based and carry the uncertainty stated in section 3.</p>
-            <p className="mt-1">
-              Code and text were written with SI assistance (Claude, by Anthropic); every number comes from NASA data processed by that code.{" "}
-              <Link href="/methodology#si" className="no-print text-accent underline underline-offset-2">How it works</Link>
-            </p>
+          <footer className="brief-ui mt-8 space-y-1 border-t border-border-strong pt-4 text-xs text-muted">
+            <dl className="num flex flex-wrap gap-x-5 gap-y-1">
+              <div className="flex gap-1.5"><dt>Generated</dt><dd className="text-fg">{fmtGenerated(brief.generated_at)}</dd></div>
+              <div className="flex gap-1.5"><dt>Dataset</dt><dd className="text-fg">{shortVersion(brief.dataset_version)}</dd></div>
+              <div className="flex gap-1.5"><dt>Model</dt><dd className="text-fg">{brief.model_version}</dd></div>
+            </dl>
+            <p>Numbers are model-based; uncertainty is in section 3.</p>
+            <p className="brief-print-only">{DATA_CREDIT}. {SI_NOTE}</p>
           </footer>
         </div>
       )}

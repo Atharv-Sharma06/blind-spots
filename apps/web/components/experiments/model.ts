@@ -108,16 +108,16 @@ export interface TestResult {
   detail: string | null;
 }
 const RESULT: Record<string, TestResult> = {
-  burnout: { kind: "burned", label: "Flame kept burning", detail: "until the sample was used up" },
-  burns: { kind: "burned", label: "Flame kept burning", detail: null },
-  extinguished_low_flow: { kind: "out", label: "Flame went out", detail: "when the airflow dropped" },
-  blowoff: { kind: "out", label: "Flame went out", detail: "blown off by strong airflow" },
-  self_extinguished: { kind: "out", label: "Flame went out", detail: "on its own" },
-  extinguished: { kind: "out", label: "Flame went out", detail: null },
-  flow_turned_off: { kind: "out", label: "Flame went out", detail: "after the airflow was switched off" },
-  brief_flame_only: { kind: "out", label: "Flame went out", detail: "after a brief flame" },
+  burnout: { kind: "burned", label: "Kept burning", detail: "until the sample was used up" },
+  burns: { kind: "burned", label: "Kept burning", detail: null },
+  extinguished_low_flow: { kind: "out", label: "Went out", detail: "when airflow dropped" },
+  blowoff: { kind: "out", label: "Went out", detail: "blown off by strong airflow" },
+  self_extinguished: { kind: "out", label: "Went out", detail: "on its own" },
+  extinguished: { kind: "out", label: "Went out", detail: null },
+  flow_turned_off: { kind: "out", label: "Went out", detail: "after airflow was switched off" },
+  brief_flame_only: { kind: "out", label: "Went out", detail: "after a brief flame" },
   ignition_failed: { kind: "other", label: "Did not ignite", detail: null },
-  n2_suppressed: { kind: "other", label: "Put out with nitrogen", detail: "not a flammability result" },
+  n2_suppressed: { kind: "other", label: "Put out with nitrogen", detail: "not a burn result" },
   test_aborted: { kind: "other", label: "Test stopped early", detail: null },
   unknown: { kind: "other", label: "Result not stated", detail: null },
 };
@@ -127,19 +127,19 @@ export function resultOf(o: string | null | undefined): TestResult {
   if (known) return known;
   return isOutcomeCode(v)
     ? { kind: "other", label: humanize(v), detail: null }
-    : { kind: "other", label: "Described in words", detail: "open it to read it" };
+    : { kind: "other", label: "Described in words", detail: "see below" };
 }
 /** Result label of a test whose outcome is only given airflow step by airflow step. */
-export const PER_STEP_LABEL = "Per airflow step";
+export const PER_STEP_LABEL = "Given per step";
 /** Result of an experiment record: like resultOf, but says where to look when the test has airflow steps but no summary. */
 export function resultOfExperiment(e: Pick<ApiExperiment, "observed_outcome" | "n_observations">): TestResult {
   const r = resultOf(e.observed_outcome);
-  if ((e.observed_outcome ?? "unknown") === "unknown" && e.n_observations > 0) return { kind: "other", label: PER_STEP_LABEL, detail: "open it to see each step" };
+  if ((e.observed_outcome ?? "unknown") === "unknown" && e.n_observations > 0) return { kind: "other", label: PER_STEP_LABEL, detail: null };
   return r;
 }
 export const RESULT_FILTER_LABEL: Record<string, string> = {
-  burned: "Flame kept burning",
-  out: "Flame went out",
+  burned: "Kept burning",
+  out: "Went out",
   steps: PER_STEP_LABEL,
   other: "Other or not stated",
 };
@@ -154,9 +154,9 @@ export const sourceLabel = (e: { investigation_acronym: string; test_label: stri
   e.test_label.startsWith(e.investigation_acronym) ? e.test_label : `${e.investigation_acronym} · test ${e.test_label}`;
 
 const STATE_LABEL: Record<string, string> = {
-  sustained: "Flame kept burning",
-  extinguished: "Flame went out",
-  brief_flame_no_sustain: "Brief flame, did not keep burning",
+  sustained: "Kept burning",
+  extinguished: "Went out",
+  brief_flame_no_sustain: "Brief flame, went out",
   not_ignited: "Did not ignite",
 };
 export const flameStateText = (s: string): string => STATE_LABEL[s] ?? humanize(s);
@@ -219,19 +219,18 @@ export function groupLabel(groups: GroupSummary[] | undefined, id: string | null
   return cfg ? `${materialLabel(fam)} · ${configurationLabel(cfg).toLowerCase()}` : humanize(id);
 }
 
-const CONTEXT_TEXT = "Context record from another apparatus or test duration: shown for reference, never used for modelling.";
+const CONTEXT_TEXT = "Context only: different apparatus or test length, so the model skips it.";
 
 export const EXCLUSION_TEXT: Record<string, string> = {
-  no_curated_flow_steps: "No flow steps could be read from the source for this test, so there is nothing to train on.",
-  low_confidence:
-    "Its flow steps rest on low-confidence interpretation (for example a fan setting converted with a calibration measured in another campaign), so they are held out of training.",
-  not_ignited: "The sample did not ignite, so there is no flame to sustain or lose.",
-  n2_suppression: "The flame was put out with nitrogen, not by the airflow, so the step says nothing about flammability.",
-  no_numeric_airflow: "The source gives no numeric airflow for this step, so it cannot be placed on the map.",
-  provenance_mismatch: "The quoted source text could not be matched to the cited cell, so the step is held out.",
-  no_material_family: "The material could not be classified, so the step has no analysis group.",
-  no_oxygen: "No oxygen value is recorded for this step.",
-  no_label: "The flame state at this step is not stated in the source.",
+  no_curated_flow_steps: "No airflow steps could be read from the source.",
+  low_confidence: "The source supports its airflow steps only with low confidence.",
+  not_ignited: "The sample did not ignite.",
+  n2_suppression: "Nitrogen put the flame out, not the airflow.",
+  no_numeric_airflow: "The source gives no airflow number.",
+  provenance_mismatch: "The quoted source text did not match the cited cell.",
+  no_material_family: "The material could not be classified.",
+  no_oxygen: "No oxygen value is recorded.",
+  no_label: "The source does not say if the flame kept burning.",
 };
 
 const EXCLUSION_SHORT: Record<string, string> = {
@@ -253,7 +252,7 @@ export function exclusionShort(reason: string | null): string {
 }
 
 export const FLAG_TEXT: Record<string, string> = {
-  pressure_assumed: "Total pressure was not recorded; the documented ISS cabin nominal is used as an assumption and kept in a separate field.",
+  pressure_assumed: "Pressure was not recorded. We assume the ISS cabin pressure and keep it in its own field.",
   co2_percent_from_mmhg_formula: "CO₂ % was computed from a partial pressure in mmHg with a documented formula.",
   test_confidence_low: "The interpretation of this test's free-text record is low confidence.",
   o2_anomaly: "The recorded oxygen values look like a sensor glitch (for example an implausible final value).",

@@ -64,7 +64,7 @@ def test_not_supported_always_has_a_reason() -> None:
 def test_reason_messages_use_canonical_terms() -> None:
     r = explain_point(to_coords([38], 60.0, [30]), OBS, latent_std_ratio=0.95)
     text = " ".join(x["message"] for x in r["reasons"])
-    assert "No comparable observation within one reference distance." in text
+    assert "No ISS tests nearby." in text
     assert "observation(s)" not in text and "ln-pressure" not in text and "factor of 1.69" in text
 
 
@@ -82,7 +82,7 @@ def test_target_aggregation_d2() -> None:
     assert agg["verdict"] == "supported" and agg["points_supported"] == 3 and agg["n_target_points"] == 6
     agg = aggregate_target(["supported"] + ["extrapolation"] * 3, [1, 1, 0, 0], [[]] * 4)
     assert agg["verdict"] == "extrapolation" and agg["reasons"][0]["code"] == "target_points_not_supported"
-    assert "not represented" not in agg["sentence"] and "1 of 4 target points" in agg["sentence"]
+    assert "not represented" not in agg["sentence"] and "1 of 4 points" in agg["sentence"]
     agg = aggregate_target(["insufficient_evidence"] * 2, [0, 0])
     assert (
         agg["verdict"] == "insufficient_evidence"

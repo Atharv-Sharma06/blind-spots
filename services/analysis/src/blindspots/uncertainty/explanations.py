@@ -19,10 +19,8 @@ from blindspots.coverage.coverage import count_within, inside_hull, nn_distance
 
 INSUFFICIENT_SENTENCE = "Insufficient experimental evidence for a reliable estimate."
 VERDICT_SENTENCES = {
-    "supported": "The estimate is supported by comparable observations.",
-    "extrapolation": (
-        "The estimate reaches beyond the comparable observations and depends on model assumptions."
-    ),
+    "supported": "ISS tests nearby support this estimate.",
+    "extrapolation": "This estimate goes beyond nearby ISS tests and relies on model assumptions.",
     "insufficient_evidence": INSUFFICIENT_SENTENCE,
 }
 SPARSE_MIN_COUNT = 3
@@ -40,34 +38,25 @@ def _plural(n: int, noun: str) -> str:
 
 def sparse_message(count: int) -> str:
     if count == 0:
-        return "No comparable observation within one reference distance."
-    return (
-        f"Only {_plural(count, 'comparable observation')} within one reference distance "
-        f"(fewer than {SPARSE_MIN_COUNT})."
-    )
+        return "No ISS tests nearby."
+    return f"Only {_plural(count, 'ISS test result')} nearby."
 
 
-OUTSIDE_MESSAGE = "Outside the observed region (the conditions spanned by the observations)."
+OUTSIDE_MESSAGE = "Beyond the range the ISS tests covered."
 
 
 def pressure_message(dp: float) -> str:
-    return (
-        f"The nearest observed pressure differs by a factor of {np.exp(dp):.2f} "
-        f"({dp / COVERAGE_SCALES['p']:.1f} reference distances in pressure)."
-    )
+    return f"The nearest tested pressure differs by a factor of {np.exp(dp):.2f}."
 
 
 def outcome_message(frac: float) -> str:
-    return (
-        f"Outcomes at similar conditions are mixed: {100 * frac:.0f}% of the predictive uncertainty is "
-        "outcome variability."
-    )
+    return f"Nearby results are mixed; {100 * frac:.0f}% of the uncertainty comes from that."
 
 
 def knowledge_message(ratio: float) -> str:
     return (
-        f"Knowledge uncertainty is still high: remaining uncertainty (latent std ratio) {ratio:.2f}; "
-        f"support needs below {SUPPORT_RATIO_MAX:.2f}."
+        f"The model is still unsure: {ratio:.2f} of its starting uncertainty remains; "
+        f"under {SUPPORT_RATIO_MAX:.2f} is needed."
     )
 
 
@@ -88,7 +77,7 @@ def _point_reasons(
     if not hull:
         r.append({"code": "outside_hull", "message": OUTSIDE_MESSAGE, "value": None})
     if n_obs == 0:
-        msg = "No observations are available at any pressure."
+        msg = "No ISS tests at any pressure."
         r.append({"code": "unobserved_pressure", "message": msg, "value": None})
     elif dp is not None and dp > COVERAGE_SCALES["p"]:
         r.append({"code": "unobserved_pressure", "message": pressure_message(dp), "value": float(dp)})
@@ -165,8 +154,7 @@ def explain_point(
         reasons.append(
             {
                 "code": "model_instability",
-                "message": "Cross-validation models disagree here "
-                f"(spread of P(sustained) {fold_spread:.2f}).",
+                "message": f"Models trained on different tests disagree here (spread {fold_spread:.2f}).",
                 "value": fold_spread,
             }
         )
@@ -176,8 +164,8 @@ def explain_point(
             reasons.append(
                 {
                     "code": "other_family_evidence_only",
-                    "message": f"{_plural(n_other, 'comparable observation')} exist only for other analysis "
-                    "groups, which this model does not use.",
+                    "message": f"Only other materials have nearby ISS tests ({n_other}); "
+                    "the model ignores them.",
                     "value": float(n_other),
                 }
             )
@@ -224,7 +212,7 @@ def aggregate_target(
             messages.setdefault(r["code"], r["message"])
     ranked = sorted(codes.items(), key=lambda kv: (-kv[1], kv[0]))
     out = [
-        {"code": code, "message": f"{messages[code]} (at {100 * cnt / n:.0f}% of target points)",
+        {"code": code, "message": f"{messages[code].rstrip('.')} (at {100 * cnt / n:.0f}% of points).",
          "value": round(cnt / n, 4)}
         for code, cnt in ranked
         if n and cnt / n >= REASON_FRACTION
@@ -233,7 +221,7 @@ def aggregate_target(
         out.append(
             {
                 "code": "target_points_not_supported",
-                "message": f"{n - k} of {n} target points are not supported by comparable observations.",
+                "message": f"{n - k} of {n} points in this air are not well covered.",
                 "value": round((n - k) / n, 4),
             }
         )
@@ -266,12 +254,12 @@ def target_sentence(verdict: str, points_supported: int, n: int, points_with_com
     if points_with_comparable == 0:
         return (
             f"{INSUFFICIENT_SENTENCE} These conditions are not represented in the integrated records: none "
-            f"of the {n} target points has a comparable observation."
+            f"of the {n} points in this air has a nearby ISS test."
         )
-    head = f"{points_supported} of {n} target points are supported by comparable observations"
+    head = f"{points_supported} of {n} points in this air are backed by nearby ISS tests"
     if verdict == "supported":
         return head + "."
     return (
-        f"{head}; {points_with_comparable} of {n} have at least one comparable observation. "
-        "Estimates for the other points depend on model assumptions."
+        f"{head}; {points_with_comparable} of {n} have at least one nearby ISS test. "
+        "Estimates for the other points rely on model assumptions."
     )

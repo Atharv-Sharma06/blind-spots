@@ -135,6 +135,9 @@ export interface VerdictFacts {
   nTargetPoints?: number | null;
 }
 
+/** Same threshold as the cabin chip ("Barely covered"): under a quarter of the sampled points have nearby tests. */
+const barelyCovered = (n: number, m: number): boolean => m > 0 && n / m < 0.25;
+
 /** The big line. It never says "none" unless the API says none for the scope it names. */
 export function verdictTitle(f: VerdictFacts): string {
   if (f.verdict === "supported") return "Covered: ISS flame tests ran in air like this.";
@@ -142,10 +145,7 @@ export function verdictTitle(f: VerdictFacts): string {
     const n = f.pointsWithComparable;
     const m = f.nTargetPoints;
     if (isNum(n) && isNum(m) && m > 0) {
-      // Same threshold as the cabin chip ("Barely covered"): under a quarter of the sampled points have nearby tests.
-      return n / m < 0.25
-        ? `Barely covered: only ${n} of ${m} points in this air have nearby ISS tests.`
-        : "Partly covered: only part of this air has nearby ISS tests.";
+      return `${barelyCovered(n, m) ? "Barely" : "Partly"} covered: only ${n} of ${m} points in this air have nearby ISS tests.`;
     }
     return "Partly covered: only part of this air has nearby ISS tests.";
   }
@@ -161,7 +161,7 @@ export interface AnswerFacts extends VerdictFacts {
   air: CabinAir | null;
 }
 
-/** One to three plain sentences, each under 20 words, built only from API numbers. */
+/** One to three short sentences built only from API numbers. */
 export function answerSentences(f: AnswerFacts): string[] {
   const out: string[] = [];
   const g = f.group;
@@ -172,9 +172,9 @@ export function answerSentences(f: AnswerFacts): string[] {
     const measured = g.pressure_measured;
     const same = trimNum(kp[0], 0) === trimNum(kp[1], 0);
     if (measured) {
-      out.push(`For ${f.materialLc}, ISS tests ran at ${rangeText(o2[0], o2[1])} % oxygen and ${rangeText(kp[0], kp[1], 0)} kPa${seaLevel ? ", about sea-level pressure" : ""}.`);
+      out.push(`For ${f.materialLc}, ISS tests ran at ${rangeText(o2[0], o2[1])} % oxygen and ${rangeText(kp[0], kp[1], 0)} kPa${seaLevel ? " (sea level)" : ""}.`);
     } else if (same) {
-      out.push(`For ${f.materialLc}, ISS tests ran at ${rangeText(o2[0], o2[1])} % oxygen. Pressure was not recorded; the dataset assumes ${rangeText(kp[0], kp[1], 0)} kPa.`);
+      out.push(`For ${f.materialLc}, ISS tests ran at ${rangeText(o2[0], o2[1])} % oxygen. Pressure was not recorded, so ${rangeText(kp[0], kp[1], 0)} kPa is assumed.`);
     } else {
       out.push(`For ${f.materialLc}, ISS tests ran at ${rangeText(o2[0], o2[1])} % oxygen and ${rangeText(kp[0], kp[1], 0)} kPa (pressure partly assumed).`);
     }
@@ -182,15 +182,20 @@ export function answerSentences(f: AnswerFacts): string[] {
   const air = f.air ? airSentenceParts(f.air) : null;
   const cov = f.assess.coverage;
   if (f.verdict === "insufficient_evidence") {
-    out.push(air ? `This cabin has ${air.o2} at ${air.kpa}, so the model does not guess here.` : "The model does not guess here.");
+    out.push(air ? `This cabin has ${air.o2} at ${air.kpa}. The model does not guess here.` : "The model does not guess here.");
   } else if (f.verdict === "extrapolation") {
-    out.push(`Nearby ISS tests reach ${cov.points_with_comparable} of ${cov.n_target_points} sampled conditions across this cabin's air. Elsewhere the model does not guess.`);
+    // The headline already gives the counts (barely or partly covered); do not repeat them.
+    out.push(
+      isNum(f.pointsWithComparable) && isNum(f.nTargetPoints) && f.nTargetPoints > 0
+        ? "The model does not guess elsewhere."
+        : `${cov.points_with_comparable} of ${cov.n_target_points} points in this air have nearby ISS tests. The model does not guess elsewhere.`,
+    );
   } else {
     const sup = pointsSupported(f.assess);
     out.push(
       sup !== null
-        ? `The model is confident for ${sup} of ${cov.n_target_points} sampled conditions across this cabin's air.`
-        : `Nearby ISS tests cover this cabin's air, and the model's uncertainty there is low.`,
+        ? `The model is confident at ${sup} of ${cov.n_target_points} points in this air.`
+        : "Nearby ISS tests cover this air. Uncertainty is low.",
     );
   }
   if (targetPAllowed(f.assess) && f.verdict !== "insufficient_evidence") {
@@ -199,8 +204,8 @@ export function answerSentences(f: AnswerFacts): string[] {
     const hi = Math.round((m.p_sustained_max ?? 0) * 100);
     out.push(
       lo === hi
-        ? `For this material the model puts the chance that a flame keeps burning at ${lo} %. This is a model estimate, not a safety rating.`
-        : `Depending on airflow, the model puts the chance that a flame keeps burning at ${lo} % to ${hi} %. This is a model estimate, not a safety rating.`,
+        ? `The model estimates a ${lo} % chance the flame keeps burning. Not a safety rating.`
+        : `Depending on airflow, the model estimates a ${lo} % to ${hi} % chance the flame keeps burning. Not a safety rating.`,
     );
   }
   return out;
@@ -212,7 +217,7 @@ const GROUND_TEST = /drop[\s-]?tower|ground|NASA-STD-6001|ZGRF/i;
 
 export interface RelatedNasa {
   n: number;
-  /** At least one of them is a ground (drop-tower or standard) test, so the sentence may say "ground tests". */
+  /** Every one of them is a ground (drop-tower or standard) test, so the sentence may say "ground tests". */
   ground: boolean;
 }
 
@@ -225,13 +230,13 @@ export function relatedNasaTests(a: AssessResponse): RelatedNasa {
   const rel = a.investigation_relevance;
   if (rel && rel.length > 0) {
     const rows = rel.filter((r) => r.role !== "integrated_model" && near(r.envelope_overlap));
-    return { n: rows.length, ground: rows.some((r) => GROUND_TEST.test(r.name)) };
+    return { n: rows.length, ground: rows.length > 0 && rows.every((r) => GROUND_TEST.test(r.name)) };
   }
   const rows = a.documented_context.filter((c) => near(c.overlap));
-  return { n: rows.length, ground: rows.some((c) => GROUND_TEST.test(c.name)) };
+  return { n: rows.length, ground: rows.length > 0 && rows.every((c) => GROUND_TEST.test(c.name)) };
 }
 
 export function relatedNasaSentence(r: RelatedNasa): string {
   // The match is a documented test RANGE that contains or overlaps this air, not proof of a test at these exact conditions.
-  return `NASA ${r.ground ? "ground " : ""}tests with a documented range that includes this air exist; the model does not use them.`;
+  return `NASA ${r.ground ? "ground " : ""}tests list a range that includes this air. The model does not use them.`;
 }

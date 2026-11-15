@@ -1,19 +1,19 @@
 "use client";
 
 import { PageContainer } from "@/components/layout/page-container";
-import { ErrorState } from "@/components/ui/error-state";
+import { Button } from "@/components/ui/button";
 
 /** Route-segment error boundary (not app/global-error.tsx): the header and footer stay in place. */
-export default function RouteError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+export default function RouteError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
   return (
     <PageContainer width="reading" className="flex-1">
       <h1 className="sr-only">Something went wrong</h1>
-      <ErrorState
-        code="internal"
-        description="This page hit an unexpected error. Retry; if it persists, reload the page."
-        message={error.digest ? `Reference ${error.digest}` : null}
-        onRetry={reset}
-      />
+      <div role="alert" data-error-code="internal" className="flex flex-col items-start gap-4 py-10">
+        <p className="text-prose font-medium text-fg">Something went wrong.</p>
+        <Button variant="primary" onClick={reset}>
+          Try again
+        </Button>
+      </div>
     </PageContainer>
   );
 }

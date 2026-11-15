@@ -1,15 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { api } from "@/lib/api";
 import { queryKeys } from "@/hooks/api";
-import { Callout } from "@/components/ui/callout";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { ApiQuery } from "@/hooks/api";
 import type { GroupSummary, MethodologyResponse, SourcesResponse } from "@/lib/types";
-import { fmtCount, fmtKpa, fmtPair } from "@/lib/format";
+import { fmtCount, fmtPair } from "@/lib/format";
 import { Bullets, ExtLink, Formula, Mono, P, QueryBoundary, Section, Sub } from "./primitives";
 
 function isRecord(v: unknown): v is Record<string, unknown> {
@@ -24,13 +23,13 @@ function countMap(v: unknown): [string, number][] {
 }
 
 const REASON_TEXT: Record<string, string> = {
-  low_confidence: "Low-confidence curated step or test (kept in the records; added back only in a sensitivity analysis)",
-  not_ignited: "Specimen did not ignite: not a flammability outcome",
-  n2_suppression: "Flame suppressed by nitrogen: not a flow-driven outcome",
-  no_numeric_airflow: "No numeric airflow could be assigned to the step",
-  no_curated_flow_steps: "No flow steps curated for the test",
-  "context only: different apparatus or test duration": "Context record from another apparatus or test duration",
-  "different apparatus and scale: context only": "Context record from a different apparatus and scale",
+  low_confidence: "Unsure transcription (kept in the records, used only in a what-if check)",
+  not_ignited: "Never ignited",
+  n2_suppression: "Flame put out by nitrogen, not by airflow",
+  no_numeric_airflow: "No airflow number for the step",
+  no_curated_flow_steps: "No flow steps typed up for the test",
+  "context only: different apparatus or test duration": "Context only: different rig or test length",
+  "different apparatus and scale: context only": "Context only: different rig and scale",
 };
 
 type FlowCounts = { n: number; recorded: number; converted: number; borrowed: number; below: number };
@@ -75,21 +74,21 @@ function FlowProvenance({ methodology }: { methodology: ApiQuery<MethodologyResp
     <p ref={ref} className="max-w-[72ch] text-[14px] leading-relaxed text-fg" data-testid="flow-provenance">
       {c ? (
         <>
-          <strong>Where the airflow numbers come from.</strong> <span className="num">{fmtCount(c.recorded)}</span> of <span className="num">{fmtCount(c.n)}</span> training steps use a recorded airflow (duct reading or a value stated in the source);{" "}
-          <span className="num">{fmtCount(c.converted)}</span> are converted from fan or pot settings with the BASS-II calibration; {c.borrowed === 0 ? "none use" : <><span className="num">{fmtCount(c.borrowed)}</span> use</>} a borrowed calibration.
-          {c.below ? <> <span className="num">{fmtCount(c.below)}</span> lie below the calibrated range and are interpolated toward the fan-off point (flagged).</> : null}
+          <strong>Where the airflow numbers come from.</strong> <span className="num">{fmtCount(c.recorded)}</span> of <span className="num">{fmtCount(c.n)}</span> steps used a recorded airflow.{" "}
+          <span className="num">{fmtCount(c.converted)}</span> were converted from fan or pot settings; {c.borrowed === 0 ? "none use" : <><span className="num">{fmtCount(c.borrowed)}</span> use</>} a borrowed calibration.
+          {c.below ? <> <span className="num">{fmtCount(c.below)}</span> fall below the calibrated range and are estimated (flagged).</> : null}
         </>
       ) : obs.isError ? (
-        <span className="text-muted">The airflow provenance counts are unavailable.</span>
+        <span className="text-muted">Airflow source counts are unavailable.</span>
       ) : (
-        <span className="text-muted">Counting where the airflow numbers come from…</span>
+        <span className="text-muted">Counting…</span>
       )}
     </p>
   );
 }
 
 function ReasonTable({ caption, rows }: { caption: string; rows: [string, number][] }) {
-  if (rows.length === 0) return <P className="text-muted">No exclusion counts are reported for {caption.toLowerCase()}.</P>;
+  if (rows.length === 0) return <P className="text-muted">No counts reported.</P>;
   return (
     <Table>
       <caption className="sr-only">{caption}</caption>
@@ -102,15 +101,22 @@ function ReasonTable({ caption, rows }: { caption: string; rows: [string, number
       <TableBody>
         {rows.map(([reason, n]) => (
           <TableRow key={reason}>
-            <TableCell className="h-auto py-1.5">
-              <span className="num mr-2 text-xs text-muted">{reason}</span>
-              {REASON_TEXT[reason] ? <span className="text-muted">{REASON_TEXT[reason]}</span> : null}
-            </TableCell>
+            <TableCell className="h-auto py-1.5">{REASON_TEXT[reason] ?? <span className="num text-xs">{reason}</span>}</TableCell>
             <TableCell numeric>{fmtCount(n)}</TableCell>
           </TableRow>
         ))}
       </TableBody>
     </Table>
+  );
+}
+
+/** Collapsed block with a plain summary line (>= 40 px tap target). */
+function More({ summary, children }: { summary: string; children: ReactNode }) {
+  return (
+    <details className="max-w-[78ch]">
+      <summary className="flex min-h-10 cursor-pointer items-center text-[14px] text-accent underline underline-offset-2">{summary}</summary>
+      <div className="mt-2 space-y-3">{children}</div>
+    </details>
   );
 }
 
@@ -126,51 +132,35 @@ function pressureBasis(g: GroupSummary) {
   if (g.pressure_measured) return <Badge tone="neutral">measured</Badge>;
   const r = g.pressure_kpa_range;
   const same = r ? r[0].toFixed(1) === r[1].toFixed(1) : false;
-  return <span className="text-[13px] text-muted">{same ? "assumed (not recorded)" : "partly assumed"}</span>;
+  return <span className="text-[13px] text-muted">{same ? "assumed" : "partly assumed"}</span>;
 }
 
 export function DataSection({ methodology, sources, groups }: { methodology: ApiQuery<MethodologyResponse>; sources: ApiQuery<SourcesResponse>; groups: ApiQuery<GroupSummary[]> }) {
   return (
-    <Section
-      id="data"
-      number={1}
-      title="Data"
-      intro="Where the records come from, what is kept or dropped, how free text and calibrated quantities become numbers, and what is missing."
-    >
-      <Sub title="Sources">
-        <P>
-          Models are trained only on the two NASA Physical Sciences Informatics (PSI) investigations below, whose as-run test matrices are public (CC0). Other
-          records (Saffire, drop tower, sounding rocket) are shown as context and never used for modelling; they are listed in section 6.
-        </P>
+    <Section id="data" number={1} title="Data" intro="Where the data comes from, what we kept, and what is missing.">
+      <Sub title="Where it comes from">
+        <P>The model learns only from two NASA flame-test studies (public data, CC0). Other records are context only (section 6).</P>
         <QueryBoundary query={sources} rows={3}>
           {(s) => {
             const model = s.investigations.filter((i) => i.role === "integrated_model");
-            if (model.length === 0) return <P className="text-muted">No investigations are flagged for modelling in the current dataset.</P>;
+            if (model.length === 0) return <P className="text-muted">No studies are used for the model.</P>;
             return (
               <Table>
-                <caption className="sr-only">Investigations used for modelling</caption>
+                <caption className="sr-only">NASA studies used by the model</caption>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Investigation</TableHead>
-                    <TableHead>DOI</TableHead>
-                    <TableHead>Licence</TableHead>
-                    <TableHead>Platform</TableHead>
+                    <TableHead>Study</TableHead>
                     <TableHead numeric>Experiments</TableHead>
-                    <TableHead numeric>Observations</TableHead>
+                    <TableHead numeric>Test results</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {model.map((i) => (
                     <TableRow key={i.investigation_id}>
                       <TableCell className="h-auto py-2">
-                        <ExtLink href={i.landing_url}>
-                          {i.acronym} <span className="num whitespace-nowrap text-xs text-muted">({i.investigation_id})</span>
-                        </ExtLink>
+                        <ExtLink href={i.landing_url}>{i.acronym}</ExtLink>
                         <div className="max-w-[40ch] text-xs text-muted">{i.title}</div>
                       </TableCell>
-                      <TableCell className="whitespace-nowrap">{i.doi ? <ExtLink href={`https://doi.org/${i.doi}`}>{i.doi}</ExtLink> : <span className="text-muted">none recorded</span>}</TableCell>
-                      <TableCell className="num whitespace-nowrap">{i.license}</TableCell>
-                      <TableCell className="h-auto py-2 text-xs">{i.platform}</TableCell>
                       <TableCell numeric>{fmtCount(i.n_experiments)}</TableCell>
                       <TableCell numeric>{fmtCount(i.n_observations)}</TableCell>
                     </TableRow>
@@ -182,159 +172,119 @@ export function DataSection({ methodology, sources, groups }: { methodology: Api
         </QueryBoundary>
       </Sub>
 
-      <Sub title="Inclusion criteria">
-        <P>
-          The unit of observation is one flow step of one test: the flame was either sustained or not at a recorded airflow and oxygen concentration. Steps of one
-          test are correlated, so all validation is grouped by experiment. Labels follow a fixed rule:
-        </P>
+      <Sub title="What counts as a test result">
+        <P>One result is one airflow step of one test: the flame kept burning or went out at that airflow and oxygen level.</P>
         <Bullets>
-          <li>
-            <Mono>sustained</Mono>: label 1 (flame sustained at that setting).
-          </li>
-          <li>
-            <Mono>extinguished</Mono> by low flow, blow-off or at constant flow: label 0. Extinguished because the flow was turned off: label 0 at near-zero flow, flagged{" "}
-            <Mono>flow_off_transient</Mono> (not a physical quench boundary).
-          </li>
-          <li>
-            <Mono>brief_flame_no_sustain</Mono>: label 0, flagged <Mono>no_sustained_propagation</Mono>. <Mono>not_ignited</Mono> and <Mono>n2_suppression</Mono> are excluded
-            from flammability training.
-          </li>
+          <li>Flame sustained: kept burning.</li>
+          <li>Flame died at low flow, by blow-off or at steady flow: went out.</li>
+          <li>A brief flame that did not spread: went out. Flame that died only because the flow was switched off is flagged (not a true limit).</li>
+          <li>Never ignited, or put out by nitrogen: left out.</li>
         </Bullets>
-        <QueryBoundary query={methodology} rows={2}>
-          {(m) => {
-            const tf = isRecord(m.config.training_filter) ? m.config.training_filter : {};
-            const conf = Array.isArray(tf.confidence_included) ? (tf.confidence_included as unknown[]).map(String) : [];
-            return (
-              <>
+        <P>
+          Each material and flame setup is analysed on its own, because material, shape and airflow change flammability. A setup is modelled only with at least 6 experiments, 3 that kept burning and 3 that went out (in at least 2 experiments).
+          Otherwise we show coverage but no prediction.
+        </P>
+        <More summary="Exact rule and checking method">
+          <P>Steps of one test are related, so every check holds out whole experiments.</P>
+          <QueryBoundary query={methodology} rows={2}>
+            {(m) => {
+              const tf = isRecord(m.config.training_filter) ? m.config.training_filter : {};
+              const conf = Array.isArray(tf.confidence_included) ? (tf.confidence_included as unknown[]).map(String) : [];
+              return (
                 <P>
                   Training filter: {typeof tf.rule === "string" ? <Mono>{tf.rule}</Mono> : "not reported"}
                   {conf.length ? (
                     <>
-                      , with curation confidence in <Mono>{conf.join(", ")}</Mono>
+                      , transcription confidence <Mono>{conf.join(", ")}</Mono>
                     </>
                   ) : null}
-                  . {typeof tf.excluded_by_default === "string" ? <>Excluded by default: {tf.excluded_by_default}.</> : null}
+                  . {typeof tf.excluded_by_default === "string" ? <>Left out by default: {tf.excluded_by_default}.</> : null}
                 </P>
-              </>
-            );
-          }}
-        </QueryBoundary>
+              );
+            }}
+          </QueryBoundary>
+        </More>
+      </Sub>
+
+      <Sub title="What we left out">
+        <P className="text-muted">Left-out rows stay in the records with their reason. Nothing is deleted.</P>
+        <More summary="Counts and reasons">
+          <QueryBoundary query={methodology} rows={3}>
+            {(m) => {
+              const tf = isRecord(m.config.training_filter) ? m.config.training_filter : {};
+              const ex = isRecord(tf.exclusions_in_dataset) ? tf.exclusions_in_dataset : null;
+              if (!ex) return <P className="text-muted">The service did not report these counts, so none are shown.</P>;
+              return (
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <ReasonTable caption="Test results left out" rows={countMap(ex.observations_by_reason)} />
+                  <ReasonTable caption="Experiments left out" rows={countMap(ex.experiments_by_reason)} />
+                </div>
+              );
+            }}
+          </QueryBoundary>
+        </More>
+      </Sub>
+
+      <Sub title="How text and units become numbers">
         <P>
-          Observations are analysed only within an <strong>analysis group</strong> (one material family plus one flame configuration), because material, geometry and flow
-          configuration change flammability. A group is modelled only with at least 6 training experiments, at least 3 sustained and 3 not-sustained observations, and
-          not-sustained outcomes in at least 2 experiments; otherwise coverage is shown but predictions are not (insufficient data).
+          Most fields are read straight from NASA files. Flow schedules and outcomes written as free text were typed up by hand, twice, and settled. A check then confirms every quoted text is an exact copy of the NASA cell; rows that fail are left
+          out of the model.
         </P>
-      </Sub>
-
-      <Sub title="Exclusions">
-        <QueryBoundary query={methodology} rows={3}>
-          {(m) => {
-            const tf = isRecord(m.config.training_filter) ? m.config.training_filter : {};
-            const ex = isRecord(tf.exclusions_in_dataset) ? tf.exclusions_in_dataset : null;
-            if (!ex) return <Callout variant="info" title="Exclusion counts are not reported by the service">The dataset report did not include them, so none are shown.</Callout>;
-            return (
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <ReasonTable caption="Observations excluded, by reason" rows={countMap(ex.observations_by_reason)} />
-                <ReasonTable caption="Experiments excluded, by reason" rows={countMap(ex.experiments_by_reason)} />
-              </div>
-            );
-          }}
-        </QueryBoundary>
-        <P className="text-muted">Excluded rows stay in the integrated records with their reason; they are not deleted.</P>
-      </Sub>
-
-      <Sub title="Extraction: structured fields and transcribed free text">
-        <Bullets>
-          <li>
-            <strong>Structured fields</strong> are read directly from the NASA workbooks: test labels, material text, specimen dimensions, oxygen concentration, and (BASS only)
-            total pressure in atm.
-          </li>
-          <li>
-            <strong>Free text</strong> (flow schedules and outcomes such as a decreasing list of fan settings with &quot;extinguished at&quot;) is interpreted by hand into curation tables. Every
-            step records the exact quoted <Mono>raw_token</Mono>, the source cell and row, and a confidence (high, medium, low). Two independent transcriptions per chunk are
-            adjudicated, and each chunk is reconciled against the other.
-          </li>
-          <li>
-            <strong>Provenance check.</strong> The pipeline re-opens the original workbook and verifies that every <Mono>raw_token</Mono> is an exact substring of the cited cell. Rows that
-            fail are flagged <Mono>provenance_mismatch</Mono> and excluded from training. The same rule applies to BASS-II outcome evidence transcribed from NASA/TM-20210011385
-            Appendix A.
-          </li>
-          <li>
-            Interpreted values stay marked: <Mono>extraction_method</Mono> is <Mono>structured_nasa_data</Mono> or <Mono>manually_transcribed</Mono>, and the interpretation confidence travels with the row.
-          </li>
-        </Bullets>
-      </Sub>
-
-      <Sub title="Normalization and unit conversions">
-        <Formula label="Unit conversions">{`pressure_kpa = pressure_atm x 101.325
+        <FlowProvenance methodology={methodology} />
+        <More summary="Technical details">
+          <Formula label="Unit conversions">{`pressure_kpa = pressure_atm x 101.325
 oxygen_percent = oxygen_fraction x 100
 airflow_cm_s = 1.0066 x AIR        (duct "Air display" reading, per the BASS-II calibration note)`}</Formula>
-        <Bullets>
-          <li>
-            Fan-display and control-box (pot) settings are converted to cm/s by interpolating the BASS-II fan-calibration table for the same restrictor count, preferring the
-            same calibration day, otherwise the nearest day. The calibration reference is stored per observation.
-          </li>
-          <li>
-            Where a test row records a direct air-display reading for a step, that reading is used instead of converting the fan or pot setting (CONTRACTS 2.2).
-          </li>
-          <li>
-            <strong>Below the calibrated range</strong> (lowest non-zero calibration point), the flow is interpolated linearly between the calibration sheet&apos;s fan-off row
-            (0 cm/s) and the chosen day&apos;s lowest calibrated non-zero point, toward the fan-off point (an assumption; the NASA sheet notes the fan stops at a finite voltage above
-            3.8 V). The step is flagged <Mono>below_calibration_range</Mono> and <Mono>flow_interpolated_to_fan_off</Mono>, with an uncertainty of max(0.5 cm/s, half the lowest
-            calibrated flow). This keeps near-quench steps in order; those values are the least certain
-            airflow numbers in the dataset. A sensitivity analysis drops them (section 4).
-          </li>
-          <li>
-            BASS has no fan calibration in the integrated files: stated cm/s values are preferred; a BASS fan or pot setting would need the BASS-II calibration, so such steps are flagged low confidence and kept out of training.
-          </li>
-          <li>
-            Oxygen is linearly interpolated between initial and final values across the steps of a test (flagged); a sensitivity analysis uses the initial value only.
-          </li>
-        </Bullets>
-        <FlowProvenance methodology={methodology} />
+          <Bullets>
+            <li>Fan and pot settings are converted to cm/s from the BASS-II fan-calibration table (same restrictor count, same day if possible). A direct air-display reading is used instead when the test has one.</li>
+            <li>
+              Below the lowest calibrated point, flow is interpolated toward the fan-off point. This is an assumption (the NASA sheet notes the fan stops at a finite voltage). These steps are flagged, carry extra uncertainty, and are the least
+              certain airflow numbers we have. A what-if check drops them (section 4).
+            </li>
+            <li>BASS has no fan calibration in these files. Stated cm/s values are used; BASS fan or pot settings are flagged low confidence and kept out of the model.</li>
+            <li>Oxygen is interpolated between its start and end values across a test (flagged). A what-if check uses the start value only.</li>
+            <li>Every typed-up value is marked as hand-transcribed and keeps its confidence level and source cell.</li>
+          </Bullets>
+        </More>
       </Sub>
 
-      <Sub title="Missing data">
+      <Sub title="What is missing">
         <P>
-          Missing values stay missing. BASS-II test matrices do not record total pressure: the measurement field is empty, and a documented ISS cabin value is stored separately as an
-          assumption (<Mono>pressure_assumed_kpa</Mono>, flagged <Mono>pressure_assumed</Mono>). It is used only to place points on pressure axes and in coverage computations. BASS records pressure per test.
+          Missing values stay missing. BASS-II tests did not record pressure. We store a documented ISS cabin value separately as an assumption, flagged, and use it only to place points on the map and in coverage. BASS tests record their own
+          pressure.
         </P>
-        <QueryBoundary query={groups} rows={3}>
-          {(gs) =>
-            gs.length === 0 ? (
-              <P className="text-muted">No analysis groups are available.</P>
-            ) : (
-              <Table containerClassName="max-h-[340px]">
-                <caption className="sr-only">Pressure basis per analysis group</caption>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Analysis group</TableHead>
-                    <TableHead numeric>Experiments</TableHead>
-                    <TableHead numeric>Pressure range (kPa)</TableHead>
-                    <TableHead>Pressure basis</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {gs.map((g) => (
-                    <TableRow key={g.group_id}>
-                      <TableCell className="h-auto py-1.5">
-                        {g.label}
-                      </TableCell>
-                      <TableCell numeric>{fmtCount(g.n_experiments)}</TableCell>
-                      <TableCell numeric>{pressureText(g.pressure_kpa_range)}</TableCell>
-                      <TableCell>{pressureBasis(g)}</TableCell>
+        <P>
+          <strong>Pressure never varies in our data.</strong> Every test result is at about 1 atm (sea-level pressure), so no pressure effect can be learned. Anything said about other pressures is an assumption (section 2).
+        </P>
+        <More summary="Pressure source by material setup">
+          <QueryBoundary query={groups} rows={3}>
+            {(gs) =>
+              gs.length === 0 ? (
+                <P className="text-muted">None available.</P>
+              ) : (
+                <Table containerClassName="max-h-[340px]">
+                  <caption className="sr-only">Pressure source per material and flame setup</caption>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Material and flame setup</TableHead>
+                      <TableHead numeric>Pressure (kPa)</TableHead>
+                      <TableHead>Source</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )
-          }
-        </QueryBoundary>
-        <Callout variant="info" title="Pressure does not vary in the integrated records">
-          Every integrated observation is at about 1 atm, so no pressure effect can be learned from them. Any statement about other pressures is assumption-driven (section 2).
-          {" "}
-          <span className="num">{fmtKpa(101.325, 3)}</span> is the standard atmosphere used as the reference for the pressure coordinate.
-        </Callout>
+                  </TableHeader>
+                  <TableBody>
+                    {gs.map((g) => (
+                      <TableRow key={g.group_id}>
+                        <TableCell className="h-auto py-1.5">{g.label}</TableCell>
+                        <TableCell numeric>{pressureText(g.pressure_kpa_range)}</TableCell>
+                        <TableCell>{pressureBasis(g)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )
+            }
+          </QueryBoundary>
+        </More>
       </Sub>
     </Section>
   );

@@ -10,10 +10,9 @@ export const PLAIN_VERDICT: Record<Verdict, { headline: string; tone: "blind" | 
   supported: { headline: "Covered: ISS flame tests ran in air like this.", tone: "covered" },
 };
 
-export const EXPLORER_INTRO =
-  "The full map behind the Cabins page: ISS test results for one material, the model's estimate, and ranked next tests.";
+export const EXPLORER_INTRO = "The full map behind the Cabins page.";
 
-/** What the "Chart" control offers. The held variable is the third condition, fixed while the other two are plotted. */
+/** What the "Chart" control offers. The held value is the third condition, fixed while the other two are plotted. */
 export const CHART_OPTIONS: Array<{ value: Plane; label: string }> = [
   { value: "o2_pressure", label: "Oxygen × pressure" },
   { value: "o2_flow", label: "Oxygen × airflow" },
@@ -25,17 +24,17 @@ export function heldLabel(plane: Plane): string {
 
 export function heldHelp(plane: Plane): string {
   return plane === "o2_pressure"
-    ? "Shows test results near this airflow. The chart does not plot airflow."
-    : "Shows test results near this pressure. The chart does not plot pressure.";
+    ? "Shows tests near this airflow."
+    : "Shows tests near this pressure.";
 }
 
-/** "Show" chips: plain name and one short helper (also the tooltip). */
+/** "Show" chips: one short helper each (the tooltip). */
 export const SHOW_HELP: Record<string, string> = {
-  observations: "Filled dots: flame kept burning. Hollow dots: flame went out.",
-  prediction: "The model's estimate that a flame keeps burning.",
-  uncertainty: "Where the model does not know.",
-  coverage: "Where ISS tests are close enough to count.",
-  context: "NASA ground and flight work the model does not use.",
+  observations: "Filled: flame kept burning. Hollow: went out.",
+  prediction: "The model's estimate of a lasting flame.",
+  uncertainty: "Where the model is unsure.",
+  coverage: "Where ISS tests are nearby.",
+  context: "NASA work the model does not use.",
 };
 
 /** Fraction 0..1 as "35 %" (non-breaking space), the notation used on the Cabins page. Missing stays "—". */

@@ -21,7 +21,7 @@ export interface MapLegendProps {
   hasContextPoints?: boolean;
   hasTarget?: boolean;
   hasCandidates?: boolean;
-  /** At least one candidate sits at a different airflow/pressure than the map shows (drawn hollow). */
+  /** At least one candidate is at a different airflow/pressure than the map shows (drawn hollow). */
   hasOffSlice?: boolean;
   /** Prediction or uncertainty requested but the material has no model grid. */
   modelMissing?: boolean;
@@ -50,8 +50,8 @@ export default function MapLegend(p: MapLegendProps) {
   const showContext = l.context && (p.hasContextEnvelopes || p.hasContextPoints);
   const sliceWord = p.plane === "o2_flow" ? "pressure" : "airflow";
   return (
-    <div className={cn("text-[12px] leading-snug", p.className)} aria-label="Map legend" role="group">
-      <ul className="grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-[repeat(auto-fill,minmax(250px,1fr))] sm:gap-x-5">
+    <div className={cn("text-[13px] leading-snug", p.className)} aria-label="Map legend" role="group">
+      <ul className="flex flex-wrap gap-x-4 gap-y-2">
         {l.observations && (
           <>
             <Item swatch={<circle cx="11" cy="8" r="4.5" fill={OBSERVED} stroke="var(--surface)" strokeWidth="1" />} label="Flame kept burning" />
@@ -65,7 +65,7 @@ export default function MapLegend(p: MapLegendProps) {
                   </>
                 }
                 label="Pressure assumed"
-                title="The test did not record its pressure; the documented cabin value is used."
+                title="The test did not record its pressure, so the documented cabin value is used."
               />
             )}
             {p.hasUnlabelled && (
@@ -95,15 +95,13 @@ export default function MapLegend(p: MapLegendProps) {
                   </text>
                 </>
               }
-              label="Next test"
-              hint="(number = rank)"
+              label="Research candidate"
             />
             {p.hasOffSlice && (
               <Item
                 swatch={<path d="M11 1 L18 8 L11 15 L4 8 Z" fill="var(--surface)" stroke={ACCENT} strokeWidth="1.5" />}
-                label="Hollow diamond"
-                hint={`= at a different ${sliceWord} than this map shows`}
-                title={`This next test is at another ${sliceWord} than the one this map shows.`}
+                label={`Candidate at other ${sliceWord}`}
+                title={`This research candidate is at a different ${sliceWord} than this map shows.`}
               />
             )}
           </>
@@ -117,7 +115,7 @@ export default function MapLegend(p: MapLegendProps) {
               </>
             }
             label="Related NASA work"
-            hint="(not used by the model)"
+            hint="(not in the model)"
           />
         )}
         {l.coverage && (
@@ -128,30 +126,41 @@ export default function MapLegend(p: MapLegendProps) {
                 <path d="M1 15 L15 1 M7 15 L21 1 M1 9 L9 1 M13 15 L21 7" stroke={GAP} strokeWidth="1" />
               </>
             }
-            label="Few nearby test results"
+            label="Few nearby tests"
             title={
               p.sparseThreshold != null
-                ? `The nearest test result is more than ${+p.sparseThreshold.toFixed(2)} steps away (the model's comparison distance; see How it works).`
-                : "The nearest test result is beyond the model's comparison distance."
+                ? `The nearest ISS test is more than ${+p.sparseThreshold.toFixed(2)} steps away.`
+                : "The nearest ISS test is far away."
             }
           />
         )}
         {l.prediction && (
           <Item
             swatch={
-              <>
-                <rect x="1" y="1" width="20" height="14" fill="rgba(23,23,26,0.1)" />
-                <path d="M1 12 Q8 4 21 7" stroke={INK} strokeWidth="1.75" fill="none" />
-              </>
+              <path d="M1 12 Q8 4 21 7" stroke={INK} strokeWidth="1.75" fill="none" />
             }
             label="Model's 50 % line"
-            hint="(only where tests support an estimate)"
-            title="The model's estimate that a flame keeps burning. Solid line: 50 %. Dashed lines: 10 % and 90 %. A model estimate, not a measured limit."
+            title="The model's estimate that a flame keeps burning. Solid line: 50 %. Dashed lines: 10 % and 90 %. An estimate, not a measured limit."
+          />
+        )}
+        {l.prediction && (
+          <Item
+            swatch={
+              <>
+                <rect x="1" y="1" width="6.67" height="14" fill={INK} fillOpacity="0.05" />
+                <rect x="7.67" y="1" width="6.67" height="14" fill={INK} fillOpacity="0.13" />
+                <rect x="14.33" y="1" width="6.67" height="14" fill={INK} fillOpacity="0.21" />
+                <rect x="1" y="1" width="20" height="14" fill="none" stroke={MUTED} strokeOpacity="0.4" strokeWidth="1" />
+              </>
+            }
+            label="Grey: chance it burns"
+            hint="(darker = higher; no grey = no estimate)"
+            title="Grey shading is the model's estimated chance that a flame keeps burning. Darker means a higher chance. Where the model has no estimate, the map is not shaded."
           />
         )}
         {l.uncertainty && (
-          <li className="col-span-2 flex items-center gap-1.5 sm:col-span-full">
-            <span className="text-muted">Model uncertainty</span>
+          <li className="flex basis-full items-center gap-1.5">
+            <span className="text-fg">Uncertainty</span>
             <span className="text-muted">low</span>
             <span className="flex w-20 opacity-[0.72]" role="img" aria-label="Colour scale from low uncertainty (light) to high uncertainty (dark purple)">
               {Array.from({ length: PLUM_STOPS.length * 2 - 1 }, (_, i) => (
@@ -162,12 +171,12 @@ export default function MapLegend(p: MapLegendProps) {
           </li>
         )}
       </ul>
-      {l.uncertainty && p.hasHypothetical && <p className="mt-2 text-muted">What-if view: the shading includes a hypothetical test result, not only the fitted model.</p>}
+      {l.uncertainty && p.hasHypothetical && <p className="mt-2 text-muted">What-if: the shading includes a hypothetical test result.</p>}
       {p.modelMissing && (
-        <p className="mt-2 text-gap-fg">This material has no fitted model, so the estimate and uncertainty layers are not available. Test results are still shown.</p>
+        <p className="mt-2 text-gap-fg">No model for this material. Test results are still shown.</p>
       )}
       {p.plane === "o2_pressure" && (
-        <p className="mt-2 text-muted">Pressure in kPa. For reference, 101.3 kPa = {(101.325 / KPA_PER_PSI).toFixed(1)} psia (sea level).</p>
+        <p className="mt-2 text-muted">Pressure in kPa. Sea level is 101.3 kPa ({(101.325 / KPA_PER_PSI).toFixed(1)} psia).</p>
       )}
     </div>
   );

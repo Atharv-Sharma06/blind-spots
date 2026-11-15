@@ -27,12 +27,11 @@ const loading = (q: ApiQuery<unknown>): Slot | null => (q.isPending ? { state: "
 function gatherSlot(headline: ApiQuery<HeadlineResponse>, methodology: ApiQuery<MethodologyResponse>): Slot {
   const h = headline.data?.data.envelope;
   if (h) {
-    const inv = h.investigations.length ? `${h.investigations.join(" and ")} records` : undefined;
-    return { state: "ready", value: { big: fmtCount(h.n_steps), caption: `test results (one per airflow step) from ${fmtCount(h.n_experiments)} ISS experiments`, note: inv } };
+    return { state: "ready", value: { big: fmtCount(h.n_steps), caption: `test results from ${fmtCount(h.n_experiments)} ISS experiments` } };
   }
   // Headline missing: fall back to the training-set size the methodology endpoint reports.
   const n = methodology.data?.data.config?.training_flow_provenance?.n_training;
-  if (typeof n === "number") return { state: "ready", value: { big: fmtCount(n), caption: "ISS test results used to train the model" } };
+  if (typeof n === "number") return { state: "ready", value: { big: fmtCount(n), caption: "ISS test results" } };
   return loading(headline) ?? { state: "unavailable" };
 }
 
@@ -49,8 +48,8 @@ function mapSlot(headline: ApiQuery<HeadlineResponse>): Slot {
     value: {
       big: `${none}`,
       of: `of ${profiles.length}`,
-      caption: `${none === 1 ? "cabin has" : "cabins have"} no nearby ISS test results`,
-      note: barely > 0 ? `${barely} more ${barely === 1 ? "is" : "are"} barely covered.` : "Nearby is defined just below.",
+      caption: `${none === 1 ? "cabin has" : "cabins have"} no nearby ISS tests`,
+      note: barely > 0 ? `${barely} more ${barely === 1 ? "is" : "are"} barely covered.` : undefined,
     },
   };
 }
@@ -62,8 +61,8 @@ function modelSlot(validation: ApiQuery<ExtValidation>, headline: ApiQuery<Headl
   if (!v || v.groups.length === 0) return { state: "unavailable" };
   const c = validationCounts(v);
   const p = headline.data?.data.envelope.pressure_measured_kpa;
-  const note = p ? `Recorded ISS pressures lie at ${fmtFixed(p[0], 0)}–${fmtFixed(p[1], 0)} kPa; the rest are assumed. Away from that the model says it does not know.` : undefined;
-  return { state: "ready", value: { big: `${c.better}`, of: `of ${c.nGroups}`, caption: "materials with enough tests where the model beats a simple guess on experiments it had not seen", note } };
+  const note = p ? `Measured ISS pressures: ${fmtFixed(p[0], 0)}–${fmtFixed(p[1], 0)} kPa. The rest are assumed.` : undefined;
+  return { state: "ready", value: { big: `${c.better}`, of: `of ${c.nGroups}`, caption: "materials where it beats a simple guess on new experiments", note } };
 }
 
 function rankSlot(validation: ApiQuery<ExtValidation>): Slot {
@@ -75,7 +74,7 @@ function rankSlot(validation: ApiQuery<ExtValidation>): Slot {
   const r = s.evr_vs_random;
   return {
     state: "ready",
-    value: { big: `${r.better}`, of: `of ${s.n_scenarios}`, caption: "replays on past experiments where the ranking beat random picking", note: `Tied in ${r.indistinguishable}, worse in ${r.worse}.` },
+    value: { big: `${r.better}`, of: `of ${s.n_scenarios}`, caption: "past replays where our pick beat a random pick", note: `Tied in ${r.indistinguishable}, worse in ${r.worse}.` },
   };
 }
 
@@ -97,8 +96,8 @@ function Figure({ slot }: { slot: Slot }) {
         <span className="num text-[30px] font-medium tracking-[-0.02em]">{big}</span>
         {of ? <span className="num text-[16px] text-muted">{of}</span> : null}
       </p>
-      <p className="mt-1 text-[13px] leading-5 text-fg">{caption}</p>
-      {note ? <p className="mt-1 text-xs leading-[18px] text-muted">{note}</p> : null}
+      <p className="mt-1 text-[14px] leading-5 text-fg">{caption}</p>
+      {note ? <p className="mt-1 text-[13px] leading-[18px] text-muted">{note}</p> : null}
     </>
   );
 }
@@ -118,8 +117,8 @@ function Step({ n, icon, title, children, slot, last }: { n: number; icon: React
         <span className="sr-only">Step {n}: </span>
         {title}
       </h3>
-      <p className="mt-1.5 mb-4 text-[14px] leading-[22px] text-muted">{children}</p>
-      <div className="mt-auto min-h-[7.5rem] border-t border-border pt-3 lg:min-h-[9rem]">
+      <p className="mt-1.5 mb-4 min-h-[44px] text-[14px] leading-[22px] text-muted">{children}</p>
+      <div className="border-t border-border pt-3">
         <Figure slot={slot} />
       </div>
       {last ? null : (
@@ -131,15 +130,15 @@ function Step({ n, icon, title, children, slot, last }: { n: number; icon: React
   );
 }
 
-/** "One step is 2 percentage points of oxygen, about 10 % in pressure, or 0.5 in the logarithm of airflow." from the API's scales. */
+/** "One step: 2 points of oxygen, about 10 % in pressure, or 0.5 in log airflow." from the API's scales. */
 function nearbyStep(methodology: ApiQuery<MethodologyResponse>): string {
   const sc = methodology.data?.data.config?.coverage_scales as { o2?: unknown; flow?: unknown; p?: unknown } | null | undefined;
   if (!sc || typeof sc.o2 !== "number" || typeof sc.flow !== "number" || typeof sc.p !== "number") return "";
-  return ` One step is ${fmtFixed(sc.o2, 0)} percentage points of oxygen, about ${fmtFixed(sc.p * 100, 0)} % in pressure, or ${fmtFixed(sc.flow, 1)} in the logarithm of airflow.`;
+  return ` One step: ${fmtFixed(sc.o2, 0)} points of oxygen, about ${fmtFixed(sc.p * 100, 0)}\u00a0% in pressure, or ${fmtFixed(sc.flow, 1)} in log airflow.`;
 }
 
 /**
- * "40 more ISS experiments are left out: ..." from the dataset's own exclusion counts (experiments excluded for a reason other
+ * "40 more experiments are left out: ..." from the dataset's own exclusion counts (experiments excluded for a reason other
  * than "context only", which marks non-ISS or different-apparatus tests). Empty when the service does not report them.
  */
 function leftOutNote(methodology: ApiQuery<MethodologyResponse>): string {
@@ -150,10 +149,10 @@ function leftOutNote(methodology: ApiQuery<MethodologyResponse>): string {
     .filter(([reason]) => !/context only/i.test(reason))
     .reduce((acc, [, v]) => acc + (typeof v === "number" ? v : 0), 0);
   if (n <= 0) return "";
-  return ` ${fmtCount(n)} more ISS ${n === 1 ? "experiment is" : "experiments are"} left out: no flame lit, or the airflow or outcome could not be read reliably.`;
+  return ` ${fmtCount(n)} more ${n === 1 ? "experiment is" : "experiments are"} left out: no flame lit, or unclear airflow or outcome.`;
 }
 
-/** The 20-second version: four numbered steps, one sentence each, one number from the API each. */
+/** Four numbered steps: one short sentence and one number from the API each. */
 export function FourSteps({ headline, validation, methodology }: { headline: ApiQuery<HeadlineResponse>; validation: ApiQuery<ExtValidation>; methodology: ApiQuery<MethodologyResponse> }) {
   return (
     <section aria-labelledby="steps-h" data-testid="four-steps">
@@ -161,48 +160,45 @@ export function FourSteps({ headline, validation, methodology }: { headline: Api
         The four steps
       </h2>
       <ol className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Step n={1} icon={<Database className="size-5" />} title="Gather the ISS flame records" slot={gatherSlot(headline, methodology)}>
-          NASA burned many materials aboard the ISS. We start from its integrated records of whether each flame kept burning.
+        <Step n={1} icon={<Database className="size-5" />} title="Collect ISS tests" slot={gatherSlot(headline, methodology)}>
+          NASA burned materials aboard the ISS.
         </Step>
-        <Step n={2} icon={<MapIcon className="size-5" />} title="Map where they cover each cabin's air" slot={mapSlot(headline)}>
-          For each crew cabin we check how close those tests came to its oxygen, pressure and airflow.
+        <Step n={2} icon={<MapIcon className="size-5" />} title="Check each cabin" slot={mapSlot(headline)}>
+          Did those tests match the cabin&apos;s air?
         </Step>
-        <Step n={3} icon={<Brain className="size-5" />} title="Model flame behaviour" slot={modelSlot(validation, headline)}>
-          Machine learning estimates when a flame keeps burning, and says when it does not know.
+        <Step n={3} icon={<Brain className="size-5" />} title="Train the model" slot={modelSlot(validation, headline)}>
+          It learns when flames burn, and says when it does not know.
         </Step>
-        <Step n={4} icon={<ListOrdered className="size-5" />} title="Rank the experiment that would teach the most" slot={rankSlot(validation)} last>
-          We rank the experiment that would cut the model&apos;s uncertainty about a cabin the most.
+        <Step n={4} icon={<ListOrdered className="size-5" />} title="Pick the next test" slot={rankSlot(validation)} last>
+          We rank the test that would teach the model most.
         </Step>
       </ol>
-      <p id="test-results" className="mt-3 max-w-[78ch] scroll-mt-[calc(var(--header-h)+16px)] text-xs leading-relaxed text-muted">
-        <strong className="font-medium text-fg">A test result</strong> is one airflow step of an experiment; an experiment has one or more steps, so results outnumber experiments.
+      <p id="test-results" className="mt-3 max-w-[78ch] scroll-mt-[calc(var(--header-h)+16px)] text-[13px] leading-relaxed text-muted">
+        <strong className="font-medium text-fg">A test result</strong> is one airflow step of an experiment.
         {methodology.isPending ? (
           <span aria-hidden className="rounded-sm bg-subtle text-transparent motion-safe:animate-pulse">
-            {" "}00 more ISS experiments are left out: no flame lit, or the airflow or outcome could not be read reliably.
+            {" "}00 more experiments are left out: no flame lit, or unclear airflow or outcome.
           </span>
         ) : (
           leftOutNote(methodology)
         )}
       </p>
-      <p id="nearby" className="mt-2 max-w-[78ch] scroll-mt-[calc(var(--header-h)+16px)] text-xs leading-relaxed text-muted">
-        <strong className="font-medium text-fg">Nearby</strong> means a test result is within one step of the cabin in oxygen, pressure and airflow combined.
+      <p id="nearby" className="mt-2 max-w-[78ch] scroll-mt-[calc(var(--header-h)+16px)] text-[13px] leading-relaxed text-muted">
+        <strong className="font-medium text-fg">Nearby</strong> means within one step in oxygen, pressure and airflow combined.
         {methodology.isPending ? (
           <span aria-hidden className="rounded-sm bg-subtle text-transparent motion-safe:animate-pulse">
-            {" "}One step is 00 percentage points of oxygen, about 00 % in pressure, or 0.0 in the logarithm of airflow.
+            {" "}One step: 00 points of oxygen, about 00&nbsp;% in pressure, or 0.0 in log airflow.
           </span>
         ) : (
           nearbyStep(methodology)
         )}{" "}
-        Every number on this page comes from the analysis outputs (the live service or its precomputed snapshot).
+        All numbers come from the analysis outputs.
       </p>
       <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2 text-[14px]">
         <Link href="/#cabins" className="inline-flex min-h-10 items-center gap-1.5 rounded-md font-medium text-accent hover:underline">
           See it for a cabin
           <ArrowRight className="size-4" aria-hidden />
         </Link>
-        <a href="#trust" className="inline-flex min-h-10 items-center rounded-md text-muted hover:text-fg hover:underline">
-          Can you trust it?
-        </a>
         <a href="#technical" className="inline-flex min-h-10 items-center rounded-md text-muted hover:text-fg hover:underline">
           Technical details
         </a>

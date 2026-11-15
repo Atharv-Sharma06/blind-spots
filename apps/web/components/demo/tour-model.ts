@@ -123,9 +123,9 @@ export interface TourFact {
 export interface SceneCaption {
   /** Short eyebrow above the caption. */
   title: string;
-  /** The caption: one sentence of at most 14 words, set large. */
+  /** The caption: one short sentence (aim for 10 words, never more than 14), set large. */
   caption: string;
-  /** At most three facts, every value from the API. */
+  /** At most two facts per caption, every value from the API. */
   facts: TourFact[];
   /** Which mandatory small print to show (binding framing) when a candidate or a hypothetical update is on screen. */
   notes: ("candidate_framing" | "hypothetical")[];
@@ -156,9 +156,9 @@ export interface CaptionInput {
 }
 
 function verdictCaption(a: AssessResponse | null): string {
-  if (!a) return "Checking whether ISS tests cover this cabin's air.";
-  if (a.verdict === "insufficient_evidence") return "Blind spot: no ISS test in our data ran in air like this.";
-  if (a.verdict === "extrapolation") return "Partly covered: only part of this air has nearby ISS tests.";
+  if (!a) return "Checking whether ISS tests cover this air.";
+  if (a.verdict === "insufficient_evidence") return "Blind spot: no ISS test in our data used this air.";
+  if (a.verdict === "extrapolation") return "Partly covered: only some of this air has nearby ISS tests.";
   return "Covered: ISS flame tests ran in air like this.";
 }
 
@@ -176,7 +176,7 @@ export function sceneCaption(i: CaptionInput): SceneCaption {
         ? "ISS flame tests cover the station's own air."
         : status === "barely"
           ? "ISS flame tests only partly cover the station's own air."
-          : "ISS flame tests do not reach even the station's own air.";
+          : "ISS flame tests do not reach the station's own air.";
     // One fact only: the count of nearby results. "Materials with nearby results" would overstate breadth (many of
     // those have only a handful of results), so it stays on the Cabins page where it is explained.
     return { ...base, caption, facts: [{ label: "Nearby ISS test results", value: iss.comparable_observations.toLocaleString("en-US") }] };
@@ -184,13 +184,12 @@ export function sceneCaption(i: CaptionInput): SceneCaption {
 
   if (i.scene === "pick") {
     const c = i.cabin;
-    if (!c) return { ...base, caption: "Now pick a Moon or Mars cabin.", waiting: true };
+    if (!c) return { ...base, caption: "Now try a Moon or Mars cabin.", waiting: true };
     return {
       ...base,
-      caption: `Now pick a cabin: ${c.name}.`,
+      caption: `Now try ${c.name}.`,
       facts: [
-        { label: "Oxygen", value: `${trim1(c.oxygen_percent)} %` },
-        { label: "Pressure", value: `${trim1(c.total_pressure_kpa)} kPa` },
+        { label: "Air", value: airText(c.oxygen_percent, c.total_pressure_kpa) },
         { label: "ISS test coverage", value: c.statusLabel },
       ],
     };
@@ -200,8 +199,11 @@ export function sceneCaption(i: CaptionInput): SceneCaption {
     const a = i.assess;
     const mat = i.materialName ? `${title} for ${i.materialName}` : title;
     const facts: TourFact[] = [];
-    if (a) {
+    if (a && i.beat === 0) {
+      // Beat 1: one fact, the count of nearby ISS test results.
       facts.push({ label: "Nearby ISS test results", value: a.coverage.comparable_observations.toLocaleString("en-US") });
+    } else if (a) {
+      // Beat 2 (the chart): this cabin's air against the pressure the ISS tests ran at; two facts at most.
       facts.push({ label: "This cabin", value: airText(a.target.oxygen_percent.nominal ?? a.target.oxygen_percent.max ?? a.target.oxygen_percent.min, a.target.total_pressure_kpa.nominal ?? a.target.total_pressure_kpa.max ?? a.target.total_pressure_kpa.min) });
       const tested = kpaWhole(i.testedKpa);
       if (tested && i.testedKpaMeasured === true) {
@@ -213,14 +215,14 @@ export function sceneCaption(i: CaptionInput): SceneCaption {
       }
     }
     if (i.beat === 0) return { ...base, title: mat, caption: verdictCaption(a), facts, waiting: !a };
-    return { ...base, title: mat, caption: "The chart shows where ISS tests ran and where this cabin sits.", facts, waiting: !a };
+    return { ...base, title: mat, caption: "The chart shows ISS tests against this cabin's air.", facts, waiting: !a };
   }
 
   if (i.scene === "next") {
-    if (i.rankStatus === "unavailable") return { ...base, caption: "Too few ISS test results for this material to rank next experiments." };
-    if (i.rankStatus === "none") return { ...base, caption: "No next experiment adds information about this cabin." };
+    if (i.rankStatus === "unavailable") return { ...base, caption: "Too few ISS test results to rank next tests." };
+    if (i.rankStatus === "none") return { ...base, caption: "No next test adds information for this cabin." };
     const top = i.top;
-    const caption = "Machine learning ranks the most informative next experiment.";
+    const caption = "Machine learning picks the most useful next test.";
     if (!top) return { ...base, caption, waiting: i.rankStatus === "loading" };
     const atTarget = top.reasons.some((r) => (r.code as string) === "at_target_conditions");
     return {
@@ -228,7 +230,6 @@ export function sceneCaption(i: CaptionInput): SceneCaption {
       caption,
       facts: [
         { label: atTarget ? "Top pick, at this cabin's own air" : "Top pick", value: airText(top.oxygen_percent, top.pressure_kpa) },
-        { label: "Airflow", value: `${trim1(top.airflow_cm_s)} cm/s` },
         { label: "Would cut uncertainty by", value: percentSpan([top.evr_fraction]) ?? "" },
       ].filter((f) => f.value !== ""),
       notes: ["candidate_framing"],
@@ -238,14 +239,14 @@ export function sceneCaption(i: CaptionInput): SceneCaption {
   // what-if
   const cf = i.counterfactual;
   if (i.rankStatus === "unavailable" || i.rankStatus === "none") {
-    return { ...base, caption: "No next experiment to preview for this material." };
+    return { ...base, caption: "No next test to preview for this material." };
   }
   if (!i.top) return { ...base, caption: "Preview what one new test result would change.", waiting: i.rankStatus === "loading" };
   const sc = cf?.scenarios ?? [];
   const span = percentSpan(sc.map((s) => s.variance_reduction_fraction));
   return {
     ...base,
-    caption: span ? `Either outcome would cut uncertainty by ${span}.` : "The model would update either way; both outcomes are hypothetical.",
+    caption: span ? `Either outcome would cut uncertainty by ${span}.` : "Both outcomes are hypothetical model updates.",
     facts: sc.map((s) => ({
       label: s.outcome === "sustained" ? "If the flame keeps burning" : "If it goes out",
       value: `${MINUS}${percentSpan([s.variance_reduction_fraction]) ?? ""}`,

@@ -63,7 +63,7 @@ export function PanelError({ error, onRetry, what = "This result" }: { error: un
   if (isApiError(error) && error.snapshotUnavailable) {
     return (
       <Callout variant="info" title="Not in this precomputed version">
-        {what} is computed on demand and is not part of the precomputed snapshot served here; it is available in the full (local) version.
+        {what} is only in the full local version.
       </Callout>
     );
   }

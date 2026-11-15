@@ -67,25 +67,22 @@ export function WhatIf({ cabin, groupId, candidate }: WhatIfProps) {
       <h3 id="what-if-h" className="text-title font-semibold">
         What would we learn?
       </h3>
-      <p className="mt-1 text-prose text-muted">Say test 1 were run. This is how the model&apos;s uncertainty about this cabin would change.</p>
+      <p className="mt-1 text-prose text-muted">Uncertainty change after test 1:</p>
 
       <div className="mt-4 min-h-[7.5rem] md:min-h-[4rem]" aria-busy={!d && !q.isError ? true : undefined}>
         {complete ? (
-          <ul className="grid gap-2 md:grid-cols-2" aria-label="Hypothetical outcomes of test 1">
+          <ul className="grid gap-2 md:grid-cols-2" aria-label="Uncertainty change after test 1">
             {list.map((r) => (
               <li key={r.key} className="flex min-h-12 items-baseline justify-between gap-4 rounded-lg border border-border bg-surface px-4 py-3" data-testid={`what-if-${r.key}`}>
                 <span className="text-prose">{r.label}</span>
-                <span className="whitespace-nowrap text-prose">
-                  <span className="text-muted">uncertainty </span>
-                  <span className="num text-title font-semibold">{r.value}</span>
-                </span>
+                <span className="num whitespace-nowrap text-title font-semibold">{r.value}</span>
               </li>
             ))}
           </ul>
         ) : q.isError && !d ? (
           <div className="flex flex-wrap items-center gap-3">
             <p className="text-prose text-muted">
-              {q.error?.snapshotUnavailable ? "A what-if preview is not available for this cabin and material." : "The what-if preview could not be loaded."}
+              {q.error?.snapshotUnavailable ? "No preview for this cabin and material." : "Could not load the preview."}
             </p>
             {q.error?.snapshotUnavailable ? null : (
               <Button variant="secondary" className="h-10 px-4 md:h-9" onClick={() => void q.refetch()}>
@@ -94,9 +91,9 @@ export function WhatIf({ cabin, groupId, candidate }: WhatIfProps) {
             )}
           </div>
         ) : d ? (
-          <p className="text-prose text-muted">A what-if preview is not available for this cabin and material.</p>
+          <p className="text-prose text-muted">No preview for this cabin and material.</p>
         ) : (
-          <div className="grid gap-2 md:grid-cols-2" role="status" aria-label="Computing the what-if preview">
+          <div className="grid gap-2 md:grid-cols-2" role="status" aria-label="Loading">
             <Skeleton className="h-12 rounded-lg" />
             <Skeleton className="h-12 rounded-lg" />
           </div>

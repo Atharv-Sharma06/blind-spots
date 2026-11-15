@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
 
-/** Left to right: the simple answer, the expert workspace, the research list, the explanation. */
+/** The four pages, in reading order. */
 export const NAV_ITEMS = [
   { href: "/", label: "Cabins" },
   { href: "/explore", label: "Explorer" },
@@ -16,10 +16,7 @@ export function isNavActive(pathname: string, href: string): boolean {
   return href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
 }
 
-/**
- * Primary navigation. One element for every width: on phones it is a four-column row (each link at least 40 px tall,
- * no horizontal scroll down to 320 px); from md up it is an inline list next to the logo.
- */
+/** Four links: a 4-column row on phones (40 px tall, no sideways scroll to 320 px), an inline list from md up. */
 export function NavLinks({ className }: { className?: string }) {
   const pathname = usePathname() ?? "/";
   return (

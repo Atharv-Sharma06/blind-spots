@@ -11,7 +11,7 @@ import type { AssessResponse, GroupSummary, Target } from "@/lib/types";
 import type { ApiError } from "@/lib/api";
 import { pointsSupported } from "./evidence";
 import { PLAIN_VERDICT } from "@/components/explore/plain";
-import { materialFullName } from "@/components/home/cabins";
+import { materialFlowNote, materialName } from "@/components/home/cabins";
 
 /** Starts the per-group assessments only once the table is near the viewport (keeps them out of the critical path). */
 function useNearViewport<T extends Element>(): [React.RefObject<T | null>, boolean] {
@@ -61,12 +61,12 @@ export function MaterialCoverage({
 
   return (
     <div ref={ref}>
-      <Table containerClassName="max-h-[360px]" aria-label="Coverage of the selected cabin by material" data-testid="material-coverage">
+      <Table aria-label="Coverage by material" data-testid="material-coverage">
         <TableHeader>
           <tr>
             <TableHead className="whitespace-normal">Material</TableHead>
-            <TableHead numeric className="hidden sm:table-cell">Nearby tests</TableHead>
-            <TableHead numeric className="hidden sm:table-cell">Nearest test (steps)</TableHead>
+            <TableHead numeric className="hidden sm:table-cell">Tests nearby</TableHead>
+            <TableHead numeric className="hidden sm:table-cell">Nearest (steps)</TableHead>
             <TableHead>Covered?</TableHead>
           </tr>
         </TableHeader>
@@ -86,12 +86,15 @@ export function MaterialCoverage({
                     aria-current={selected ? "true" : undefined}
                     className={cn("flex min-h-10 w-full items-center text-left leading-snug hover:underline sm:min-h-0", selected && "font-medium")}
                   >
-                    {materialFullName(g.group_id, g.label)}
+                    <span>
+                      {materialName(g.group_id, g.label)}
+                      {materialFlowNote(g.group_id) ? <span className="block text-xs font-normal text-muted">{materialFlowNote(g.group_id)}</span> : null}
+                    </span>
                   </button>
-                  {g.model_status !== "modeled" ? <span className="block text-xs text-muted">no prediction: too few test results</span> : null}
+                  {g.model_status !== "modeled" ? <span className="block text-xs text-muted">Too few test results to predict</span> : null}
                   {a ? (
                     <span className="block text-xs text-muted sm:hidden">
-                      <span className="num">{fmtCount(a.coverage.comparable_observations)}</span> nearby tests · nearest <span className="num">{fmtFixed(a.coverage.nn_distance_min, 1)}</span> steps away
+                      <span className="num">{fmtCount(a.coverage.comparable_observations)}</span> tests nearby · nearest <span className="num">{fmtFixed(a.coverage.nn_distance_min, 1)}</span> steps
                     </span>
                   ) : null}
                 </TableCell>
@@ -103,7 +106,7 @@ export function MaterialCoverage({
                       <span className="text-[13px] text-fg">{PLAIN_VERDICT[a.verdict].headline.split(":")[0]}</span>
                       {sup !== null ? (
                         <span className="block text-xs whitespace-nowrap text-muted">
-                          <span className="num">{sup}</span> of <span className="num">{a.coverage.n_target_points}</span> conditions
+                          <span className="num">{sup}</span> of <span className="num">{a.coverage.n_target_points}</span> points
                         </span>
                       ) : null}
                     </>

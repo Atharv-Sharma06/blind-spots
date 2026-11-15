@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import type { ApiQuery } from "@/hooks/api";
 import type { GroupSummary, HeadlineResponse } from "@/lib/types";
 import { fmtCount } from "@/lib/format";
-import { materialFullName, materialName } from "@/components/home/cabins";
+import { materialFullName } from "@/components/home/cabins";
 import type { ExtValidation } from "./types";
 import { blindspotShortfall, VERDICT_WORD } from "./labels";
 import { QueryBoundary } from "./primitives";
@@ -42,16 +42,16 @@ function Ghost({ children, className }: { children: ReactNode; className?: strin
 /** Loading state with the loaded layout's structure (lead, tiles, limits, collapsed table), so later sections do not shift. */
 function TrustSkeleton() {
   const tiles = [
-    ["materials where the model beats a simple guess", "A simple guess is always picking the most common result. Checked on ISS experiments it had not seen. Clearly worse in none. 0 of the 0 are acrylic-sphere setups."],
-    ["materials where its uncertainty rises when it is wrong", "Inconclusive in 00, not shown in 00. 0 of the 0 are acrylic-sphere setups, whose flame-went-out results are mostly airflow being switched off."],
-    ["past-experiment replays where the ranking beat random picks", "Tied in 00, worse in 0. Against \"test the nearest gap\": better in 00, worse in 0."],
-    ["recorded pressure of the ISS test results", "Recorded for 000 of 000 results; the other 000 are assumed at normal ISS cabin pressure. Away from this the model says it does not know."],
+    ["materials beat a simple guess", "Worse in none. 0 are acrylic spheres."],
+    ["materials: uncertainty rises when wrong", "Unclear in 0. 0 of the 0 are acrylic spheres."],
+    ["replays: ranking beat random picks", "Tied in 00, worse in 0."],
+    ["recorded pressure in ISS tests", "Known for 000 of 000 results; the rest assumed."],
   ];
   return (
     <div role="status" aria-label="Loading the validation summary">
       <div aria-hidden className="space-y-6">
         <p className="max-w-[68ch] text-[16px] leading-relaxed">
-          <Ghost>Short answer: partly. Tested on experiments it did not see, the model beats a simple guess in 00 of 00 materials. Where the ISS tests give it no evidence, it says so instead of guessing.</Ghost>
+          <Ghost>Short answer: partly. On ISS tests it had not seen, the model beats a simple guess in 00 of 00 materials. Where ISS tests give no evidence, it says so.</Ghost>
         </p>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {tiles.map(([label, note]) => (
@@ -63,14 +63,14 @@ function TrustSkeleton() {
           ))}
         </div>
         <div className="max-w-[78ch] space-y-2">
-          <h3 className="text-[14px] font-semibold"><Ghost>Read the results with these limits</Ghost></h3>
+          <h3 className="text-[14px] font-semibold"><Ghost>Limits</Ghost></h3>
           <ul className="space-y-1.5 pl-5 text-[14px] leading-relaxed">
             {[
-              "The uncertainty check passes for only 0 of 0 materials: acrylic rod (PMMA) and acrylic sphere (PMMA). Without the steps where the airflow was switched off, only 0 to 00 flame-went-out results remain in each of them, so treat the check as unproven for real flame-out boundaries.",
-              "Gravity is not modelled. All the ISS tests ran in microgravity (free fall). The Moon and Mars have partial gravity, and the challenge notes that PSI holds no partial-gravity combustion data, so this site judges the air only.",
-              "The model reports uncertainty but is not tuned to be exactly right about it: in 00 of 00 materials its stated chances match reality less well than a constant guess (section 4).",
-              "The ranking beats random picks in 00 of 00 replays, but not the simple rule \"test the nearest gap\" (0 better, 00 tied, 0 worse). The replays share materials, so they are not independent.",
-              "Every ISS test ran near sea-level pressure, so the model has not learned any pressure effect. At other pressures, and beyond the tested oxygen range, it falls back to the average for that material and withholds the probability (section 2).",
+              "The uncertainty check passes in only 0 of 0 materials, and leans on steps where airflow was switched off. Without them, at most 00 flame-went-out results remain per material.",
+              "Gravity is not modelled. All ISS tests ran in free fall; the Moon and Mars differ. This site judges the air only.",
+              "In 00 of 00 materials, its stated chances match reality worse than a constant guess.",
+              "The ranking beats random picks in 00 of 00 replays, but not \"test the nearest gap\" (0 better, 00 tied, 0 worse).",
+              "ISS tests ran near sea-level pressure, so no pressure effect is learned. Outside the tested range, the model gives no probability.",
             ].map((t) => (
               <li key={t}><Ghost>{t}</Ghost></li>
             ))}
@@ -101,7 +101,7 @@ export function TrustSection({
         Can you trust it?
       </h2>
       <p className="mt-2 max-w-[68ch] text-[13px] leading-relaxed text-muted">
-        Worked out from the checks in section 4 of the technical details below. The model is always scored on experiments it did not see during training.
+        Scored on ISS tests the model did not see. Details in section 4 below.
       </p>
       <div className="mt-5">
         {validation.isPending ? <TrustSkeleton /> : (
@@ -133,62 +133,60 @@ export function TrustSection({
               return { mis: g.blindspot_test.point_level.n_misclassified, left: fo?.n_not_sustained };
             });
             const leftVals = supportedFacts.map((x) => x.left).filter((x): x is number => typeof x === "number");
-            const span = (xs: number[], sep = "–") => (xs.length ? (Math.min(...xs) === Math.max(...xs) ? `${Math.min(...xs)}` : `${Math.min(...xs)}${sep}${Math.max(...xs)}`) : null);
-            const passFamilies = [...new Set(bsSupported.map((g) => materialName(g.group_id, groups?.find((x) => x.group_id === g.group_id)?.label ?? g.group_id)))].map((n) => (/^(Nomex|Ultem)\b/.test(n) ? n : n.charAt(0).toLowerCase() + n.slice(1)));
             return (
               <div className="space-y-6">
                 <p className="max-w-[68ch] text-[16px] leading-relaxed" data-testid="trust-lead">
-                  Short answer: partly. Tested on experiments it did not see, the model beats a simple guess in {better.length} of {gs.length} materials. Where the ISS tests give it no evidence, it says so instead of guessing.
+                  Short answer: partly. On ISS tests it had not seen, the model beats a simple guess in {better.length} of {gs.length} materials. Where ISS tests give no evidence, it says so.
                 </p>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
                   <Tile
                     value={`${better.length} of ${gs.length}`}
-                    label="materials where the model beats a simple guess"
-                    note={`A simple guess is always picking the most common result. Checked on ISS experiments it had not seen. ${worse.length === 0 ? "Clearly worse in none." : `Clearly worse in ${worse.length}.`}${spheres(better) ? ` ${spheres(better)} of the ${better.length} are acrylic-sphere setups.` : ""}`}
+                    label="materials beat a simple guess"
+                    note={`${worse.length === 0 ? "Worse in none." : `Worse in ${worse.length}.`}${spheres(better) ? ` ${spheres(better)} are acrylic spheres.` : ""}`}
                   />
                   <Tile
                     value={`${bsSupported.length} of ${gs.length}`}
-                    label="materials where its uncertainty rises when it is wrong"
-                    note={`Inconclusive in ${bsInconclusive.length}${gs.length - bsSupported.length - bsInconclusive.length ? `, not shown in ${gs.length - bsSupported.length - bsInconclusive.length}` : ""}.${spheres(bsSupported) ? ` ${spheres(bsSupported)} of the ${bsSupported.length} are acrylic-sphere setups, whose flame-went-out results are mostly airflow being switched off.` : ""}`}
+                    label="materials: uncertainty rises when wrong"
+                    note={`Unclear in ${bsInconclusive.length}${gs.length - bsSupported.length - bsInconclusive.length ? `, not shown in ${gs.length - bsSupported.length - bsInconclusive.length}` : ""}.${spheres(bsSupported) ? ` ${spheres(bsSupported)} of the ${bsSupported.length} are acrylic spheres.` : ""}`}
                   />
                   {vr && summary ? (
                     <Tile
                       value={`${vr.better} of ${summary.n_scenarios}`}
-                      label="past-experiment replays where the ranking beat random picks"
-                      note={`Tied in ${vr.indistinguishable}, worse in ${vr.worse}.${vg ? ` Against "test the nearest gap": better in ${vg.better}, worse in ${vg.worse}.` : ""}`}
+                      label="replays: ranking beat random picks"
+                      note={`Tied in ${vr.indistinguishable}, worse in ${vr.worse}.`}
                     />
                   ) : null}
                   {pr && nAssumed !== null && nSteps !== null ? (
                     <Tile
                       value={`${f(pr[0], 0)}–${f(pr[1], 0)} kPa`}
-                      label="recorded pressure of the ISS test results"
-                      note={`Recorded for ${fmtCount(nSteps - nAssumed)} of ${fmtCount(nSteps)} results; the other ${fmtCount(nAssumed)} are assumed at normal ISS cabin pressure. Away from this the model says it does not know.`}
+                      label="recorded pressure in ISS tests"
+                      note={`Known for ${fmtCount(nSteps - nAssumed)} of ${fmtCount(nSteps)} results; the rest assumed at normal cabin pressure.`}
                     />
                   ) : null}
                 </div>
 
                 <div className="max-w-[78ch] space-y-2">
-                  <h3 className="text-[14px] font-semibold">Read the results with these limits</h3>
+                  <h3 className="text-[14px] font-semibold">Limits</h3>
                   <ul className="list-disc space-y-1.5 pl-5 text-[14px] leading-relaxed marker:text-muted">
                     {bsSupported.length ? (
                       <li>
-                        The uncertainty check passes for only {bsSupported.length} of {gs.length} materials: {passFamilies.join(" and ")}.
-                        {span(leftVals) !== null ? ` Without the steps where the airflow was switched off, only ${span(leftVals, " to ")} flame-went-out results remain in each of them,` : ""} so treat the check as unproven for real flame-out boundaries.
+                        The uncertainty check passes in only {bsSupported.length} of {gs.length} materials
+                        {leftVals.length ? `, and leans on steps where airflow was switched off. Without them, at most ${Math.max(...leftVals)} flame-went-out results remain per material.` : "."}
                       </li>
                     ) : null}
                     <li>
-                      <strong className="font-medium">Gravity is not modelled.</strong> All the ISS tests ran in microgravity (free fall). The Moon and Mars have partial gravity, and the challenge notes that PSI holds no partial-gravity combustion data, so this site judges the air only.
+                      <strong className="font-medium">Gravity is not modelled.</strong> All ISS tests ran in free fall; the Moon and Mars differ. This site judges the air only.
                     </li>
                     <li>
-                      The model reports uncertainty but is not tuned to be exactly right about it: in {eceWorse} of {gs.length} materials its stated chances match reality less well than a constant guess (section 4).
+                      In {eceWorse} of {gs.length} materials, its stated chances match reality worse than a constant guess.
                     </li>
                     {vg ? (
                       <li>
-                        The ranking beats random picks in {vr?.better ?? "—"} of {summary?.n_scenarios ?? "—"} replays, but not the simple rule &quot;test the nearest gap&quot; ({vg.better} better, {vg.indistinguishable} tied, {vg.worse} worse). The replays share materials, so they are not independent.
+                        The ranking beats random picks in {vr?.better ?? "—"} of {summary?.n_scenarios ?? "—"} replays, but not &quot;test the nearest gap&quot; ({vg.better} better, {vg.indistinguishable} tied, {vg.worse} worse).
                       </li>
                     ) : null}
                     <li>
-                      Every ISS test ran near sea-level pressure, so the model has not learned any pressure effect. At other pressures, and beyond the tested oxygen range, it falls back to the average for that material and withholds the probability (section 2).
+                      ISS tests ran near sea-level pressure, so no pressure effect is learned. Outside the tested range, the model gives no probability.
                     </li>
                   </ul>
                 </div>
@@ -196,11 +194,11 @@ export function TrustSection({
                 <Disclosure summary="Results for each material" tone="strong" contentClassName="mt-3 pl-0" data-testid="trust-by-group">
                   <div className="relative overflow-x-auto rounded-md border border-border bg-surface" tabIndex={0} role="region" aria-label="Validation summary by material">
                     <table className="w-full min-w-[720px] border-collapse text-[13px]">
-                      <caption className="sr-only">Checks on unseen experiments, by material</caption>
+                      <caption className="sr-only">Checks on unseen tests, by material</caption>
                       <thead>
                         <tr className="border-b border-border bg-subtle text-left text-xs text-muted">
-                          <th scope="col" className="px-3 py-2 font-medium">Material and airflow</th>
-                          <th scope="col" className="px-3 py-2 text-right font-medium">Experiments</th>
+                          <th scope="col" className="px-3 py-2 font-medium">Material</th>
+                          <th scope="col" className="px-3 py-2 text-right font-medium">Tests</th>
                           <th scope="col" className="px-3 py-2 font-medium">Versus a simple guess</th>
                           <th scope="col" className="px-3 py-2 font-medium">Uncertainty check</th>
                           <th scope="col" className="px-3 py-2 text-right font-medium">
@@ -258,8 +256,7 @@ export function TrustSection({
                     </table>
                   </div>
                   <p className="mt-2 max-w-[78ch] text-xs leading-relaxed text-muted">
-                    The two numbers under each verdict are a score where lower is better (log loss): the model first, the simple guess second. Every score is measured on experiments the model did not see. &quot;Better&quot; means a 95 % interval of the
-                    difference lies entirely on the model&apos;s side. Ranking vs random: replays on past ISS experiments in which each strategy picks tests one at a time (section 4).
+                    Numbers under each verdict: model score, then simple-guess score (log loss, lower is better), on unseen tests. &quot;Better&quot; means clearly better, not chance (95 % interval).
                   </p>
                 </Disclosure>
 

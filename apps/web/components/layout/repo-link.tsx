@@ -1,4 +1,3 @@
-import { ExternalLink } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 /** Public repository URL, set at build time. Never invented: when unset, no link is rendered. */
@@ -20,10 +19,9 @@ export function RepoLink({ className }: { className?: string }) {
       target="_blank"
       rel="noopener noreferrer"
       data-testid="repo-link"
-      className={cn("inline-flex h-7 items-center gap-1 rounded-md px-1.5 text-ui text-muted transition-colors hover:text-fg", className)}
+      className={cn("hidden h-10 items-center rounded-md px-1 text-ui text-muted transition-colors hover:text-fg min-[360px]:inline-flex md:h-8 md:px-1.5", className)}
     >
       {repoLabel(REPO_URL)}
-      <ExternalLink className="size-3" aria-hidden />
       <span className="sr-only">(opens in a new tab)</span>
     </a>
   );

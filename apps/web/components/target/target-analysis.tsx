@@ -13,12 +13,10 @@ import {
   fmtKpa,
   fmtOxygen,
   fmtPsia,
-  fmtProbability,
   isNum,
   kpaToPsia,
   reasonLabel,
   targetFlagLabel,
-  verdictLabel,
 } from "@/lib/format";
 import type { AssessResponse, GroupSummary, Range, ResolvedTarget } from "@/lib/types";
 import type { ApiQuery } from "@/hooks/api";
@@ -57,6 +55,20 @@ function CabinLine({ t }: { t: ResolvedTarget }) {
   );
 }
 
+/** Plain one-line reasons; unknown codes fall back to the shared label. */
+const PLAIN_REASON: Record<string, string> = {
+  point_verdicts: "No part of this cabin is covered",
+  sparse_observations: "Few ISS tests nearby",
+  outside_hull: "Outside the range the ISS tests covered",
+  unobserved_pressure: "Pressure never tested nearby",
+  outcome_variability: "Nearby tests had mixed results",
+  model_instability: "Model answers shift between runs",
+  other_family_evidence_only: "Only other materials have tests here",
+  no_model: "No model for this material",
+  high_knowledge_uncertainty: "The model is still unsure",
+  target_points_not_supported: "Too few cabin conditions have an estimate",
+};
+
 const TONE = {
   blind: { box: "border-plum-3 bg-plum-1 text-plum-7", Icon: CircleSlash },
   partly: { box: "border-gap/40 bg-gap-tint text-gap-fg", Icon: TriangleAlert },
@@ -75,23 +87,23 @@ function PlainVerdict({ verdict, headline }: { verdict: AssessResponse["verdict"
   );
 }
 
-/** One or two plain sentences, built only from the API's numbers. */
+/** One or two short sentences, built only from the API's numbers. */
 function plainSentence(a: AssessResponse): string {
-  const { n_target_points: n, points_with_comparable: k, nn_distance_min: nn } = a.coverage;
+  const { n_target_points: n, points_with_comparable: k } = a.coverage;
   const s = pointsSupported(a);
-  if (a.model.model_status !== "modeled") return "This material has too few test results for a model. The chart shows coverage only.";
-  if (k === 0) return `No ISS test result for this material is nearby.${isNum(nn) ? ` The closest is ${fmtFixed(nn, 1)} steps away (1 step or less counts as nearby).` : ""}`;
-  if (a.verdict === "supported") return `Test results are nearby for ${k} of ${n} conditions sampled in this cabin${s !== null ? `, and the model is confident at ${s}` : ""}.`;
-  return `Test results are nearby for ${k} of ${n} conditions sampled in this cabin. Elsewhere, estimates depend on model assumptions.`;
+  if (a.model.model_status !== "modeled") return "Too few test results for a model. The chart shows coverage only.";
+  if (k === 0) return "No ISS test for this material is nearby.";
+  if (a.verdict === "supported") return `Tests are nearby for ${k} of ${n} cabin conditions${s !== null ? `. The model is confident at ${s}` : ""}.`;
+  return `Tests are nearby for ${k} of ${n} cabin conditions. Elsewhere, estimates rest on model assumptions.`;
 }
 
-/** A number with its plain explanation: label and help on the left, value on the right. */
-function Fact({ label, help, value, note, ...rest }: { label: string; help: string; value: string; note?: string } & React.HTMLAttributes<HTMLDivElement>) {
+/** One key number: plain label (and optional short help) on the left, value on the right. */
+function Fact({ label, help, value, note, ...rest }: { label: string; help?: string; value: string; note?: string } & React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 py-2" {...rest}>
+    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-4 py-2" {...rest}>
       <dt className="col-start-1 text-[13px] text-fg">{label}</dt>
-      <dd className="col-start-1 row-start-2 mt-0.5 text-xs text-muted">{help}</dd>
-      <dd className="col-start-2 row-span-2 row-start-1 text-right">
+      {help ? <dd className="col-start-1 row-start-2 mt-0.5 text-xs text-muted">{help}</dd> : null}
+      <dd className={cn("col-start-2 row-start-1 text-right", help && "row-span-2")}>
         <span className="num text-[15px] font-medium text-fg">{value}</span>
         {note ? <span className="block text-xs text-muted">{note}</span> : null}
       </dd>
@@ -148,6 +160,8 @@ export function TargetAnalysis({ query, group, pending }: TargetAnalysisProps) {
   const p = a.target.total_pressure_kpa.nominal ?? a.target.total_pressure_kpa.max;
   const ppo2 = isNum(o2) && isNum(p) ? (o2 / 100) * p : null;
 
+  const nearest = isNum(cov.nn_distance_min) ? fmtFixed(cov.nn_distance_min, 1) : "—";
+
   return (
     <Updating active={pending}>
       <div className="space-y-4" data-testid="target-analysis" data-verdict={a.verdict}>
@@ -168,94 +182,66 @@ export function TargetAnalysis({ query, group, pending }: TargetAnalysisProps) {
         <CabinLine t={a.target} />
 
         <dl className="divide-y divide-border border-y border-border">
-          <Fact
-            label="Nearby test results"
-            help="ISS test results for this material close to this air."
-            value={fmtCount(cov.comparable_observations)}
-          />
-          <Fact
-            label="Nearest test result"
-            help="How far the closest ISS test is. 1 step or less counts as nearby (see How it works)."
-            value={isNum(cov.nn_distance_min) ? fmtFixed(cov.nn_distance_min, 1) : "—"}
-            note={isNum(cov.nn_distance_min) ? "steps" : undefined}
-          />
-          <Fact
-            label="Cabin conditions with a nearby test"
-            help={`Of ${fmtCount(cov.n_target_points)} conditions sampled across this cabin's range.`}
-            value={`${fmtCount(cov.points_with_comparable)} of ${fmtCount(cov.n_target_points)}`}
-          />
+          <Fact label="Nearby ISS test results" value={fmtCount(cov.comparable_observations)} />
+          <Fact label="Cabin conditions with a nearby test" value={`${fmtCount(cov.points_with_comparable)} of ${fmtCount(cov.n_target_points)}`} />
           {sup !== null ? (
             <Fact
               data-testid="points-supported"
               label="Conditions with an estimate"
-              help="Only conditions the model is confident about get an estimate."
+              help="Where the model is confident."
               value={`${fmtCount(sup)} of ${fmtCount(cov.n_target_points)}`}
             />
           ) : null}
-          <Fact
-            label="Share inside the ISS test range"
-            help="How much of this cabin's range lies within the range the ISS tests span."
-            value={isNum(cov.fraction_inside_hull) ? pct(cov.fraction_inside_hull) : "—"}
-          />
           {showP ? (
-            <Fact
-              label="Chance the flame keeps burning"
-              help={`The model's estimate over the confident conditions. Not a measurement.`}
-              value={pctRange(m.p_sustained_min, m.p_sustained_max)}
-            />
-          ) : null}
+            <Fact label="Chance the flame keeps burning" help="Model estimate, not a measurement." value={pctRange(m.p_sustained_min, m.p_sustained_max)} />
+          ) : (
+            <Fact label="Nearest ISS test" help="1 step or less counts as nearby." value={nearest} note={isNum(cov.nn_distance_min) ? "steps" : undefined} />
+          )}
         </dl>
 
-        <Disclosure summary="Technical details" data-testid="why-uncertain">
+        <Disclosure summary="More details" data-testid="why-uncertain">
           {a.reasons.length > 0 ? (
             <div>
-              <p className="mb-1 font-medium text-fg">Why is this region uncertain?</p>
-              <ul className="space-y-1.5">
+              <p className="mb-1 font-medium text-fg">Why is this uncertain?</p>
+              <ul className="list-disc space-y-1 pl-4 text-muted">
                 {a.reasons.map((r) => (
-                  <li key={r.code}>
-                    <span className="font-medium text-fg">{reasonLabel(r.code)}.</span> <span className="text-muted">{r.message}</span>
-                  </li>
+                  <li key={r.code}>{PLAIN_REASON[r.code] ?? reasonLabel(r.code)}</li>
                 ))}
               </ul>
             </div>
           ) : (
-            <p className="text-muted">{verdictSentence(a)}{isNum(m.latent_std_ratio_mean) ? ` Remaining uncertainty averages ${fmtFixed(m.latent_std_ratio_mean, 2)} of the prior (latent std ratio; supported needs below 0.6).` : ""}</p>
+            <p className="text-muted">{verdictSentence(a)}{isNum(m.latent_std_ratio_mean) ? ` Uncertainty left: ${fmtFixed(m.latent_std_ratio_mean, 2)} (confident needs below 0.6).` : ""}</p>
           )}
-          <p className="text-muted">
-            Verdict term: <span className="text-fg">{verdictLabel(a.verdict)}</span>
-            {sup !== null ? <>; <span className="num text-fg">{fmtCount(sup)}</span> of <span className="num text-fg">{fmtCount(cov.n_target_points)}</span> cabin conditions supported</> : null}
-            {ppo2 !== null ? <>; ppO₂ <span className="num text-fg">{fmtFixed(ppo2, 1)}</span> kPa</> : null}.
-          </p>
-          {showP ? (
-            <p className="text-muted">
-              Model P(sustained){" "}
-              <span className="num text-fg">{m.p_sustained_min === m.p_sustained_max ? fmtProbability(m.p_sustained_min) : `${fmtProbability(m.p_sustained_min)}–${fmtProbability(m.p_sustained_max)}`}</span>
-              {isNum(m.p_sustained_mean) ? <>, mean <span className="num text-fg">{fmtProbability(m.p_sustained_mean)}</span></> : null}
-              {bal && bal.n > 0 ? <>; group base rate <span className="num text-fg">{fmtProbability(bal.sustained / bal.n)}</span> sustained</> : null}. A model estimate, not a measurement.
-            </p>
-          ) : null}
+          <dl className="space-y-1 text-muted">
+            {showP ? (
+              <div className="flex justify-between gap-4"><dt>Nearest ISS test</dt><dd className="num text-fg">{nearest}{isNum(cov.nn_distance_min) ? " steps" : ""}</dd></div>
+            ) : null}
+            <div className="flex justify-between gap-4"><dt>Cabin range inside the ISS test range</dt><dd className="num text-fg">{isNum(cov.fraction_inside_hull) ? pct(cov.fraction_inside_hull) : "—"}</dd></div>
+            {ppo2 !== null ? <div className="flex justify-between gap-4"><dt>Oxygen pressure</dt><dd className="num text-fg">{fmtFixed(ppo2, 1)} kPa</dd></div> : null}
+            {showP && isNum(m.p_sustained_mean) ? <div className="flex justify-between gap-4"><dt>Model average chance of burning</dt><dd className="num text-fg">{pct(m.p_sustained_mean)}</dd></div> : null}
+            {showP && bal && bal.n > 0 ? <div className="flex justify-between gap-4"><dt>ISS tests in this material that kept burning</dt><dd className="num text-fg">{pct(bal.sustained / bal.n)}</dd></div> : null}
+          </dl>
           {modelled && dec && a.verdict !== "insufficient_evidence" ? (
             <div>
-              <p className="mb-1 font-medium text-fg">Uncertainty at the cabin (mean)</p>
+              <p className="mb-1 font-medium text-fg">Where the uncertainty comes from</p>
               <UncertaintyBar knowledge={dec.knowledge} variability={dec.variability} />
             </div>
           ) : null}
           {bal && bal.n > 0 ? (
             <p className="text-muted" data-testid="class-balance">
-              Training data in {group ? materialFullName(group.group_id, group.label) : "this material"}: {fmtCount(group?.n_experiments)} experiments, {fmtCount(bal.sustained)} flame sustained and {fmtCount(bal.notSustained)} not sustained observations.
-              {group && group.n_experiments < SMALL_SAMPLE_EXPERIMENTS ? " Small sample: treat estimates with caution." : ""}
+              {group ? materialFullName(group.group_id, group.label) : "This material"} has {fmtCount(group?.n_experiments)} experiments: {fmtCount(bal.sustained)} flame kept burning, {fmtCount(bal.notSustained)} went out.
+              {group && group.n_experiments < SMALL_SAMPLE_EXPERIMENTS ? " Few tests, so treat estimates with care." : ""}
             </p>
           ) : null}
           <p className="text-muted">
-            <span className="font-medium text-fg">Airflow band: {band.label}.</span> {bandNote ?? band.explanation}
+            <span className="font-medium text-fg">Airflow: {band.label}.</span> {bandNote ?? band.explanation}
           </p>
           {(a.target.flags ?? []).map((f) => (
             <p key={f} className="text-muted">{targetFlagLabel(f)}</p>
           ))}
-          <div>
-            <p className="font-medium text-fg">Full summary</p>
-            <p className="mt-0.5 text-muted">{a.summary}</p>
-          </div>
+          <Disclosure summary="Full summary">
+            <p>{a.summary}</p>
+          </Disclosure>
         </Disclosure>
 
         <InvestigationRelevance a={a} />

@@ -55,7 +55,6 @@ import {
   xDomainFor,
 } from "./model";
 import { PanelSkeleton } from "./query-state";
-import { EXPLORER_INTRO } from "./plain";
 
 // Plot height set by CSS (phones 340, tablets 440, lg+: fits the sticky map card in the viewport), so the server
 // render already has the final height and phones do not jump at load (a04-02).
@@ -276,7 +275,7 @@ export function ExploreWorkspace() {
     covQ.isError && !cov && !heldView ? (
       <ErrorState compact code={isApiError(covQ.error) ? covQ.error.code : "backend_unavailable"} message={covQ.error?.message} onRetry={() => void covQ.refetch()} />
     ) : groupsQ.data && groups.length === 0 ? (
-      <EmptyState icon={<MapIcon aria-hidden />} title="No materials available" description="The analysis service returned no materials." />
+      <EmptyState icon={<MapIcon aria-hidden />} title="No materials available" description="Try again later." />
     ) : (
       <div className="relative">
         <div className={mapBusy ? "opacity-55 transition-opacity delay-150 duration-200" : "transition-opacity duration-150"}>
@@ -330,8 +329,7 @@ export function ExploreWorkspace() {
             Cabins
           </Link>
         </div>
-        <p className="max-w-[760px] text-[15px] text-muted">{EXPLORER_INTRO}</p>
-        <a href="#explorer-map" className="inline-flex min-h-10 items-center text-sm text-fg underline underline-offset-2 lg:hidden">Jump to the chart ↓</a>
+        <p className="max-w-[760px] text-[15px] text-muted">ISS tests for one material, with the model&apos;s estimate and next tests.</p>
       </header>
 
       {/* Phones read top to bottom: the answer first, then the chart, then what to test next. At lg the map spans both rows of the left column. */}
@@ -354,34 +352,31 @@ export function ExploreWorkspace() {
             </div>
           </div>
           <p className="px-4 pt-3 text-xs text-muted" data-testid="chart-caption">
-            Each dot is one ISS test of this material. The dashed box is this cabin; numbered markers are the suggested next tests.
+            Dots are ISS tests. The dashed box is this cabin. Numbers are next tests.
           </p>
           <div className="p-2 sm:p-3" aria-busy={mapBusy}>
             {mapNode}
           </div>
           {group && !modelled ? (
             <p className="border-t border-border px-4 py-2 text-xs text-muted">
-              <span className="font-medium text-fg">No prediction for this material.</span> It has too few test results for a model ({group.model_reason ?? "insufficient data"}). The chart shows test results and coverage only. Try another material.
+              <span className="font-medium text-fg">No estimate for this material.</span> Too few test results. Try another material.
             </p>
           ) : null}
           <div className="space-y-1 border-t border-border px-4 py-2">
             {group ? <GroupFacts group={group} /> : <p className="text-xs text-muted">&nbsp;</p>}
             {cov ? (
               <p className="text-xs text-muted" data-testid="obs-note">
-                Showing <span className="num">{obsResult.points.length}</span> of <span className="num">{obsResult.total}</span> test results: those close to the {plane === "o2_flow" ? "pressure" : "airflow"} value held above
-                {obsResult.points.length === 0
-                  ? `. None is close to it${assess?.coverage.nn_distance_min != null ? `; the nearest to this cabin is ${assess.coverage.nn_distance_min.toFixed(1)} steps away` : ""}`
-                  : ""}
-                {obsResult.hiddenZeroFlow > 0 ? `; ${obsResult.hiddenZeroFlow} zero-airflow results cannot be drawn on the log axis` : ""}.
+                Showing <span className="num">{obsResult.points.length}</span> of <span className="num">{obsResult.total}</span> test results near the held {plane === "o2_flow" ? "pressure" : "airflow"}.
+                {obsResult.hiddenZeroFlow > 0 ? ` ${obsResult.hiddenZeroFlow} with zero airflow are not drawn.` : ""}
               </p>
             ) : null}
-            {dm.snapshotOnly ? <p className="text-xs text-muted">Precomputed version: held values are limited to the precomputed set. Your own cabin conditions need the full (local) version.</p> : null}
+            {dm.snapshotOnly ? <p className="text-xs text-muted">Precomputed version: preset values only. Your own cabin needs the full version.</p> : null}
           </div>
           {mapLayers.context && ctx.envelopes.length > 0 ? (
             <details className="group border-t border-border px-4 py-2 text-xs" data-testid="context-list">
               <summary className="block cursor-pointer list-none text-muted hover:text-fg [&::-webkit-details-marker]:hidden [&::marker]:content-none">
                 <span aria-hidden className="mr-1 inline-block transition-transform group-open:rotate-90">›</span>
-                Related NASA work on the chart ({ctx.envelopes.length}): dotted boxes the model does not use
+                Related NASA work ({ctx.envelopes.length}): dotted boxes the model does not use
               </summary>
               <ul className="mt-1 space-y-0.5 text-muted">
                 {ctx.envelopes.map((e) => (
@@ -392,8 +387,7 @@ export function ExploreWorkspace() {
                   </li>
                 ))}
               </ul>
-              <p className="mt-1 text-muted">Each box spans the documented test conditions; the tag on the map names the work where it fits.</p>
-              <p className="mt-1 text-muted">Grey triangles are individual documented tests (Saffire, drop tower) that are not integrated either; hover or focus one for its name.</p>
+              <p className="mt-1 text-muted">Grey triangles are single NASA tests, also not used by the model.</p>
             </details>
           ) : null}
         </section>
@@ -405,7 +399,7 @@ export function ExploreWorkspace() {
             busy={ready && assessQ.isPlaceholderData}
             lead={
               <div>
-                <ControlLabel id="cabin-label" label="Cabin" helpId="cabin-help" help="The air to check against the ISS tests." />
+                <ControlLabel id="cabin-label" label="Cabin" />
                 <TargetSelector className="w-full" />
               </div>
             }
@@ -455,7 +449,7 @@ export function ExploreWorkspace() {
 
       {groups.length > 0 && ready ? (
         <Panel id="material-heading" title="Coverage by material">
-          <p className="mb-2 text-xs text-muted">This cabin checked against every material. Select a row to switch the chart.</p>
+          <p className="mb-2 text-xs text-muted">Pick a row to switch the chart.</p>
           <MaterialCoverage groups={groups} target={target} selectedGroupId={groupId} onSelect={onGroup} />
         </Panel>
       ) : null}

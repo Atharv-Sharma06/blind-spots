@@ -43,13 +43,17 @@ export function reductionFraction(c: Candidate): number | null {
   return isNum(v) ? v : null;
 }
 
-/** "Would cut the model's uncertainty about this cabin by 19 %." / "Would cut it by a further 14 % after test 1." */
-export function reductionSentence(c: Candidate): string | null {
+/** "Cuts uncertainty by" / "Cuts uncertainty by a further" + "19 %": rank 1 on its own, later ranks after the ones above them. */
+export function reductionParts(c: Candidate): { lead: string; value: string } | null {
   const f = reductionFraction(c);
   if (f === null) return null;
-  if (c.rank <= 1) return `Would cut the model's uncertainty about this cabin by ${percentText(f)}.`;
-  const above = c.rank === 2 ? "test 1" : `tests 1${c.rank > 3 ? " to " : " and "}${c.rank - 1}`;
-  return `Would cut it by a further ${percentText(f)} after ${above}.`;
+  return { lead: c.rank <= 1 ? "Cuts uncertainty by" : "Cuts uncertainty by a further", value: percentText(f) };
+}
+
+/** "Cuts uncertainty by 19 %." / "Cuts uncertainty by a further 14 %." */
+export function reductionSentence(c: Candidate): string | null {
+  const p = reductionParts(c);
+  return p ? `${p.lead} ${p.value}.` : null;
 }
 
 /**
@@ -64,8 +68,7 @@ export function isAtTarget(c: Candidate, target: ResolvedTarget): boolean {
 }
 
 /** D4 wording in plain words (the Explorer keeps the precise sentence). Used only when the test really is at the cabin's air. */
-export const AT_TARGET_PLAIN =
-  "This is the cabin's own air. The most informative single test is at the cabin's own conditions. That follows from the model's assumption that conditions close together behave alike.";
+export const AT_TARGET_PLAIN = "This is the cabin's own air. The model picks it because it assumes nearby conditions behave alike.";
 
 function bounds(r: Range): [number, number] | null {
   const lo = r.min ?? r.nominal ?? r.max;
@@ -104,19 +107,22 @@ export function isAtCabinAir(c: Candidate, target: ResolvedTarget): boolean {
   return isAtTarget(c, target) && !o2Off && !kpaOff;
 }
 
-export function atTargetSentence(c: Candidate, target: ResolvedTarget): string {
+/**
+ * "Closest" is only said when this candidate really has the smallest distance to the cabin's air among the candidates
+ * passed in `shown`; without that list (or when another one is closer) the sentence makes no superlative claim.
+ */
+export function atTargetSentence(c: Candidate, target: ResolvedTarget, shown?: readonly Candidate[]): string {
   const { o2Off, kpaOff } = airOffsets(c, target);
   if (!o2Off && !kpaOff) return AT_TARGET_PLAIN;
   const cabinO2 = cabinOxygenText(target.oxygen_percent);
   const detail = o2Off && cabinO2 ? ` (cabin ${cabinO2} oxygen, test ${oxygenText(c)})` : "";
-  return `This is the closest test point to the cabin's air${detail}. The most informative single test is near the cabin's own conditions. That follows from the model's assumption that conditions close together behave alike.`;
-}
-
-/** One calm line on why the top pick matters (no numbers). */
-export function whyItMatters(atCabinAir: boolean): string {
-  return `Why it matters: ${
-    atCabinAir ? "this is the air the crew would breathe. One test here would show directly whether the material keeps burning in it." : "it would help fill the gap between the ISS tests and this cabin's air."
-  } Results like this inform what fire controls a cabin like this needs.`;
+  const others = (shown ?? []).filter((x) => x !== c);
+  const isClosest =
+    isNum(c.target_distance) &&
+    others.length > 0 &&
+    others.every((x) => isNum(x.target_distance) && c.target_distance! < x.target_distance);
+  const lead = isClosest ? "This is the closest test point to the cabin's air" : "This test sits beside the cabin's air";
+  return `${lead}${detail}. The model picks it because it assumes nearby conditions behave alike.`;
 }
 
 /** Which of the three numbers differ between the candidates (the others are the same in every card). */
@@ -136,37 +142,59 @@ export interface ClosestIssTest {
   kpaGap: number;
 }
 
+/** The API's nearest recorded test to the cabin (coverage.nearest_observations[0]); both numbers must be present to be used. */
+export interface NearestObservationHint {
+  oxygen_percent: number | null;
+  pressure_kpa: number | null;
+}
+
 /**
- * The ISS test result of this material closest to the cabin's air, by oxygen and pressure each scaled to the span the
- * ranking covers. Gaps are measured to the cabin's stated range, so they are 0 inside it. Null if nothing can be measured.
+ * The ISS test result of this material closest to the cabin's air. When the API's nearest observation is passed it wins
+ * (the page then agrees with the assessment); otherwise rows are ranked by oxygen gap first, pressure gap as the tie-break.
+ * Gaps are measured to the cabin's stated range, so they are 0 inside it. Null if nothing can be measured.
  */
-export function closestIssTest(rows: readonly TestRow[], target: ResolvedTarget, domain: CandidateDomain): ClosestIssTest | null {
+export function closestIssTest(
+  rows: readonly TestRow[],
+  target: ResolvedTarget,
+  _domain?: CandidateDomain,
+  nearest?: NearestObservationHint | null,
+): ClosestIssTest | null {
   const o2 = bounds(target.oxygen_percent);
   const kpa = bounds(target.total_pressure_kpa);
   if (!o2 || !kpa || rows.length === 0) return null;
-  const o2Span = Math.max(1e-9, domain.oxygen_percent[1] - domain.oxygen_percent[0]);
-  const kpaSpan = Math.max(1e-9, domain.pressure_kpa[1] - domain.pressure_kpa[0]);
+  const make = (r: Pick<TestRow, "oxygen" | "kpa" | "pressureAssumed">): ClosestIssTest => ({
+    oxygen: r.oxygen,
+    kpa: r.kpa,
+    pressureAssumed: r.pressureAssumed,
+    oxygenGap: outside(r.oxygen, o2),
+    kpaGap: outside(r.kpa, kpa),
+  });
+  if (nearest && isNum(nearest.oxygen_percent) && isNum(nearest.pressure_kpa)) {
+    const { oxygen_percent: no, pressure_kpa: nk } = nearest;
+    const match = rows.find((r) => Math.abs(r.oxygen - no) < 0.05 && Math.abs(r.kpa - nk) < 0.5);
+    return make(match ?? { oxygen: no, kpa: nk, pressureAssumed: false });
+  }
   let best: ClosestIssTest | null = null;
-  let bestScore = Infinity;
   for (const r of rows) {
-    const og = outside(r.oxygen, o2);
-    const kg = outside(r.kpa, kpa);
-    const score = Math.hypot(og / o2Span, kg / kpaSpan);
-    if (score < bestScore) {
-      bestScore = score;
-      best = { oxygen: r.oxygen, kpa: r.kpa, pressureAssumed: r.pressureAssumed, oxygenGap: og, kpaGap: kg };
+    const t = make(r);
+    if (
+      best === null ||
+      t.oxygenGap < best.oxygenGap - 1e-9 ||
+      (Math.abs(t.oxygenGap - best.oxygenGap) <= 1e-9 && t.kpaGap < best.kpaGap)
+    ) {
+      best = t;
     }
   }
   return best;
 }
 
-/** "Closest ISS test of this material: 22.2 % oxygen, 101 kPa. That is 11.8 points of oxygen and 45 kPa from this cabin." */
+/** "Closest ISS test: 22.2 % oxygen, 101 kPa. That is 11.8 points of oxygen and 45 kPa away." */
 export function closestIssSentence(t: ClosestIssTest): string | null {
   const gaps: string[] = [];
   if (t.oxygenGap >= 0.05) gaps.push(`${trimNumber(t.oxygenGap, 1)} points of oxygen`);
   if (t.kpaGap >= 0.5) gaps.push(`${trimNumber(t.kpaGap, 0)} kPa`);
   if (gaps.length === 0) return null;
-  return `Closest ISS test of this material: ${trimNumber(t.oxygen, 1)} % oxygen, ${trimNumber(t.kpa, 1)} kPa${t.pressureAssumed ? " (pressure assumed)" : ""}. That is ${gaps.join(" and ")} from this cabin's air.`;
+  return `Closest ISS test: ${trimNumber(t.oxygen, 1)} % oxygen, ${trimNumber(t.kpa, 1)} kPa${t.pressureAssumed ? " (pressure assumed)" : ""}. That is ${gaps.join(" and ")} away.`;
 }
 
 /** True when the cabin's oxygen lies outside the range the ranking covers (from the API's candidate domain). */

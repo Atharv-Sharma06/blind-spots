@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Callout } from "@/components/ui/callout";
+import { Disclosure } from "@/components/ui/disclosure";
 import { Metric } from "@/components/ui/metric";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { Select } from "@/components/ui/select";
@@ -12,7 +13,7 @@ import type { ApiQuery } from "@/hooks/api";
 import type { GroupSummary } from "@/lib/types";
 import { fmtCount, fmtFractionPercent } from "@/lib/format";
 import type { ExtGroupValidation, ExtScenario, ExtValidation } from "./types";
-import { P, QueryBoundary, Section, Sub } from "./primitives";
+import { P, QueryBoundary, Section } from "./primitives";
 import { STRATEGY_LABEL, blindspotShortfall, modelLabel, scenarioLabel, subgroupLabel, variantLabel, VERDICT_WORD } from "./labels";
 
 const f = (v: number | null | undefined, d = 3): string => (typeof v === "number" && Number.isFinite(v) ? v.toFixed(d) : "—");
@@ -56,14 +57,14 @@ function ModelComparison({ g }: { g: ExtGroupValidation }) {
   const vs = g.cv.gp_vs_majority;
   const verdictFor = (c: { value: number | null; ci95: [number, number] | null } | undefined) => {
     if (!c || c.value === null || !c.ci95) return "not evaluated";
-    if (c.ci95[0] <= 0 && c.ci95[1] >= 0) return "interval includes 0: not distinguishable from the majority-class baseline";
-    return c.ci95[1] < 0 ? "GP lower than baseline; interval excludes 0" : "GP higher (worse) than baseline; interval excludes 0";
+    if (c.ci95[0] <= 0 && c.ci95[1] >= 0) return "not clearly different from the majority-class guess";
+    return c.ci95[1] < 0 ? "model clearly better" : "model clearly worse";
   };
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-3">
         <SegmentedControl aria-label="Metric" size="sm" value={metric} onValueChange={(v) => setMetric(v as MetricKey)} options={METRICS.map((m) => ({ value: m.value, label: m.label }))} />
-        <span className="text-xs text-muted">{info.hint}. Dot = estimate, bar = 95 % interval.</span>
+        <span className="text-xs text-muted">{info.hint}. Dot = estimate, bar = 95% range.</span>
       </div>
       <div className="space-y-4">
         <DotPlot
@@ -99,7 +100,7 @@ function ModelComparison({ g }: { g: ExtGroupValidation }) {
         </Table>
       </div>
       {vs ? (
-        <Callout variant="info" title="GP minus the majority-class guess (negative favours the GP)">
+        <Callout variant="info" title="Model minus the majority-class guess (negative favours the model)">
           <ul className="space-y-0.5">
             <li>
               Log loss <span className="num">{signed(vs.log_loss?.value)}</span> [<span className="num">{ci(vs.log_loss?.ci95)}</span>]: {verdictFor(vs.log_loss)}.
@@ -112,14 +113,12 @@ function ModelComparison({ g }: { g: ExtGroupValidation }) {
       ) : null}
       {g.calibration?.text ? (
         <p className="max-w-[72ch] text-[13px] leading-relaxed text-fg" data-testid="calibration-text">
-          <strong>Calibration{g.calibration.claim_calibrated ? "" : " (uncertainty-aware, not claimed calibrated)"}.</strong> {g.calibration.text}{" "}
+          <strong>Calibration{g.calibration.claim_calibrated ? "" : " (not claimed calibrated)"}.</strong> {g.calibration.text}{" "}
           <span className="text-muted">Rule: {g.calibration.rule}.</span>
         </p>
       ) : null}
       <p className="text-xs text-muted">
-        {g.cv.scheme}
-        {g.cv.ci_method ? `; intervals: ${g.cv.ci_method}` : ""}
-        {g.cv.gp_mean_function ? `; GP mean function: ${g.cv.gp_mean_function}` : ""}. Out-of-fold predictions pooled: <span className="num">{fmtCount(g.cv.n_pooled_predictions)}</span>.
+        {g.cv.scheme}. Out-of-fold predictions pooled: <span className="num">{fmtCount(g.cv.n_pooled_predictions)}</span>.
       </p>
     </div>
   );
@@ -136,9 +135,8 @@ function Blindspot({ g }: { g: ExtGroupValidation }) {
         {short ? <span className="text-xs text-muted">Why: {short}.</span> : null}
       </div>
       <p className="max-w-[72ch] text-xs leading-relaxed text-muted">
-        Does the model flag in advance where it will be wrong? Rule: <strong className="font-medium text-fg">supported</strong> when the Spearman correlation between pre-reveal knowledge (epistemic) uncertainty and log loss is
-        positive with one-sided p &lt; 0.05 at both levels (points, and withheld experiments refitted without them), <em>and</em> the point-level partial correlation of knowledge uncertainty with log loss, controlling for outcome-variability
-        (aleatoric) uncertainty, is positive with p &lt; 0.05; <strong className="font-medium text-fg">not supported</strong> when the correlation is 0 or negative at both levels; otherwise inconclusive.
+        Does the model flag in advance where it will be wrong? <strong className="font-medium text-fg">Supported</strong> means uncertainty before the reveal rises with log loss afterwards (Spearman, one-sided p &lt; 0.05) for both points and
+        withheld experiments, and still does after controlling for outcome-variability (aleatoric) uncertainty. <strong className="font-medium text-fg">Not supported</strong> means the correlation is 0 or negative at both levels. Anything else is inconclusive.
       </p>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,480px)_minmax(0,1fr)]">
         {pairs.length ? (
@@ -149,7 +147,7 @@ function Blindspot({ g }: { g: ExtGroupValidation }) {
             ariaLabel={`Scatter of epistemic uncertainty before reveal against error after reveal for ${pairs.length} withheld experiments`}
           />
         ) : (
-          <P className="text-muted">No experiment-level pairs are available for this group.</P>
+          <P className="text-muted">No experiment-level pairs are available for this test set.</P>
         )}
         <div className="space-y-3">
           <Table>
@@ -180,7 +178,7 @@ function Blindspot({ g }: { g: ExtGroupValidation }) {
           <p className="text-xs text-muted">
             AUROC for flagging misclassified points: <span className="num">{f(b.point_level.auroc_error_detection, 2)}</span>
             {typeof b.point_level.n_misclassified === "number" ? <> (<span className="num">{b.point_level.n_misclassified}</span> misclassified)</> : null}. p-values are permutation tests
-            {b.group_level.p_value_note ? ` (${b.group_level.p_value_note})` : ""}; the smallest reportable value is about 0.0005.
+            {b.group_level.p_value_note ? ` (${b.group_level.p_value_note})` : ""}; the smallest possible is about 0.0005.
           </p>
           {b.diagnostics ? (
             <p className="text-xs text-muted">
@@ -190,7 +188,7 @@ function Blindspot({ g }: { g: ExtGroupValidation }) {
           ) : null}
         </div>
       </div>
-      <Callout variant="info" title="Interpretation (generated from the numbers)">
+      <Callout variant="info" title="What this means (generated from the numbers)">
         {b.interpretation}
       </Callout>
       {b.rule ? <p className="max-w-[72ch] text-xs leading-relaxed text-muted">Verdict rule: {b.rule}</p> : null}
@@ -212,16 +210,16 @@ function Retrospective({ scenarios }: { scenarios: ExtScenario[] }) {
       {scenarios.length > 1 ? (
         <div className="max-w-sm">
           <label htmlFor="retro-scenario" className="mb-1 block text-xs text-muted">
-            Pseudo-target scenario
+            Practice scenario
           </label>
           <Select id="retro-scenario" value={String(idx)} onValueChange={(v) => setIdx(Number(v))} options={scenarios.map((s, i) => ({ value: String(i), label: scenarioLabel(s.name) }))} />
         </div>
       ) : null}
       <P className="text-muted">
-        <span className="font-medium text-fg">{scenarioLabel(sc.name)}</span>: {sc.target_definition}. <span className="num">{sc.n_seeds}</span> seeds, <span className="num">{sc.n_rounds}</span> acquisition rounds
-        {typeof sc.n_target_experiments === "number" ? <>, <span className="num">{sc.n_target_experiments}</span> held-out target experiments ({fmtCount(sc.n_target_observations)} observations
-        {sc.target_class_balance ? <>, <span className="num">{sc.target_class_balance.sustained}</span> sustained / <span className="num">{sc.target_class_balance.not_sustained}</span> not sustained</> : null})</> : null}
-        {typeof sc.n_pool_experiments === "number" ? <>; pool of <span className="num">{sc.n_pool_experiments}</span> experiments to acquire from</> : null}.
+        <span className="font-medium text-fg">{scenarioLabel(sc.name)}</span>: {sc.target_definition}. <span className="num">{sc.n_seeds}</span> random starts, <span className="num">{sc.n_rounds}</span> rounds
+        {typeof sc.n_target_experiments === "number" ? <>, <span className="num">{sc.n_target_experiments}</span> hidden target experiments ({fmtCount(sc.n_target_observations)} test results
+        {sc.target_class_balance ? <>, <span className="num">{sc.target_class_balance.sustained}</span> kept burning / <span className="num">{sc.target_class_balance.not_sustained}</span> went out</> : null})</> : null}
+        {typeof sc.n_pool_experiments === "number" ? <>; <span className="num">{sc.n_pool_experiments}</span> experiments to pick from</> : null}.
       </P>
       <LineBands
         series={series}
@@ -273,10 +271,28 @@ function Retrospective({ scenarios }: { scenarios: ExtScenario[] }) {
           </Table>
         ) : null}
       </div>
-      <Callout variant="info" title="Interpretation (generated from the numbers)">
+      <Callout variant="info" title="What this means (generated from the numbers)">
         {sc.interpretation}
       </Callout>
     </div>
+  );
+}
+
+function Tile({ label, value, meaning }: { label: string; value: string | null; meaning: string }) {
+  return (
+    <div className="min-w-0">
+      <Metric label={label} value={value} size="lg" />
+      <p className="mt-1 text-xs leading-snug text-muted">{meaning}</p>
+    </div>
+  );
+}
+
+/** One collapsed detail: a plain-words title, the technical content behind it. */
+function Detail({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <Disclosure tone="strong" className="border-t border-border pt-2" summaryClassName="min-h-10 text-[14px]" contentClassName="mt-2 space-y-3 pl-0 text-fg sm:pl-5" summary={title}>
+      {children}
+    </Disclosure>
   );
 }
 
@@ -292,173 +308,165 @@ function GroupValidationView({ g, summary, retro }: { g: ExtGroupValidation; sum
   const err = g.error_distribution;
 
   return (
-    <div className="space-y-8">
-      <div className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-4">
-        <Metric label="Experiments" value={fmtCount(g.n_experiments)} />
-        <Metric label="Observations (training)" value={total !== null ? fmtCount(total) : fmtCount(g.n_observations)} />
-        <Metric label="Sustained / not sustained" value={sus !== null && not !== null ? `${sus} / ${not}` : null} />
-        <Metric label="Majority-class share" value={majority !== null ? fmtFractionPercent(majority, 0) : null} />
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4">
+        <Tile label="ISS tests" value={fmtCount(g.n_experiments)} meaning="Real experiments, each hidden in turn." />
+        <Tile label="Test results" value={total !== null ? fmtCount(total) : fmtCount(g.n_observations)} meaning="Single flame outcomes in this set." />
+        <Tile label="Kept burning / went out" value={sus !== null && not !== null ? `${sus} / ${not}` : null} meaning="How many of each outcome." />
+        <Tile label="Score to beat" value={majority !== null ? fmtFractionPercent(majority, 0) : null} meaning="Right this often by always guessing the common outcome." />
       </div>
 
       {smallSample ? (
         <Callout variant="info" title="Small sample">
-          {fmtCount(g.n_experiments)} experiments{not !== null ? ` and ${fmtCount(not)} not-sustained observations` : ""}. Intervals are wide and point estimates are unstable; read the differences between models through their intervals, not their
-          point values.
+          {fmtCount(g.n_experiments)} tests{not !== null ? ` and ${fmtCount(not)} went-out results` : ""}. Numbers can swing a lot, so trust the ranges more than single values.
         </Callout>
       ) : null}
       {flowOffLeft ? (
-        <Callout variant="info" title="Most not-sustained rows are flow-turned-off steps">
-          When flow-turned-off steps are dropped, {flowOffLeft.n_not_sustained} not-sustained {flowOffLeft.n_not_sustained === 1 ? "row remains" : "rows remain"} in this group, so any gain over the majority class largely reflects &quot;flow near zero means no flame&quot; rather than a learned flammability
-          boundary.
+        <Callout variant="info" title="Most flame-outs came from turning the flow off">
+          Without those flow-turned-off steps, {flowOffLeft.n_not_sustained} went-out {flowOffLeft.n_not_sustained === 1 ? "result remains" : "results remain"}. Any gain over guessing mostly reflects &quot;no flow, no flame&quot;, not a learned flammability limit.
         </Callout>
       ) : null}
 
-      <Sub title="Model versus baselines">
-        <ModelComparison g={g} />
-      </Sub>
+      <div className="space-y-1">
+        <Detail title="How it compares with simple guesses">
+          <ModelComparison g={g} />
+        </Detail>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Fig
-          title="Reliability diagram (GP, out-of-fold)"
-          note={
+        <Detail title="How reliable the probabilities are">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <Fig
+              title="Predicted chance vs what happened"
+              note={`Each dot is a bin of predictions; bigger dots hold more. Counts pool ${g.cv.repeats ?? "all"} repeats. Sparse bins are unreliable.`}
+            >
+              <ReliabilityDiagram
+                bins={bins.map((b) => ({ lo: b.lo, hi: b.hi, count: b.count, meanPredicted: b.mean_predicted, observedFrequency: b.observed_frequency }))}
+                ariaLabel="Reliability diagram: observed frequency of sustained flame against mean predicted probability by bin, with bin counts"
+              />
+            </Fig>
+            <Fig title="How far off the predictions were" note="Gap between the predicted chance and what happened (0 or 1).">
+              {err.counts.length ? (
+                <Histogram edges={err.bins} counts={err.counts} xLabel="|outcome - predicted probability|" ariaLabel="Histogram of absolute prediction errors" />
+              ) : (
+                <P className="text-muted">No error data is available.</P>
+              )}
+            </Fig>
+          </div>
+        </Detail>
+
+        <Detail title="Leaving out a whole campaign">
+          {g.logo.applicable && g.logo.folds.length ? (
             <>
-              Dot area and the histogram show the number of predictions per bin; counts pool {g.cv.repeats ?? "all"} cross-validation repeats, so they are that multiple of the row count. Bins with few predictions are unreliable.
-            </>
-          }
-        >
-          <ReliabilityDiagram
-            bins={bins.map((b) => ({ lo: b.lo, hi: b.hi, count: b.count, meanPredicted: b.mean_predicted, observedFrequency: b.observed_frequency }))}
-            ariaLabel="Reliability diagram: observed frequency of sustained flame against mean predicted probability by bin, with bin counts"
-          />
-        </Fig>
-        <Fig title="Error distribution (absolute error of out-of-fold predictions)" note="Absolute difference between the predicted probability and the 0/1 outcome; counts pool all repeats.">
-          {err.counts.length ? (
-            <Histogram edges={err.bins} counts={err.counts} xLabel="|outcome - predicted probability|" ariaLabel="Histogram of absolute prediction errors" />
-          ) : (
-            <P className="text-muted">No error distribution is available.</P>
-          )}
-        </Fig>
-      </div>
-
-      <Sub title="Leave-one-campaign-out">
-        {g.logo.applicable && g.logo.folds.length ? (
-          <>
-            <Table>
-              <caption className="sr-only">Leave-one-campaign-out results</caption>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Held-out campaign</TableHead>
-                  <TableHead numeric>n</TableHead>
-                  <TableHead numeric>Not sustained</TableHead>
-                  <TableHead numeric>Brier</TableHead>
-                  <TableHead numeric>Log loss</TableHead>
-                  <TableHead numeric>AUC</TableHead>
-                  <TableHead numeric>Majority log loss</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {g.logo.folds.map((r) => (
-                  <TableRow key={r.held_out}>
-                    <TableCell>{r.held_out}</TableCell>
-                    <TableCell numeric>{r.n}</TableCell>
-                    <TableCell numeric>{typeof r.n_not_sustained === "number" ? r.n_not_sustained : "—"}</TableCell>
-                    <TableCell numeric>{f(r.brier)}</TableCell>
-                    <TableCell numeric>{f(r.log_loss)}</TableCell>
-                    <TableCell numeric>{f(r.auc)}</TableCell>
-                    <TableCell numeric>{f(r.majority_log_loss)}</TableCell>
+              <Table>
+                <caption className="sr-only">Leave-one-campaign-out results</caption>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Held-out campaign</TableHead>
+                    <TableHead numeric>n</TableHead>
+                    <TableHead numeric>Not sustained</TableHead>
+                    <TableHead numeric>Brier</TableHead>
+                    <TableHead numeric>Log loss</TableHead>
+                    <TableHead numeric>AUC</TableHead>
+                    <TableHead numeric>Majority log loss</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            <p className="text-xs text-muted">Folds with very few rows or a single outcome class give unstable values; they are shown, not hidden. Oxygen is nearly confounded with campaign, so this is a hard test.</p>
-          </>
-        ) : (
-          <P className="text-muted">Not applicable{g.logo.reason ? `: ${g.logo.reason}` : ""}.</P>
-        )}
-      </Sub>
+                </TableHeader>
+                <TableBody>
+                  {g.logo.folds.map((r) => (
+                    <TableRow key={r.held_out}>
+                      <TableCell>{r.held_out}</TableCell>
+                      <TableCell numeric>{r.n}</TableCell>
+                      <TableCell numeric>{typeof r.n_not_sustained === "number" ? r.n_not_sustained : "—"}</TableCell>
+                      <TableCell numeric>{f(r.brier)}</TableCell>
+                      <TableCell numeric>{f(r.log_loss)}</TableCell>
+                      <TableCell numeric>{f(r.auc)}</TableCell>
+                      <TableCell numeric>{f(r.majority_log_loss)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <p className="text-xs text-muted">Small folds give unstable values; none are hidden. Oxygen is nearly tied to campaign, so this is a hard test.</p>
+            </>
+          ) : (
+            <P className="text-muted">Not applicable{g.logo.reason ? `: ${g.logo.reason}` : ""}.</P>
+          )}
+        </Detail>
 
-      <Sub title="Subgroups">
-        <Table>
-          <caption className="sr-only">Out-of-fold performance by subgroup</caption>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Subgroup</TableHead>
-              <TableHead numeric>n</TableHead>
-              <TableHead numeric>Not sustained</TableHead>
-              <TableHead numeric>Brier</TableHead>
-              <TableHead numeric>Log loss</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {g.subgroups.map((s) => (
-              <TableRow key={s.name}>
-                <TableCell>{subgroupLabel(s.name)}</TableCell>
-                <TableCell numeric>{s.n}</TableCell>
-                <TableCell numeric>{typeof s.n_not_sustained === "number" ? s.n_not_sustained : "—"}</TableCell>
-                <TableCell numeric>{f(s.brier)}</TableCell>
-                <TableCell numeric>{f(s.log_loss)}</TableCell>
+        <Detail title="Results by subgroup">
+          <Table>
+            <caption className="sr-only">Out-of-fold performance by subgroup</caption>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Subgroup</TableHead>
+                <TableHead numeric>n</TableHead>
+                <TableHead numeric>Not sustained</TableHead>
+                <TableHead numeric>Brier</TableHead>
+                <TableHead numeric>Log loss</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        <p className="text-xs text-muted">
-          Subgroups with few not-sustained rows (including none) say little about discrimination. Curation confidence is confounded with the label in some groups (explicit outcome tokens are mostly not-sustained rows), so confidence subgroups are not a measure of
-          curation quality.
-        </p>
-      </Sub>
+            </TableHeader>
+            <TableBody>
+              {g.subgroups.map((s) => (
+                <TableRow key={s.name}>
+                  <TableCell>{subgroupLabel(s.name)}</TableCell>
+                  <TableCell numeric>{s.n}</TableCell>
+                  <TableCell numeric>{typeof s.n_not_sustained === "number" ? s.n_not_sustained : "—"}</TableCell>
+                  <TableCell numeric>{f(s.brier)}</TableCell>
+                  <TableCell numeric>{f(s.log_loss)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          <p className="text-xs text-muted">Few went-out results means little can be said. Curation confidence is tied to the outcome in some sets, so it does not measure curation quality.</p>
+        </Detail>
 
-      <Sub title="Sensitivity analyses">
-        <Table>
-          <caption className="sr-only">Sensitivity of cross-validated performance to analysis choices</caption>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Variant</TableHead>
-              <TableHead numeric>Rows</TableHead>
-              <TableHead numeric>Not sustained</TableHead>
-              <TableHead numeric>Brier</TableHead>
-              <TableHead numeric>Log loss</TableHead>
-              <TableHead numeric>AUC</TableHead>
-              <TableHead numeric>Delta log loss</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {g.sensitivity.map((s) => (
-              <TableRow key={s.variant}>
-                <TableCell className="h-auto py-1.5">{variantLabel(s.variant)}</TableCell>
-                <TableCell numeric>{s.n_training}</TableCell>
-                <TableCell numeric>{typeof s.n_not_sustained === "number" ? s.n_not_sustained : "—"}</TableCell>
-                <TableCell numeric>{f(s.brier)}</TableCell>
-                <TableCell numeric>{f(s.log_loss)}</TableCell>
-                <TableCell numeric>
-                  {typeof s.n_not_sustained === "number" && s.n_not_sustained < MIN_NEG_FOR_AUC ? <span className="text-xs text-muted" title={`AUC ${f(s.auc)} on ${s.n_not_sustained} not-sustained rows`}>not interpretable</span> : f(s.auc)}
-                </TableCell>
-                <TableCell numeric>{signed(s.delta_vs_primary)}</TableCell>
+        <Detail title="If we change an assumption">
+          <Table>
+            <caption className="sr-only">Sensitivity of cross-validated performance to analysis choices</caption>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Variant</TableHead>
+                <TableHead numeric>Rows</TableHead>
+                <TableHead numeric>Not sustained</TableHead>
+                <TableHead numeric>Brier</TableHead>
+                <TableHead numeric>Log loss</TableHead>
+                <TableHead numeric>AUC</TableHead>
+                <TableHead numeric>Delta log loss</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        <p className="text-xs text-muted">
-          AUC is shown as not interpretable when fewer than {MIN_NEG_FOR_AUC} not-sustained rows remain. Each variant is evaluated on its own rows with the same cross-validation, so the delta is not like-for-like when the row set differs. Pressure length-scale variants change nothing in-sample because pressure does not vary in the data; they
-          matter only for extrapolation.
-        </p>
-      </Sub>
+            </TableHeader>
+            <TableBody>
+              {g.sensitivity.map((s) => (
+                <TableRow key={s.variant}>
+                  <TableCell className="h-auto py-1.5">{variantLabel(s.variant)}</TableCell>
+                  <TableCell numeric>{s.n_training}</TableCell>
+                  <TableCell numeric>{typeof s.n_not_sustained === "number" ? s.n_not_sustained : "—"}</TableCell>
+                  <TableCell numeric>{f(s.brier)}</TableCell>
+                  <TableCell numeric>{f(s.log_loss)}</TableCell>
+                  <TableCell numeric>
+                    {typeof s.n_not_sustained === "number" && s.n_not_sustained < MIN_NEG_FOR_AUC ? <span className="text-xs text-muted" title={`AUC ${f(s.auc)} on ${s.n_not_sustained} not-sustained rows`}>not interpretable</span> : f(s.auc)}
+                  </TableCell>
+                  <TableCell numeric>{signed(s.delta_vs_primary)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          <p className="text-xs text-muted">
+            AUC is skipped when fewer than {MIN_NEG_FOR_AUC} went-out results remain. Each variant uses its own rows, so deltas are not like for like. Pressure length-scale variants change nothing here because pressure does not vary in the data.
+          </p>
+        </Detail>
 
-      <Sub title="Blind-spot test: does uncertainty predict error?">
-        <Blindspot g={g} />
-      </Sub>
+        <Detail title="Does uncertainty warn us before mistakes?">
+          <Blindspot g={g} />
+        </Detail>
 
-      <Sub title="Acquisition retrospective">
-        {retro.length ? (
-          <>
-            <P className="text-muted">
-              Held-out real experiments act as a pseudo-target. Each strategy acquires whole experiments from the remaining pool, the model is refitted on the acquired data only, and quality is the log loss on the held-out target. Lower curves are better.
-            </P>
-            <Retrospective key={g.group_id} scenarios={retro} />
-          </>
-        ) : (
-          <P className="text-muted">No retrospective scenario is available for this group.</P>
-        )}
-      </Sub>
+        <Detail title="Practice runs of choosing the next tests">
+          {retro.length ? (
+            <>
+              <P className="text-muted">We hid real experiments as the target. Each strategy picks experiments to learn from, then we score the model on the target. Lower curves are better.</P>
+              <Retrospective key={g.group_id} scenarios={retro} />
+            </>
+          ) : (
+            <P className="text-muted">No practice runs are available for this set.</P>
+          )}
+        </Detail>
+      </div>
     </div>
   );
 }
@@ -466,7 +474,7 @@ function GroupValidationView({ g, summary, retro }: { g: ExtGroupValidation; sum
 const FLOW_OFF = /flow_off/i;
 const BELOW_CAL = /below_calibration/i;
 
-/** Cross-group summary of the caveats that decide how far the numbers below can be trusted. All values are computed from the validation artifact. */
+/** Headline numbers, each with a one-line plain meaning, then the caveats that limit them (collapsed). All values are computed from the validation artifact. */
 function ReadThisFirst({ v, labels }: { v: ExtValidation; labels: Map<string, GroupSummary> }) {
   const name = (id: string) => labels.get(id)?.label ?? id;
   const gs = v.groups;
@@ -493,50 +501,56 @@ function ReadThisFirst({ v, labels }: { v: ExtValidation; labels: Map<string, Gr
   const summary = (v.acquisition_retrospective as { summary?: RetroSummary }).summary;
   const cmp = (k: keyof RetroSummary, label: string) => {
     const c = summary?.[k] as { better: number; indistinguishable: number; worse: number } | undefined;
-    return c ? `${label}: better in ${c.better}, indistinguishable in ${c.indistinguishable}, worse in ${c.worse}` : null;
+    return c ? `${label}: better in ${c.better}, level in ${c.indistinguishable}, worse in ${c.worse}` : null;
   };
   const parts = [cmp("evr_vs_random", "vs random"), cmp("evr_vs_uncertainty_sampling", "vs uncertainty sampling"), cmp("evr_vs_nearest_gap", "vs nearest gap")].filter((x): x is string => x !== null);
   return (
-    <Callout variant="info" title="What limits these results" data-testid="read-this-first">
-      <ul className="mt-1 list-disc space-y-1.5 pl-4 text-xs">
-        <li>
-          <strong>Against a majority-class baseline</strong>, the GP is clearly better (log-loss interval excludes 0) in {beats.length} of {gs.length} groups
-          {beats.length ? ` (${beats.map((g) => name(g.group_id)).join("; ")})` : ""}. In the other {gs.length - beats.length} groups it is roughly at baseline.
-        </li>
-        {flowOff.length ? (
+    <div className="space-y-4" data-testid="read-this-first">
+      <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
+        <Tile label="Beats guessing" value={`${beats.length} of ${gs.length}`} meaning="Test sets where the model clearly beats always guessing the common outcome." />
+        <Tile label="Warns before mistakes" value={`${supported.length} of ${gs.length}`} meaning="Test sets where higher uncertainty came before bigger errors." />
+        {summary ? <Tile label="Practice runs" value={String(summary.n_scenarios)} meaning="Choosing next tests: modest evidence, no sure edge over a simple rule." /> : null}
+        {ranges.length ? <Tile label="Pressure tested (kPa)" value={`${f(Math.min(...ranges), 1)} to ${f(Math.max(...ranges), 1)}`} meaning="All ISS tests in our data ran near 1 atm. Low pressure is untested." /> : null}
+      </div>
+      <Disclosure tone="strong" summary="What limits these results" data-testid="read-this-first-details" summaryClassName="min-h-10 text-[14px]" contentClassName="mt-2 pl-0 text-fg sm:pl-5">
+        <ul className="list-disc space-y-1.5 pl-4 text-xs text-muted">
           <li>
-            <strong>Sphere results depend on flow-turned-off steps.</strong> Dropping them lowers the cross-validated AUC:{" "}
-            {flowOff.map((x) => {
-              const left = x.g.sensitivity.find((r) => FLOW_OFF.test(r.variant))?.n_not_sustained ?? 0;
-              return x.noNeg ? `${name(x.g.group_id)} ${f(x.a0, 2)}, but only ${left} not-sustained ${left === 1 ? "row remains" : "rows remain"} without them, so discrimination cannot be re-evaluated` : `${name(x.g.group_id)} ${f(x.a0, 2)} to ${f(x.a1, 2)}`;
-            }).join("; ")}. Those labels are a transient from turning the flow off, not a physical quench boundary.
+            <strong className="font-medium text-fg">Against the majority-class baseline</strong>, the model is clearly better (log-loss interval excludes 0) in {beats.length} of {gs.length} test sets
+            {beats.length ? ` (${beats.map((g) => name(g.group_id)).join("; ")})` : ""}. In the other {gs.length - beats.length} it is about level.
           </li>
-        ) : null}
-        {below.length ? (
+          {flowOff.length ? (
+            <li>
+              <strong className="font-medium text-fg">Sphere results lean on flow-turned-off steps.</strong> Dropping them lowers the cross-validated AUC:{" "}
+              {flowOff.map((x) => {
+                const left = x.g.sensitivity.find((r) => FLOW_OFF.test(r.variant))?.n_not_sustained ?? 0;
+                return x.noNeg ? `${name(x.g.group_id)} ${f(x.a0, 2)}, but only ${left} went-out ${left === 1 ? "result remains" : "results remain"}, so it cannot be re-checked` : `${name(x.g.group_id)} ${f(x.a0, 2)} to ${f(x.a1, 2)}`;
+              }).join("; ")}. Those labels come from turning the flow off, not a physical quench boundary.
+            </li>
+          ) : null}
+          {below.length ? (
+            <li>
+              <strong className="font-medium text-fg">Many near-quench steps rely on interpolated flows below the calibrated range.</strong> Without them:{" "}
+              {below.map((x) => `${name(x.g.group_id)} keeps ${x.kept} of ${x.n} test results`).join("; ")}.
+            </li>
+          ) : null}
           <li>
-            <strong>Many near-quench steps rely on the documented below-calibration flow interpolation toward the fan-off point.</strong> Without those rows:{" "}
-            {below.map((x) => `${name(x.g.group_id)} keeps ${x.kept} of ${x.n} training observations`).join("; ")}.
+            <strong className="font-medium text-fg">Blind-spot test:</strong> supported in {supported.length} test set{supported.length === 1 ? "" : "s"}
+            {supported.length ? ` (${supported.map((g) => name(g.group_id)).join("; ")})` : ""}, inconclusive in {inconclusive.length}.
           </li>
-        ) : null}
-        <li>
-          <strong>Blind-spot test</strong> (rule in the blind-spot subsection below, including the partial correlation given outcome variability): supported in {supported.length} group{supported.length === 1 ? "" : "s"}
-          {supported.length ? ` (${supported.map((g) => name(g.group_id)).join("; ")})` : ""}, inconclusive in {inconclusive.length}.
-        </li>
-        {ranges.length ? (
-          <li>
-            <strong>All integrated observations are at about 1 atm</strong> ({f(Math.min(...ranges), 1)} to {f(Math.max(...ranges), 1)} kPa) and the pressure length scale is fixed, not learned. At low pressure, predictions revert to the training base rate:
-            a probability there is reversion, not a pressure effect, and is not presented as an estimate when the evidence is insufficient.
-          </li>
-        ) : null}
-        {summary ? (
-          <li>
-            <strong>Acquisition retrospective</strong> ({summary.n_scenarios} pseudo-target scenarios, target-aware ranking {parts.join("; ")}): modest small-sample evidence. There is no reliable advantage over the
-            nearest-gap baseline, and the scenarios are not independent.
-          </li>
-        ) : null}
-        <li>Every group uses a constant GP mean fixed a priori; no mean-function selection is performed.</li>
-      </ul>
-    </Callout>
+          {ranges.length ? (
+            <li>
+              <strong className="font-medium text-fg">The pressure length scale is fixed, not learned.</strong> At low pressure, predictions fall back to the training base rate. That is not a pressure effect, and we do not show it as an estimate when evidence is thin.
+            </li>
+          ) : null}
+          {summary ? (
+            <li>
+              <strong className="font-medium text-fg">Choosing next tests</strong> ({summary.n_scenarios} scenarios; {parts.join("; ")}): modest small-sample evidence. No reliable edge over the nearest-gap rule, and the scenarios overlap.
+            </li>
+          ) : null}
+          <li>Every test set uses a constant model mean, fixed in advance; none is selected.</li>
+        </ul>
+      </Disclosure>
+    </div>
   );
 }
 
@@ -560,15 +574,10 @@ export function ValidationSection({
 }) {
   const labels = useMemo(() => new Map((groups ?? []).map((g) => [g.group_id, g])), [groups]);
   return (
-    <Section
-      id="validation"
-      number={4}
-      title="Validation"
-      intro="Everything here is out-of-sample and grouped by experiment, because flow steps within one test are correlated. Each group is reported with its sample size and compared with simple baselines; none of it is experimental validation beyond the integrated records."
-    >
+    <Section id="validation" number={4} title="Validation" intro="We hid whole ISS experiments, then checked the model's guesses against them. This is not new experiments.">
       <QueryBoundary query={validation} rows={5}>
         {(v) => {
-          if (v.groups.length === 0) return <Callout variant="warning" title="No validation results are available">The validation artifact has no modelled groups.</Callout>;
+          if (v.groups.length === 0) return <Callout variant="warning" title="No validation results">There are no modelled test sets.</Callout>;
           const gid = group && v.groups.some((x) => x.group_id === group) ? group : (v.groups[0]?.group_id ?? "");
           const g = v.groups.find((x) => x.group_id === gid) ?? (v.groups[0] as ExtGroupValidation);
           const retro = v.acquisition_retrospective.scenarios.filter((s) => s.group_id === gid);
@@ -576,31 +585,28 @@ export function ValidationSection({
           return (
             <>
               <ReadThisFirst v={v} labels={labels} />
-              <div id="validation-detail" className="flex scroll-mt-[calc(var(--header-h)+16px)] flex-wrap items-end gap-4">
+              <div id="validation-detail" className="scroll-mt-[calc(var(--header-h)+16px)]">
                 <div className="w-full max-w-sm">
                   <label htmlFor="val-group" className="mb-1 block text-xs text-muted">
-                    Analysis group
+                    See details for
                   </label>
                   <Select
                     id="val-group"
                     value={gid}
                     onValueChange={onGroupChange}
-                    options={v.groups.map((x) => ({ value: x.group_id, label: `${labels.get(x.group_id)?.label ?? x.group_id} (${x.n_experiments} exp.)` }))}
+                    options={v.groups.map((x) => ({ value: x.group_id, label: `${labels.get(x.group_id)?.label ?? x.group_id} (${x.n_experiments} tests)` }))}
                   />
                 </div>
-                <p className="num text-xs text-muted">
-                  validation generated {v.generated_at.slice(0, 10)} · model {v.model_version} · dataset {v.dataset_version}
-                </p>
               </div>
               <GroupValidationView key={gid} g={g} summary={labels.get(gid)} retro={retro} />
               {notModelled.length ? (
-                <Sub title="Groups that are not modelled">
-                  <P className="text-muted">These groups show coverage only; there are too few experiments or outcomes for grouped cross-validation.</P>
+                <Detail title="Test sets we did not model">
+                  <P className="text-muted">Too few tests or outcomes to check the model fairly, so we show coverage only.</P>
                   <Table containerClassName="max-h-[320px]">
                     <caption className="sr-only">Groups without a model and the reason</caption>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Group</TableHead>
+                        <TableHead>Test set</TableHead>
                         <TableHead>Reason</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -613,7 +619,7 @@ export function ValidationSection({
                       ))}
                     </TableBody>
                   </Table>
-                </Sub>
+                </Detail>
               ) : null}
             </>
           );

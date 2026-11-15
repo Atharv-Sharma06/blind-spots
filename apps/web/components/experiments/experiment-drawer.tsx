@@ -35,7 +35,6 @@ import {
   plainDefinition,
   pressureOf,
   rawFlowText,
-  PER_STEP_LABEL,
   resultOfExperiment,
   sourceLabel,
   tmPage,
@@ -64,7 +63,7 @@ export function ExperimentDrawer(props: {
   return (
     <Sheet open={!!id} onOpenChange={(o) => !o && onClose()}>
       <SheetContent
-        title={exp ? materialLabel(exp.material_family) : notFound ? "No experiment with this id" : "Experiment details"}
+        title={exp ? materialLabel(exp.material_family) : notFound ? "Experiment not found" : "Experiment"}
         description={exp ? sourceLabel(exp) : undefined}
         className="sm:max-w-[640px]"
         aria-describedby={undefined}
@@ -74,10 +73,10 @@ export function ExperimentDrawer(props: {
           <div data-error-code="not_found">
             <EmptyState
               icon={<SearchX aria-hidden />}
-              title="No experiment with this id"
+              title="Experiment not found"
               description={
                 <>
-                  <span className="num text-fg">{id}</span> is not one of the experiments in our data. Check the link, or pick one from the list.
+                  <span className="num text-fg">{id}</span> is not in our data. Check the link, or pick one from the list.
                 </>
               }
               action={
@@ -90,7 +89,7 @@ export function ExperimentDrawer(props: {
         ) : q.isError ? (
           <ErrorState code={q.error.code} error={q.error} message={q.error.message} onRetry={() => void q.refetch()} compact />
         ) : !q.data ? (
-          <div className="space-y-2" role="status" aria-label="Loading experiment details">
+          <div className="space-y-2" role="status" aria-label="Loading experiment">
             {Array.from({ length: 8 }, (_, i) => (
               <Skeleton key={i} className="h-6 w-full" />
             ))}
@@ -156,16 +155,16 @@ function Details({ e, obs, groups, inv }: { e: ApiExperiment; obs: ApiObservatio
   const described = e.observed_outcome && !isOutcomeCode(e.observed_outcome) ? e.observed_outcome : null;
 
   const training = context
-    ? `No. ${exclusionText(e.exclusion_reason)}`
+    ? "No."
     : obs.length === 0
       ? e.included_in_training
         ? "Yes."
         : exclusionText(e.exclusion_reason) || "No."
       : nUsed === obs.length
-        ? `Yes. All ${obs.length} ${obs.length === 1 ? "step is" : "steps are"} used to teach the model.`
+        ? `Yes, all ${obs.length} ${obs.length === 1 ? "step" : "steps"}.`
         : nUsed === 0
-          ? `No. None of its ${obs.length} ${obs.length === 1 ? "step is" : "steps are"} used. ${exclusionText(e.exclusion_reason)}`.trim()
-          : `Partly. ${nUsed} of ${obs.length} steps are used; the others are held out (the reason is on each step).`;
+          ? `No. ${exclusionText(e.exclusion_reason)}`.trim()
+          : `Partly: ${nUsed} of ${obs.length} steps.`;
 
   // The assumed pressure and the context-only status are already explained in their own boxes above.
   const shownFlags = e.quality_flags.filter((f) => f !== "pressure_assumed" && f !== "context_only" && f !== "context_record");
@@ -180,132 +179,94 @@ function Details({ e, obs, groups, inv }: { e: ApiExperiment; obs: ApiObservatio
 
   return (
     <div>
-      <Section title="Result">
+      <Section title="What happened">
         <ResultChip
           kind={r.kind}
           label={r.label}
-          detail={r.label === PER_STEP_LABEL ? "the result is given for each airflow step, below" : r.detail}
+          detail={r.detail}
           large
         />
         {described ? (
           <blockquote className="mt-3 rounded-md border border-border bg-subtle p-3 text-ui">
-            <span className="mb-1 block text-xs text-muted">NASA&apos;s description (verbatim)</span>
+            <span className="mb-1 block text-xs text-muted">NASA&apos;s words</span>
             {described}
           </blockquote>
         ) : null}
         {context ? (
-          <p className="mt-3 rounded-md bg-gap-tint px-3 py-2 text-ui text-gap-fg">
-            Context only: this test used different apparatus or a different test length, so the model does not use it.
-          </p>
+          <p className="mt-3 rounded-md bg-gap-tint px-3 py-2 text-ui text-gap-fg">Context only: different apparatus or test length, so the model skips it.</p>
         ) : null}
       </Section>
 
-      <Section title="Test conditions">
+      <Section title="Conditions">
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           <Fact label="Oxygen" value={fmtPlain(oxygenOf(e), 1)} unit="%" note={e.oxygen_percent_final !== null ? <>at the end: <span className="num">{fmtPlain(e.oxygen_percent_final, 1)}</span> %</> : undefined} />
-          <Fact label="Pressure" value={fmtPlain(p.kpa, 1)} unit="kPa" note={p.assumed ? "assumed, not recorded" : p.kpa !== null ? "recorded" : undefined} />
-          <Fact className="col-span-2 sm:col-span-1" label="Airflow" value={fmtAirflow(e)} unit="cm/s" note={fmtAirflow(e).includes("–") ? "range across the steps" : undefined} />
+          <Fact label="Pressure" value={fmtPlain(p.kpa, 1)} unit="kPa" note={p.assumed ? "assumed" : undefined} />
+          <Fact className="col-span-2 sm:col-span-1" label="Airflow" value={fmtAirflow(e)} unit="cm/s" note={fmtAirflow(e).includes("–") ? "varies by step" : undefined} />
         </div>
         {p.assumed ? (
           <p className="mt-3 rounded-md bg-gap-tint px-3 py-2 text-ui text-gap-fg">
-            The NASA source does not record the pressure of this test. We assume the documented ISS cabin pressure and keep it in a separate field, so it is never mistaken for a
-            measurement.
+            NASA did not record the pressure. We assume the ISS cabin pressure and keep it in its own field.
           </p>
         ) : null}
-        <div className="mt-4">
-          <Fields items={sample} />
-        </div>
+        {e.flame_configuration && e.flame_configuration !== "unknown" ? <p className="mt-3 text-ui text-muted">Setup: {configurationLabel(e.flame_configuration)}.</p> : null}
       </Section>
 
-      <Section title={`Flame at each airflow step (${obs.length})`}>
-        {obs.length === 0 ? (
-          <p className="text-ui text-muted">
-            {context
-              ? "Context tests keep only the printed test-level values; they have no airflow steps."
-              : "No airflow steps could be read from the source for this test."}
-          </p>
-        ) : (
-          <>
-            <ol className="space-y-2">
-              {obs.map((o) => (
-                <StepItem key={o.observation_id} o={o} testLabel={e.test_label} />
-              ))}
-            </ol>
-            <p className="mt-2 text-xs text-muted">
-              Each step is one airflow setting within the experiment. Steps are numbered from 1. Greyed steps are not used by the model.
-            </p>
-          </>
-        )}
-      </Section>
+      {obs.length === 0 && context ? null : (
+        <Section title={`Airflow steps (${obs.length})`}>
+          {obs.length === 0 ? (
+            <p className="text-ui text-muted">No steps could be read from the source.</p>
+          ) : (
+            <>
+              <ol className="space-y-2">
+                {obs.map((o) => (
+                  <StepItem key={o.observation_id} o={o} />
+                ))}
+              </ol>
+              <p className="mt-2 text-xs text-muted">Greyed steps are not used by the model.</p>
+            </>
+          )}
+        </Section>
+      )}
 
-      <Section title="Does the model use this experiment?">
+      <Section title="Used by the model?">
         <p className="text-ui">{training}</p>
       </Section>
 
-      {e.notes_raw ? (
-        <Section title="What NASA's notes say">
-          <blockquote className="max-h-48 overflow-auto rounded-md border border-border bg-subtle p-3 font-mono text-xs whitespace-pre-wrap">{e.notes_raw}</blockquote>
-          <p className="mt-1.5 text-xs text-muted">
-            Verbatim from the source{tmNotes ? `: ${TM_ID} Appendix A${page ? `, printed page ${page}` : ""}` : ""}.
+      <Section title="Source">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          <p className="min-w-0 text-ui">
+            <span className="num">{sourceLabel(e)}</span>
           </p>
-        </Section>
-      ) : null}
-
-      <Section title="Where this comes from">
-        <Fields
-          items={[
-            ["Investigation", inv?.title ?? e.investigation_name],
-            ["Test", <span key="t" className="num">{sourceLabel(e)}</span>],
-            ["Spreadsheet row", e.source_sheet ? <span className="num">{e.source_sheet} · row {e.source_row ?? MISSING}</span> : MISSING],
-            [
-              "DOI",
-              doi ? (
-                <a key="d" className="num text-observed underline underline-offset-2" href={`https://doi.org/${doi}`} target="_blank" rel="noreferrer">
-                  {doi}
-                </a>
-              ) : (
-                MISSING
-              ),
-            ],
-          ]}
-        />
-        <div className="mt-3">
           <Button asChild className="h-10 sm:h-8">
             <a href={e.source_url} target="_blank" rel="noreferrer">
               Open the NASA record <ExternalLink aria-hidden />
             </a>
           </Button>
-          <p className="mt-1.5 text-xs text-muted">
-            {isPsi
-              ? `Opens the NASA Physical Sciences Informatics page for ${e.investigation_id}, which hosts the source files.`
-              : ntrsId
-                ? `Opens the NASA Technical Reports Server record (${ntrsId}) the values were transcribed from.`
-                : "Opens the NASA source record."}
-          </p>
         </div>
       </Section>
 
-      {shownFlags.length > 0 ? (
-        <Section title="Things to know about this record">
-          <ul className="list-disc space-y-1.5 pl-4 text-ui marker:text-muted">
-            {shownFlags.map((f) => (
-              <li key={f} title={`Flag code: ${f}`}>
-                {flagText(f)}
-              </li>
-            ))}
-          </ul>
-        </Section>
-      ) : null}
-
       <div className="pt-4">
-        <Disclosure summary="Technical details" tone="strong">
+        <Disclosure summary="Technical details (raw fields)" tone="strong">
           <Fields
             items={[
+              ["Investigation", inv?.title ?? e.investigation_name],
               ["Experiment id", <span key="i" className="num">{e.experiment_id}</span>],
               ["Sample", e.sample_id ? <span className="num">{e.sample_id}</span> : MISSING],
               [isPsi ? "PSI accession" : ntrsId ? "NTRS document" : "Accession", <span key="a" className="num">{ntrsId ?? e.investigation_id}</span>],
+              ["Spreadsheet row", e.source_sheet ? <span className="num">{e.source_sheet} · row {e.source_row ?? MISSING}</span> : MISSING],
+              [
+                "DOI",
+                doi ? (
+                  <a key="d" className="num text-observed underline underline-offset-2" href={`https://doi.org/${doi}`} target="_blank" rel="noreferrer">
+                    {doi}
+                  </a>
+                ) : (
+                  MISSING
+                ),
+              ],
+              ...sample,
               ["Apparatus", e.experimental_platform],
-              ["Comparison group", e.group_id ? groupLabel(groups, e.group_id) : "None"],
+              ["Comparison set", e.group_id ? groupLabel(groups, e.group_id) : "None"],
               ["Recorded outcome", outcomeLabel(e.observed_outcome)],
               ["How it was assigned", plainDefinition(e.outcome_definition)],
               ["Measurement method", plainDefinition(e.measurement_method)],
@@ -314,6 +275,45 @@ function Details({ e, obs, groups, inv }: { e: ApiExperiment; obs: ApiObservatio
                 "Extraction",
                 `${e.extraction_method === "derived_computation" ? "Computed from the sensor file" : e.extraction_method === "manually_transcribed" ? "Transcribed by hand" : humanize(e.extraction_method)} · confidence ${confidenceLabel(e.extraction_confidence).toLowerCase()}`,
               ],
+              ...(e.notes_raw
+                ? ([
+                    [
+                      "NASA's notes",
+                      <span key="n" className="block">
+                        <span className="block max-h-48 overflow-auto rounded-md border border-border bg-subtle p-2 font-mono text-xs whitespace-pre-wrap">{e.notes_raw}</span>
+                        <span className="mt-1 block text-xs text-muted">
+                          Verbatim{tmNotes ? `, ${TM_ID} Appendix A${page ? `, p. ${page}` : ""}` : ""}.
+                        </span>
+                      </span>,
+                    ],
+                  ] as [string, React.ReactNode][])
+                : []),
+              ...(shownFlags.length > 0
+                ? ([
+                    [
+                      "Record notes",
+                      <ul key="f" className="list-disc space-y-1 pl-4 marker:text-muted">
+                        {shownFlags.map((f) => (
+                          <li key={f} title={`Flag code: ${f}`}>
+                            {flagText(f)}
+                          </li>
+                        ))}
+                      </ul>,
+                    ],
+                  ] as [string, React.ReactNode][])
+                : []),
+              ...(obs.length > 0
+                ? ([
+                    [
+                      "Step sources",
+                      <ol key="s" className="space-y-2">
+                        {obs.map((o) => (
+                          <StepSource key={o.observation_id} o={o} testLabel={e.test_label} />
+                        ))}
+                      </ol>,
+                    ],
+                  ] as [string, React.ReactNode][])
+                : []),
             ]}
           />
         </Disclosure>
@@ -322,19 +322,13 @@ function Details({ e, obs, groups, inv }: { e: ApiExperiment; obs: ApiObservatio
   );
 }
 
-function StepItem({ o, testLabel }: { o: ApiObservation; testLabel: string }) {
-  const ev = o as ApiObservation & StepEvidence;
-  const tm = o.raw_column === "TM Appendix A observation";
-  const raw = rawFlowText(o.flow_raw_value, o.flow_raw_unit);
-  const cal = calibrationText(o.flow_calibration_ref);
+function stepWhy(o: ApiObservation): string {
+  if (o.exclusion_reason === "low_confidence") return "low confidence in the source";
+  return exclusionText(o.exclusion_reason) || "no reason recorded";
+}
+
+function StepItem({ o }: { o: ApiObservation }) {
   const used = o.included_in_training;
-  const why = used
-    ? ""
-    : o.exclusion_reason === "low_confidence"
-      ? o.quality_flags.includes("calibration_borrowed_from_bass2")
-        ? "the fan or pot setting was converted with the BASS-II (2014) calibration, not one measured in this campaign, so the step is low confidence."
-        : "the source supports this step only with low confidence."
-      : exclusionText(o.exclusion_reason) || "no reason recorded.";
   return (
     <li
       data-used={used ? "true" : "false"}
@@ -353,24 +347,34 @@ function StepItem({ o, testLabel }: { o: ApiObservation; testLabel: string }) {
         {" · "}Oxygen <span className="num">{fmtPlain(o.oxygen_percent, 1)}</span> %
         {o.extinction_mode ? <span className="text-muted"> · {extinctionText(o.extinction_mode)}</span> : null}
       </p>
-      <p className="mt-1 text-xs text-muted">
-        Airflow from: {BASIS_TEXT[o.airflow_basis] ?? humanize(o.airflow_basis)}
-        {raw ? `; ${raw}` : ""}
-        {cal ? `; ${cal}` : ""}
-      </p>
-      <p className="mt-1 text-xs text-muted">
-        Source cell: <q className="font-mono">{o.raw_token}</q>{" "}
-        {tm ? `(${TM_ID} Appendix A, test ${testLabel})` : <span className="num">(row {o.source_row}, column “{o.raw_column}”)</span>}
-      </p>
+      {!used ? <p className="mt-1 text-xs">Not used: {stepWhy(o)}.</p> : null}
+    </li>
+  );
+}
+
+/** Raw provenance of one step (shown inside Technical details): airflow basis, source cell and any evidence quote. */
+function StepSource({ o, testLabel }: { o: ApiObservation; testLabel: string }) {
+  const ev = o as ApiObservation & StepEvidence;
+  const tm = o.raw_column === "TM Appendix A observation";
+  const raw = rawFlowText(o.flow_raw_value, o.flow_raw_unit);
+  const cal = calibrationText(o.flow_calibration_ref);
+  return (
+    <li className="text-xs">
+      <span className="font-medium text-fg">Step {o.step_index + 1}</span>
+      {": "}airflow from {BASIS_TEXT[o.airflow_basis] ?? humanize(o.airflow_basis)}
+      {raw ? `; ${raw}` : ""}
+      {cal ? `; ${cal}` : ""}. Source cell: <q className="font-mono">{o.raw_token}</q>{" "}
+      {tm ? `(${TM_ID} Appendix A, test ${testLabel})` : <span className="num">(row {o.source_row}, column “{o.raw_column}”)</span>}.
       {ev.evidence_quote ? (
-        <p className="mt-1 text-xs text-muted">
+        <>
+          {" "}
           {TM_ID}
           {ev.evidence_page ? `, p. ${ev.evidence_page}` : ""}: <q className="text-fg">{ev.evidence_quote}</q>
-        </p>
+        </>
       ) : o.quality_flags.includes("outcome_evidence_nasa_tm_20210011385") && !tm ? (
-        <p className="mt-1 text-xs text-muted">Flame state confirmed by {TM_ID} Appendix A.</p>
+        <> Flame state confirmed by {TM_ID} Appendix A.</>
       ) : null}
-      {!used ? <p className="mt-1 text-xs">Not used by the model: {why}</p> : null}
+      {o.quality_flags.includes("calibration_borrowed_from_bass2") ? " Airflow converted with the BASS-II (2014) calibration." : ""}
     </li>
   );
 }

@@ -16,7 +16,6 @@ import {
   chartCabin,
   kpaText,
   lcFirst,
-  psiaText,
   rangeText,
   relatedNasaSentence,
   relatedNasaTests,
@@ -97,7 +96,6 @@ export function AnswerCard({ cabin, material, onMaterialChange }: AnswerCardProp
               onRetry={() => void assessQ.refetch()}
               assess={assess}
               comparableAnyMaterial={headlineProfile ? headlineProfile.comparable_observations : null}
-              setups={nearby ? { withNearby: groups.filter((g) => (nearby.get(g.group_id) ?? 0) > 0).length, total: groups.length } : null}
               picker={
                 <div className="border-b border-border bg-subtle/50 px-4 py-3 sm:px-6">
                   <MaterialPicker part="select" groups={groups} nearby={nearby} selectedId={group.group_id} onChange={(id) => onMaterialChange(id)} />
@@ -168,20 +166,20 @@ function Notice({ children }: { children: React.ReactNode }) {
 function AnswerSkeleton() {
   return (
     <div aria-busy="true" aria-label="Loading the answer">
-      <div className="h-[132px] space-y-3 px-4 py-5 sm:h-[120px] sm:px-6">
+      <div className="h-[170px] space-y-3 px-4 py-5 sm:h-[111px] sm:px-6">
         <Skeleton className="h-4 w-56" />
         <Skeleton className="h-8 w-full max-w-xl" />
       </div>
-      <div className="h-[400px] space-y-3 px-4 py-4 sm:h-[170px] sm:px-6">
+      <div className="h-[340px] space-y-3 px-4 py-4 sm:h-[220px] sm:px-6">
         <Skeleton className="h-4 w-full max-w-3xl" />
         <Skeleton className="h-4 w-full max-w-2xl" />
         <Skeleton className="h-4 w-full max-w-xl" />
       </div>
       <div className="border-t border-border px-4 pt-5 pb-4 sm:px-6">
         <Skeleton className={cn("w-full", CHART_HEIGHT_CLASS)} />
-        <div className="h-[168px] sm:h-[130px]" />
+        <div className="h-[151px] sm:h-[109px]" />
       </div>
-      <div className="h-[56px] border-t border-border bg-subtle/50 px-4 py-2 sm:px-6" />
+      <div className="h-[77px] border-t border-border bg-subtle/50 px-4 py-2 sm:h-[65px] sm:px-6" />
     </div>
   );
 }
@@ -196,20 +194,18 @@ interface VerdictProps {
   assessError: unknown;
   onRetry: () => void;
   comparableAnyMaterial: number | null;
-  /** Material setups with nearby results for this cabin (all of the API's groups), from the headline; null when unavailable. */
-  setups: { withNearby: number; total: number } | null;
   /** The material dropdown, shown right under the verdict so the cause and the effect are on screen together. */
   picker: React.ReactNode;
 }
 
+/** Where the air comes from, in a few words; a documented NASA atmosphere needs no note. */
 const STATUS_NOTE: Record<string, string> = {
-  documented_nasa: "Documented NASA atmosphere",
-  nasa_design_recommendation: "NASA design recommendation, not a built or approved cabin",
-  historical_nasa: "Historical NASA record or analysis, not a current operating limit",
-  user_hypothetical: "Hypothetical air, not a NASA cabin",
+  nasa_design_recommendation: "NASA design recommendation",
+  historical_nasa: "Historical NASA record",
+  user_hypothetical: "Hypothetical air",
 };
 
-function Verdict({ profile, cabinId, group, assess, assessError, onRetry, comparableAnyMaterial, setups, picker }: VerdictProps) {
+function Verdict({ profile, cabinId, group, assess, assessError, onRetry, comparableAnyMaterial, picker }: VerdictProps) {
   const air = cabinAir(profile);
   const name = shortCabinName(profile.profile_id, profile.name);
   const tone = assess ? TONE[verdictTone(assess.verdict)] : null;
@@ -224,15 +220,15 @@ function Verdict({ profile, cabinId, group, assess, assessError, onRetry, compar
       {air ? (
         <span>
           {air.o2UpTo ? "up to " : ""}
-          <span className="font-medium text-fg">{trimNum(air.o2, 1)} % oxygen</span> · <span className="font-medium text-fg">{kpaText(air.kpa)} kPa</span> <span>({psiaText(air.kpa)})</span>
+          <span className="font-medium text-fg">{trimNum(air.o2, 1)} % oxygen</span> · <span className="font-medium text-fg">{kpaText(air.kpa)} kPa</span>
         </span>
       ) : null}
       <a href="#cabins" className="-my-2.5 inline-flex min-h-10 items-center text-ui font-medium text-accent underline underline-offset-2 hover:text-fg sm:order-last sm:ml-auto" data-testid="change-cabin">
         Change cabin
       </a>
       {STATUS_NOTE[profile.status] ? (
-        <span className="rounded-full border border-border-strong/60 bg-surface/70 px-2 py-0.5 text-xs text-muted" data-testid="cabin-status">
-          {STATUS_NOTE[profile.status]}
+        <span className="text-xs text-muted" data-testid="cabin-status">
+          ({STATUS_NOTE[profile.status]})
         </span>
       ) : null}
     </p>
@@ -267,7 +263,7 @@ function Verdict({ profile, cabinId, group, assess, assessError, onRetry, compar
         <div className="space-y-2 px-4 py-4 sm:px-6">
           <Skeleton className="h-5 w-full max-w-lg" />
           <Skeleton className="h-5 w-full max-w-md" />
-          <div className="h-[170px] sm:h-[110px]" />
+          <div className="h-[132px] sm:h-[36px]" />
         </div>
       </div>
     );
@@ -289,8 +285,9 @@ function Verdict({ profile, cabinId, group, assess, assessError, onRetry, compar
     materialLc: material,
     air,
   });
-  const n = assess.coverage.comparable_observations;
   const explorer = `/explore?target=${encodeURIComponent(cabinId)}&group=${encodeURIComponent(group.group_id)}`;
+  // Two short sentences: what the ISS tests covered (first sentence only; the pressure caveat sits under the chart) and the gravity limit.
+  const rangeSentence = sentences[0]?.startsWith("For ") ? sentences[0].replace(/\.\s+[A-Z].*$/, ".") : null;
 
   return (
     <div data-testid="answer-verdict" data-verdict={assess.verdict}>
@@ -302,40 +299,17 @@ function Verdict({ profile, cabinId, group, assess, assessError, onRetry, compar
         </p>
       </div>
       {picker}
-      <div className="px-4 py-4 sm:px-6">
-        <div className="space-y-2">
-          {sentences.map((s, i) => (
-            <p key={i} className="max-w-3xl text-title leading-7 text-fg">
-              {noBreakNumbers(s)}
-            </p>
-          ))}
-        </div>
-        <div className="mt-3 max-w-3xl space-y-1.5 border-t border-border pt-3 text-ui text-muted">
-          <p>
-            {n > 0 ? `${n.toLocaleString("en-US")} nearby ISS test ${n === 1 ? "result" : "results"} for this material.` : "No nearby ISS test results for this material."} Nearby means close enough in oxygen, pressure
-            and airflow for the model to compare. ISS tests here means the ISS test results in our data (BASS, BASS-II).{" "}
-            <Link href="/methodology" className="-my-2.5 inline-block py-2.5 underline underline-offset-2 hover:text-fg">
-              How it works
+      <div className="space-y-2 px-4 py-4 sm:px-6">
+        {rangeSentence ? <p className="max-w-3xl text-title leading-7 text-fg">{noBreakNumbers(rangeSentence)}</p> : null}
+        <p className="max-w-3xl text-title leading-7 text-fg">These tests ran in microgravity, not Moon or Mars gravity.</p>
+        {related && related.n > 0 ? (
+          <p className="max-w-3xl text-ui text-fg" data-testid="related-nasa">
+            {relatedNasaSentence(related)}{" "}
+            <Link href={`${explorer}#related-work`} className="-my-2.5 inline-block py-2.5 font-medium text-accent underline underline-offset-2 hover:text-fg">
+              See them in the Explorer
             </Link>
           </p>
-          {setups && tone && assess.verdict !== "supported" && comparableAnyMaterial !== null && comparableAnyMaterial > 0 && setups.withNearby > 0 ? (
-            <p data-testid="other-materials">
-              Other materials may be better covered: {setups.withNearby} of {setups.total} material setups have nearby ISS tests. Pick another material above.
-            </p>
-          ) : null}
-          {related && related.n > 0 ? (
-            <p className="text-fg" data-testid="related-nasa">
-              {relatedNasaSentence(related)}{" "}
-              <Link href={`${explorer}#related-work`} className="-my-2.5 inline-block py-2.5 font-medium text-accent underline underline-offset-2 hover:text-fg">
-                See them in the Explorer
-              </Link>
-            </p>
-          ) : null}
-          <p data-testid="answer-caveats">
-            Air only: all these ISS tests ran in microgravity. The Moon and Mars have partial gravity, and NASA&apos;s PSI database has no partial-gravity flame data. This shows where ISS test results exist. It is not a
-            certified fire-safety assessment.
-          </p>
-        </div>
+        ) : null}
       </div>
     </div>
   );
@@ -395,7 +369,6 @@ function ChartBlock({
 
   return (
     <div>
-      <p className="mb-2 max-w-3xl text-ui text-muted">Each dot is one ISS test of {materialLabel}. &ldquo;This cabin&rdquo; marks the air you picked.</p>
       <SimpleChart dots={dots} cabin={cabin} others={others} regionLabel="Where ISS tests ran" ariaLabel={aria} />
       <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-ui text-muted">
         <span className="inline-flex items-center gap-1.5">
@@ -415,7 +388,7 @@ function ChartBlock({
             <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>
               <circle cx="6" cy="6" r="3.5" fill="var(--muted)" fillOpacity="0.6" />
             </svg>
-            Other cabins (tap a dot for its name)
+            Other cabins
           </span>
         ) : null}
         {cabin.xHi - cabin.xLo > 0 || cabin.yHi - cabin.yLo > 0 ? (
@@ -423,31 +396,25 @@ function ChartBlock({
             <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>
               <rect x="1" y="1" width="10" height="10" fill="var(--fg)" fillOpacity="0.06" stroke="var(--fg)" strokeWidth="1.25" strokeDasharray="3 2" />
             </svg>
-            Dashed box: the range of air this cabin can have
+            Dashed box: this cabin&apos;s air range
           </span>
         ) : null}
-        <span>
-          <span className="num text-fg">{rows.length.toLocaleString("en-US")}</span> ISS test results for {materialLabel}
-        </span>
       </div>
       {assumed > 0 ? (
-        <p className="mt-1.5 max-w-3xl text-xs text-muted">
+        <p className="mt-2 max-w-3xl text-xs text-muted">
           {assumedKpa !== null
-            ? `${assumed === rows.length ? "These tests did not record the pressure" : `${assumed.toLocaleString("en-US")} of ${rows.length.toLocaleString("en-US")} results did not record the pressure`}; the chart uses the dataset's assumed ${kpaText(assumedKpa)} kPa.`
-            : `${assumed.toLocaleString("en-US")} of ${rows.length.toLocaleString("en-US")} results did not record the pressure; the chart uses the pressure assumed in the dataset.`}
-        </p>
-      ) : null}
-      {notUsed > 0 ? (
-        <p className="mt-1 max-w-3xl text-xs text-muted" data-testid="not-used-note">
-          {notUsed === 1 ? "1 result is" : `${notUsed.toLocaleString("en-US")} results are`} not used by the model{notUsedWhy}.
-        </p>
-      ) : null}
-      {withoutOutcome > 0 ? (
-        <p className="mt-1 max-w-3xl text-xs text-muted">
-          {withoutOutcome === 1 ? "1 more result has" : `${withoutOutcome.toLocaleString("en-US")} more results have`} no clear outcome and {withoutOutcome === 1 ? "is" : "are"} not drawn.
+            ? `${assumed === rows.length ? "These tests did not record pressure" : "Some tests did not record pressure"}; the chart uses an assumed ${kpaText(assumedKpa)} kPa.`
+            : "Some tests did not record pressure; the chart uses assumed values."}
         </p>
       ) : null}
       <Disclosure className="mt-3" summary="Show as table" summaryClassName="min-h-10">
+        {notUsed > 0 || withoutOutcome > 0 ? (
+          <p className="mb-2 max-w-3xl text-xs text-muted" data-testid="not-used-note">
+            {notUsed > 0 ? `${notUsed === 1 ? "1 result is" : `${notUsed.toLocaleString("en-US")} results are`} not used by the model${notUsedWhy}.` : ""}
+            {notUsed > 0 && withoutOutcome > 0 ? " " : ""}
+            {withoutOutcome > 0 ? `${withoutOutcome === 1 ? "1 more result has" : `${withoutOutcome.toLocaleString("en-US")} more results have`} no clear outcome and ${withoutOutcome === 1 ? "is" : "are"} not drawn.` : ""}
+          </p>
+        ) : null}
         <ResultsTable rows={rows} others={others} cabinName={shortCabinName(profile.profile_id, profile.name)} air={air} materialLabel={materialLabel} />
       </Disclosure>
     </div>

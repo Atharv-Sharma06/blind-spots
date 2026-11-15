@@ -8,19 +8,23 @@ import type { AssessResponse } from "@/lib/types";
 import { relevanceRows, type RelevanceRole } from "./evidence";
 
 const ROLE: Record<RelevanceRole, { label: string; cls: string }> = {
-  integrated: { label: "Used by the model", cls: "border-observed/25 bg-observed-tint text-observed" },
+  integrated: { label: "In the model", cls: "border-observed/25 bg-observed-tint text-observed" },
   context: { label: "Context only", cls: "border-border bg-subtle text-fg" },
-  not_integrated: { label: "Not used by the model", cls: "border-border bg-surface text-muted" },
+  not_integrated: { label: "Not in the model", cls: "border-border bg-surface text-muted" },
 };
 
 const TOP = 3;
 
-/** The rest of the record title after its short name: "X (Long name), detail" -> "Long name, detail". */
-function subtitle(name: string, head: string): string {
-  if (!name.startsWith(head)) return name;
-  const rest = name.slice(head.length);
-  if (rest.startsWith(" (")) return rest.slice(2).replace(")", "");
-  return rest.replace(/^[\s:·-]+/, "");
+/** The one short reason a record is listed: nearby test count, else how its tested air overlaps, else its summary. */
+function reasonOf(r: ReturnType<typeof relevanceRows>["rows"][number]): string | null {
+  if (r.comparable !== null) return `${fmtCount(r.comparable)} nearby ISS test result${r.comparable === 1 ? "" : "s"}`;
+  if (r.comparableAny != null) return `${fmtCount(r.comparableAny)} nearby ISS test result${r.comparableAny === 1 ? "" : "s"}, any material`;
+  if (r.overlap) {
+    return r.overlap
+      .replace(/^Its tested conditions (include|overlap) this cabin's air$/, (_m, v: string) => `Tested air ${v}s this cabin's`)
+      .replace(/^Its tested conditions do not (overlap|reach) this cabin's air$/, (_m, v: string) => `Tested air does not ${v} this cabin's`);
+  }
+  return r.summary ?? null;
 }
 
 /** "Related NASA work for this cabin": the backend's ranked investigation_relevance for the selected target. */
@@ -38,43 +42,31 @@ export function InvestigationRelevance({ a }: { a: AssessResponse }) {
   const shown = all ? rows : rows.slice(0, TOP);
   return (
     <section id="related-work" aria-labelledby="inv-rel-heading" className="scroll-mt-20 pt-1" data-testid="investigation-relevance">
-      <h3 id="inv-rel-heading" className="text-[13px] font-semibold text-fg">Related NASA work for this cabin</h3>
+      <h3 id="inv-rel-heading" className="text-[13px] font-semibold text-fg">Related NASA work</h3>
       <p className="mt-0.5 text-xs text-muted">
-        {fromBackend ? "Ranked by how close their test conditions are to this air. Only some are used by the model." : "Documented NASA work whose test conditions reach this air. The model does not use it."}
+        {fromBackend ? "Closest first. Only some feed the model." : "None of it feeds the model."}
       </p>
       <ol className="mt-2 divide-y divide-border">
         {shown.map((r) => {
           const role = ROLE[r.role];
-          const count =
-            r.comparable !== null
-              ? `${fmtCount(r.comparable)} nearby test result${r.comparable === 1 ? "" : "s"} for this material`
-              : r.comparableAny != null
-                ? `${fmtCount(r.comparableAny)} nearby ISS test result${r.comparableAny === 1 ? "" : "s"} (any material)`
-                : null;
-          const evidence = [count, r.overlap].filter(Boolean).join(" · ");
+          const reason = reasonOf(r);
           return (
             <li key={r.id} className="py-2 first:pt-0 last:pb-0">
-              <div className="flex items-start justify-between gap-2">
-                <p className="line-clamp-2 min-w-0 text-[13px] leading-snug font-medium text-fg">
+              <div className="flex items-center justify-between gap-2">
+                <p className="min-w-0 text-[13px] leading-snug font-medium text-fg" title={r.name && r.name !== r.acronym ? r.name : undefined}>
                   {r.url ? (
-                    <a href={r.url} target="_blank" rel="noreferrer noopener" className="inline-flex min-h-10 items-center gap-1 hover:underline sm:min-h-0">
-                      {r.acronym}
+                    <a href={r.url} target="_blank" rel="noreferrer noopener" className="flex min-h-10 min-w-0 items-center gap-1 hover:underline sm:min-h-0">
+                      <span className="truncate">{r.acronym}</span>
                       <ExternalLink className="size-3 shrink-0 text-muted" aria-hidden />
                       <span className="sr-only"> (source record, opens in a new tab)</span>
                     </a>
                   ) : (
-                    r.acronym
+                    <span className="block truncate">{r.acronym}</span>
                   )}
                 </p>
                 <span className={cn("inline-flex h-5 shrink-0 items-center rounded-sm border px-1.5 text-xs font-medium leading-none", role.cls)}>{role.label}</span>
               </div>
-              {r.name && r.name !== r.acronym ? (
-                <p className="mt-0.5 line-clamp-1 text-xs text-muted" title={r.name}>
-                  {subtitle(r.name, r.acronym)}
-                </p>
-              ) : null}
-              {r.summary && !evidence ? <p className="mt-0.5 line-clamp-2 text-xs text-muted">{r.summary}</p> : null}
-              {evidence ? <p className="mt-0.5 text-xs text-fg" title={r.summary ?? undefined}>{evidence}</p> : null}
+              {reason ? <p className="mt-0.5 line-clamp-1 text-xs text-muted">{reason}</p> : null}
             </li>
           );
         })}

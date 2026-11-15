@@ -18,13 +18,23 @@ export interface MaterialPickerProps {
   part?: "select" | "list" | "both";
 }
 
-const countText = (n: number) => (n === 0 ? "none nearby" : `${n.toLocaleString("en-US")} nearby`);
+const countText = (n: number) => `${n.toLocaleString("en-US")} nearby`;
+
+/** Short airflow wording for option text (the same material appears with different airflow, so it must stay). */
+const SHORT_FLOW: Record<string, string> = {
+  opposed: "air against flame",
+  concurrent: "air with flame",
+  wake: "flame in wake",
+  stagnation: "air at sample",
+  unknown: "airflow unknown",
+};
+const shortFlow = (groupId: string) => SHORT_FLOW[groupId.split("__")[1] ?? ""] ?? materialFlowNote(groupId);
 
 function sortGroups(groups: readonly GroupSummary[], nearby: ReadonlyMap<string, number> | null): GroupSummary[] {
   return [...groups].sort((a, b) => (nearby ? (nearby.get(b.group_id) ?? 0) - (nearby.get(a.group_id) ?? 0) : 0) || b.n_training - a.n_training || a.label.localeCompare(b.label));
 }
 
-/** "Material: [Thin acrylic film (PMMA) v]" plus the "By material" list. Plain names; counts come from the API. */
+/** "Material [48 nearby · Thin acrylic film (PMMA), air against flame v]" plus the "By material" list. Counts come from the API. */
 export function MaterialPicker({ groups, nearby, selectedId, onChange, part = "both" }: MaterialPickerProps) {
   const selectId = React.useId();
   const modelled = sortGroups(
@@ -32,12 +42,9 @@ export function MaterialPicker({ groups, nearby, selectedId, onChange, part = "b
     nearby,
   );
   const all = sortGroups(groups, nearby);
-  const selected = groups.find((g) => g.group_id === selectedId) ?? null;
   const withNearby = nearby ? groups.filter((g) => (nearby.get(g.group_id) ?? 0) > 0).length : null;
-  const nModelled = modelled.length;
-  const selFlow = selected ? materialFlowNote(selected.group_id) : null;
   const full = (g: GroupSummary) => {
-    const flow = materialFlowNote(g.group_id);
+    const flow = shortFlow(g.group_id);
     return flow ? `${materialName(g.group_id, g.label)}, ${flow}` : materialName(g.group_id, g.label);
   };
 
@@ -61,8 +68,8 @@ export function MaterialPicker({ groups, nearby, selectedId, onChange, part = "b
           >
             {modelled.map((g) => (
               <option key={g.group_id} value={g.group_id}>
+                {nearby ? `${countText(nearby.get(g.group_id) ?? 0)} · ` : ""}
                 {full(g)}
-                {nearby ? ` · ${countText(nearby.get(g.group_id) ?? 0)}` : ""}
               </option>
             ))}
           </select>
@@ -71,10 +78,9 @@ export function MaterialPicker({ groups, nearby, selectedId, onChange, part = "b
       </div>
       {nearby && modelled.length > 0 && modelled.every((g) => (nearby.get(g.group_id) ?? 0) === 0) ? (
         <p className="mt-1.5 text-ui text-muted sm:pl-[4.25rem]" data-testid="no-material-nearby">
-          No material has nearby ISS tests for this cabin.
+          No material has nearby ISS tests here.
         </p>
       ) : null}
-      {selected && selFlow ? <p className="mt-1.5 text-ui text-muted sm:pl-[4.25rem]">{`${selFlow[0]!.toUpperCase()}${selFlow.slice(1)}.`}</p> : null}
       </>
       ) : null}
 
@@ -84,12 +90,12 @@ export function MaterialPicker({ groups, nearby, selectedId, onChange, part = "b
           summaryClassName="min-h-10"
           summary={
             <span className="text-ui">
-              By material: <span className="font-semibold text-fg">{withNearby}</span> of <span className="font-semibold text-fg">{groups.length}</span> material setups have nearby ISS tests, <span className="font-semibold text-fg">{nModelled}</span> have enough for the model
+              By material: <span className="font-semibold text-fg">{withNearby}</span> of <span className="font-semibold text-fg">{groups.length}</span> material setups have nearby ISS tests
             </span>
           }
           contentClassName="pl-0 sm:pl-5"
         >
-          <p className="mb-2 text-ui text-muted">A material setup is a material plus how the air flowed past it. Pick one to see its answer. Greyed rows have too few ISS tests for the model.</p>
+          <p className="mb-2 text-ui text-muted">Pick a row to switch material. Grey rows have too few ISS tests for the model.</p>
           <ul className="divide-y divide-border overflow-hidden rounded-md border border-border">
             {all.map((g) => {
               const n = nearby?.get(g.group_id) ?? 0;
@@ -100,7 +106,7 @@ export function MaterialPicker({ groups, nearby, selectedId, onChange, part = "b
                   <span className="min-w-0 flex-1">
                     <span className={cn("block truncate text-ui", canPick ? "text-fg" : "text-muted")}>{full(g)}</span>
                   </span>
-                  <span className={cn("shrink-0 text-xs tabular", n > 0 ? "text-fg" : "text-muted")}>{countText(n)}{!canPick && n > 0 ? ", too few for the model" : ""}</span>
+                  <span className={cn("shrink-0 text-xs tabular", n > 0 ? "text-fg" : "text-muted")}>{countText(n)}{!canPick && n > 0 ? ", too few for the model" : ""}{!canPick && n === 0 ? <span className="sr-only">, too few for the model</span> : null}</span>
                   {canPick ? <Check aria-hidden className={cn("size-4 shrink-0", isSel ? "text-accent" : "text-transparent")} /> : <span className="w-4 shrink-0" aria-hidden />}
                 </>
               );
@@ -116,7 +122,7 @@ export function MaterialPicker({ groups, nearby, selectedId, onChange, part = "b
                       {body}
                     </button>
                   ) : (
-                    <div className="flex min-h-10 items-center gap-3 bg-subtle/60 px-3" title="Too few ISS tests for the model to estimate this material">
+                    <div className="flex min-h-10 items-center gap-3 bg-subtle/60 px-3" title="Too few ISS tests for the model">
                       {body}
                     </div>
                   )}

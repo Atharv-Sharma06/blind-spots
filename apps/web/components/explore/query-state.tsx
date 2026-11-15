@@ -21,7 +21,7 @@ export function QueryError({ error, onRetry }: { error: unknown; onRetry?: () =>
   if (isApiError(error) && error.snapshotUnavailable) {
     return (
       <Callout variant="info" title="Not in this precomputed version">
-        This result is computed on demand and is not part of the precomputed snapshot served here; it is available in the full (local) version.
+        This needs the full version of the app.
       </Callout>
     );
   }

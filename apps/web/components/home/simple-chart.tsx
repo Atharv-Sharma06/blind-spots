@@ -28,8 +28,8 @@ export interface SimpleChartProps {
   dots: readonly ChartDot[];
   cabin: ChartCabin;
   others: readonly ChartCabin[];
-  /** Label on the shaded region, e.g. "Where ISS tests ran". */
-  regionLabel: string;
+  /** Kept for compatibility. The shaded region is always labelled "ISS tests". */
+  regionLabel?: string;
   /** One sentence for screen readers (role="img"). */
   ariaLabel: string;
 }
@@ -53,6 +53,7 @@ function useBox<T extends HTMLElement>(): [React.RefObject<T | null>, { w: numbe
   return [ref, box];
 }
 
+const REGION_TEXT = "ISS tests";
 const trim = (n: number) => String(Math.round(n * 10) / 10);
 
 export function SimpleChart(props: SimpleChartProps) {
@@ -69,10 +70,10 @@ const MUTED = "var(--muted)";
 const BLUE = "var(--observed)";
 const HALO = { paintOrder: "stroke", stroke: "var(--surface)", strokeWidth: 3.5, strokeLinejoin: "round" } as const;
 
-function ChartSvg({ dots, cabin, others, regionLabel, ariaLabel, width, height }: SimpleChartProps & { width: number; height: number }) {
+function ChartSvg({ dots, cabin, others, ariaLabel, width, height }: SimpleChartProps & { width: number; height: number }) {
   const narrow = width < 480;
   const [hover, setHover] = React.useState<number | null>(null);
-  const m = { t: 14, r: narrow ? 14 : 22, b: narrow ? 46 : 50, l: narrow ? 46 : 56 };
+  const m = { t: 12, r: narrow ? 14 : 22, b: narrow ? 42 : 44, l: narrow ? 46 : 50 };
   const iw = Math.max(width - m.l - m.r, 10);
   const ih = Math.max(height - m.t - m.b, 10);
 
@@ -86,8 +87,9 @@ function ChartSvg({ dots, cabin, others, regionLabel, ariaLabel, width, height }
   }, [dots, cabin, iw, ih]);
   const { x, y, hull, xd, yd } = geo;
 
-  const xTicks = x.ticks(narrow ? 5 : 8).filter((t) => t >= 0 && t <= 100);
-  const yTicks = y.ticks(ih < 260 ? 5 : 6).filter((t) => t >= 0);
+  // Few ticks: the exact numbers are in the table.
+  const xTicks = x.ticks(narrow ? 3 : 4).filter((t) => t >= 0 && t <= 100);
+  const yTicks = y.ticks(4).filter((t) => t >= 0);
 
   // Region where ISS tests ran: the convex hull of the dots; a thin band when the dots form (almost) a line.
   const dotBox = dots.length
@@ -110,7 +112,7 @@ function ChartSvg({ dots, cabin, others, regionLabel, ariaLabel, width, height }
     : null;
   const hullBox = hullPath && dotBox ? dotBox : band ? { x0: band.x, x1: band.x + band.w, y0: band.y, y1: band.y + band.h } : null;
   const regionFont = narrow ? 11 : 12;
-  const regionW = textWidth(regionLabel, regionFont, true);
+  const regionW = textWidth(REGION_TEXT, regionFont, true);
   let regionPos: { x: number; y: number } | null = null;
   if (hullBox) {
     const big = hullBox.y1 - hullBox.y0 > 44 && hullBox.x1 - hullBox.x0 > regionW + 20;
@@ -161,12 +163,9 @@ function ChartSvg({ dots, cabin, others, regionLabel, ariaLabel, width, height }
   return (
     <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="img" aria-label={ariaLabel} className="block select-none">
       <g transform={`translate(${m.l},${m.t})`}>
-        {/* grid */}
-        {xTicks.map((t) => (
-          <line key={`gx${t}`} x1={x(t)} x2={x(t)} y1={0} y2={ih} stroke="var(--border)" strokeWidth={1} />
-        ))}
+        {/* light horizontal guides only */}
         {yTicks.map((t) => (
-          <line key={`gy${t}`} x1={0} x2={iw} y1={y(t)} y2={y(t)} stroke="var(--border)" strokeWidth={1} />
+          <line key={`gy${t}`} x1={0} x2={iw} y1={y(t)} y2={y(t)} stroke="var(--border)" strokeWidth={1} strokeOpacity={0.7} />
         ))}
 
         {/* where ISS tests ran */}
@@ -174,7 +173,7 @@ function ChartSvg({ dots, cabin, others, regionLabel, ariaLabel, width, height }
         {band ? <rect x={band.x} y={band.y} width={band.w} height={band.h} rx={6} fill={BLUE} fillOpacity={0.1} stroke={BLUE} strokeOpacity={0.45} strokeWidth={1} /> : null}
         {regionPos ? (
           <text x={regionPos.x} y={regionPos.y} fontSize={regionFont} fontWeight={600} fill={BLUE} style={HALO}>
-            {regionLabel}
+            {REGION_TEXT}
           </text>
         ) : null}
 
@@ -226,20 +225,23 @@ function ChartSvg({ dots, cabin, others, regionLabel, ariaLabel, width, height }
         <line x1={0} x2={iw} y1={ih} y2={ih} stroke="var(--border-strong)" />
         <line x1={0} x2={0} y1={0} y2={ih} stroke="var(--border-strong)" />
         {xTicks.map((t) => (
-          <text key={`tx${t}`} x={x(t)} y={ih + 17} textAnchor="middle" fontSize={12} fill={MUTED}>
-            {trim(t)}
-          </text>
+          <g key={`tx${t}`}>
+            <line x1={x(t)} x2={x(t)} y1={ih} y2={ih + 4} stroke="var(--border-strong)" />
+            <text x={x(t)} y={ih + 18} textAnchor="middle" fontSize={12} fill={MUTED}>
+              {trim(t)}
+            </text>
+          </g>
         ))}
         {yTicks.map((t) => (
           <text key={`ty${t}`} x={-8} y={y(t)} textAnchor="end" dominantBaseline="central" fontSize={12} fill={MUTED}>
             {trim(t)}
           </text>
         ))}
-        <text x={iw / 2} y={ih + (narrow ? 38 : 42)} textAnchor="middle" fontSize={12} fontWeight={500} fill={INK}>
-          Oxygen in the air (%)
+        <text x={iw / 2} y={ih + (narrow ? 36 : 38)} textAnchor="middle" fontSize={12} fontWeight={500} fill={INK}>
+          Oxygen (%)
         </text>
-        <text transform={`translate(${-m.l + 13},${ih / 2}) rotate(-90)`} textAnchor="middle" fontSize={12} fontWeight={500} fill={INK}>
-          Air pressure (kPa)
+        <text transform={`translate(${-m.l + 12},${ih / 2}) rotate(-90)`} textAnchor="middle" fontSize={12} fontWeight={500} fill={INK}>
+          Pressure (kPa)
         </text>
       </g>
     </svg>

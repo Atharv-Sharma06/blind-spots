@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from datetime import UTC, datetime
 from typing import Any
 
@@ -13,9 +14,9 @@ from blindspots.api.services import modeling, ranking
 from blindspots.api.services.targets import resolve_target
 
 STANDARD_DISCLAIMER = (
-    "This brief describes computational research candidates derived from public NASA records. It requires "
-    "qualified scientific review, established safety procedures and formal feasibility assessment. It is "
-    "not endorsed or approved by NASA and is not a certified fire-safety assessment."
+    "Computational research candidates built from public NASA records. They need qualified scientific "
+    "review, established safety procedures and formal feasibility assessment. Not endorsed or approved by "
+    "NASA; not a certified fire-safety assessment."
 )
 
 
@@ -48,27 +49,29 @@ STATUS_TEXT = {
     "user_hypothetical": "user-selected hypothetical",
 }
 FLAG_TEXT = {
-    "documented_upper_bound_used": "no documented nominal oxygen; the documented upper bound is analysed",
-    "documented_lower_bound_used": "no documented nominal oxygen; the documented lower bound is analysed",
-    "documented_bound_used": "a documented bound is used where no nominal value exists",
-    "default_band": "no documented airflow; the default analysis band is used",
+    "documented_upper_bound_used": "no documented usual oxygen level; the documented upper limit is used",
+    "documented_lower_bound_used": "no documented usual oxygen level; the documented lower limit is used",
+    "documented_bound_used": "a documented limit is used where no usual value exists",
+    "default_band": "no documented airflow; the default band is used",
 }
 REASON_LABELS = {
-    "point_verdicts": "Target points supported",
-    "sparse_observations": "Sparse observations nearby",
-    "outside_hull": "Outside the observed region",
-    "unobserved_pressure": "Pressure not observed",
-    "outcome_variability": "Mixed outcomes nearby",
-    "model_instability": "Model unstable across resamples",
-    "other_family_evidence_only": "Evidence from other material families only",
-    "no_model": "No model for this group",
-    "expected_uncertainty_reduction": "Expected uncertainty reduction",
-    "at_target_conditions": "At the target conditions",
-    "high_target_covariance": "Strongly informs the target",
-    "high_candidate_uncertainty": "High uncertainty at the candidate",
-    "near_decision_boundary": "Near the predicted decision boundary",
-    "fills_coverage_gap": "Fills a coverage gap",
-    "assumption_dependent": "Depends on the assumed pressure correlation",
+    "point_verdicts": "Points covered",
+    "sparse_observations": "Few ISS tests nearby",
+    "outside_hull": "Outside the tested range",
+    "unobserved_pressure": "Pressure not tested",
+    "outcome_variability": "Mixed results nearby",
+    "model_instability": "Models disagree",
+    "other_family_evidence_only": "Only other materials tested nearby",
+    "no_model": "No model for this material",
+    "high_knowledge_uncertainty": "Model still unsure",
+    "target_points_not_supported": "Points not well covered",
+    "expected_uncertainty_reduction": "Uncertainty it would remove",
+    "at_target_conditions": "At the cabin's conditions",
+    "high_target_covariance": "Informs the cabin's air",
+    "high_candidate_uncertainty": "Model very unsure here",
+    "near_decision_boundary": "Near the burn / go-out line",
+    "fills_coverage_gap": "Fills a gap in the tests",
+    "assumption_dependent": "Depends on the pressure assumption",
 }
 BLINDSPOT_VERDICT_TEXT = {
     "supported": "supported",
@@ -92,10 +95,9 @@ def _target_section(resolved: dict[str, Any]) -> str:
     band = assess_mod.BAND_SOURCE_TEXT.get(resolved["airflow_band_source"], "analysis band")
     lines = [
         f"- Label: {resolved['label']} ({status})",
-        f"- Oxygen: nominal {assess_mod.fmt_num(o2['nominal'])}%{_bounds(o2)}",
-        f"- Total pressure: nominal {p['nominal']:.1f} kPa{_bounds(p)}",
-        f"- Airflow band: {assess_mod.fmt_flow(af['min'])}\u2013{assess_mod.fmt_flow(af['max'])} cm/s "
-        f"({band})",
+        f"- Oxygen: usually {assess_mod.fmt_num(o2['nominal'])}%{_bounds(o2)}",
+        f"- Pressure: usually {p['nominal']:.1f} kPa{_bounds(p)}",
+        f"- Airflow: {assess_mod.fmt_flow(af['min'])}\u2013{assess_mod.fmt_flow(af['max'])} cm/s ({band})",
     ]
     if resolved.get("airflow_band_note"):
         lines.append(f"- Airflow note: {str(resolved['airflow_band_note']).removeprefix('Airflow band: ')}")
@@ -115,25 +117,45 @@ def _target_section(resolved: dict[str, Any]) -> str:
             if s.get("quote"):
                 lines.append(f'    - "{s["quote"]}"')
     else:
-        lines.append("- Sources: none (user-selected hypothetical conditions)")
+        lines.append("- Sources: none (you chose these conditions)")
     return "\n".join(lines)
+
+
+VERDICT_PLAIN = {
+    "supported": "covered by ISS tests",
+    "extrapolation": "beyond the ISS tests",
+    "insufficient_evidence": "not enough evidence",
+}
 
 
 def _coverage_section(a: dict[str, Any]) -> str:
     c = a["coverage"]
+    n, k = c["n_target_points"], a["points_supported"]
     lines = [
-        f"- Target points analysed: {c['n_target_points']}; with at least one comparable integrated "
-        f"observation: {c['points_with_comparable']}; comparable observations: "
-        f"{c['comparable_observations']}",
-        f"- Nearest observation (reference distances): minimum {_fmt(c['nn_distance_min'], 1)}, "
-        f"median {_fmt(c['nn_distance_median'], 1)}; share of the target inside the observed region: "
-        f"{100 * c['fraction_inside_hull']:.0f}%",
-        f"- Evidence verdict: {a['verdict'].replace('_', ' ')} (supported at {a['points_supported']} of "
-        f"{c['n_target_points']} target points)",
+        f"- Verdict: {VERDICT_PLAIN.get(a['verdict'], a['verdict'].replace('_', ' '))}; {k} of {n} points in "
+        "this air are well covered",
+        f"- Nearby ISS tests: {c['points_with_comparable']} of {n} points have at least one "
+        f"({c['comparable_observations']} test results in all)",
+        f'- Closest test: {_fmt(c["nn_distance_min"], 1)} reference distances away (our "nearby" unit); '
+        f"typical {_fmt(c['nn_distance_median'], 1)}",
+        f"- Inside the tested range: {100 * c['fraction_inside_hull']:.0f}% of this air",
     ]
-    for r in a["reasons"]:
-        lines.append(f"  - {REASON_LABELS.get(r['code'], r['code'].replace('_', ' '))}: {r['message']}")
-    lines.append(f"- Summary: {a['summary']}")
+    m = a.get("model") or {}
+    if m.get("p_sustained_mean") is not None:
+        lines.append(
+            f"- Chance the flame kept burning, over the {k} covered points: "
+            f"mean {_fmt(m['p_sustained_mean'], 2)} "
+            f"(range {_fmt(m.get('p_sustained_min'), 2)}\u2013{_fmt(m.get('p_sustained_max'), 2)})"
+        )
+    if m.get("latent_std_ratio_mean") is not None:
+        lines.append(
+            "- Uncertainty left over the whole target: "
+            f"{_fmt(m['latent_std_ratio_mean'], 2)} of the starting level"
+        )
+    why = [r for r in a["reasons"] if r["code"] != "point_verdicts"]
+    if why:
+        lines.append("- Why:")
+        lines.extend(f"  - {r['message']}" for r in why)
     return "\n".join(lines)
 
 
@@ -149,29 +171,29 @@ def _model_section(group: dict[str, Any], group_id: str) -> str:
         else f"- Analysis group: {group['label']}",
     ]
     if gm is None:
-        lines.append("- No model: insufficient data for this group; only coverage is shown.")
+        lines.append("- No model: too little data for this material; only coverage is shown.")
         return "\n".join(lines)
     ms = gm.metrics_summary
     lines.append(
-        "- Algorithm: Gaussian-process classifier (logit link, Laplace approximation, ARD "
-        "squared-exponential "
-        f"kernel, MAP-II hyperparameters); pressure length scale fixed at "
-        f"{modeling.trained_pressure_length_scale(gm.model):g} (ln units)."  # type: ignore[arg-type]
+        "- Model type: Gaussian-process classifier (it reports its own uncertainty); pressure length scale "
+        f"fixed at {modeling.trained_pressure_length_scale(gm.model):g} (ln units)."  # type: ignore[arg-type]
     )
     gp, maj = ms.get("gp") or {}, ms.get("majority_class") or {}
     lines.append(
-        f"- Grouped cross-validation by experiment ({ms.get('cv_scheme', 'grouped CV')}): "
-        f"GP Brier {_metric(gp.get('brier'))}, log loss {_metric(gp.get('log_loss'))}, "
+        f"- Check on held-out experiments ({ms.get('cv_scheme', 'grouped CV')}; lower is better except AUC): "
+        f"model Brier {_metric(gp.get('brier'))}, log loss {_metric(gp.get('log_loss'))}, "
         f"AUC {_metric(gp.get('auc'))}, ECE {_metric(gp.get('ece'))}."
     )
     lines.append(
-        f"- Majority-class baseline: Brier {_metric(maj.get('brier'))}, log loss "
+        "- Majority-class baseline (always guesses the common outcome): "
+        f"Brier {_metric(maj.get('brier'))}, log loss "
         f"{_metric(maj.get('log_loss'))}, AUC {_metric(maj.get('auc'))}."
     )
     diff = ms.get("gp_vs_majority") or {}
     if diff:
         lines.append(
-            f"- GP minus majority baseline (negative favours the GP): Brier {_metric(diff.get('brier'))}, "
+            "- Model minus baseline (negative means the model is better): "
+            f"Brier {_metric(diff.get('brier'))}, "
             f"log loss {_metric(diff.get('log_loss'))}."
         )
     if ms.get("small_sample_warning"):
@@ -181,8 +203,34 @@ def _model_section(group: dict[str, Any], group_id: str) -> str:
         bt = val.get("blindspot_test") or {}
         if bt:
             bv = BLINDSPOT_VERDICT_TEXT.get(str(bt.get("verdict")), str(bt.get("verdict")))
-            lines.append(f"- Uncertainty-vs-error check: {bv}. {bt.get('interpretation', '')}")
+            lines.append(
+                f"- Does the model's uncertainty track its errors? {bv.capitalize()}. "
+                f"{bt.get('interpretation', '')}".rstrip()
+            )
     return "\n".join(lines)
+
+
+_RANKED_RE = re.compile(
+    r"^Ranked \d+ of (\d+) grid candidates by greedy batch expected uncertainty reduction\."
+)
+
+
+def _plain_assumption(text: str) -> str | None:
+    """Plain wording for the ranking notes that read badly beside one candidate; others pass through."""
+    m = _RANKED_RE.match(text)
+    if m:
+        return (
+            f"We scored {m.group(1)} conditions on a grid by expected uncertainty reduction. "
+            "Simple baselines (random, most uncertain, nearest gap) are scored the same way."
+        )
+    if text.startswith("Expected variance reduction (EVR)"):
+        return (
+            "Expected uncertainty reduction is how much one new hypothetical test would be expected to "
+            "cut the model's uncertainty about the target (approximate; model settings held fixed)."
+        )
+    if text.startswith("Target airflow band "):
+        return None  # already shown under Target
+    return text
 
 
 def _candidate_section(
@@ -192,47 +240,49 @@ def _candidate_section(
     fractions: list[float] | None = None,
 ) -> str:
     if cand is None:
-        return "No candidate is available (no model for this group, or no eligible candidate)."
+        return "No candidate is available (no model for this material, or no eligible candidate)."
     o2, p, u = cand["oxygen_percent"], cand["pressure_kpa"], cand["airflow_cm_s"]
     status = (
-        "Within demonstrated envelope"
+        "Inside the conditions ISS tests already ran"
         if cand["feasibility_status"] == "within_demonstrated_envelope"
-        else "Outside demonstrated envelope"
+        else "Outside the conditions ISS tests already ran"
     )
     lines = [
-        f"- Research question: Would additional evidence at {o2:.1f}% O₂, {p:.1f} kPa and "
-        f"{assess_mod.fmt_flow(u)} cm/s materially change the estimated probability of a sustained flame "
-        "over the target region, and how sensitive is that estimate to the assumed pressure correlation?",
+        f"- Research question: Would new test results at {o2:.1f}% O₂, {p:.1f} kPa and "
+        f"{assess_mod.fmt_flow(u)} cm/s cut the model's uncertainty about this air? How much does the "
+        "answer depend on the assumed pressure effect?",
         f"- Source of candidate: {source}.",
-        f"- Expected uncertainty reduction: {100 * cand['evr_fraction']:.1f}% of the weighted latent "
-        "variance over the target region (model-based, hypothetical).",
+        f"- Expected uncertainty reduction: {100 * cand['evr_fraction']:.1f}% of the model's current "
+        "uncertainty about this air (model-based, hypothetical).",
         f"- {cand['explanation']}",
-        f"- Demonstrated-envelope status: {status}. {cand['feasibility_note']}",
+        f"- Tested range: {status}. {cand['feasibility_note']}",
     ]
     for r in cand["reasons"]:
+        if r["code"] == "expected_uncertainty_reduction":
+            continue  # same number as the line above
         lines.append(f"  - {REASON_LABELS.get(r['code'], r['code'].replace('_', ' '))}: {r['message']}")
     if rank_res is not None:
         sens = rank_res["sensitivity"]
         if sens:
             changed = [s["pressure_length_scale"] for s in sens if not s["same_top_as_default"]]
-            line = "- Pressure sensitivity (pressure length scale 0.15 / 0.3 / 0.6): "
+            line = "- Pressure sensitivity (length scale 0.15 / 0.3 / 0.6): "
             if fractions:
                 line += (
-                    "expected uncertainty reduction at this candidate "
-                    + " / ".join(f"{100 * f:.1f}%" for f in fractions)
-                    + "; "
+                    "uncertainty reduction here " + " / ".join(f"{100 * f:.1f}%" for f in fractions) + "; "
                 )
             line += (
-                "the top-ranked candidate is unchanged."
+                "the top candidate stays the same."
                 if not changed
-                else "the top-ranked candidate changes at " + ", ".join(f"{c:g}" for c in changed) + "."
+                else "the top candidate changes at " + ", ".join(f"{c:g}" for c in changed) + "."
             )
             lines.append(line)
         lines.append("- Assumptions:")
         for a in rank_res["assumptions"]:
-            lines.append(f"  - {a}")
+            note = _plain_assumption(a)
+            if note:
+                lines.append(f"  - {note}")
     if cand["related_documented_investigations"]:
-        lines.append("- Related NASA work that may already inform this condition (not integrated):")
+        lines.append("- Related NASA work that may already cover this (not used by the model):")
         for r in cand["related_documented_investigations"]:
             lines.append(f"  - {r['name']}: {r['note']}")
     lines.append(f"- {ranking.DISCLAIMER}")
@@ -240,20 +290,19 @@ def _candidate_section(
 
 
 def _historical_section(a: dict[str, Any], store: deps.DataStore) -> str:
-    inv_url = {i["investigation_id"]: i["landing_url"] for i in store.investigations}
     near = a["coverage"]["nearest_observations"]
     if not near:
-        return "No integrated observations exist for this analysis group."
-    lines = ["Nearest integrated observations to the target region (reference distance):"]
+        return "No ISS test results exist for this material."
+    lines = ["Closest ISS test results to this air (distance in reference distances):"]
     for o in near:
         exp = store.experiment_by_id.get(o["experiment_id"], {})
-        inv = exp.get("investigation_id", o["experiment_id"].split(":")[0])
-        label = {1: "flame sustained", 0: "flame not sustained"}.get(o["label"], "not used for training")
+        inv, _, test = o["experiment_id"].partition(":")
+        inv = exp.get("investigation_id", inv)
+        label = {1: "flame kept burning", 0: "flame went out"}.get(o["label"], "not used by the model")
         lines.append(
-            f"- {o['experiment_id']} ({exp.get('investigation_acronym', inv)}): "
-            f"O2 {o['oxygen_percent']:.1f} %, {o['pressure_kpa']:.1f} kPa, {o['airflow_cm_s']:.2f} cm/s, "
-            f"{label}, distance {o['distance']:.2f}; "
-            f"{inv_url.get(inv, config.PSI_LANDING_URL.format(id=inv))}"
+            f"- {exp.get('investigation_acronym', inv)} test {test or o['experiment_id']}: "
+            f"{o['oxygen_percent']:.1f}% O₂, {o['pressure_kpa']:.1f} kPa, {o['airflow_cm_s']:.2f} cm/s, "
+            f"{label}, distance {o['distance']:.2f}"
         )
     rel = [
         r
@@ -266,7 +315,7 @@ def _historical_section(a: dict[str, Any], store: deps.DataStore) -> str:
         )
     ][:6]
     if rel:
-        lines.append("Investigations ranked by relevance to the target:")
+        lines.append("Related investigations, closest first:")
         for r in rel:
             ref = f" ({r['url']})" if r.get("url") else ""
             lines.append(f"{r['relevance_rank']}. {r['name']}{ref}: {r['summary']}")
@@ -278,17 +327,13 @@ def _citations_section(resolved: dict[str, Any], a: dict[str, Any], store: deps.
     for i in store.investigations:
         if i.get("role") in ("integrated_model", "integrated_context") and i.get("doi"):
             lines.append(f"- {i['acronym']}: {i['title']}, doi:{i['doi']}, {i['landing_url']}")
-    lines.append("Target profile sources:")
-    seen: set[tuple[str, str | None]] = set()
-    for s in resolved["sources"]:
-        if (s["title"], s.get("url")) in seen:
-            continue
-        seen.add((s["title"], s.get("url")))
-        lines.append(f"- {s['title']}" + (f", {s['url']}" if s.get("url") else ""))
-    if not resolved["sources"]:
-        lines.append("- none (user-selected hypothetical conditions)")
+    lines.append(
+        "Sources for this air: listed under Target."
+        if resolved["sources"]
+        else "Sources for this air: none (you chose these conditions)."
+    )
     if a["documented_context"]:
-        lines.append("Related NASA work, not integrated (context only):")
+        lines.append("Related NASA work, not used by the model (context only):")
         by_id = {r["id"]: r for r in deps.not_integrated_records()}
         for d in a["documented_context"]:
             srcs = [q["url"] for q in by_id.get(d["id"], {}).get("sources", []) if q.get("url")]
@@ -301,8 +346,8 @@ def _limitations_section(group: dict[str, Any]) -> str:
 
     items = _limitations(deps.get_store())
     items.append(
-        f"Small samples: this group has {group['n_experiments']} experiments; uncertainty is wide and "
-        "validation metrics are unstable."
+        f"Small sample: only {group['n_experiments']} experiments for this material, so uncertainty is wide "
+        "and scores are unstable."
     )
     return "\n".join(f"- {x}" for x in items)
 
@@ -354,8 +399,8 @@ def build_brief(group_id: str, target: Target, candidate: Point | None) -> dict[
     md = [
         f"# {title}",
         "",
-        f"Generated {now.day} {now.strftime('%b %Y, %H:%M')} UTC. Dataset version: {dataset_version}. "
-        f"Model version: {model_version}.",
+        f"Generated {now.day} {now.strftime('%b %Y, %H:%M')} UTC. Dataset {dataset_version}. "
+        f"Model {model_version}.",
         "",
         "## Target",
         sections["target"],
@@ -369,7 +414,7 @@ def build_brief(group_id: str, target: Target, candidate: Point | None) -> dict[
         "## Candidate research question",
         sections["candidate"],
         "",
-        "## Relevant historical investigations",
+        "## Nearby ISS results and related NASA work",
         sections["historical_investigations"],
         "",
         "## Citations",

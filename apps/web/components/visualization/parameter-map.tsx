@@ -767,7 +767,7 @@ export default function ParameterMap(props: ParameterMapProps) {
     return { s, n };
   }, [vis.obs]);
   const summary = `${ariaLabel}. ${vis.obs.length} of ${observations.length} test results in view (${counts.s} flame kept burning, ${counts.n} flame went out). Oxygen ${fmt(lo(view.x), 1)} to ${fmt(hi(view.x), 1)} percent, ${yName.toLowerCase()} ${fmt(lo(view.y))} to ${fmt(hi(view.y))} ${yUnit}.${target ? ` This cabin: ${target.label}.` : ""}`;
-  const kbdHint = "Arrows pan · + / − zoom · 0 reset · Tab to points, arrows between points, Enter select, Esc clear";
+  const kbdHint = "Arrows pan, + / − zoom, 0 resets. Tab to points, Enter selects, Esc clears.";
 
   const hasAssumed = vis.obs.some((o) => o.pressureAssumed);
   const hasUnlabelled = vis.obs.some((o) => o.label === null);
@@ -785,8 +785,8 @@ export default function ParameterMap(props: ParameterMapProps) {
           <div className="font-medium text-fg">{o.title}</div>
           <dl className="mt-1 grid grid-cols-[auto_1fr] gap-x-3 text-[12px]">
             <dt className="text-muted">Outcome</dt>
-            <dd>{o.label === 1 ? "Flame kept burning" : o.label === 0 ? "Flame went out" : "Outcome not determined"}</dd>
-            <dt className="text-muted">O₂</dt><dd className="num">{fmt(o.x, 1)} %</dd>
+            <dd>{o.label === 1 ? "Flame kept burning" : o.label === 0 ? "Flame went out" : "Outcome unknown"}</dd>
+            <dt className="text-muted">Oxygen</dt><dd className="num">{fmt(o.x, 1)} %</dd>
             {plane === "o2_flow" ? (
               <><dt className="text-muted">Airflow</dt><dd className="num">{fmt(o.y)} cm/s</dd></>
             ) : (
@@ -807,15 +807,15 @@ export default function ParameterMap(props: ParameterMapProps) {
       if (!members.length) return null;
       return (
         <>
-          <div className="font-medium text-fg">{members.length > 1 ? `Research candidates ${members.map((m) => m.rank).join(", ")}` : `Research candidate ${members[0]!.rank}`}</div>
-          <div className="num text-[11px] text-muted">O₂ {fmt(members[0]!.x, 1)} %, {yName.toLowerCase()} {fmt(members[0]!.y)} {yUnit}</div>
+          <div className="font-medium text-fg">{members.length > 1 ? `Candidates ${members.map((m) => m.rank).join(", ")}` : `Candidate ${members[0]!.rank}`}</div>
+          <div className="num text-[11px] text-muted">Oxygen {fmt(members[0]!.x, 1)} %, {yName.toLowerCase()} {fmt(members[0]!.y)} {yUnit}</div>
           {members.length > 1 || members.some((m) => m.off) ? (
             <ul className="mt-1 space-y-0.5 text-[12px]">
               {members.map((m) => (
                 <li key={m.id}>
                   <span className="num">{m.rank}</span>
                   {m.slice != null ? <span className="num"> · {sliceName} {fmt(m.slice)} {sliceUnit}</span> : null}
-                  {m.off ? <span className="text-muted"> · at a different {sliceName} than this map shows</span> : null}
+                  {m.off ? <span className="text-muted"> · different {sliceName}</span> : null}
                 </li>
               ))}
             </ul>
@@ -829,7 +829,7 @@ export default function ParameterMap(props: ParameterMapProps) {
         <>
           <div className="font-medium text-fg">This cabin</div>
           <div className="text-muted">{target.label}</div>
-          <div className="num text-[11px] text-muted">O₂ {fmt(target.nominal[0], 1)} %, {yName.toLowerCase()} {fmt(target.nominal[1], plane === "o2_flow" ? 2 : 1)} {yUnit}</div>
+          <div className="num text-[11px] text-muted">Oxygen {fmt(target.nominal[0], 1)} %, {yName.toLowerCase()} {fmt(target.nominal[1], plane === "o2_flow" ? 2 : 1)} {yUnit}</div>
         </>
       );
     }
@@ -840,8 +840,8 @@ export default function ParameterMap(props: ParameterMapProps) {
         <>
           <div className="font-medium text-fg">{c.investigation}</div>
           <div className="text-muted">{c.label}</div>
-          <div className="font-mono text-[11px] tabular-nums">O2 {fmt(c.x, 1)} %, {yName.toLowerCase()} {fmt(c.y)} {yUnit}</div>
-          <div className="mt-1 text-muted">Related NASA test. The model does not use it.</div>
+          <div className="font-mono text-[11px] tabular-nums">Oxygen {fmt(c.x, 1)} %, {yName.toLowerCase()} {fmt(c.y)} {yUnit}</div>
+          <div className="mt-1 text-muted">Related NASA test, not used by the model.</div>
         </>
       );
     }
@@ -856,12 +856,12 @@ export default function ParameterMap(props: ParameterMapProps) {
     const nn = (coverage?.nn_distance ?? surface?.nn_distance)?.[hover.j]?.[hover.i];
     return (
       <dl className="grid grid-cols-[auto_1fr] gap-x-3 text-[12px]">
-        <dt className="text-muted">O₂</dt><dd className="num">{typeof cx === "number" ? fmt(cx, 1) : "n/a"} %</dd>
+        <dt className="text-muted">Oxygen</dt><dd className="num">{typeof cx === "number" ? fmt(cx, 1) : "n/a"} %</dd>
         <dt className="text-muted">{yName}</dt><dd className="num">{typeof cy === "number" ? fmt(cy) : "n/a"} {yUnit}</dd>
-        {layers.prediction && (<><dt className="text-muted">Flame keeps burning</dt><dd className="num">{typeof p === "number" && v === "supported" ? `${Math.round(p * 100)} % (model)` : "no estimate here"}</dd></>)}
+        {layers.prediction && (<><dt className="text-muted">Chance it burns</dt><dd className="num">{typeof p === "number" && v === "supported" ? `${Math.round(p * 100)} % (model)` : "no estimate"}</dd></>)}
         {layers.prediction && v && (<><dt className="text-muted">Verdict</dt><dd>{verdictLabel(v)}</dd></>)}
-        {layers.uncertainty && (<><dt className="text-muted">Model uncertainty</dt><dd className="num">{typeof u === "number" ? fmt(u) : "n/a"}</dd></>)}
-        {layers.coverage && (<><dt className="text-muted">Nearest test result</dt><dd className="num">{typeof nn === "number" ? `${fmt(nn)} steps${threshold != null && nn > threshold ? " (far)" : ""}` : "n/a"}</dd></>)}
+        {layers.uncertainty && (<><dt className="text-muted">Uncertainty</dt><dd className="num">{typeof u === "number" ? fmt(u) : "n/a"}</dd></>)}
+        {layers.coverage && (<><dt className="text-muted">Nearest ISS test</dt><dd className="num">{typeof nn === "number" ? `${fmt(nn)} steps${threshold != null && nn > threshold ? " (far)" : ""}` : "n/a"}</dd></>)}
       </dl>
     );
   })();
@@ -872,9 +872,9 @@ export default function ParameterMap(props: ParameterMapProps) {
   const clampY = (v: number) => Math.max(0, Math.min(ih, v));
   // Short in-plot notes, stacked from the bottom centre (never overlapping each other or the labels below).
   const notes: string[] = [];
-  if (layers.prediction && rasters && !rasters.supportedRuns.length) notes.push("The model makes no estimate on this slice.");
-  if (wholeGap) notes.push("Few nearby test results across this whole slice");
-  if (hypotheticalSurface && (layers.prediction || layers.uncertainty)) notes.push("What-if view: a hypothetical test result is added");
+  if (layers.prediction && rasters && !rasters.supportedRuns.length) notes.push("No model estimate here.");
+  if (wholeGap) notes.push("Few nearby ISS tests on this map");
+  if (hypotheticalSurface && (layers.prediction || layers.uncertainty)) notes.push("What-if: one hypothetical test added");
 
   // ---- label layout: markers are fixed obstacles; then the target label, the contour label, context labels (each once)
   const labelLayout = (() => {
@@ -987,7 +987,7 @@ export default function ParameterMap(props: ParameterMapProps) {
     <div className="w-full">
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
         {/* Visible on wide screens only; always in the accessible description of the map. */}
-        <p className="sr-only text-[12px] text-muted sm:not-sr-only" id={`${uid}-hint`}>{asTable ? "Table of test results currently in view." : wrapFocus ? kbdHint : kb}</p>
+        <p className="sr-only text-[12px] text-muted sm:not-sr-only" id={`${uid}-hint`}>{asTable ? "Test results in view." : wrapFocus ? kbdHint : kb}</p>
         <div className="flex flex-wrap items-center gap-1.5 max-sm:w-full">
           {!asTable && (
             <>
@@ -1008,14 +1008,14 @@ export default function ParameterMap(props: ParameterMapProps) {
             <caption className="sr-only">{summary}</caption>
             <thead className="sticky top-0 bg-subtle text-left">
               <tr>
-                {["Test result", "Experiment", "Oxygen (%)", `${yName} (${yUnit})`, "Outcome", "Pressure"].map((h) => (
+                {["Test result", "Experiment", "Oxygen (%)", `${yName} (${yUnit})`, "Outcome", "Pressure source"].map((h) => (
                   <th key={h} scope="col" className="border-b border-border px-2 py-1.5 font-medium text-muted">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody className="font-mono tabular-nums">
               {vis.obs.length === 0 && (
-                <tr><td colSpan={6} className="px-2 py-3 font-sans text-muted">No test results in the current view or layer selection.</td></tr>
+                <tr><td colSpan={6} className="px-2 py-3 font-sans text-muted">No test results in view.</td></tr>
               )}
               {vis.obs.map((o) => (
                 <tr key={o.id} className={o.id === selectedObservationId ? "bg-accent-tint" : "border-b border-border"}>
@@ -1236,7 +1236,7 @@ export default function ParameterMap(props: ParameterMapProps) {
                 <text key={t} x={iw / 2} y={ih - 12 - k * 16} textAnchor="middle" fontSize={12} fill={MUTED} stroke="var(--surface)" strokeWidth={4} paintOrder="stroke" strokeLinejoin="round">{t}</text>
               ))}
               {modelMissing && (
-                <text x={iw / 2} y={ih / 2} textAnchor="middle" fontSize={13} fill={MUTED} stroke="var(--surface)" strokeWidth={4} paintOrder="stroke" strokeLinejoin="round">No model for this material: estimate and uncertainty not shown.</text>
+                <text x={iw / 2} y={ih / 2} textAnchor="middle" fontSize={13} fill={MUTED} stroke="var(--surface)" strokeWidth={4} paintOrder="stroke" strokeLinejoin="round">No model for this material.</text>
               )}
             </g>
           </svg>

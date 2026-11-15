@@ -29,7 +29,6 @@ export function Toc({ items }: { items: TocItem[] }) {
 
   return (
     <nav aria-label="Technical details sections" className="hidden lg:sticky lg:top-[calc(var(--header-h)+24px)] lg:block">
-      <p className="mb-2 hidden text-xs font-medium uppercase tracking-wide text-muted lg:block">Technical details</p>
       <ol className="flex gap-1 overflow-x-auto pb-2 lg:flex-col lg:gap-0.5 lg:overflow-visible lg:pb-0">
         {items.map((it, i) => (
           <li key={it.id} className="shrink-0">

@@ -116,7 +116,7 @@ test("captions never exceed 14 words and avoid expert words", () => {
     assert.ok(cap.caption.length > 0, `${c.scene} has a caption`);
     assert.ok(wordCount(cap.caption) <= CAPTION_MAX_WORDS, `${c.scene}: "${cap.caption}" has ${wordCount(cap.caption)} words`);
     assert.ok(!/!/.test(cap.caption), "no exclamation marks");
-    assert.ok(cap.facts.length <= 3, `${c.scene} shows at most three facts`);
+    assert.ok(cap.facts.length <= 2, `${c.scene} shows at most two facts`);
     for (const t of [cap.caption, cap.title, ...cap.facts.flatMap((f) => [f.label, f.value])]) {
       assert.ok(!forbidden.test(t), `expert word in "${t}"`);
     }
@@ -132,15 +132,16 @@ test("scene 1 and 2 use the headline numbers", () => {
   const none = sceneCaption({ ...base, scene: "iss", iss: { comparable_observations: 0, groups_with_comparable: 0, n_groups: 20 } });
   assert.ok(!/cover the station/.test(none.caption), "no coverage claim when there are no nearby results");
   const b = sceneCaption({ ...base, scene: "pick" });
-  assert.equal(b.caption, "Now pick a cabin: Moon/Mars Exploration Atmosphere.", "scene 2 names the cabin from the data");
+  assert.equal(b.caption, "Now try Moon/Mars Exploration Atmosphere.", "scene 2 names the cabin from the data");
   assert.ok(sceneCaption({ ...base, scene: "pick", cabin: { ...base.cabin, name: "Artemis Moon habitat" } }).caption.includes("Artemis Moon habitat"));
-  assert.deepEqual(b.facts.map((f) => f.value), ["34 %", "56.5 kPa", "Not covered"]);
+  assert.deepEqual(b.facts.map((f) => f.value), ["34 % oxygen, 56.5 kPa", "Not covered"]);
 });
 
 test("scene 3 wording follows the verdict (no probability, no invented coverage)", () => {
-  assert.equal(sceneCaption({ ...base, scene: "answer" }).caption, "Blind spot: no ISS test in our data ran in air like this.");
-  assert.equal(sceneCaption({ ...base, scene: "answer", assess: fixture_assess("extrapolation", 3) }).caption, "Partly covered: only part of this air has nearby ISS tests.");
+  assert.equal(sceneCaption({ ...base, scene: "answer" }).caption, "Blind spot: no ISS test in our data used this air.");
+  assert.equal(sceneCaption({ ...base, scene: "answer", assess: fixture_assess("extrapolation", 3) }).caption, "Partly covered: only some of this air has nearby ISS tests.");
   assert.equal(sceneCaption({ ...base, scene: "answer", assess: fixture_assess("supported", 40) }).caption, "Covered: ISS flame tests ran in air like this.");
+  assert.deepEqual(sceneCaption({ ...base, scene: "answer", assess: fixture_assess("supported", 40) }).facts, [{ label: "Nearby ISS test results", value: "40" }]);
   const waiting = sceneCaption({ ...base, scene: "answer", assess: null });
   assert.equal(waiting.waiting, true);
   assert.deepEqual(waiting.facts, []);
@@ -153,7 +154,7 @@ test("scene 3 wording follows the verdict (no probability, no invented coverage)
 
 test("scene 4 and 5 carry the binding framing", () => {
   const next = sceneCaption({ ...base, scene: "next" });
-  assert.equal(next.caption, "Machine learning ranks the most informative next experiment.");
+  assert.equal(next.caption, "Machine learning picks the most useful next test.");
   assert.deepEqual(next.notes, ["candidate_framing"]);
   assert.match(next.facts[0].label, /own air/, "D4: at-target wording");
   assert.equal(next.facts.at(-1).value, "19 %");
@@ -182,6 +183,6 @@ test("scene 3 never shows an assumed pressure as a measured one", () => {
   // Unknown whether it was recorded: no pressure fact at all.
   const unknown = sceneCaption({ ...base, scene: "answer", beat: 1, testedKpaMeasured: null });
   assert.equal(unknown.facts.some((f) => /pressure|ran at/i.test(f.label)), false);
-  // Facts stay within three.
-  for (const c of [assumed, partly, unknown]) assert.ok(c.facts.length <= 3);
+  // Facts stay within two.
+  for (const c of [assumed, partly, unknown]) assert.ok(c.facts.length <= 2);
 });

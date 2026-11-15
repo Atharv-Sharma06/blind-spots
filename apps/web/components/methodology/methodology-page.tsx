@@ -25,7 +25,7 @@ const TOC: TocItem[] = [
   { id: "active-learning", label: "Active learning" },
   { id: "validation", label: "Validation" },
   { id: "reproducibility", label: "Reproducibility" },
-  { id: "sources", label: "Sources and context" },
+  { id: "sources", label: "Sources" },
   { id: "limitations", label: "Limitations" },
   { id: "built", label: "How this was built" },
 ];
@@ -59,7 +59,7 @@ export function MethodologyPage() {
         <SectionHeader
           as="h1"
           title="How it works"
-          description="Four steps, from NASA's ISS flame records to the experiment that would teach the most."
+          description="From NASA's ISS flame tests to the next test to run."
         />
         <FourSteps headline={headline} validation={validation} methodology={methodology} />
         <TrustSection
@@ -78,13 +78,10 @@ export function MethodologyPage() {
       <section id="technical" aria-labelledby="technical-h" className="mx-auto w-full max-w-[1100px] scroll-mt-[calc(var(--header-h)+16px)] border-t border-border-strong pt-10">
         <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
           <div className="min-w-0">
-            <p className="text-xs font-medium uppercase tracking-wide text-muted">For scientists and reviewers</p>
-            <h2 id="technical-h" className="mt-1 text-[24px] font-semibold tracking-[-0.02em]">
+            <h2 id="technical-h" className="text-[24px] font-semibold tracking-[-0.02em]">
               Technical details
             </h2>
-            <p className="mt-2 max-w-[68ch] text-[14px] leading-relaxed text-muted">
-              The data, the model, the checks, the sources and how this was built, in eight numbered sections. You do not need them to use the site.
-            </p>
+            <p className="mt-2 max-w-[68ch] text-[14px] leading-relaxed text-muted">For reviewers. You do not need these to use the site.</p>
           </div>
           <div className="flex gap-2">
             <button type="button" onClick={() => setSectionOpen("*", true)} className="inline-flex min-h-10 items-center rounded-md border border-border bg-surface px-3 text-[13px] font-medium hover:bg-subtle">

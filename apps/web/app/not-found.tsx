@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageContainer } from "@/components/layout/page-container";
-import { ErrorState } from "@/components/ui/error-state";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = { title: "Page not found" };
@@ -10,20 +9,12 @@ export default function NotFound() {
   return (
     <PageContainer width="reading" className="flex-1">
       <h1 className="sr-only">Page not found</h1>
-      <ErrorState
-        code="not_found"
-        description="This address does not match a page in Blind Spots. Check the link, or start from the Cabins page."
-        action={
-          <>
-            <Button asChild size="sm" variant="primary">
-              <Link href="/">Back to Cabins</Link>
-            </Button>
-            <Button asChild size="sm" variant="ghost">
-              <Link href="/methodology">How it works</Link>
-            </Button>
-          </>
-        }
-      />
+      <div data-error-code="not_found" className="flex flex-col items-start gap-4 py-10">
+        <p className="text-prose font-medium text-fg">This page does not exist.</p>
+        <Button asChild variant="primary">
+          <Link href="/">Back to Cabins</Link>
+        </Button>
+      </div>
     </PageContainer>
   );
 }

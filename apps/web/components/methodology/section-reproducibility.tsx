@@ -3,7 +3,8 @@
 import type { ApiQuery } from "@/hooks/api";
 import type { MethodologyResponse } from "@/lib/types";
 import type { ExtValidation } from "./types";
-import { ExtLink, Facts, Mono, P, QueryBoundary, Section, Sub } from "./primitives";
+import { Disclosure } from "@/components/ui/disclosure";
+import { ExtLink, Facts, Mono, P, QueryBoundary, Section } from "./primitives";
 
 const COMMANDS = `cd services/analysis
 uv sync
@@ -14,18 +15,36 @@ uv run blindspots serve            # start the analysis API
 # optional: static snapshot for deployment without the Python service
 uv run blindspots export-artifacts --snapshot ../../apps/web/public/snapshot`;
 
+function Detail({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <Disclosure tone="strong" className="border-t border-border pt-2" summaryClassName="min-h-10 text-[14px]" contentClassName="mt-2 space-y-3 pl-0 text-fg sm:pl-5" summary={title}>
+      {children}
+    </Disclosure>
+  );
+}
+
 const json = (v: unknown): string => (v === null || v === undefined ? "not reported" : JSON.stringify(v));
 
 export function ReproducibilitySection({ methodology, validation }: { methodology: ApiQuery<MethodologyResponse>; validation: ApiQuery<ExtValidation> }) {
   return (
-    <Section id="reproducibility" number={5} title="Reproducibility" intro="Versions, seeds and commands that regenerate every number on this page from the raw NASA files.">
+    <Section id="reproducibility" number={5} title="Reproducibility" intro="Rerun it and get the same numbers.">
       <QueryBoundary query={methodology} rows={4}>
         {(m) => {
           const cfg = m.config as unknown as Record<string, unknown>;
           const seeds = (cfg.seeds ?? null) as { cv_seeds?: number[]; seed?: number } | null;
           return (
-            <div className="space-y-6">
-              <Sub title="Versions">
+            <div className="space-y-3">
+              <P>
+                Every number here is rebuilt from the raw NASA files with a few commands. The same data and settings always give the same results.
+                {m.repository_url ? (
+                  <>
+                    {" "}The code is public: <ExtLink href={m.repository_url}>{m.repository_url}</ExtLink>
+                  </>
+                ) : (
+                  <> No code link is set for this deployment.</>
+                )}
+              </P>
+              <Detail title="Versions and settings">
                 <Facts
                   items={[
                     { label: "Dataset version", value: m.versions.dataset_version ?? "not reported" },
@@ -34,15 +53,6 @@ export function ReproducibilitySection({ methodology, validation }: { methodolog
                     { label: "API version", value: m.versions.api_version },
                     { label: "Raw data retrieved", value: m.dates.data_retrieved },
                     { label: "Last analysis", value: m.dates.last_analysis ?? "not reported" },
-                  ]}
-                />
-                <P className="text-muted">
-                  The dataset version is a hash of the normalized content; the model version combines it with a hash of the training configuration, so identical data and configuration give identical versions.
-                </P>
-              </Sub>
-              <Sub title="Training and validation configuration">
-                <Facts
-                  items={[
                     { label: "Random seed (model fitting)", value: seeds?.seed !== undefined ? String(seeds.seed) : "not reported" },
                     { label: "Cross-validation seeds", value: seeds?.cv_seeds ? seeds.cv_seeds.join(", ") : "not reported" },
                     { label: "Pressure length scale (fixed)", value: `${json(cfg.pressure_length_scale_default)} ln units; sensitivity ${json(cfg.pressure_length_scale_sensitivity)}` },
@@ -55,31 +65,22 @@ export function ReproducibilitySection({ methodology, validation }: { methodolog
                   {(v) => {
                     const cv = v.groups[0]?.cv;
                     return cv ? (
-                      <P className="text-muted">
+                      <P className="text-xs text-muted">
                         Cross-validation: {cv.scheme}
-                        {cv.ci_method ? `; intervals: ${cv.ci_method}` : ""}. The complete training configuration (restarts, bootstrap and permutation counts, priors) is stored in the model manifest in the repository under <Mono>models/{m.versions.model_version ?? "&lt;model_version&gt;"}/manifest.json</Mono>.
+                        {cv.ci_method ? `; intervals: ${cv.ci_method}` : ""}. Full settings: <Mono>models/{m.versions.model_version ?? "&lt;model_version&gt;"}/manifest.json</Mono>.
                       </P>
                     ) : null;
                   }}
                 </QueryBoundary>
-              </Sub>
-              <Sub title="Commands">
+              </Detail>
+              <Detail title="Commands">
                 <pre className="num max-w-[78ch] overflow-x-auto rounded-md border border-border bg-surface px-4 py-3 text-[12.5px] leading-relaxed" tabIndex={0} aria-label="Commands to reproduce the analysis">
                   {COMMANDS}
                 </pre>
-                <P className="text-muted">
-                  Raw NASA files are fetched through the PSI web service and checked against SHA-256 hashes in the raw-file manifest; the interpretation tables with cell-level provenance are in the repository under <Mono>data/curation</Mono>.
+                <P className="text-xs text-muted">
+                  Raw files are checked against SHA-256 hashes. Cell-level sources are in <Mono>data/curation</Mono>.
                 </P>
-              </Sub>
-              <Sub title="Repository">
-                {m.repository_url ? (
-                  <P>
-                    <ExtLink href={m.repository_url}>{m.repository_url}</ExtLink>
-                  </P>
-                ) : (
-                  <P className="text-muted">No repository URL is configured for this deployment.</P>
-                )}
-              </Sub>
+              </Detail>
             </div>
           );
         }}

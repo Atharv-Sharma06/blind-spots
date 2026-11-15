@@ -2,11 +2,11 @@ import type { ExtGroupValidation } from "./types";
 
 /** Human-readable names for the model ids in the validation artifact. */
 export const MODEL_LABEL: Record<string, string> = {
-  gp: "GP classifier (Blind Spots)",
-  logistic_o2_flow: "Logistic: O₂ + airflow",
-  logistic_o2: "Logistic: O₂ only",
+  gp: "Blind Spots model",
+  logistic_o2_flow: "Simple model: oxygen + airflow",
+  logistic_o2: "Simple model: oxygen only",
   majority_class: "Majority-class guess",
-  bootstrap_logistic_ensemble: "Bootstrap logistic ensemble",
+  bootstrap_logistic_ensemble: "Resampled simple models",
 };
 export const modelLabel = (id: string): string => MODEL_LABEL[id] ?? id.replace(/_/g, " ");
 
@@ -38,8 +38,8 @@ export function subgroupLabel(v: string): string {
 }
 
 export function scenarioLabel(name: string): string {
-  if (name === "lowest_o2_quartile") return "Lowest-O₂ quartile held out";
-  if (name === "low_airflow_frontier") return "Lowest-airflow quartile held out";
+  if (name === "lowest_o2_quartile") return "Lowest-oxygen quarter held out";
+  if (name === "low_airflow_frontier") return "Lowest-airflow quarter held out";
   if (name.startsWith("campaign_holdout:")) return `Campaign ${name.slice("campaign_holdout:".length)} held out`;
   return name.replace(/_/g, " ");
 }
@@ -68,9 +68,9 @@ export function blindspotShortfall(g: ExtGroupValidation): string | null {
   if (b.verdict === "not_supported") return "uncertainty did not rise with error at either level";
   const c = blindspotCriteria(g);
   const miss: string[] = [];
-  if (!c.point) miss.push("the point-level association is not significant");
-  if (!c.experiment) miss.push("the held-out-experiment association is not significant");
-  if (c.partial === false) miss.push("the association does not hold after controlling for outcome variability");
+  if (!c.point) miss.push("single points show no clear link");
+  if (!c.experiment) miss.push("held-out experiments show no clear link");
+  if (c.partial === false) miss.push("the link fades once outcome variability is accounted for");
   return miss.length ? miss.join("; ") : null;
 }
 

@@ -5,16 +5,10 @@ import { useAssessTarget, useGroups, useHeadline, useRankCandidates } from "@/ho
 import { materialName } from "@/components/home/cabins";
 import { verdictTitle } from "@/components/home/answer-copy";
 import { CANDIDATE_FRAMING } from "@/lib/copy";
-import { airflowText, AT_TARGET_PLAIN, atTargetSentence, isAtTarget, lowerFirst, oxygenText, pressurePsiaText, pressureText, reductionSentence } from "@/components/home/next-logic";
-
-/** D4 in one sentence for the exact case (the full brief below keeps the long wording); the near-miss sentence is shown as is. */
-function atTarget(c: Parameters<typeof atTargetSentence>[0], target: Parameters<typeof atTargetSentence>[1]): string {
-  const full = atTargetSentence(c, target);
-  return full === AT_TARGET_PLAIN ? "This is the cabin's own air, so the most informative single test is at the cabin's own conditions." : full;
-}
+import { airflowText, atTargetSentence, isAtTarget, lowerFirst, oxygenText, pressurePsiaText, pressureText, reductionSentence } from "@/components/home/next-logic";
 
 /**
- * "In short": the answer in two plain lines at the top of the brief. It sends the same two requests the Cabins page makes for a
+ * "In short": the verdict and the best next test, first thing in the brief. It sends the same two requests the Cabins page makes for a
  * named cabin (assess and rank, k = 3), so the snapshot already has them; every figure comes from those responses.
  * Shown only for a named cabin on a modelled material; otherwise it renders nothing and the full brief below stands alone.
  */
@@ -36,7 +30,7 @@ export function InShort({ profileId, groupId }: { profileId: string | null; grou
 
   if (!settled || !group) {
     return (
-      <div role="status" aria-label="Loading the short answer" className="brief-ui my-5 min-h-[120px] rounded-lg border border-border bg-surface p-4">
+      <div role="status" aria-label="Loading the short answer" className="brief-ui my-4 min-h-[120px] rounded-lg border border-border bg-surface p-4">
         <Skeleton className="h-4 w-16" />
         <Skeleton className="mt-3 h-6 w-4/5" />
         <Skeleton className="mt-3 h-4 w-full" />
@@ -52,18 +46,18 @@ export function InShort({ profileId, groupId }: { profileId: string | null; grou
   const reduction = c ? reductionSentence(c) : null;
 
   return (
-    <section aria-labelledby="brief-in-short-h" className="brief-ui my-5 rounded-lg border border-border-strong bg-surface p-4" data-testid="brief-in-short" data-verdict={assess.verdict}>
+    <section aria-labelledby="brief-in-short-h" className="brief-ui my-4 rounded-lg border border-border-strong bg-surface p-4" data-testid="brief-in-short" data-verdict={assess.verdict}>
       <h2 id="brief-in-short-h" className="text-xs font-medium uppercase tracking-[0.08em] text-muted">
         In short
       </h2>
-      <p className="mt-2 text-[17px] font-semibold leading-snug tracking-[-0.01em]" data-testid="brief-in-short-verdict">
+      <p className="mt-2 text-[19px] font-semibold leading-snug tracking-[-0.01em]" data-testid="brief-in-short-verdict">
         {title}
       </p>
       {c && rank ? (
         <p className="mt-2 text-[15px] leading-relaxed" data-testid="brief-in-short-next">
-          <span className="font-medium">Most informative next test:</span> {material} at {oxygenText(c)} oxygen, {pressureText(c)} ({pressurePsiaText(c)}) and {airflowText(c)} airflow.
+          <span className="font-medium">Best next test:</span> {material}, {oxygenText(c)} oxygen, {pressureText(c)} ({pressurePsiaText(c)}), {airflowText(c)} airflow.
           {reduction ? ` ${reduction}` : ""}
-          {isAtTarget(c, rank.target) ? ` ${atTarget(c, rank.target)}` : ""}
+          {isAtTarget(c, rank.target) ? ` ${atTargetSentence(c, rank.target)}` : ""}
         </p>
       ) : null}
       {c && rank ? <p className="mt-2 text-xs leading-relaxed text-muted">{CANDIDATE_FRAMING}</p> : null}

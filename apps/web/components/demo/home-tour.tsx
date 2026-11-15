@@ -77,17 +77,22 @@ function findTarget(ref: string): HTMLElement | null {
   return document.querySelector<HTMLElement>(`[data-tour="${ref}"]`) ?? document.getElementById(ref);
 }
 
+/** The verdict banner ("Covered", "Blind spot: ...") inside the answer card; null until the answer has loaded. */
+function verdictBanner(): HTMLElement | null {
+  return document.querySelector<HTMLElement>("[data-testid='answer-verdict']:not([data-verdict='loading']):not([data-verdict='error']) > div:first-child");
+}
+
 /**
  * Rectangle the ring draws around. The "next" section also holds the what-if box and the Explorer button, which
- * scene 5 explains on its own, so scene 4 rings only the heading and the ranked list above it. The "answer" section
- * also holds the chart (its own beat) and the material picker, so beat 0 of scene 3 rings the verdict and the
- * sentences above the chart: that part stays clear of the docked card, and the chart keeps its own beat.
+ * scene 5 explains on its own, so scene 4 rings only the heading and the ranked list above it. The answer beat
+ * rings the verdict banner alone (scrolled to the top of the window, clear of the docked card); the chart keeps its own beat.
  */
 function ringRect(ref: string, limit: number): DOMRect | null {
-  const el = findTarget(ref);
+  // The answer beat rings the verdict banner itself, so the ring never wraps only the "The answer" heading.
+  const el = ref === "answer" ? verdictBanner() ?? findTarget(ref) : findTarget(ref);
   if (!el) return null;
   let rect = el.getBoundingClientRect();
-  const cutSelector = ref === "next" ? "#what-if, [data-tour='what-if']" : ref === "answer" ? "#chart, [data-tour='chart']" : null;
+  const cutSelector = ref === "next" ? "#what-if, [data-tour='what-if']" : null;
   const cut = cutSelector ? el.querySelector<HTMLElement>(cutSelector) : null;
   if (cut) {
     const bottom = cut.getBoundingClientRect().top - 14;
@@ -145,6 +150,7 @@ export function HomeTour({ className }: { className?: string }) {
 
   const rootRef = useRef<HTMLElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
+  const veilRef = useRef<HTMLDivElement>(null);
   const launcherRef = useRef<HTMLButtonElement>(null);
   const cardH = useRef(0);
   const startCabin = useRef<string | null>(null);
@@ -286,13 +292,17 @@ export function HomeTour({ className }: { className?: string }) {
     let tries = 0;
     let timer = 0;
     const attempt = () => {
-      const el = findTarget(beatDef.scroll);
+      const isAnswer = beatDef.scroll === "answer";
+      const banner = isAnswer ? verdictBanner() : null;
+      // The answer beat waits (about 4 s) for the verdict banner to load; then it falls back to the whole section.
+      const el = banner ?? (isAnswer && tries < 15 ? null : findTarget(beatDef.scroll));
       if (!el) {
         if (++tries < 16) timer = window.setTimeout(attempt, 250);
         return;
       }
       const rect = el.getBoundingClientRect();
-      const top = stickyHeaderHeight() + 12;
+      // The verdict banner sits ~80 px from the top, so it and the sentences under it stay clear of the docked card.
+      const top = banner ? Math.max(80, stickyHeaderHeight() + 12) : stickyHeaderHeight() + 12;
       const free = window.innerHeight - cardH.current - top - 12;
       let y = rect.top + window.scrollY - top;
       if (beatDef.scroll === "chart" && rect.height < free) y -= (free - rect.height) / 2;
@@ -310,6 +320,8 @@ export function HomeTour({ className }: { className?: string }) {
     const pad = 8;
     const tick = () => {
       const cardTop = rootRef.current ? rootRef.current.getBoundingClientRect().top : window.innerHeight;
+      // Cabin scenes: the answer verdict peeks out beside the card and would read as cut-off text, so fade the strip around the card.
+      if (veilRef.current) veilRef.current.style.height = `${Math.max(0, Math.round(window.innerHeight - cardTop + 6))}px`;
       const r = ringRect(beatDef.ring, cardTop - 14);
       if (r) {
         const visible = r.bottom > 0 && r.top < window.innerHeight && r.width > 0;
@@ -427,11 +439,11 @@ export function HomeTour({ className }: { className?: string }) {
   const isTitle = scene === 0;
   const running = !paused && !reduced && !blocked;
   const pauseButton = reduced ? (
-    <span className="text-xs text-muted">Autoplay is off (reduced motion): use Next</span>
+    <span className="text-xs text-muted">Autoplay is off. Use Next.</span>
   ) : (
-    <Button size="sm" variant="secondary" onClick={togglePause} aria-pressed={paused} aria-label={paused ? "Play" : "Pause"} aria-keyshortcuts="Space" className="h-10 sm:h-8">
+    <Button size="sm" variant="secondary" onClick={togglePause} aria-pressed={paused} aria-keyshortcuts="Space" className="h-10 sm:h-8">
       {paused ? <Play aria-hidden /> : <Pause aria-hidden />}
-      <span className="hidden sm:inline">{paused ? "Play" : "Pause"}</span>
+      {paused ? "Play" : "Pause"}
     </Button>
   );
 
@@ -484,7 +496,6 @@ export function HomeTour({ className }: { className?: string }) {
                   <Button size="sm" variant="primary" onClick={() => go(1)} aria-keyshortcuts="ArrowRight" className="h-10 sm:h-8">
                     Start<ChevronRight aria-hidden />
                   </Button>
-                  {reduced ? pauseButton : null}
                   <Button size="sm" variant="ghost" onClick={exit} aria-keyshortcuts="Escape" className="ml-auto h-10 sm:h-8">
                     <X aria-hidden />Exit
                   </Button>
@@ -493,9 +504,6 @@ export function HomeTour({ className }: { className?: string }) {
                 <>
                   <Button size="sm" variant="primary" onClick={exit} aria-keyshortcuts="Escape" className="h-10 sm:h-8">
                     <X aria-hidden />Close the tour
-                  </Button>
-                  <Button size="sm" variant="secondary" onClick={() => go(scene - 1)} aria-keyshortcuts="ArrowLeft" className="h-10 sm:h-8">
-                    <ChevronLeft aria-hidden />Back
                   </Button>
                   <Button size="sm" variant="secondary" onClick={replay} className="h-10 sm:h-8">
                     <RotateCcw aria-hidden />Replay
@@ -536,6 +544,15 @@ export function HomeTour({ className }: { className?: string }) {
             className="pointer-events-none fixed left-0 top-0 z-20 rounded-lg opacity-0 transition-opacity duration-200"
             style={{ boxShadow: "0 0 0 3px var(--accent), 0 0 0 9px rgb(14 124 102 / .16)", animation: "tour-ring 1.8s ease-in-out infinite" }}
           />
+          {scene <= 2 ? (
+            <div
+              ref={veilRef}
+              aria-hidden
+              data-tour-veil
+              className="pointer-events-none fixed inset-x-0 bottom-0 z-40"
+              style={{ background: "linear-gradient(to bottom, transparent, var(--bg) 6px)" }}
+            />
+          ) : null}
           <section
             ref={rootRef}
             tabIndex={-1}
@@ -597,19 +614,19 @@ export function HomeTour({ className }: { className?: string }) {
               ) : null}
             </div>
             <div className="flex flex-wrap items-center gap-2 border-t border-border px-4 py-2 sm:px-5">
-              <Button size="sm" variant="secondary" onClick={() => go(scene - 1)} aria-keyshortcuts="ArrowLeft" aria-label="Back" className="h-10 sm:h-8">
-                <ChevronLeft aria-hidden /><span className="hidden sm:inline">Back</span>
+              <Button size="sm" variant="secondary" onClick={() => go(scene - 1)} aria-keyshortcuts="ArrowLeft" className="h-10 sm:h-8">
+                <ChevronLeft aria-hidden />Back
               </Button>
               <Button size="sm" variant="primary" onClick={() => go(scene + 1)} aria-keyshortcuts="ArrowRight" className="h-10 sm:h-8">
                 Next<ChevronRight aria-hidden />
               </Button>
               {pauseButton}
-              <Button size="sm" variant="ghost" onClick={exit} aria-keyshortcuts="Escape" aria-label="Exit the tour" className="ml-auto h-10 sm:h-8">
-                <X aria-hidden /><span className="hidden sm:inline">Exit</span>
-              </Button>
-              <p className="hidden w-full text-xs text-muted sm:block" aria-hidden>
-                <Kbd>←</Kbd> <Kbd>→</Kbd> step · <Kbd>Space</Kbd> pause · <Kbd>Esc</Kbd> exit
+              <p className="ml-auto hidden text-xs text-muted sm:block" aria-hidden>
+                <Kbd>←</Kbd> <Kbd>→</Kbd> to step
               </p>
+              <Button size="sm" variant="ghost" onClick={exit} aria-keyshortcuts="Escape" aria-label="Exit the tour" className="ml-auto h-10 sm:ml-0 sm:h-8">
+                <X aria-hidden />Exit
+              </Button>
             </div>
           </section>
         </>,
