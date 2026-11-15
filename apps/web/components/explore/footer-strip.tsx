@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { DataSourceBadge } from "@/components/data-source-badge";
 import { briefHref } from "@/components/brief/link";
 import { useExploreStore } from "@/lib/explore-store";
 import { useDataMode, useHealth } from "@/hooks/api";
 import { shortVersion } from "@/lib/format";
 
-export function FooterStrip() {
+/** `candidate`: the candidate being explored, so the brief describes what is on screen. */
+export function FooterStrip({ candidate = null }: { candidate?: { oxygen_percent: number; airflow_cm_s: number; pressure_kpa: number } | null }) {
   const { health } = useHealth();
   const dm = useDataMode();
   const groupId = useExploreStore((s) => s.groupId);
@@ -20,9 +20,9 @@ export function FooterStrip() {
         Sources: NASA Physical Sciences Informatics (BASS, BASS-II), NASA technical reports;{" "}
         <Link href="/methodology" className="text-fg underline underline-offset-2">dataset sources</Link>
       </span>
-      <span className="num">Dataset {shortVersion(dataset)} · Model {model ?? "—"}</span>
-      <DataSourceBadge />
-      <Link href={briefHref(groupId, target)} className="text-fg underline underline-offset-2" data-testid="brief-link">Research brief</Link>
+      <span>Dataset <span className="num">{shortVersion(dataset)}</span> · Model <span className="num">{model ?? "—"}</span></span>
+      <Link href={briefHref(groupId, target, candidate)} className="text-fg underline underline-offset-2" data-testid="brief-link">{candidate ? "Research brief for this candidate" : "Research brief"}</Link>
+      <Link href="/methodology#trust" className="text-fg underline underline-offset-2">How far to trust this</Link>
       <Link href="/methodology#limitations" className="text-fg underline underline-offset-2">Limitations</Link>
     </div>
   );

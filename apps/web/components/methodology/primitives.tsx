@@ -76,7 +76,7 @@ export function QueryBoundary<T>({ query, children, rows = 3 }: { query: ApiQuer
     );
   }
   if (query.isError) {
-    return <ErrorState code={query.error.code} message={query.error.message} onRetry={() => void query.refetch()} compact />;
+    return <ErrorState code={query.error.code} error={query.error} message={query.error.message} onRetry={() => void query.refetch()} compact />;
   }
   if (!query.data) return null;
   return <>{children(query.data.data)}</>;

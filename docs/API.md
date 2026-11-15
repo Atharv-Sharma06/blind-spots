@@ -18,10 +18,19 @@ values are `null`. Units are in field names (`_percent`, `_kpa`, `_cm_s`).
 - **Verdict** ∈ `supported | extrapolation | insufficient_evidence`. Reasons are
   `{"code": str, "message": str, "value": number|null}` with codes `sparse_observations`, `outside_hull`,
   `unobserved_pressure`, `outcome_variability`, `model_instability`, `other_family_evidence_only`,
-  `no_model` (group not modelled).
+  `high_knowledge_uncertainty`, `target_points_not_supported`, `point_verdicts` (target-level basis: value =
+  share of target points supported), `no_model` (group not modelled). Point rule and wording come from
+  `blindspots.uncertainty.explanations` (the API calls it).
+- **NaN / Infinity** anywhere in a request (JSON body or numeric query) is a 422 `validation_error`; validation
+  error details never echo the input.
 - **Errors** (non-2xx only): `{"error": {"code", "message", "details"}}` with codes `validation_error` 422,
-  `not_found` 404, `artifact_missing` 503, `ingestion_failure` 500, `internal` 500. The web proxy maps
+  `not_found` 404, `artifact_missing` 503, `ingestion_failure` 500, `internal` 500 (405 wrong method also uses
+  `validation_error`). The web proxy maps
   network failures to `backend_unavailable`. Scientific limits are never errors.
+- **Caching and load**: model responses are memoized per canonical request and artifact versions. At most 2
+  `candidates/rank` or `candidates/counterfactual` computations run at once (further requests wait; a queued
+  request identical to a finished one is served from the cache), so bursts of parallel ranks do not multiply
+  memory use.
 
 ## Endpoints
 
@@ -51,7 +60,9 @@ values are `null`. Units are in field names (`_percent`, `_kpa`, `_cm_s`).
 ### GET /api/observations?group=
 `Observation[]` (+ `group_id`).
 ### GET /api/export/experiments.csv?investigation=&group=
-`text/csv` of normalized experiment records (header row = ExperimentRecord fields).
+`text/csv` of normalized experiment records (header row = ExperimentRecord fields). `group` (here and on
+`/api/experiments`) accepts any `group_id` that appears on a record, including groups that exist only on context
+records (e.g. `other__concurrent`, `other__opposed`, `ultem_sheet__concurrent`); 404 only for ids on no record.
 
 ### GET /api/targets
 `{"profiles": AtmosphereProfile[], "ventilation": {"min_cm_s", "max_cm_s", "sources"} | null}`
@@ -70,7 +81,8 @@ conditions shown on the map as context, never used for modelling.
 ### GET /api/coverage?group=&plane=&slice=&nx=&ny=&x_min=&x_max=&y_min=&y_max=
 `plane` = `o2_flow` (x = O2 %, y = airflow cm/s on a log axis, slice = pressure kPa, default 101.3) or
 `o2_pressure` (x = O2 %, y = pressure kPa, slice = airflow cm/s, default 10). Defaults: x 10–40 %,
-airflow 0.2–50 cm/s, pressure 30–110 kPa, nx = 61, ny = 41.
+airflow 0.2–50 cm/s, pressure 30–110 kPa, nx = 61, ny = 41. Validation (422): numbers finite, min < max,
+O2 axis within 0–100 %, y axis and slice within (0, 1000] (kPa or cm/s).
 ```json
 {"group_id": "...", "plane": "o2_flow",
  "slice": {"variable": "pressure_kpa", "value": 101.3, "unit": "kPa"},
@@ -96,21 +108,45 @@ Response `{"group_id", "model_version", "predictions": [{"point", "p_sustained",
 Request `{"group_id": str, "target": Target}`. Response:
 ```json
 {"group_id": "...", "target": {"label", "status", "oxygen_percent": Range, "total_pressure_kpa": Range,
-   "airflow_cm_s": Range, "airflow_band_source": "profile"|"ventilation_standard"|"default_band", "sources": []},
+   "airflow_cm_s": Range, "airflow_band_source": "profile"|"ventilation_standard"|
+   "ventilation_standard_with_near_quiescent_extension"|"default_band"|"custom", "airflow_band_note": str|null,
+   "profile_id": str|null, "kind": "operating_point", "flags": [str], "sources": []},
  "coverage": {"n_target_points": 45, "comparable_observations": 0, "points_with_comparable": 0,
    "nn_distance_min": 4.2, "nn_distance_median": 5.1, "fraction_inside_hull": 0.0,
    "nearest_observations": [{"observation_id", "experiment_id", "distance", "oxygen_percent",
       "airflow_cm_s", "pressure_kpa", "label"}]},
  "model": {"model_status": "modeled", "p_sustained_mean": 0.71, "p_sustained_min": 0.40,
    "p_sustained_max": 0.90, "latent_std_ratio_mean": 0.97, "epistemic_mean": 0.31, "aleatoric_mean": 0.40},
- "verdict": "insufficient_evidence", "reasons": [{"code", "message", "value"}],
+ "verdict": "insufficient_evidence", "points_supported": 0,
+ "point_verdicts": {"supported": 0, "extrapolation": 0, "insufficient_evidence": 9},
+ "reasons": [{"code", "message", "value"}],
  "documented_context": [{"id", "name", "overlap": "contains_target_nominal" | "overlaps_target_region",
    "data_availability", "reason_not_integrated"}],
+ "investigation_relevance": [{"id", "name", "role": "integrated_model"|"integrated_context"|
+   "documented_not_integrated"|"catalogued_not_integrated", "relevance_rank": 1,
+   "comparable_observations": int|null, "comparable_records_all_groups": int|null,
+   "nearest_distance": number|null, "envelope_overlap": "contains_target_nominal"|"overlaps_target_region"|
+   "outside_target_region"|"not_documented"|null, "doi": str|null, "url": str|null, "summary": str}],
  "summary": "Deterministic sentence(s) built from the numbers above."}
 ```
+**Verdict (LEAD_DECISIONS D2).** Each target point gets the point verdict (supported = inside the observed
+region or ≥ 3 comparable observations, and latent std ratio < 0.6). Target verdict: `supported` when ≥ 50 % of
+the points are supported; `insufficient_evidence` when no point has a comparable observation; otherwise
+`extrapolation`. `points_supported` / `coverage.n_target_points` is always reported. `model.p_sustained_*` are
+computed over the **supported points only** (weights renormalised) and are `null` when none is supported.
+`reasons[0]` is always the numeric basis (`point_verdicts`), so the list is never empty. The summary says
+"not represented in the integrated records" **only** when `coverage.points_with_comparable == 0` (never "not
+studied"); with partial coverage it says how many points are covered.
 `documented_context` lists not-integrated investigations (`/api/context` → `not_integrated`) whose documented
-O2/pressure/flow ranges contain or overlap the target. The summary must then say the target conditions are
-"not represented in the integrated records" and name those investigations — never "not studied".
+O2/pressure/flow ranges contain or overlap the target.
+`investigation_relevance`: every catalogued investigation ranked by relevance to the target (deterministic):
+integrated training investigations with comparable observations in this group first, then context records near
+the target and documented envelopes containing/overlapping it, then the rest; PSI catalogued investigations
+(not solid-fuel flammability data) last. `comparable_observations` (integrated, this group),
+`comparable_records_all_groups` (records within one reference distance, any group), `nearest_distance`
+(reference distances to the target region), `envelope_overlap` (documented envelopes; context investigations
+take it from the matching manifest entry). `summary` is one sentence built from these numbers and manifest
+fields only.
 
 ### POST /api/candidates/rank
 Request `{"group_id": str, "target": Target, "k": 3, "assumptions": {"pressure_length_scale": 0.3}}`.
@@ -118,7 +154,8 @@ Request `{"group_id": str, "target": Target, "k": 3, "assumptions": {"pressure_l
 {"group_id": "...", "target": {/* resolved */}, "status": "ok"|"no_eligible_candidates"|"no_informative_candidates"|"model_unavailable",
  "candidates": [{"candidate_id": "c1", "rank": 1, "oxygen_percent": 28.0, "pressure_kpa": 70.3,
    "airflow_cm_s": 3.2, "evr": 0.84, "evr_fraction": 0.21, "marginal_evr_fraction": 0.21,
-   "mi_reduction_fraction": 0.18, "p_sustained": 0.55, "latent_std_ratio": 0.95, "nn_distance": 3.1,
+   "mi_reduction_fraction": 0.18, "p_sustained": 0.55|null, "latent_std_ratio": 0.95, "nn_distance": 3.1,
+   "verdict": "supported"|"extrapolation"|"insufficient_evidence", "target_distance": 0.0,
    "feasibility_status": "within_demonstrated_envelope"|"outside_demonstrated_envelope",
    "feasibility_note": "...", "reasons": [{"code", "message", "value"}], "explanation": "...",
    "related_documented_investigations": [{"id", "name", "data_availability", "note"}]}],
@@ -128,8 +165,15 @@ Request `{"group_id": str, "target": Target, "k": 3, "assumptions": {"pressure_l
    "airflow_cm_s": [0.5, 45]},
  "disclaimer": "Computational research candidate requiring qualified scientific review, established safety procedures and formal feasibility assessment."}
 ```
-Candidate `reasons` codes: `high_target_covariance`, `high_candidate_uncertainty`, `near_decision_boundary`,
+Candidate `reasons` codes: `expected_uncertainty_reduction` (always first; value = evr_fraction, so "why" is
+never empty), `at_target_conditions` (within 1 reference distance of the target: "the most informative single
+experiment is at the target conditions themselves; this follows from the model's distance-based (stationary)
+correlation assumption"), `high_target_covariance`, `high_candidate_uncertainty`, `near_decision_boundary`,
 `fills_coverage_gap`, `assumption_dependent` (value depends mainly on the assumed pressure correlation).
+`p_sustained` is `null` unless the candidate's point verdict (`verdict`) is `supported`. `target_distance` =
+reference distance to the nearest target point. `rank` is `null` for baselines and compare a/b; `baselines` is
+`null` unless `status == "ok"`; baselines are scored with the same expected uncertainty reduction ("the expected
+reduction if this baseline's pick were tested instead").
 `related_documented_investigations`: not-integrated investigations whose documented envelope contains the
 candidate (note: "Inside the documented test envelope of <name>; existing data may already inform this
 candidate (not integrated: <reason>).").
@@ -142,10 +186,14 @@ the documented tolerance or the preference flips under the pressure-length-scale
 
 ### POST /api/candidates/counterfactual
 Request `{"group_id", "target", "candidate": {"oxygen_percent","airflow_cm_s","pressure_kpa"},
-"plane": "o2_flow"|"o2_pressure"|null, "slice": number|null}`.
+"plane": "o2_flow"|"o2_pressure"|null, "slice": number|null, "x_min"?: number|null, "x_max"?: number|null}`.
+`x_min`/`x_max` (optional, same meaning and validation as `/api/surface`) set the oxygen axis of the scenario
+surfaces (61 x 41 grid), so far targets (Skylab, Apollo) get what-if grids on the extended axis; 422 on invalid
+ranges.
 ```json
-{"p_sustained_at_candidate": 0.55,
- "current": {"target_p_mean": 0.62, "target_latent_var": 2.1, "target_epistemic": 0.30},
+{"p_sustained_at_candidate": 0.55|null, "target_p_supported": true, "target_points_supported": 15,
+ "n_target_points": 27,
+ "current": {"target_p_mean": 0.62|null, "target_latent_var": 2.1, "target_epistemic": 0.30},
  "scenarios": [
    {"outcome": "sustained", "label": "Hypothetical outcome: flame sustained", "probability": 0.55,
     "target_p_mean": 0.70, "target_latent_var": 1.6, "target_epistemic": 0.22, "variance_reduction_fraction": 0.24,
@@ -154,6 +202,9 @@ Request `{"group_id", "target", "candidate": {"oxygen_percent","airflow_cm_s","p
  "expected_variance_reduction_fraction": 0.22,
  "note": "Hypothetical outcomes and model updates; not experimental results."}
 ```
+`target_p_mean` (current and per scenario) = weighted mean P(sustained) over the currently supported target
+points; `null` when no target point is supported (`target_p_supported: false`). `p_sustained_at_candidate` is
+`null` unless the candidate point is supported.
 
 ### GET /api/model/metadata?group=
 Model card: `{"model_id", "model_version", "group_id", "algorithm", "features", "hyperparameters",
@@ -183,8 +234,31 @@ Model card: `{"model_id", "model_version", "group_id", "algorithm", "features", 
 ### GET /api/methodology
 `{"versions": {"dataset_version", "model_version", "pipeline_version", "api_version"},
 "config": {"training_filter", "coverage_scales", "support_thresholds", "candidate_domain", "seeds",
-"pressure_length_scale_default"}, "dates": {"data_retrieved": "2026-11-15", "last_analysis"},
-"limitations": [str], "repository_url": str|null}`
+"pressure_length_scale_default", "pressure_length_scale_sensitivity", "pressure_length_scale_fixed",
+"training_flow_provenance": {"n_training", "n_recorded", "n_converted_bass2_calibration",
+"n_borrowed_calibration", "n_below_calibration_range"}|null}, "dates": {"data_retrieved": "2026-11-15",
+"last_analysis"}, "limitations": [str], "repository_url": str|null}`. `support_thresholds` also states the point
+and target verdict rules. `training_flow_provenance` counts the training steps (included and labelled) by airflow
+basis: recorded = duct reading or a value stated in the source; converted = fan or pot setting via the BASS-II
+calibration (not borrowed); the airflow-provenance limitation sentence uses the same numbers. Limitations are computed from the data (airflow provenance counts, context investigations,
+stationarity of the kernel). `repository_url` comes from the env var `BLINDSPOTS_REPOSITORY_URL` (null if unset).
+
+### GET /api/headline?profiles=
+Finding strip data, computed from the store. Always the ISS nominal profile and the NASA Exploration Atmosphere;
+`profiles` (comma-separated ids) appends more (404 for an unknown id).
+```json
+{"profiles": [{"profile_id": "iss_cabin_nominal", "label": "...", "status": "documented_nasa",
+   "oxygen_percent": 21, "total_pressure_kpa": 101.353, "n_target_points": 27,
+   "comparable_observations": 241, "groups_with_comparable": 19, "n_groups": 20,
+   "by_group": [{"group_id", "label", "comparable_observations", "points_with_comparable"}]}],
+ "envelope": {"investigations": ["BASS-II", "BASS"], "n_experiments": 210, "n_steps": 566,
+   "oxygen_percent": [13.5, 22.7], "pressure_kpa": [98.3, 102.2], "pressure_measured_kpa": [98.3, 102.2],
+   "n_steps_pressure_assumed": 420, "airflow_cm_s": [0.0, 53.3]}}
+```
+`comparable_observations` = training observations (any analysis group, each compared within its group) within
+one reference distance of the profile's target region; `n_groups` = groups with training evidence. The envelope
+spans all training observations (`pressure_kpa` uses the documented 101.353 kPa assumption for BASS-II rows,
+counted in `n_steps_pressure_assumed`; `pressure_measured_kpa` spans measured values only).
 
 ### GET /api/sources
 `{"investigations": Investigation[], "publications": [{"title", "doi", "url", "investigation_id"}],
@@ -195,7 +269,11 @@ Model card: `{"model_id", "model_version", "group_id", "algorithm", "features", 
 Request `{"group_id", "target", "candidate": {"oxygen_percent","airflow_cm_s","pressure_kpa"} | null}`.
 Response `{"title", "generated_at", "dataset_version", "model_version", "markdown": str,
 "sections": {"target", "coverage", "model", "candidate", "historical_investigations", "citations",
-"limitations"}}`. Contains no operational test instructions.
+"limitations"}}`. Contains no operational test instructions. `candidate: null` → the system's
+"top-ranked candidate (default assumptions)"; an explicit candidate → "selected candidate" (plus "(rank k under
+default assumptions)" when it equals a ranked candidate). Both include the pressure-sensitivity line (expected
+uncertainty reduction at 0.15 / 0.3 / 0.6) and the assumptions list. The relevant-investigations section lists
+the top `investigation_relevance` rows.
 
 ## Static snapshot (deployment without the Python service)
 

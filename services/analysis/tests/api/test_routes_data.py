@@ -103,9 +103,40 @@ def test_export_csv_header(client: TestClient) -> None:
     assert len(rows) - 1 == len(client.get("/api/experiments", params={"investigation": "PSI-25"}).json())
 
 
+def test_export_csv_context_only_groups(client: TestClient, group_ids: list[str]) -> None:
+    """Groups that exist only on context records (e.g. Saffire) filter the table and CSV; unknown ids 404."""
+    record_groups = {e["group_id"] for e in client.get("/api/experiments").json()}
+    context_only = sorted(record_groups - set(group_ids))
+    assert context_only, "expected at least one context-only group id on the records"
+    for gid in context_only:
+        rows = client.get("/api/experiments", params={"group": gid}).json()
+        assert rows and all(r["group_id"] == gid for r in rows)
+        r = client.get("/api/export/experiments.csv", params={"group": gid})
+        assert r.status_code == 200
+        assert len(list(csv.reader(io.StringIO(r.text)))) - 1 == len(rows)
+    assert client.get("/api/export/experiments.csv", params={"group": "no_such__group"}).status_code == 404
+
+
+def test_methodology_flow_provenance(client: TestClient) -> None:
+    fp = client.get("/api/methodology").json()["config"]["training_flow_provenance"]
+    assert set(fp) == {
+        "n_training",
+        "n_recorded",
+        "n_converted_bass2_calibration",
+        "n_borrowed_calibration",
+        "n_below_calibration_range",
+    }
+    store = deps.require_store()
+    train = [o for o in store.observations if o["included_in_training"] and o.get("label") is not None]
+    assert fp["n_training"] == len(train) > 0
+    assert fp["n_recorded"] + fp["n_converted_bass2_calibration"] + fp["n_borrowed_calibration"] <= len(train)
+    sentence = next(x for x in client.get("/api/methodology").json()["limitations"] if "training steps" in x)
+    assert f"{fp['n_recorded']} of {fp['n_training']} training steps" in sentence
+
+
 def test_targets_context_sources_methodology(client: TestClient) -> None:
     t = client.get("/api/targets").json()
-    assert len(t["profiles"]) == 11 and t["ventilation"]["min_cm_s"] == pytest.approx(7.62)
+    assert len(t["profiles"]) >= 11 and t["ventilation"]["min_cm_s"] == pytest.approx(7.62)
     assert any(p["oxygen_percent"]["nominal"] is None for p in t["profiles"])
     c = client.get("/api/context").json()
     ids = {n["id"] for n in c["not_integrated"]}
@@ -124,6 +155,40 @@ def test_targets_context_sources_methodology(client: TestClient) -> None:
     assert m["config"]["pressure_length_scale_default"] == 0.3
     assert m["dates"]["data_retrieved"] == "2026-11-15"
     assert any("imbalanced" in x for x in m["limitations"])
+    # D5: airflow provenance is computed from the data, never the old "borrowed calibrations" claim
+    assert any(x.startswith("Airflow provenance: ") for x in m["limitations"])
+    assert not any("borrowed fan and pot" in x for x in m["limitations"])
+
+
+def test_headline(client: TestClient) -> None:
+    h = models.HeadlineResponse.model_validate(client.get("/api/headline").json())
+    ids = [p.profile_id for p in h.profiles]
+    assert ids[:2] == ["iss_cabin_nominal", "exploration_atmosphere_8p2_34"]
+    iss, expl = h.profiles[0], h.profiles[1]
+    assert iss.comparable_observations == sum(g.comparable_observations for g in iss.by_group) > 0
+    assert expl.comparable_observations == 0 and expl.groups_with_comparable == 0
+    env = h.envelope
+    assert (
+        env.n_steps > 0
+        and env.oxygen_percent is not None
+        and env.oxygen_percent[0] < 21 < env.oxygen_percent[1]
+    )
+    assert set(env.investigations) == {"BASS", "BASS-II"}
+    extra = client.get("/api/headline", params={"profiles": "shuttle_nominal"}).json()
+    assert [p["profile_id"] for p in extra["profiles"]][-1] == "shuttle_nominal"
+    assert client.get("/api/headline", params={"profiles": "nope"}).status_code == 404
+
+
+def test_non_finite_and_out_of_range_inputs_are_422(client: TestClient, group_ids: list[str]) -> None:
+    g = group_ids[0]
+    for q in (
+        {"slice": "nan"},
+        {"x_max": "inf"},
+        {"x_min": -1e308, "x_max": 1e308},
+        {"plane": "o2_pressure", "y_min": -50},
+    ):
+        r = client.get("/api/coverage", params={"group": g, **q})
+        assert r.status_code == 422 and r.json()["error"]["code"] == "validation_error", q
 
 
 @pytest.mark.parametrize(

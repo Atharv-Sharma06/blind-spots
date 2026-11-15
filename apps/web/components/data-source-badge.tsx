@@ -37,6 +37,7 @@ export function DataSourceBadge({ meta, className }: DataSourceBadgeProps) {
   }
 
   let text: string;
+  let version: string | null = null;
   let title: string;
   let icon: React.ReactNode;
   switch (view.kind) {
@@ -46,8 +47,11 @@ export function DataSourceBadge({ meta, className }: DataSourceBadgeProps) {
       icon = <Radio aria-hidden />;
       break;
     case "snapshot":
-      text = view.modelVersion ? `Precomputed snapshot · ${view.modelVersion}` : "Precomputed snapshot";
-      title = `Results are precomputed${view.generatedAt ? ` (generated ${view.generatedAt})` : ""}; custom targets and arbitrary candidates require the live analysis service.`;
+      text = "Precomputed snapshot";
+      version = view.modelVersion;
+      title =
+        (dm.mode === "auto" ? "The analysis service did not respond, so results come from the precomputed snapshot" : "Results are precomputed") +
+        `${view.generatedAt ? ` (generated ${view.generatedAt})` : ""}; custom targets and arbitrary candidates are available in the full (local) version.`;
       icon = <Database aria-hidden />;
       break;
     case "unavailable":
@@ -70,7 +74,12 @@ export function DataSourceBadge({ meta, className }: DataSourceBadgeProps) {
       className={className}
     >
       {icon}
-      <span className="num">{text}</span>
+      <span>{text}</span>
+      {version ? (
+        <span data-part="version" className="num">
+          {` · ${version}`}
+        </span>
+      ) : null}
     </Badge>
   );
 }

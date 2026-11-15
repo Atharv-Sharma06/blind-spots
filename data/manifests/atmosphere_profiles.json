@@ -291,9 +291,55 @@
           "doc_number": null,
           "page": "PDF p. 2",
           "quote": "Artemis habitat and suit atmospheric parameters have not been finalized"
+        },
+        {
+          "ref_id": "NTRS-20220000245",
+          "title": "Artemis Deep Space Habitation: Enabling a Sustained Human Presence on the Moon and Beyond",
+          "url": "https://ntrs.nasa.gov/citations/20220000245",
+          "doc_number": null,
+          "page": "PDF p. 4",
+          "quote": "SH is assumed to operate at a nominal atmospheric operating pressure of 10.2 psia and 26.5% oxygen concentration and a capability of operating at 8.2 psia and 34% oxygen"
         }
       ],
       "notes": "Recommendation/adoption for exploration vehicles, not a certified flown cabin. A 2022 NASA forum deck states Artemis habitat and suit atmospheric parameters have not been finalized, so this must not be presented as a flight-baseline for any specific Artemis element. No min/max tolerance was found for this point. ppO2 computed (0.34 x 8.2 psia x 6.894757); the evidence report states 2.79 psia."
+    },
+    {
+      "profile_id": "artemis_surface_habitat_10p2_26p5",
+      "name": "Artemis lunar Surface Habitat, nominal (10.2 psia / 26.5 % O2)",
+      "context": "Design assumption for the Artemis Base Camp lunar Surface Habitat (SH) in a 2022 NASA habitation paper; the same paper states a capability of operating at 8.2 psia / 34 % O2 (see the NASA Exploration Atmosphere profile).",
+      "status": "nasa_design_recommendation",
+      "oxygen_percent": {
+        "nominal": 26.5,
+        "min": null,
+        "max": null
+      },
+      "total_pressure_kpa": {
+        "nominal": 70.327,
+        "min": null,
+        "max": null
+      },
+      "total_pressure_psia": {
+        "nominal": 10.2,
+        "min": null,
+        "max": null
+      },
+      "o2_partial_pressure_kpa": {
+        "nominal": 18.637,
+        "min": null,
+        "max": null
+      },
+      "airflow_cm_s": null,
+      "sources": [
+        {
+          "ref_id": "NTRS-20220000245",
+          "title": "Artemis Deep Space Habitation: Enabling a Sustained Human Presence on the Moon and Beyond",
+          "url": "https://ntrs.nasa.gov/citations/20220000245",
+          "doc_number": null,
+          "page": "PDF p. 4",
+          "quote": "SH is assumed to operate at a nominal atmospheric operating pressure of 10.2 psia and 26.5% oxygen concentration and a capability of operating at 8.2 psia and 34% oxygen"
+        }
+      ],
+      "notes": "The source says the SH 'is assumed to operate' at this point and that trade analyses are assessing a move to a nominal 8.2 psia, so this is a design assumption, not a flight baseline. Lunar surface gravity (about 1/6 g) is not represented in the integrated records (all microgravity, ISS). kPa = psia x 6.894757; ppO2 computed (0.265 x 10.2 psia x 6.894757). Quote checked against the NTRS PDF, page 4 rendered."
     },
     {
       "profile_id": "eawg_2006_8p0_32",

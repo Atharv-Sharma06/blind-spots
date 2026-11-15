@@ -1,34 +1,33 @@
 # Demo script
 
-Both scripts describe only functionality that exists in the current build (checked by driving the app headlessly against the live API on port 8208 and the web app on port 3309, and by reading the UI code).
-Numbers marked "at dataset 8783ff5aa6a2" were read off the running app and will change if the dataset or model is rebuilt; re-check them before presenting.
+Both scripts describe functionality of the current build. Numbers are computed by `docs/_gen/build.py` from the analysis API.
+Numbers marked "at dataset 4fe55f76142a" were read off the running app and will change if the dataset or model is rebuilt; re-check them before presenting.
 
 Setup (one time, from the repository root):
 
 ```bash
-cd services/analysis && uv run uvicorn blindspots.api.app:create_app --factory --host 127.0.0.1 --port 8208 &
-cd apps/web && ANALYSIS_API_ORIGIN=http://127.0.0.1:8208 npm run dev -- --port 3309
-# open http://localhost:3309  (use localhost, not 127.0.0.1: Next dev blocks the other origin and the page stays on "Connecting to analysis")
+cd services/analysis && uv run blindspots serve      # API on http://127.0.0.1:8000
+cd apps/web && npm run dev                           # open http://localhost:3000
 ```
 
 For the static deployment use `NEXT_PUBLIC_DATA_MODE=snapshot` (see README). In snapshot mode everything below works for documented profiles, but custom targets, arbitrary candidates and arbitrary slice values show a "requires the live analysis service" state.
 
 ## A. 30-second script (the built-in "Guided demo" does this automatically)
 
-Click **Guided demo** in the Explore header. It selects the data-driven default group (pmma_thin_film__opposed), then five scenes of 10 seconds each autoplay on the real map (Space pauses, arrow keys step, Esc exits). The demo target is the documented profile with the fewest comparable observations in that group. When the target's pressure lies outside the group's observed pressure range (here all observations are at about 101.4 kPa), scenes 2 to 5 switch the map to the O2 x pressure plane so the gap is visible, and from scene 3 the context layer is on: Saffire-V/VI flights and drop-tower runs near reduced pressure or elevated O2 are drawn as grey dashed boxes and triangles and captioned as documented tests that are not integrated into the model. Suggested narration, one sentence per scene:
+Click **Guided demo** in the Explore header. It selects the data-driven default group (pmma_thin_film__opposed), then the scenes autoplay (about 30 seconds in total) on the real map (Space pauses, arrow keys step, Esc exits). The demo target is the NASA Exploration Atmosphere (8.2 psia / 34 % O2). When the target's pressure lies outside the group's observed pressure range (here all observations are at about 101.4 kPa), scenes 2 to 5 switch the map to the O2 x pressure plane so the gap is visible, and from scene 3 the context layer is on: Saffire-V/VI flights and drop-tower runs near reduced pressure or elevated O2 are drawn as grey dashed boxes and triangles and captioned as documented tests that are not integrated into the model. Suggested narration, one sentence per scene:
 
-1. **"We know where NASA has tested."** Every dot is a measured outcome from NASA's ISS combustion records, here for Thin PMMA films, opposed flow (16 experiments, 49 observations, 48 training rows: 37 sustained, 11 not).
-2. **"But do we know enough about where crews may live?"** A documented NASA cabin atmosphere (Space Shuttle staged pre-EVA cabin, 10.2 psia / 26.5 % O2 (70.3 kPa)) appears as a dashed target. At dataset 8783ff5aa6a2: 0 comparable integrated observations lie within one reference distance of its sampled conditions; the nearest is 4.24 reference distances away.
+1. **"We know where NASA has tested."** Every dot is a recorded flow step from NASA's ISS BASS/BASS-II test matrices, its outcome interpreted from the source cell, here for Thin PMMA films · opposed flow (16 experiments, 49 observations, 48 training rows).
+2. **"But do we know enough about where crews may live?"** A documented NASA cabin atmosphere (NASA Exploration Atmosphere (8.2 psia / 34 % O2)) appears as a dashed target. At dataset 4fe55f76142a: 0 comparable integrated observations lie within one reference distance of its sampled conditions; the nearest is 8.3 reference distances away.
 3. **"The missing evidence becomes visible."** Amber marks coverage gaps, plum marks model uncertainty, and the verdict reads "insufficient evidence". The caption says the conditions are "not represented in the integrated records" and names documented NASA work that is not integrated (for example SoFIE-GEL) - it never says NASA has not studied them. The caption adds that the map plots O2 against pressure because the target pressure is outside the observed range, and that the grey context markers are documented tests that are not integrated. No P(sustained) is shown for an insufficient-evidence target.
-4. **"What should we learn next?"** The top-ranked *computational research candidate*: 27.0 % O2, 70.3 kPa, 1.71 cm/s, with a model-based expected reduction in uncertainty about the target of 18.9%; it requires qualified scientific review.
-5. **"Turn existing data into better research questions."** A counterfactual preview shows how the model would update under each hypothetical outcome (hypothetical, not experimental results); expected variance reduction 18.9%. End card: "Blind Spots - From experimental data to scientific discovery", with a **Research brief** button.
+4. **"What should we learn next?"** The top-ranked *computational research candidate*: 34.0 % O2, 56.5 kPa, 1.71 cm/s, with a model-based expected reduction in uncertainty about the target of 19.3%; it requires qualified scientific review.
+5. **"Turn existing data into better research questions."** A counterfactual preview shows how the model would update under each hypothetical outcome (hypothetical, not experimental results); expected variance reduction 19.3%. The top-ranked candidate sits at the target conditions themselves; this follows from the model's distance-based (stationary) correlation assumption, because no integrated observation constrains that region.
 
 ## B. 3-minute technical demo
 
 Everything here is clickable in the current UI. Keep the framing: a research-planning tool, not a fire-safety certification, not endorsed by NASA.
 
 **0:00 - Problem and data (20 s).** Open **Methodology** (sections: Data, Modelling, Active learning, Validation, Reproducibility, Sources and context, Limitations). Say: public NASA combustion data are hard to compare; we integrated 250 ISS
-BASS / BASS-II experiments (566 training observations, 79% sustained) with the exact source cell behind each value, and treated 26 other experiments as context only. Point at the Data section's exclusion counts.
+BASS / BASS-II experiments (565 training observations, 78% sustained) with the exact source cell behind each value, and treated 26 other experiments as context only. Point at the Data section's exclusion counts.
 
 **0:20 - Provenance (20 s).** Open **Experiments** (276 rows). Filter by investigation, group, outcome, training status or confidence; open any row to see the quoted source token, its row and column, and the flagged assumptions (for example, BASS-II pressure is "not recorded in the source", an assumed value is shown separately).
 
@@ -38,11 +37,11 @@ Point out that all data sit at about 1 atm, so the pressure plane shows how litt
 **1:10 - Target atmosphere (30 s).** Open **Target** and pick a documented profile (e.g. NASA Exploration Atmosphere, 8.2 psia / 34 % O2). Read the Target analysis panel: number of comparable observations, nearest distance, verdict with reasons, the airflow band and its source
 (for profiles without their own band: the documented ventilation band with a near-quiescent extension, labelled as an analysis choice), and the "Documented NASA work not integrated here" callout. "Coverage by material" assesses the same target in every group; click a row to switch the map.
 
-**1:40 - Model and honesty (30 s).** Open **Methodology > Validation**: per-group cross-validation versus the majority-class baseline with group-bootstrap CIs, calibration, leave-one-campaign-out and the blind-spot test. Say plainly: the GP beats the majority-class baseline (CI excludes 0) in 4 of 9 groups,
-3 of those mostly because flow-off transients are easy negatives; the blind-spot test is supported in 3 groups and inconclusive in 6; pressure is assumption-driven (fixed length scale 0.3). The retrospective check is modest: EVR beat random in 10 of 18 scenarios.
+**1:40 - Model and honesty (30 s).** Open **Methodology > Validation**: per-group cross-validation versus the majority-class baseline with group-bootstrap CIs, calibration, leave-one-campaign-out and the blind-spot test. Say plainly: the GP beats the majority-class baseline (CI excludes 0) in 6 of 9 groups,
+3 of those mostly because flow-off transients are easy negatives; the blind-spot test is supported in 4 groups and inconclusive in 5; pressure is assumption-driven (fixed length scale 0.3). The retrospective check is modest: EVR beat random in 11 of 18 scenarios.
 
 **2:10 - Candidates (30 s).** In **Next research candidate** read the ranked candidates with their reasons, feasibility status ("outside the demonstrated envelope: feasibility not verified; requires qualified review") and the random / uncertainty-sampling / nearest-gap baselines.
-Select two and use **Compare selected** (it can answer "indistinguishable"). The pressure-assumption sensitivity (ranking recomputed with pressure length scales 0.15 / 0.3 / 0.6) is described in Methodology > Active learning and returned by the API; the candidate panel does not display it separately.
+Select two and use **Compare selected** (it can answer "indistinguishable"). The candidate panel also shows the sensitivity of the ranking to the assumed pressure correlation (pressure length scales 0.15 / 0.3 / 0.6).
 
 **2:40 - Counterfactual and brief (20 s).** Click **Explore candidate**: the counterfactual panel shows target P(sustained) and variance under "if sustained" / "if not sustained" (labelled hypothetical); "Show on map" overlays the updated surface. Then **Research brief** (footer): a seven-section brief
 (target, coverage, model and validation, candidate, historical investigations, citations, limitations) with Download .md and print.

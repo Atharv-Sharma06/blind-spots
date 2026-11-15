@@ -1,6 +1,6 @@
 "use client";
 
-import { keepPreviousData, useQuery, type UseQueryOptions, type UseQueryResult } from "@tanstack/react-query";
+import { keepPreviousData, useQueries, useQuery, type UseQueryOptions, type UseQueryResult } from "@tanstack/react-query";
 import { api, isApiError, type ApiError } from "@/lib/api";
 import type {
   ApiExperiment,
@@ -20,6 +20,7 @@ import type {
   ExperimentsQuery,
   GridQuery,
   GroupSummary,
+  HeadlineResponse,
   Investigation,
   MethodologyResponse,
   ModelMetadata,
@@ -29,6 +30,7 @@ import type {
   RankResponse,
   SourcesResponse,
   SurfaceResponse,
+  Target,
   TargetsResponse,
   ValidationResponse,
 } from "@/lib/types";
@@ -53,7 +55,7 @@ export const useInvestigations = (): ApiQuery<Investigation[]> =>
   useApiQuery({ queryKey: queryKeys.investigations(), queryFn: ({ signal }) => api.investigations(signal), retry });
 
 export const useGroups = (): ApiQuery<GroupSummary[]> =>
-  useApiQuery({ queryKey: queryKeys.groups(), queryFn: ({ signal }) => api.groups(signal), retry });
+  useApiQuery({ queryKey: queryKeys.groups(), queryFn: ({ signal }) => api.groups(signal), retry, staleTime: Infinity });
 
 export const useExperiments = (query?: ExperimentsQuery): ApiQuery<ApiExperiment[]> =>
   useApiQuery({
@@ -81,7 +83,11 @@ export const useObservations = (group: string | null | undefined): ApiQuery<ApiO
   });
 
 export const useTargets = (): ApiQuery<TargetsResponse> =>
-  useApiQuery({ queryKey: queryKeys.targets(), queryFn: ({ signal }) => api.targets(signal), retry });
+  useApiQuery({ queryKey: queryKeys.targets(), queryFn: ({ signal }) => api.targets(signal), retry, staleTime: Infinity });
+
+/** GET /api/headline: finding-strip numbers (D1). Hide the strip while pending or on error; never show placeholders. */
+export const useHeadline = (): ApiQuery<HeadlineResponse> =>
+  useApiQuery({ queryKey: queryKeys.headline(), queryFn: ({ signal }) => api.headline(signal), retry, staleTime: Infinity });
 
 /** GET /api/context (not-integrated investigations, ground flammability, context experiments). */
 export const useContextEvidence = (): ApiQuery<ContextResponse> =>
@@ -153,23 +159,67 @@ export const useRankCandidates = (body: RankRequest | null | undefined): ApiQuer
     retry,
   });
 
+/**
+ * No placeholder data (a05-08): the previous pair's numbers must never show under the new pair's heading.
+ * While loading, `data` is undefined (show a skeleton).
+ */
 export const useCompareCandidates = (body: CompareRequest | null | undefined): ApiQuery<CompareResponse> =>
   useApiQuery({
     queryKey: queryKeys.compare(body),
     queryFn: ({ signal }) => api.compareCandidates(body as CompareRequest, signal),
     enabled: !!body,
-    placeholderData: keepPreviousData,
     retry,
   });
 
+/**
+ * Previous data is kept only while the *same* candidate/group/target is recomputed for another plane or
+ * slice (the scalar numbers are identical then); a different candidate shows a skeleton (a05-08). Check
+ * `isPlaceholderData` before drawing the hypothetical surface (it belongs to the previous slice).
+ */
 export const useCounterfactual = (body: CounterfactualRequest | null | undefined): ApiQuery<CounterfactualResponse> =>
   useApiQuery({
     queryKey: queryKeys.counterfactual(body),
     queryFn: ({ signal }) => api.counterfactual(body as CounterfactualRequest, signal),
     enabled: !!body,
-    placeholderData: keepPreviousData,
+    placeholderData: (prev, prevQuery) => {
+      if (!prev || !body || !prevQuery) return undefined;
+      const k = prevQuery.queryKey[2];
+      if (typeof k !== "string") return undefined;
+      try {
+        const pb = JSON.parse(k) as CounterfactualRequest;
+        const same = JSON.stringify([pb.group_id, pb.target, pb.candidate]) === JSON.stringify([body.group_id, body.target, body.candidate]);
+        return same ? prev : undefined;
+      } catch {
+        return undefined;
+      }
+    },
     retry,
   });
+
+/**
+ * Feature C: the target assessed in every group (shares the assess cache with useAssessTarget). Deferred
+ * with `enabled: false` until the primary view (assess + rank of the selected group) has settled, so the
+ * 20 table requests never queue ahead of the map and the candidate ranking (a04-03).
+ */
+export function useGroupAssessments(
+  groups: readonly GroupSummary[],
+  target: Target | null,
+  opts: { enabled?: boolean } = {},
+): ApiQuery<AssessResponse>[] {
+  const enabled = (opts.enabled ?? true) && !!target;
+  return useQueries({
+    queries: groups.map((g) => {
+      const body: AssessRequest = { group_id: g.group_id, target: target as Target };
+      return {
+        queryKey: queryKeys.assess(body),
+        queryFn: ({ signal }: { signal: AbortSignal }) => api.assessTarget(body, signal),
+        enabled,
+        staleTime: 5 * 60_000,
+        retry,
+      };
+    }),
+  }) as ApiQuery<AssessResponse>[];
+}
 
 export const useBrief = (body: BriefRequest | null | undefined): ApiQuery<BriefResponse> =>
   useApiQuery({

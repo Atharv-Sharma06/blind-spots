@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useContextEvidence, useGroups, useMethodology, useModelMetadata, useSources, useValidation, type ApiQuery } from "@/hooks/api";
-import { DataSourceBadge } from "@/components/data-source-badge";
 import { PageContainer } from "@/components/layout/page-container";
 import { SectionHeader } from "@/components/ui/section-header";
 import { ActiveLearningSection } from "./section-active";
@@ -12,10 +11,13 @@ import { ModellingSection } from "./section-modelling";
 import { ReproducibilitySection } from "./section-reproducibility";
 import { SourcesSection } from "./section-sources";
 import { ValidationSection } from "./section-validation";
+import { TrustSection } from "./section-trust";
+import { BuiltSection } from "./section-built";
 import { Toc, type TocItem } from "./toc";
 import type { ExtValidation } from "./types";
 
 const TOC: TocItem[] = [
+  { id: "trust", label: "Can you trust it?" },
   { id: "data", label: "Data" },
   { id: "modelling", label: "Modelling" },
   { id: "active-learning", label: "Active learning" },
@@ -23,6 +25,7 @@ const TOC: TocItem[] = [
   { id: "reproducibility", label: "Reproducibility" },
   { id: "sources", label: "Sources and context" },
   { id: "limitations", label: "Limitations" },
+  { id: "built", label: "How this was built" },
 ];
 
 /** Default group: the API's data-driven default (is_default), else the modelled group with the most training rows. */
@@ -48,15 +51,25 @@ export function MethodologyPage() {
 
   return (
     <PageContainer className="flex flex-1 flex-col gap-6">
-      <SectionHeader
-        as="h1"
-        title="Methodology"
-        description="How the NASA records were integrated, how the model is fitted and checked, and how research candidates are ranked. Every number on this page is read from the analysis service."
-        actions={<DataSourceBadge meta={methodology.data?.meta} />}
-      />
+      <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
+        <SectionHeader
+          as="h1"
+          className="min-w-0 flex-1 basis-[28rem]"
+          title="Methodology"
+          description="How the NASA records were integrated, how the model is fitted and checked, and how research candidates are ranked. Every number on this page comes from the analysis outputs (the live service or its precomputed snapshot)."
+        />
+      </div>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[210px_minmax(0,1fr)] lg:gap-10">
         <Toc items={TOC} />
         <div className="min-w-0 max-w-[920px] space-y-12">
+          <TrustSection
+            validation={validation}
+            groups={groups.data?.data}
+            onShowGroup={(g) => {
+              setPicked(g);
+              requestAnimationFrame(() => document.getElementById("validation-detail")?.scrollIntoView({ block: "start" }));
+            }}
+          />
           <DataSection methodology={methodology} sources={sources} groups={groups} />
           <ModellingSection methodology={methodology} metadata={metadata} groupLabel={groupLabel} />
           <ActiveLearningSection methodology={methodology} />
@@ -64,6 +77,7 @@ export function MethodologyPage() {
           <ReproducibilitySection methodology={methodology} validation={validation} />
           <SourcesSection sources={sources} context={context} />
           <LimitationsSection methodology={methodology} />
+          <BuiltSection />
         </div>
       </div>
     </PageContainer>

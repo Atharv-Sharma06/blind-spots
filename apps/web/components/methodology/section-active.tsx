@@ -30,7 +30,7 @@ export function ActiveLearningSection({ methodology }: { methodology: ApiQuery<M
         </P>
       </Sub>
 
-      <Sub title="Acquisition: expected variance reduction (EVR)">
+      <Sub title="Ranking score: expected uncertainty reduction">
         <P>
           Let <Mono>f</Mono> be the latent function, <Mono>S</Mono> its posterior covariance, <Mono>t</Mono> the points of the target region with weights <Mono>w_t</Mono> (summing to 1) and <Mono>c</Mono> a candidate. Observing one
           outcome at <Mono>c</Mono> reduces the weighted variance of <Mono>f</Mono> over the target by:
@@ -40,19 +40,23 @@ export function ActiveLearningSection({ methodology }: { methodology: ApiQuery<M
 F_c     =  sum_y  p_y / ( S(c, c) + 1 / W(f_y) )
 
 W(f)    =  sigmoid(f) * (1 - sigmoid(f))
-f_y     =  latent mean at c after conditioning on outcome y
+f_y     =  1-D Laplace mode of f(c) after a hypothetical outcome y
 p_y     =  current predictive probability of outcome y
 
-EVR fraction(c) = EVR(c) / ( sum_t  w_t * S(t, t) )`}</Formula>
+expected uncertainty reduction(c) = EVR(c) / ( sum_t  w_t * S(t, t) )`}</Formula>
         <Bullets>
           <li>
             <Mono>S(t, c)</Mono> is large when the candidate and the target are correlated under the kernel. A candidate far from the target, or one that is already well constrained, scores low.
           </li>
           <li>
             <Mono>F_c</Mono> averages, over the two possible outcomes y weighted by their current predictive probability <Mono>p_y</Mono>, the Laplace information that a binary observation adds at <Mono>c</Mono>:{" "}
-            <Mono>f_y</Mono> is the latent mean after conditioning on outcome <Mono>y</Mono> and <Mono>W(f) = sigmoid(f)(1 - sigmoid(f))</Mono> is the Laplace curvature. Outcomes that are nearly certain are less informative than those near the decision boundary.
+            <Mono>f_y</Mono> is the one-dimensional Laplace mode of the candidate&apos;s latent value after a hypothetical outcome <Mono>y</Mono> (prior: its current mean and variance) and <Mono>W(f) = sigmoid(f)(1 - sigmoid(f))</Mono> is the Laplace curvature. Outcomes that are nearly certain are less informative than those near the decision boundary.
           </li>
-          <li>The ranking quantity is a Gaussian-surrogate approximation to the Laplace posterior; it is a ranking heuristic, not an exact expected information gain.</li>
+          <li>The score is the share of the current latent (logit-scale) variance over the target that one hypothetical observation is expected to remove. It is a ranking heuristic on the Laplace approximation, not an exact expected information gain.</li>
+          <li>
+            <strong>Stationarity.</strong> The covariance <Mono>S(t, c)</Mono> comes from a kernel that depends only on distance, with length scales learned near 1 atm and the tested oxygen range. Where no integrated data constrain the target, the score
+            follows that assumption alone, so the most informative single experiment is often at the target conditions themselves. The interface says so when the top candidate lies within 1 reference distance of the target.
+          </li>
           <li>
             Mutual-information reduction on the target (<Mono>mi_reduction_fraction</Mono>) is reported alongside, computed from the updated variances with latent means held fixed.
           </li>
@@ -72,11 +76,10 @@ EVR fraction(c) = EVR(c) / ( sum_t  w_t * S(t, t) )`}</Formula>
             The target is a documented atmosphere profile or a user-selected hypothetical set of conditions (always labelled as such). The target region is a grid of points over its oxygen, pressure and airflow ranges.
           </li>
           <li>
-            Airflow: the profile&apos;s airflow band when it has one; otherwise from 0.5 cm/s up to the maximum of the NASA-STD-3001 ventilation range, reported as{" "}
-            <Mono>ventilation_standard_with_near_quiescent_extension</Mono>. The extension below the standard&apos;s minimum is an analysis choice (ventilation loss or dead zones), not a documented cabin value.
+            Airflow: the profile&apos;s airflow band when it has one; otherwise from 0.5 cm/s up to the maximum of the NASA-STD-3001 ventilation range, reported as &quot;NASA-STD-3001 ventilation range, extended down to 0.5 cm/s&quot;. The extension below the standard&apos;s minimum is an analysis choice (ventilation loss or dead zones), not a documented cabin value.
           </li>
           <li>
-            If a profile gives no nominal oxygen but a maximum, the maximum is analysed and flagged <Mono>documented_upper_bound_used</Mono> (higher oxygen is the worst case for flammability). A nominal is never invented. Crew
+            If a profile gives no nominal oxygen but a maximum, the maximum is analysed and flagged as a documented upper bound (higher oxygen is the worst case for flammability). A nominal is never invented. Crew
             envelope profiles are context only and cannot be targets.
           </li>
         </Bullets>
@@ -93,43 +96,45 @@ EVR fraction(c) = EVR(c) / ( sum_t  w_t * S(t, t) )`}</Formula>
           </TableHeader>
           <TableBody>
             <TableRow>
-              <TableCell className="num h-auto py-2">evr</TableCell>
-              <TableCell className="h-auto py-2">Largest expected reduction of target variance (above).</TableCell>
+              <TableCell className="h-auto whitespace-nowrap py-2">Blind Spots (target-aware)</TableCell>
+              <TableCell className="h-auto py-2">Largest expected uncertainty reduction over the target (above).</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell className="num h-auto py-2">uncertainty_sampling</TableCell>
-              <TableCell className="h-auto py-2">Largest epistemic uncertainty at the candidate itself; ignores the target.</TableCell>
+              <TableCell className="h-auto whitespace-nowrap py-2">Uncertainty sampling</TableCell>
+              <TableCell className="h-auto py-2">Largest knowledge (epistemic) uncertainty at the candidate itself; ignores the target.</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell className="num h-auto py-2">nearest_gap</TableCell>
-              <TableCell className="h-auto py-2">Candidate closest to the target centroid (in scaled units) among candidates that lie in a coverage gap (nearest observation farther than 1 scaled unit).</TableCell>
+              <TableCell className="h-auto whitespace-nowrap py-2">Nearest gap</TableCell>
+              <TableCell className="h-auto py-2">Candidate closest to the target centre (in reference distances) among candidates in a coverage gap (nearest observation more than 1 reference distance away).</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell className="num h-auto py-2">random</TableCell>
+              <TableCell className="h-auto whitespace-nowrap py-2">Random</TableCell>
               <TableCell className="h-auto py-2">Uniform draw from the candidate set, seeded deterministically from the request.</TableCell>
             </TableRow>
           </TableBody>
         </Table>
-        <P>Every ranking response includes each baseline&apos;s pick and its EVR, so the value of target-aware selection can be seen for the same request. Section 4 tests this retrospectively.</P>
+        <P>
+          Every ranking shows each baseline&apos;s pick scored with the same expected uncertainty reduction: the expected reduction if that baseline&apos;s pick were tested instead. Because the target-aware pick maximises this score, it is
+          highest by construction; the fair, out-of-sample comparison is the retrospective replay in section 4.
+        </P>
       </Sub>
 
       <Sub title="Sensitivity analysis">
         <P>
           Because pressure cannot be learned from the data, the ranking is recomputed with pressure length scales{" "}
           <span className="num">{inline(methodology, (m) => ((m.config as { pressure_length_scale_sensitivity?: number[] }).pressure_length_scale_sensitivity ?? []).join(" / ") || "—")}</span>. The response states whether the top
-          candidate changes. A candidate is flagged <Mono>assumption_dependent</Mono> when its EVR fraction varies across those settings by more than half of its largest value. Two candidates are reported as{" "}
-          <Mono>indistinguishable</Mono> when their EVR fractions differ by less than 15 % (relative) or the preference flips under any setting.
+          candidate changes. A candidate is flagged as assumption-dependent when its expected uncertainty reduction varies across those settings by more than half of its largest value. Two candidates are reported as indistinguishable when their scores differ by less than 15 % (relative) or the preference flips under any setting.
         </P>
       </Sub>
 
       <Sub title="Feasibility labels (never claims)">
         <Bullets>
           <li>
-            <Mono>within_demonstrated_envelope</Mono>: inside the observed bounding box and convex hull of the integrated investigations. Text: &quot;Inside conditions already run in the integrated investigations (not an engineering
+            <strong>Within demonstrated envelope</strong>: inside the observed bounding box and convex hull of the integrated investigations. Text: &quot;Inside conditions already run in the integrated investigations (not an engineering
             feasibility assessment).&quot;
           </li>
           <li>
-            <Mono>outside_demonstrated_envelope</Mono>: &quot;Feasibility not verified; requires qualified review.&quot;
+            <strong>Outside demonstrated envelope</strong>: &quot;Feasibility not verified; requires qualified review.&quot;
           </li>
           <li>
             Each candidate inside the documented test envelope of a NASA investigation that is not integrated lists it (for example a Saffire or SoFIE run), noting that existing data may already inform the candidate.
@@ -141,7 +146,7 @@ EVR fraction(c) = EVR(c) / ( sum_t  w_t * S(t, t) )`}</Formula>
       <Sub title="Counterfactual previews">
         <P>
           For a chosen candidate, the model is conditioned on each hypothetical outcome in turn (flame sustained, flame not sustained) with hyperparameters held fixed. The preview shows the resulting target probability and variance,
-          the probability of each outcome under the current model, and the expected variance reduction. These are <strong>hypothetical outcomes and model updates, not experimental results</strong>.
+          the probability of each outcome under the current model, and the expected uncertainty reduction. These are <strong>hypothetical outcomes and model updates, not experimental results</strong>.
         </P>
       </Sub>
     </Section>

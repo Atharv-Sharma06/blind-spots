@@ -110,8 +110,79 @@ class TestRealSheet:
         r = real.convert("fan_display", 89.0, 2, 2014, 49)
         assert r is not None and r.u_cm_s == pytest.approx(1.0066 * 20)
 
+    def test_row_without_fan_display_is_kept(self, real: FlowCalibration) -> None:
+        # real cells, block 2014-202, 2 restrictors (columns CA-CC, rows 31-33): pot 1 | fan 47 | air 5,
+        # pot 0.5 | (empty) | air 3, pot 0 | fan 38 | air 0. The empty fan cell must not drop the reading.
+        pts = [(p.pot, p.fan_display, p.air_display) for p in real._by_day[(2014, 202, 2)]]
+        assert pts[-3:] == [(1, 47, 5), (0.5, None, 3), (0, 38, 0)]
+        r = real.convert("pot", 0.5, 2, 2014, 202)
+        assert r is not None and r.calibration_ref == "2014-202/2 restrictors" and r.flags == ()
+        assert r.u_cm_s == pytest.approx(1.0066 * 3)
+        # below the lowest point the same day now applies: pot 0.27 -> 1.0066 x 3 x 0.27/0.5
+        r = real.convert("pot", 0.27, 2, 2014, 202)
+        assert r is not None and r.calibration_ref == "2014-202/2 restrictors"
+        assert r.u_cm_s == pytest.approx(1.0066 * 3 * 0.27 / 0.5)
+        assert r.uncertainty_cm_s == pytest.approx(1.0066 * 3 / 2)
+        # the row has no fan display, so fan-display conversions on that day cannot use it
+        r = real.convert("fan_display", 47.0, 2, 2014, 202)
+        assert r is not None and r.u_cm_s == pytest.approx(1.0066 * 5)
+
     def test_below_range_real(self, real: FlowCalibration) -> None:
         r = real.convert("pot", 0.35, 2, 2014, 190)
         # lowest non-zero point of the real 2014-190 2-restrictor block is pot 0.5 -> air 0.5
         assert r is not None and "below_calibration_range" in r.flags
         assert r.u_cm_s == pytest.approx(1.0066 * 0.5 * 0.35 / 0.5)
+
+
+def test_suspect_duplicate_sections_are_skipped() -> None:
+    """Two restrictor sections of one day with identical readings are both skipped (CONTRACTS 2.4)."""
+    from blindspots.processing.flow_calibration import CalBlock, CalPoint
+
+    fixture_dup = [CalPoint(10, 122, 20), CalPoint(6, 88.5, 10), CalPoint(2, 55, 3), CalPoint(0, 38, 0)]
+    fixture_ok0 = [CalPoint(10, 122, 50), CalPoint(6, 88.5, 35), CalPoint(2, 55, 15)]
+    fixture_ok2 = [CalPoint(10, 122, 22), CalPoint(6, 88.5, 12), CalPoint(2, 55, 4)]
+    blocks = [
+        CalBlock(2014, 200, "2014-200", None, {0: fixture_ok0, 2: fixture_ok2}),
+        CalBlock(2014, 210, "2014-210", None, {0: list(fixture_dup), 2: list(fixture_dup[:3])}),
+    ]
+    cal = FlowCalibration(blocks)
+    assert cal.suspect_duplicates == {(2014, 210, 0), (2014, 210, 2)}
+    assert cal.usable_days(0) == [(2014, 200)]
+    res = cal.convert("pot", 6.0, 0, 2014, 210)
+    assert res is not None
+    assert res.calibration_ref == "2014-200/0 restrictors"
+    assert "calibration_block_suspect_duplicate" in res.flags
+    assert res.u_cm_s == pytest.approx(1.0066 * 35)
+
+
+def test_real_sheet_day_210_no_restrictor_block_is_suspect() -> None:
+    path = REPO_ROOT / CALIBRATION_FILE
+    if not path.is_file():
+        pytest.skip("calibration workbook not present")
+    cal = FlowCalibration.from_workbook(path)
+    assert (2014, 210, 0) in cal.suspect_duplicates
+    res = cal.convert("pot", 5.0, 0, 2016, 57)
+    assert res is not None and not res.calibration_ref.startswith("2014-210")
+
+
+def test_parser_keeps_pot_air_row_with_empty_fan_cell() -> None:
+    """A pot -> air row with an empty Fan Display cell stays in its section; a pot-only row is skipped."""
+    import openpyxl
+
+    from blindspots.processing.flow_calibration import CalPoint, parse_calibration_sheet
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    assert ws is not None
+    ws.cell(3, 1, "DATE")
+    ws.cell(4, 1, "GMT")
+    ws.cell(4, 2, "2014-202")
+    rows = [(2, 55, 8), (1, 47, 5), (0.5, None, 3), (0.4, None, None), (0, 38, 0)]
+    for i, (pot, fan, air) in enumerate(rows):
+        ws.cell(7 + i, 1, pot)
+        ws.cell(7 + i, 2, fan)
+        ws.cell(7 + i, 3, air)
+    (block,) = parse_calibration_sheet(ws)
+    assert block.sections == {
+        0: [CalPoint(2, 55, 8), CalPoint(1, 47, 5), CalPoint(0.5, None, 3), CalPoint(0, 38, 0)]
+    }

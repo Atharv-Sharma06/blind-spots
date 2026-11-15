@@ -16,12 +16,12 @@ export function PanelSkeleton({ label = "Loading" }: { label?: string }) {
   );
 }
 
-/** Typed error for a failed query; snapshot gaps get the honest "requires the live analysis service" text. */
+/** Typed error for a failed query; snapshot gaps get an honest note (never "run the service locally", D7). */
 export function QueryError({ error, onRetry }: { error: unknown; onRetry?: () => void }) {
   if (isApiError(error) && error.snapshotUnavailable) {
     return (
-      <Callout variant="info" title="Requires the live analysis service">
-        This result is not in the precomputed snapshot. Run the analysis service locally to compute it.
+      <Callout variant="info" title="Not in this precomputed version">
+        This result is computed on demand and is not part of the precomputed snapshot served here; it is available in the full (local) version.
       </Callout>
     );
   }

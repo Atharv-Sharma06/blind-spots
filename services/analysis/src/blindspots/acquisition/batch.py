@@ -47,7 +47,7 @@ class JointPosterior:
         self.S -= np.outer(v, v) * factor
 
 
-def _record(
+def candidate_record(
     jp: JointPosterior, cs: CandidateSet, i: int, rank: int, marginal: float, method: str
 ) -> dict[str, Any]:
     standalone = jp.evr_initial(i)
@@ -73,6 +73,9 @@ def _record(
     }
 
 
+_record = candidate_record  # old private name, kept for callers not yet migrated
+
+
 def records_for_indices(
     model: Any,
     targets: np.ndarray,
@@ -86,8 +89,24 @@ def records_for_indices(
     out = []
     for rank, i in enumerate(order, start=1):
         marginal = float(jp.evr(np.array([i]))[0])
-        out.append(_record(jp, cs, i, rank, marginal, method))
+        out.append(candidate_record(jp, cs, i, rank, marginal, method))
         jp.downdate(i)
+    return out
+
+
+def greedy_from(
+    jp: JointPosterior, cs: CandidateSet, k: int, method: str = "greedy_evr"
+) -> list[dict[str, Any]]:
+    """Greedy picks on an existing joint posterior (mutated), each maximizing marginal EVR."""
+    remaining = np.arange(len(cs))
+    out: list[dict[str, Any]] = []
+    for rank in range(1, min(k, len(cs)) + 1):
+        gains = jp.evr(remaining)
+        j = int(np.argmax(gains))  # ties -> lowest index (deterministic)
+        i = int(remaining[j])
+        out.append(candidate_record(jp, cs, i, rank, float(gains[j]), method))
+        jp.downdate(i)
+        remaining = np.delete(remaining, j)
     return out
 
 
@@ -101,14 +120,4 @@ def greedy_batch(
     """Pick k candidates sequentially, each maximizing marginal EVR given earlier picks."""
     if len(candidates) == 0 or k < 1:
         return dict(NO_CANDIDATES)
-    jp = JointPosterior(model, targets, candidates.X, weights)
-    remaining = np.arange(len(candidates))
-    out: list[dict[str, Any]] = []
-    for rank in range(1, min(k, len(candidates)) + 1):
-        gains = jp.evr(remaining)
-        j = int(np.argmax(gains))  # ties -> lowest index (deterministic)
-        i = int(remaining[j])
-        out.append(_record(jp, candidates, i, rank, float(gains[j]), "greedy_evr"))
-        jp.downdate(i)
-        remaining = np.delete(remaining, j)
-    return out
+    return greedy_from(JointPosterior(model, targets, candidates.X, weights), candidates, k)

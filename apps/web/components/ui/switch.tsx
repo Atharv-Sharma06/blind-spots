@@ -31,7 +31,7 @@ export const Switch = React.forwardRef<React.ElementRef<typeof SwitchPrimitive.R
     return (
       <div className="inline-flex items-center gap-2">
         {control}
-        <label htmlFor={sid} className="cursor-pointer text-[13px] text-fg">
+        <label htmlFor={sid} className="cursor-pointer text-ui text-fg">
           {label}
         </label>
       </div>

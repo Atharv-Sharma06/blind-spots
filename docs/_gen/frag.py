@@ -72,12 +72,18 @@ def build(F: dict) -> dict:
     opts = man["config"]["mean_options"]
     X["MEAN_OPTIONS"] = ", ".join(opts)
     if len(opts) > 1:
-        X["MEAN_SENTENCE"] = ("Mean function per group (" + " vs ".join(opts) + ") is chosen by repeated grouped-CV log loss; linear in O2 is used only when the 95% group-bootstrap CI "
-                              "of the log-loss difference is entirely below zero (MS-002).")
+        X["MEAN_SENTENCE"] = (
+            "Mean function per group ("
+            + " vs ".join(opts)
+            + ") is chosen by repeated grouped-CV log loss; linear in O2 is used only when the 95% group-bootstrap CI "
+            "of the log-loss difference is entirely below zero (MS-002)."
+        )
         X["MEAN_SHORT"] = "mean function chosen by grouped CV (" + ", ".join(opts) + ")"
     else:
-        X["MEAN_SENTENCE"] = (f"Mean function: `{opts[0]}` only. This is the `mean_options` setting of this model version's training configuration; the grouped-CV selection between a constant and a linear-in-O2 mean "
-                              "(MS-002) exists in the code but is not used by this configuration. Every group therefore uses a constant GP mean fixed a priori; there is no mean-function selection.")
+        X["MEAN_SENTENCE"] = (
+            f"Mean function: `{opts[0]}` only. This is the `mean_options` setting of this model version's training configuration; the grouped-CV selection between a constant and a linear-in-O2 mean "
+            "(MS-002) exists in the code but is not used by this configuration. Every group therefore uses a constant GP mean fixed a priori; there is no mean-function selection."
+        )
         X["MEAN_SHORT"] = f"`{opts[0]}` mean function (the only option in this model version's configuration)"
     X["CV_REPEATS"] = groups[0]["cv"]["repeats"]
     X["CV_K"] = groups[0]["cv"]["k"]
@@ -103,9 +109,7 @@ def build(F: dict) -> dict:
             )
     X["INV_TABLE"] = table(["id", "name", "role", "experiments", "flow-step observations", "DOI"], inv_rows)
     X["N_CATALOGUED_ONLY"] = sum(1 for i in F["inv"] if i["role"] == "catalogued_not_integrated")
-    X["N_CONTEXT_EXP"] = sum(
-        i["n_experiments"] for i in F["inv"] if i["role"] == "integrated_context"
-    )
+    X["N_CONTEXT_EXP"] = sum(i["n_experiments"] for i in F["inv"] if i["role"] == "integrated_context")
     X["N_MODEL_EXP"] = sum(i["n_experiments"] for i in F["inv"] if i["role"] == "integrated_model")
     X["N_PSI25"] = c["experiments_by_investigation"].get("PSI-25")
     X["N_PSI26"] = c["experiments_by_investigation"].get("PSI-26")
@@ -134,7 +138,9 @@ def build(F: dict) -> dict:
     X["TRAIN_CONF"] = ", ".join(f"{k} {v}" for k, v in sorted(ts["confidence"].items()))
     X["NEG_MODES"] = ", ".join(f"{k} {v}" for k, v in sorted(ts["neg_modes"].items(), key=lambda kv: -kv[1]))
     X["BASIS"] = ", ".join(f"{k} {v}" for k, v in sorted(ts["basis"].items(), key=lambda kv: -kv[1]))
-    X["CAMPAIGN_TRAIN"] = ", ".join(f"{k} {v}" for k, v in sorted(ts["campaign"].items(), key=lambda kv: -kv[1]))
+    X["CAMPAIGN_TRAIN"] = ", ".join(
+        f"{k} {v}" for k, v in sorted(ts["campaign"].items(), key=lambda kv: -kv[1])
+    )
     ev = rep.get("evidence", {})
     X["TM_STEPS"] = ev.get("steps_with_tm_evidence")
     X["TM_STEPS_TRAIN"] = ev.get("steps_with_tm_evidence_in_training")
@@ -144,7 +150,9 @@ def build(F: dict) -> dict:
     X["CFG_CHANGED"] = cc.get("n_changed")
     X["CFG_TRANSITIONS"] = ", ".join(f"{k}: {v}" for k, v in cc.get("by_transition", {}).items())
     X["N_CONTEXT_RECORDS"] = ev.get("n_context_records")
-    X["CONTEXT_BY_SOURCE"] = "; ".join(f"{k}: {v}" for k, v in ev.get("context_records_by_source", {}).items())
+    X["CONTEXT_BY_SOURCE"] = "; ".join(
+        f"{k}: {v}" for k, v in ev.get("context_records_by_source", {}).items()
+    )
     qf = rep["quality_flags"]["observations"]
     X["FLAG_BELOW_CAL_ALL"] = qf.get("below_calibration_range")
     X["FLAG_BORROWED_ALL"] = qf.get("calibration_borrowed_from_bass2")
@@ -193,7 +201,6 @@ def build(F: dict) -> dict:
     )
     X["NOT_MODELLED_LIST"] = ", ".join(f"`{k}`" for k in sorted(nm))
     # default UI group
-    modelled_ids = {g["group_id"]: g for g in groups}
     try:  # same rule as /api/groups is_default (needs PYTHONPATH=services/analysis/src)
         from blindspots.api import deps as _deps
 
@@ -242,7 +249,12 @@ def build(F: dict) -> dict:
     X["N_GP_INDIST"] = cnt["not distinguishable"]
     X["N_GP_WORSE"] = cnt["GP worse"]
     better = [g["group_id"] for g in groups if verdict_vs_majority(g).startswith("GP better")]
-    X["GP_INDIST_GROUPS"] = ", ".join(f"`{g['group_id']}`" for g in groups if verdict_vs_majority(g).startswith("not distinguishable")) or "none"
+    X["GP_INDIST_GROUPS"] = (
+        ", ".join(
+            f"`{g['group_id']}`" for g in groups if verdict_vs_majority(g).startswith("not distinguishable")
+        )
+        or "none"
+    )
     X["GP_BETTER_GROUPS"] = ", ".join(f"`{x}`" for x in better) or "none"
     # share of negatives that are flow-off transients / brief flames
     fo_rows, fo_ids = [], []
@@ -261,7 +273,14 @@ def build(F: dict) -> dict:
         if hi and neg:
             conf.append(hi["n_not_sustained"] / neg)
     X["FLOWOFF_TABLE"] = table(
-        ["group", "not-sustained rows", "of which flow_off_transient", "share", "of which no_sustained_propagation (brief flame)", "share"],
+        [
+            "group",
+            "not-sustained rows",
+            "of which flow_off_transient",
+            "share",
+            "of which no_sustained_propagation (brief flame)",
+            "share",
+        ],
         fo_rows,
     )
     # CV AUC with and without the flow-off rows, for groups dominated by them; reliance on below-calibration rows
@@ -273,13 +292,17 @@ def build(F: dict) -> dict:
         gp_auc = next((m["auc"]["value"] for m in g["cv"]["models"] if m.get("name") == "gp"), None)
         if (neg - fo["n_not_sustained"]) / neg >= 0.8 and gp_auc is not None:
             if fo.get("auc") is None:
-                auc_parts.append(f"`{g['group_id']}` has no other negatives (CV AUC {gp_auc:.2f} with them; not evaluable without)")
+                auc_parts.append(
+                    f"`{g['group_id']}` has no other negatives (CV AUC {gp_auc:.2f} with them; not evaluable without)"
+                )
             else:
                 auc_parts.append(f"`{g['group_id']}` {gp_auc:.2f} to {fo['auc']:.2f}")
         bc = sv["drop below_calibration_range rows"]
         n_all = g["label_counts"]["sustained"] + neg
         if bc["n_training"] < 0.5 * n_all or bc["n_not_sustained"] < 0.5 * neg:
-            below_parts.append(f"`{g['group_id']}` ({bc['n_training']} of {n_all} training rows and {bc['n_not_sustained']} of {neg} negatives remain)")
+            below_parts.append(
+                f"`{g['group_id']}` ({bc['n_training']} of {n_all} training rows and {bc['n_not_sustained']} of {neg} negatives remain)"
+            )
     X["FLOWOFF_AUC"] = "; ".join(auc_parts) or "none"
     X["BELOWCAL_RELIANT"] = "; ".join(below_parts) or "none"
     fo_set = {x.split("`")[1] for x in fo_ids}
@@ -333,8 +356,14 @@ def build(F: dict) -> dict:
     X["BS_SUPPORTED"] = vc["supported"]
     X["BS_INCONCLUSIVE"] = vc["inconclusive"]
     X["BS_NOT_SUPPORTED"] = vc["not_supported"]
-    X["BS_SUPPORTED_GROUPS"] = ", ".join(f"`{g['group_id']}`" for g in groups if g["blindspot_test"]["verdict"] == "supported") or "none"
-    X["BS_INCONC_GROUPS"] = ", ".join(f"`{g['group_id']}`" for g in groups if g["blindspot_test"]["verdict"] == "inconclusive") or "none"
+    X["BS_SUPPORTED_GROUPS"] = (
+        ", ".join(f"`{g['group_id']}`" for g in groups if g["blindspot_test"]["verdict"] == "supported")
+        or "none"
+    )
+    X["BS_INCONC_GROUPS"] = (
+        ", ".join(f"`{g['group_id']}`" for g in groups if g["blindspot_test"]["verdict"] == "inconclusive")
+        or "none"
+    )
     pr = [g["blindspot_test"]["diagnostics"]["partial_rho_epistemic_given_aleatoric"] for g in groups]
     X["PARTIAL_MIN"], X["PARTIAL_MAX"] = f2(min(pr)), f2(max(pr))
     pa = [g["blindspot_test"]["diagnostics"]["rho_aleatoric_point"] for g in groups]
@@ -360,15 +389,20 @@ def build(F: dict) -> dict:
         X["R_N"] = sm["n_scenarios"]
         X["R_SEEDS"] = r["design"]["seeds"]
         X["R_ROUNDS"] = sc[0]["n_rounds"]
-        for key, nm_ in (("evr_vs_random", "RAND"), ("evr_vs_uncertainty_sampling", "UNC"), ("evr_vs_nearest_gap", "GAP")):
+        for key, nm_ in (
+            ("evr_vs_random", "RAND"),
+            ("evr_vs_uncertainty_sampling", "UNC"),
+            ("evr_vs_nearest_gap", "GAP"),
+        ):
             X[f"R_{nm_}_B"], X[f"R_{nm_}_I"], X[f"R_{nm_}_W"] = (
                 sm[key]["better"],
                 sm[key]["indistinguishable"],
                 sm[key]["worse"],
             )
-        X["R_SKIPPED"] = "; ".join(
-            f"`{s['group_id']}` / {s['name']}: {s['reason']}" for s in r["design"]["skipped"]
-        ) or "none"
+        X["R_SKIPPED"] = (
+            "; ".join(f"`{s['group_id']}` / {s['name']}: {s['reason']}" for s in r["design"]["skipped"])
+            or "none"
+        )
         X["R_LIMITS"] = "\n".join(f"- {x}" for x in r["design"]["limitations"])
         rows = []
         degenerate = 0
@@ -376,7 +410,7 @@ def build(F: dict) -> dict:
         for s in sc:
             pdiff = s["paired_differences"]
 
-            def cell(k):
+            def cell(k, pdiff=pdiff):
                 d = pdiff[k]
                 lo, hi = d["ci95"]
                 tag = "EVR better" if hi < 0 else ("EVR worse" if lo > 0 else "indist.")
@@ -493,9 +527,11 @@ def extras(F, X):
     ex = _P(__file__).parent / "extra.json"
     if ex.exists():
         X.update(_json.loads(ex.read_text()))
+
     # not-integrated and profiles tables
     def rng(r):
         return "n/a" if not r else f"{r[0]} to {r[1]}"
+
     rows = []
     for x in F["not_integrated"]:
         rows.append(
@@ -509,9 +545,18 @@ def extras(F, X):
             )
         )
     X["NOT_INTEGRATED_TABLE"] = table(
-        ["id", "investigation", "O2 % range", "pressure kPa range", "flow cm/s range", "reason not integrated into the model"], rows
+        [
+            "id",
+            "investigation",
+            "O2 % range",
+            "pressure kPa range",
+            "flow cm/s range",
+            "reason not integrated into the model",
+        ],
+        rows,
     )
     X["N_NOT_INTEGRATED"] = len(F["not_integrated"])
+
     def rr(r):
         if not r:
             return "n/a"
@@ -520,6 +565,7 @@ def extras(F, X):
             if r.get(k_) is not None:
                 parts.append(f"{k_} {r[k_]}")
         return ", ".join(parts) or "n/a"
+
     rows = [
         (
             f"`{p['profile_id']}`",
@@ -534,9 +580,11 @@ def extras(F, X):
     X["VENT_MIN"] = F["profiles"]["ventilation"]["min_cm_s"]
     X["VENT_MAX"] = F["profiles"]["ventilation"]["max_cm_s"]
     pri = F["manifest"]["config"]["priors"]
+
     def lg(k):
         m, sd = pri[k]
-        return f"ln-mean {m:.3f} (= {2.718281828 ** m:.2f}), sd {sd}"
+        return f"ln-mean {m:.3f} (= {2.718281828**m:.2f}), sd {sd}"
+
     X["PRIOR_L_O2"], X["PRIOR_L_FLOW"], X["PRIOR_SIGNAL"] = lg("l_o2"), lg("l_flow"), lg("signal_var")
     X["PRIOR_B0"] = f"normal, mean {pri['b0'][0]}, sd {pri['b0'][1]}"
     X["PRIOR_B1"] = f"normal, mean {pri['b1'][0]}, sd {pri['b1'][1]}"
@@ -563,15 +611,15 @@ def learned_table(F):
         zlo, zhi = np.percentile(X_[:, 1], [10, 90])
         flo, fhi = np.expm1(zlo), np.expm1(zhi)
 
-        def p(o2, z):
+        def p(o2, z, gm=gm):
             return float(gm.model.predict_proba(np.array([[o2, z, 0.0]]))[0])
 
-        l = gm.model.length_scales
+        ls = gm.model.length_scales
         rows.append(
             (
                 f"`{gid}`",
-                f"{l[0]:.2f}",
-                f"{l[1]:.2f}",
+                f"{ls[0]:.2f}",
+                f"{ls[1]:.2f}",
                 f"O2 {o2lo:.1f} to {o2hi:.1f} %, flow {flo:.2f} to {fhi:.1f} cm/s",
                 f"{p(o2lo, zlo):.2f}",
                 f"{p(o2hi, zlo):.2f}",
@@ -621,4 +669,19 @@ def logo_summary(F):
                 )
             )
     worse = sum(1 for r in rows if r[-1] == "GP worse")
-    return table(["group", "held-out campaign", "n", "not sustained", "GP log loss", "majority log loss", "which is lower"], rows), len(rows), worse
+    return (
+        table(
+            [
+                "group",
+                "held-out campaign",
+                "n",
+                "not sustained",
+                "GP log loss",
+                "majority log loss",
+                "which is lower",
+            ],
+            rows,
+        ),
+        len(rows),
+        worse,
+    )

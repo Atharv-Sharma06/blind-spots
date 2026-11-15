@@ -8,12 +8,51 @@ import type { NextConfig } from "next";
 //    Python service exists, so no rewrite to a local API is emitted.
 const SNAPSHOT_ONLY = process.env.NEXT_PUBLIC_DATA_MODE === "snapshot";
 const ANALYSIS_API_ORIGIN = (process.env.ANALYSIS_API_ORIGIN || "http://127.0.0.1:8000").replace(/\/+$/, "");
+const DEV = process.env.NODE_ENV !== "production";
+
+if (process.env.VERCEL && !SNAPSHOT_ONLY && !process.env.ANALYSIS_API_ORIGIN) {
+  console.warn("Vercel build without NEXT_PUBLIC_DATA_MODE=snapshot or ANALYSIS_API_ORIGIN: /api/* would proxy to 127.0.0.1.");
+}
+
+// Next's App Router streams its payload through inline <script> tags and the UI sets inline styles, so
+// 'unsafe-inline' is required without per-request nonces; everything else is same-origin only.
+// Dev adds 'unsafe-eval' (React Refresh) and ws: (hot reload).
+const CSP = [
+  "default-src 'self'",
+  `script-src 'self' 'unsafe-inline'${DEV ? " 'unsafe-eval'" : ""}`,
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob:",
+  "font-src 'self' data:",
+  `connect-src 'self'${DEV ? " ws: wss:" : ""}`,
+  "worker-src 'self' blob:",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+].join("; ");
+
+const SECURITY_HEADERS = [
+  { key: "Content-Security-Policy", value: CSP },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), browsing-topics=()" },
+];
 
 const nextConfig: NextConfig = {
   // Separate build dirs let several builds run side by side (e.g. NEXT_DIST_DIR=.next-map).
   distDir: process.env.NEXT_DIST_DIR || ".next",
   reactStrictMode: true,
   poweredByHeader: false,
+  async headers() {
+    return [
+      { source: "/:path*", headers: SECURITY_HEADERS },
+      // Snapshot files are content-addressed (name = slug + hash of the bytes), so a URL never changes meaning.
+      { source: "/snapshot/files/:path*", headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }] },
+      // The manifest maps requests to those files and changes on every export: always revalidate.
+      { source: "/snapshot/manifest.json", headers: [{ key: "Cache-Control", value: "public, max-age=0, must-revalidate" }] },
+    ];
+  },
   async rewrites() {
     if (SNAPSHOT_ONLY) return [];
     return [{ source: "/api/:path*", destination: `${ANALYSIS_API_ORIGIN}/api/:path*` }];

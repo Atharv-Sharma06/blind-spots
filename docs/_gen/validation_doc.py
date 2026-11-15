@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from frag import ci, f2, f3, model, pct, table, verdict_vs_majority
+from frag import ci, f3, pct, table, verdict_vs_majority
 
 HEAD = """# Validation
 
@@ -62,7 +62,8 @@ Question: does the model flag, before the outcome is revealed, the regions where
 Point level: Spearman rho between pre-reveal epistemic uncertainty (mutual information) and per-point log loss on out-of-fold
 predictions ({N_PERM}-permutation one-sided p; points are treated as exchangeable, so this p is optimistic). Experiment level: leave-one-experiment-out
 refits (hyperparameters refit for each held-out experiment), mean epistemic uncertainty versus mean log loss per held-out experiment
-({N_PERM} permutations, one-sided). Verdict rule: supported if rho > 0 with p < 0.05 at both levels; not supported if rho <= 0 at both; otherwise inconclusive.
+({N_PERM} permutations, one-sided). Verdict rule: supported if rho > 0 with p < 0.05 at both levels and the point-level partial rho
+of epistemic given aleatoric uncertainty is > 0 with p < 0.05; not supported if rho <= 0 at both; otherwise inconclusive.
 The smallest reportable p is 1/{P_FLOOR}.
 
 {BLINDSPOT_TABLE}
@@ -70,7 +71,7 @@ The smallest reportable p is 1/{P_FLOOR}.
 Result as computed: {BS_SUPPORTED} supported, {BS_INCONCLUSIVE} inconclusive, {BS_NOT_SUPPORTED} not supported out of {N_MODELLED} groups.
 Supported: {BS_SUPPORTED_GROUPS}. Inconclusive: {BS_INCONC_GROUPS}.
 
-Reading: where the verdict is "supported", epistemic uncertainty and loss rise together. But aleatoric (predictive-entropy)
+Reading: where the verdict is "supported", epistemic uncertainty and loss rise together. But outcome-variability (aleatoric)
 uncertainty tracks loss at least as strongly as epistemic uncertainty in {N_ALEA_GE_EPI} of {N_MODELLED} groups (point-level rho), and the partial correlation
 of epistemic uncertainty given aleatoric uncertainty ranges from {PARTIAL_MIN} to {PARTIAL_MAX}. The partial correlation is the better indicator of added value.
 With {MIN_MISCLASS} to {MAX_MISCLASS} misclassified points per group, the AUROC rests on very few events. Treat the result as an association in small samples,
@@ -114,9 +115,7 @@ Blind-spot test: **{bverdict}**. {binterp}
 def group_section(g, reps):
     lc = g["label_counts"]
     models = g["cv"]["models"]
-    cv_rows = [
-        (m["name"], ci(m["brier"]), ci(m["log_loss"]), ci(m["auc"]), ci(m["ece"])) for m in models
-    ]
+    cv_rows = [(m["name"], ci(m["brier"]), ci(m["log_loss"]), ci(m["auc"]), ci(m["ece"])) for m in models]
     d = g["cv"]["gp_vs_majority"]
     calib = "; ".join(
         f"[{b['lo']:.1f},{b['hi']:.1f}) n={b['count']} pred {b['mean_predicted']:.2f} obs {b['observed_frequency']:.2f}"
@@ -140,7 +139,15 @@ def group_section(g, reps):
         logo_s = (
             "Leave-one-campaign-out (GP vs majority log loss; n rows and not-sustained rows in the held-out campaign):\n\n"
             + table(
-                ["held-out campaign", "n", "not sustained", "GP Brier", "GP log loss", "GP AUC", "majority log loss"],
+                [
+                    "held-out campaign",
+                    "n",
+                    "not sustained",
+                    "GP Brier",
+                    "GP log loss",
+                    "GP AUC",
+                    "majority log loss",
+                ],
                 rows,
             )
         )
@@ -158,7 +165,9 @@ def group_section(g, reps):
         )
         for s in g["sensitivity"]
     ]
-    sub = [(s["name"], s["n"], s["n_not_sustained"], f3(s["brier"]), f3(s["log_loss"])) for s in g["subgroups"]]
+    sub = [
+        (s["name"], s["n"], s["n_not_sustained"], f3(s["brier"]), f3(s["log_loss"])) for s in g["subgroups"]
+    ]
     b = g["blindspot_test"]
     return GROUP.format(
         gid=f"`{g['group_id']}`",
@@ -192,30 +201,30 @@ def retro_section(X):
     if not X["RETRO"]:
         return "No retrospective artifact was found for this dataset version (run `uv run blindspots retrospective`)."
     return f"""Design (copied from the artifact): per modelled group with at least 12 training experiments, target experiments (a lowest-O2 quartile, a
-lowest-minimum-airflow quartile and one campaign) are held out of the pool. Each of {X['R_SEEDS']} seeds draws 3 random pool experiments with both labels as the
-initial training set; then up to {X['R_ROUNDS']} rounds, each strategy picking one whole experiment from the remaining pool. EVR = expected variance reduction of the
+lowest-minimum-airflow quartile and one campaign) are held out of the pool. Each of {X["R_SEEDS"]} seeds draws 3 random pool experiments with both labels as the
+initial training set; then up to {X["R_ROUNDS"]} rounds, each strategy picking one whole experiment from the remaining pool. EVR = expected variance reduction of the
 target latent function. Baselines: uncertainty sampling, nearest gap, random. Metric: log loss (and Brier) on the held-out target observations, which never enter
 fitting. A constant majority-class prediction is reported for reference.
 
-Summary over {X['R_N']} pseudo-target scenarios (95% bootstrap CIs over seeds on the paired difference of the area under the target log-loss curve):
+Summary over {X["R_N"]} pseudo-target scenarios (95% bootstrap CIs over seeds on the paired difference of the area under the target log-loss curve):
 
-- EVR versus random: better in {X['R_RAND_B']}, indistinguishable in {X['R_RAND_I']}, worse in {X['R_RAND_W']}.
-- EVR versus uncertainty sampling: better in {X['R_UNC_B']}, indistinguishable in {X['R_UNC_I']}, worse in {X['R_UNC_W']}.
-- EVR versus nearest gap: better in {X['R_GAP_B']}, indistinguishable in {X['R_GAP_I']}, worse in {X['R_GAP_W']}.
-- Final-round EVR target log loss was below the constant majority-class baseline in {X['R_BELOW_EVR']} of {X['R_N']} scenarios (random: {X['R_BELOW_RANDOM']} of {X['R_N']}).
-- In {X['R_DEGENERATE']} of {X['R_N']} scenarios all four strategies end within 0.0005 of the same final log loss. {X['R_SMALL_POOL']} of {X['R_N']} scenarios have at most {X['R_ROUNDS']} experiments left in the pool after the 3 initial ones, so the strategies can acquire every pool experiment and only the path (area under the curve) differs.
-- Scenarios skipped by the design: {X['R_SKIPPED']}.
+- EVR versus random: better in {X["R_RAND_B"]}, indistinguishable in {X["R_RAND_I"]}, worse in {X["R_RAND_W"]}.
+- EVR versus uncertainty sampling: better in {X["R_UNC_B"]}, indistinguishable in {X["R_UNC_I"]}, worse in {X["R_UNC_W"]}.
+- EVR versus nearest gap: better in {X["R_GAP_B"]}, indistinguishable in {X["R_GAP_I"]}, worse in {X["R_GAP_W"]}.
+- Final-round EVR target log loss was below the constant majority-class baseline in {X["R_BELOW_EVR"]} of {X["R_N"]} scenarios (random: {X["R_BELOW_RANDOM"]} of {X["R_N"]}).
+- In {X["R_DEGENERATE"]} of {X["R_N"]} scenarios all four strategies end within 0.0005 of the same final log loss. {X["R_SMALL_POOL"]} of {X["R_N"]} scenarios have at most {X["R_ROUNDS"]} experiments left in the pool after the 3 initial ones, so the strategies can acquire every pool experiment and only the path (area under the curve) differs.
+- Scenarios skipped by the design: {X["R_SKIPPED"]}.
 
 Limitations (from the artifact):
 
-{X['R_LIMITS']}
+{X["R_LIMITS"]}
 
-Honest reading: the artifact's own interpretation is "{X['R_INTERP']}" EVR is not shown to be reliably better than the baselines; it is a principled
+Honest reading: the artifact's own interpretation is "{X["R_INTERP"]}" EVR is not shown to be reliably better than the baselines; it is a principled
 target-aware score whose retrospective advantage, where present, is small-sample evidence only.
 
 Per scenario (AUC difference of the target log-loss curve; negative favours EVR; tag from the CI):
 
-{X['RETRO_TABLE']}
+{X["RETRO_TABLE"]}
 """
 
 
@@ -228,16 +237,20 @@ def build_validation(F, X):
     X2["P_MIN"], X2["P_MAX"] = X["ts"]["p_min"], X["ts"]["p_max"]
     X2["P_FLOOR"] = X["N_PERM"] + 1
     X2["RETRO_SECTION"] = retro_section(X)
-    out = HEAD.format(mdir=F["mdir"], retro_path=F["retro_path"], **{k: v for k, v in X2.items() if k not in ("ts", "mdir", "retro_path")})
+    out = HEAD.format(
+        mdir=F["mdir"],
+        retro_path=F["retro_path"],
+        **{k: v for k, v in X2.items() if k not in ("ts", "mdir", "retro_path")},
+    )
     for g in groups:
         out += group_section(g, X["CV_REPEATS"])
-    out += """
+    out += f"""
 ## Limitations of this validation
 
 - Observations are ordered flow schedules; most "sustained" rows are sustained by list order and the final unrecorded setting is omitted, so the
   boundary is thinly observed.
-- Flow values are mostly derived (borrowed calibration, linear extrapolation below the calibrated range); the "drop below_calibration_range rows"
-  sensitivity rows show the dependence.
+- Airflow: {X["FLOW_PROVENANCE"]} Values below the calibrated range are linearly
+  extrapolated; the "drop below_calibration_range rows" sensitivity rows show the dependence.
 - O2 is partly confounded with campaign; leave-one-campaign-out folds are small (see n).
 - Results describe the integrated records only. They say nothing about conditions covered by investigations that are not integrated (for example
   SoFIE-GEL, Saffire-V/VI): those conditions are not represented in the integrated records.

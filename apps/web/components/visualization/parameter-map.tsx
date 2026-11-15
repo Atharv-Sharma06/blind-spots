@@ -7,6 +7,7 @@ import { select } from "d3-selection";
 import { zoom as d3zoom, zoomIdentity } from "d3-zoom";
 import { Button } from "@/components/ui/button";
 import type { CoverageResponse, SurfaceResponse } from "@/lib/types";
+import { verdictLabel } from "@/lib/format";
 import MapLegend from "./map-legend";
 import { ACCENT, GAP, INK, MUTED, OBSERVED, fmtTick, gridGeom, maskRuns, plumRgb, yTicks, type GridGeom } from "./map-scales";
 
@@ -41,22 +42,30 @@ export type ParameterMapProps = {
     context: boolean;
   };
   target?: { label: string; xRange: [number, number]; yRange: [number, number]; nominal: [number, number] } | null;
-  candidates?: Array<{ id: string; rank: number; x: number; y: number; title: string }>;
-  contextEnvelopes?: Array<{ id: string; label: string; xRange: [number | null, number | null]; yRange: [number | null, number | null] }>;
+  /**
+   * `slice` (optional) = the candidate's value on the sliced axis (pressure kPa on o2_flow, airflow cm/s on
+   * o2_pressure). When given, candidates more than one reference scale from the map slice are drawn hollow ("off-slice").
+   */
+  candidates?: Array<{ id: string; rank: number; x: number; y: number; title: string; slice?: number | null }>;
+  contextEnvelopes?: Array<{ id: string; label: string; short?: string; xRange: [number | null, number | null]; yRange: [number | null, number | null] }>;
   contextPoints?: Array<{ id: string; x: number; y: number; label: string; investigation: string }>;
   highlightObservationIds?: string[];
   selectedObservationId?: string | null;
   selectedCandidateId?: string | null;
   viewDomain?: ViewDomain | null;
-  onViewDomainChange?: (d: ViewDomain) => void;
+  onViewDomainChange?: (d: ViewDomain | null) => void;
   onSelectObservation?: (id: string | null) => void;
   onSelectCandidate?: (id: string | null) => void;
+  /** Fixed plot height in px. Omit it and size the plot box with `plotClassName` (CSS) instead: the plot then
+   *  measures itself, so the server-rendered height equals the client height on every screen (no load jump). */
   height?: number;
+  plotClassName?: string;
   ariaLabel: string;
 };
 
 const M = { l: 58, r: 18, t: 12, b: 46 };
 const CONTOUR_LEVELS = [0.1, 0.5, 0.9];
+const CONTOUR_LABEL = "model p = 0.5 (supported region)";
 
 type Grid = number[][];
 type Item = { key: string; kind: "obs" | "cand"; id: string; px: number; py: number };
@@ -64,7 +73,27 @@ type Hover =
   | { kind: "obs"; id: string; x: number; y: number }
   | { kind: "cand"; id: string; x: number; y: number }
   | { kind: "ctx"; id: string; x: number; y: number }
-  | { kind: "cell"; i: number; j: number; x: number; y: number; px: number; py: number };
+  | { kind: "cell"; i: number; j: number; x: number; y: number };
+
+type CandMember = { id: string; rank: number; x: number; y: number; title: string; slice?: number | null; off: boolean };
+type CandGroup = { key: string; X: number; Y: number; members: CandMember[]; anyOn: boolean; label: string; half: number };
+
+let measureCtx: CanvasRenderingContext2D | null = null;
+let measureFamily: string | null = null;
+/** Text width in px for SVG labels (Geist via the body font); estimate when no DOM. */
+function textW(t: string, size: number, weight = 400): number {
+  if (typeof document !== "undefined") {
+    measureCtx ??= document.createElement("canvas").getContext("2d");
+    measureFamily ??= getComputedStyle(document.body).fontFamily || "sans-serif";
+    if (measureCtx) {
+      measureCtx.font = `${weight} ${size}px ${measureFamily}`;
+      return measureCtx.measureText(t).width;
+    }
+  }
+  return t.length * size * 0.56;
+}
+type Box = { x: number; y: number; w: number; h: number };
+const hit = (a: Box, b: Box) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
 
 const at = <T,>(a: T[] | undefined, i: number): T | undefined => (a ? a[i] : undefined);
 
@@ -99,11 +128,13 @@ function buildRasters(surface: SurfaceResponse, hypo: ParameterMapProps["hypothe
   const verdict = surface.verdict;
   const verdictAt = (i: number, j: number) => at(verdict ?? undefined, j)?.[i];
   const row = (j: number) => (geom.yAscending ? ny - 1 - j : j);
-  const supported = (i: number, j: number) => (verdict ? verdictAt(i, j) !== "insufficient_evidence" : true);
+  // D3: prediction fill and contours only where the cell verdict is "supported".
+  const supported = (i: number, j: number) => (verdict ? verdictAt(i, j) === "supported" : false);
 
   let unc: HTMLCanvasElement | null = null;
   let pred: HTMLCanvasElement | null = null;
   let hasExtrapolation = false;
+  if (verdict) for (const r of verdict) if (r.some((v) => v === "extrapolation")) hasExtrapolation = true;
   const uc = u ? makeCanvas(nx, ny) : null;
   const pc = p ? makeCanvas(nx, ny) : null;
   for (let j = 0; j < ny; j++) {
@@ -122,12 +153,10 @@ function buildRasters(surface: SurfaceResponse, hypo: ParameterMapProps["hypothe
       if (pc && p && supported(i, j)) {
         const v = at(p[j], i);
         if (typeof v === "number" && Number.isFinite(v)) {
-          const ext = verdictAt(i, j) === "extrapolation";
-          if (ext) hasExtrapolation = true;
           pc[1].data[o] = 23;
           pc[1].data[o + 1] = 23;
           pc[1].data[o + 2] = 26;
-          pc[1].data[o + 3] = Math.round(255 * (0.03 + 0.17 * Math.min(1, Math.max(0, v))) * (ext ? 0.55 : 1));
+          pc[1].data[o + 3] = Math.round(255 * (0.05 + 0.16 * Math.min(1, Math.max(0, v))));
         }
       }
     }
@@ -144,11 +173,33 @@ function buildRasters(surface: SurfaceResponse, hypo: ParameterMapProps["hypothe
   const supportedRuns = maskRuns(nx, ny, (i, j) => supported(i, j));
   let contours: Rasters["contours"] = [];
   if (p) {
-    const flat = new Float64Array(nx * ny);
+    const flat = new Float64Array(nx * ny).fill(NaN);
     for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
       const v = at(p[j], i);
-      flat[j * nx + i] = typeof v === "number" && Number.isFinite(v) ? v : 0;
+      if (typeof v === "number" && Number.isFinite(v)) flat[j * nx + i] = v;
     }
+    // Missing (null) probabilities: fill from valid neighbours so contours do not trace the gap edge (drawing is
+    // clipped to supported cells anyway, so filled values are never shown as estimates).
+    for (let pass = 0; pass < nx + ny; pass++) {
+      let left = 0;
+      const prev = flat.slice();
+      for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
+        if (!Number.isNaN(prev[j * nx + i]!)) continue;
+        let sum = 0;
+        let n = 0;
+        for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
+          const a = i + di;
+          const b = j + dj;
+          if (a < 0 || b < 0 || a >= nx || b >= ny) continue;
+          const w = prev[b * nx + a]!;
+          if (!Number.isNaN(w)) { sum += w; n++; }
+        }
+        if (n) flat[j * nx + i] = sum / n;
+        else left++;
+      }
+      if (!left) break;
+    }
+    for (let k = 0; k < flat.length; k++) if (Number.isNaN(flat[k]!)) flat[k] = 0;
     const gen = d3contours().size([nx, ny]).smooth(true);
     contours = CONTOUR_LEVELS.map((level) => ({ level, multi: gen.contour(flat as unknown as number[], level) }));
   }
@@ -213,10 +264,38 @@ function fmt(v: number, d = 2): string {
 
 export default function ParameterMap(props: ParameterMapProps) {
   const {
-    plane, xDomain, yDomain, yScale, observations, coverage, surface, hypotheticalSurface, layers, target,
+    plane, xDomain: xDomainIn, yDomain: yDomainIn, yScale, observations, coverage, surface, hypotheticalSurface, layers: layersIn, target,
     candidates = [], contextEnvelopes = [], contextPoints = [], highlightObservationIds, selectedObservationId,
-    selectedCandidateId, viewDomain, onViewDomainChange, onSelectObservation, onSelectCandidate, height = 520, ariaLabel,
+    selectedCandidateId, viewDomain, onViewDomainChange, onSelectObservation, onSelectCandidate, height: heightProp, plotClassName, ariaLabel,
   } = props;
+  const [measuredH, setMeasuredH] = useState<number | null>(null);
+  const height = heightProp ?? measuredH ?? 520;
+  // D3: axes extend to include the selected target (e.g. Skylab, Apollo); grids are drawn only where provided.
+  const [xDomain, yDomain] = useMemo((): [[number, number], [number, number]] => {
+    const x: [number, number] = [xDomainIn[0], xDomainIn[1]];
+    const y: [number, number] = [yDomainIn[0], yDomainIn[1]];
+    if (target) {
+      const [t0, t1] = [Math.min(...target.xRange, target.nominal[0]), Math.max(...target.xRange, target.nominal[0])];
+      if (t0 < x[0]) x[0] = Math.max(0, Math.floor((t0 - 2) / 5) * 5);
+      if (t1 > x[1]) x[1] = Math.min(100, Math.ceil((t1 + 2) / 5) * 5);
+      const [u0, u1] = [Math.min(...target.yRange, target.nominal[1]), Math.max(...target.yRange, target.nominal[1])];
+      if (yScale === "log") {
+        if (u0 > 0 && u0 < y[0]) y[0] = u0 / 1.5;
+        if (u1 > y[1]) y[1] = u1 * 1.5;
+      } else {
+        if (u0 < y[0]) y[0] = Math.max(0, Math.floor((u0 - 5) / 10) * 10);
+        if (u1 > y[1]) y[1] = Math.ceil((u1 + 5) / 10) * 10;
+      }
+    }
+    return [x, y];
+  }, [xDomainIn, yDomainIn, yScale, target]);
+  const fullX = xDomain;
+  const fullY = yDomain;
+  // D3: only one surface layer at a time (the store enforces it; cope here if several arrive).
+  const layers = useMemo(() => {
+    const surf = layersIn.prediction ? "prediction" : layersIn.uncertainty ? "uncertainty" : layersIn.coverage ? "coverage" : null;
+    return { ...layersIn, prediction: surf === "prediction", uncertainty: surf === "uncertainty", coverage: surf === "coverage" };
+  }, [layersIn]);
   const uid = useId().replace(/[^a-zA-Z0-9]/g, "");
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -227,6 +306,8 @@ export default function ParameterMap(props: ParameterMapProps) {
   const [activeKey, setActiveKey] = useState<string | null>(null);
   const [focusKey, setFocusKey] = useState<string | null>(null);
   const [asTable, setAsTable] = useState(false);
+  const tipRef = useRef<HTMLDivElement>(null);
+  const [wrapFocus, setWrapFocus] = useState(false);
 
   useEffect(() => {
     const el = wrapRef.current;
@@ -234,10 +315,12 @@ export default function ParameterMap(props: ParameterMapProps) {
     const ro = new ResizeObserver((e) => {
       const w = e[0]?.contentRect.width;
       if (w && w > 120) setWidth(Math.round(w));
+      const h = e[0]?.contentRect.height;
+      if (heightProp === undefined && h && h > 120) setMeasuredH(Math.round(h));
     });
     ro.observe(el);
     return () => ro.disconnect();
-  }, [asTable]);
+  }, [asTable, heightProp]);
 
   const domKey = `${xDomain.join(",")}|${yDomain.join(",")}|${yScale}|${plane}`;
   const internal = internalRaw && internalRaw.key === domKey ? internalRaw.v : null;
@@ -246,6 +329,12 @@ export default function ParameterMap(props: ParameterMapProps) {
   const view: ViewDomain = useMemo(() => viewDomain ?? internal ?? { x: xDomain, y: yDomain }, [viewDomain, internal, xDomain, yDomain]);
   const iw = Math.max(50, width - M.l - M.r);
   const ih = Math.max(50, height - M.t - M.b);
+  /** Tooltip placement at the pointer, flipped left/up near the right/bottom edges (transform: no layout shift). */
+  const tipTransform = (x: number, y: number) => {
+    const fx = x + 14 + 270 > width;
+    const fy = y + 14 + 170 > height;
+    return `translate3d(${fx ? x - 14 : x + 14}px, ${fy ? y - 14 : y + 14}px, 0) translate(${fx ? "-100%" : "0"}, ${fy ? "-100%" : "0"})`;
+  };
 
   const xs = useMemo(() => scaleLinear().domain(view.x).range([0, iw]), [view.x, iw]);
   const ys = useMemo(() => {
@@ -275,8 +364,8 @@ export default function ParameterMap(props: ParameterMapProps) {
 
   const resetView = useCallback(() => {
     setInternal(null);
-    live.current.onViewDomainChange?.({ x: xDomain, y: yDomain });
-  }, [xDomain, yDomain, setInternal]);
+    live.current.onViewDomainChange?.(null);
+  }, [setInternal]);
 
   const zoomBy = useCallback(
     (f: number) => {
@@ -398,22 +487,11 @@ export default function ParameterMap(props: ParameterMapProps) {
       // With coverage hatch on top, lighten the uncertainty wash so the two layers do not stack into a saturated plane.
       if (layers.uncertainty && rasters.unc) {
         ctx.save();
-        if (layers.coverage) ctx.globalAlpha = 0.5;
+        ctx.globalAlpha = 0.72;
         ctx.drawImage(rasters.unc, rx, ry, rw, rh);
         ctx.restore();
       }
       if (layers.prediction && rasters.pred) ctx.drawImage(rasters.pred, rx, ry, rw, rh);
-      if (layers.prediction && rasters.insufficientRuns.length) {
-        const pat = hatchPattern(ctx, "rgba(107,106,101,0.45)", dpr, 6);
-        if (pat) {
-          ctx.save();
-          runsPath(rasters.geom, rasters.insufficientRuns);
-          ctx.clip();
-          ctx.fillStyle = pat;
-          ctx.fillRect(0, 0, iw, ih);
-          ctx.restore();
-        }
-      }
     }
     if (layers.coverage && sparse && sparse.runs.length) {
       const g = sparse.geom;
@@ -426,11 +504,6 @@ export default function ParameterMap(props: ParameterMapProps) {
         ctx.globalAlpha = 0.12;
         ctx.fillStyle = GAP;
         ctx.fillRect(0, 0, iw, ih);
-        ctx.globalAlpha = 1;
-        ctx.font = "12px sans-serif";
-        ctx.fillStyle = "rgba(107,106,101,1)";
-        ctx.textAlign = "center";
-        ctx.fillText("No supported estimate in this slice", iw / 2, Math.min(ih - 8, 18));
         ctx.restore();
       }
       const pat = whole ? null : hatchPattern(ctx, GAP, dpr, 8);
@@ -438,7 +511,7 @@ export default function ParameterMap(props: ParameterMapProps) {
         ctx.save();
         runsPath(sparse.geom, sparse.runs);
         ctx.clip();
-        ctx.globalAlpha = 0.6;
+        ctx.globalAlpha = 0.95;
         ctx.fillStyle = pat;
         ctx.fillRect(0, 0, iw, ih);
         ctx.restore();
@@ -472,7 +545,7 @@ export default function ParameterMap(props: ParameterMapProps) {
       const { fx, fy } = centreFns(gm);
       let d = "";
       const pts: Array<[number, number]> = [];
-      let best: Array<[number, number]> = [];
+      const visPts: Array<[number, number]> = [];
       for (const poly of multi) {
         for (const ring of poly.coordinates) {
           const cur: Array<[number, number]> = [];
@@ -483,12 +556,11 @@ export default function ParameterMap(props: ParameterMapProps) {
             cur.push([X, Y]);
           });
           d += "Z";
-          const vis = cur.filter(([X, Y]) => X > 24 && X < iw - 24 && Y > 14 && Y < ih - 14);
-          if (vis.length > best.length) best = vis;
+          visPts.push(...cur.filter(([X, Y]) => X > 24 && X < iw - 24 && Y > 14 && Y < ih - 14));
           pts.push(...cur);
         }
       }
-      return { d, labelPt: best.length ? best[Math.floor(best.length / 2)]! : null };
+      return { d, visPts };
     },
     [centreFns, iw, ih],
   );
@@ -504,7 +576,7 @@ export default function ParameterMap(props: ParameterMapProps) {
   }, [layers.coverage, sparse, ringsToPath]);
 
   const supportedClip = useMemo(() => {
-    if (!layers.prediction || !rasters || !rasters.hasInsufficient) return null;
+    if (!layers.prediction || !rasters) return null;
     const gm = rasters.geom;
     return rasters.supportedRuns.map(([j, i0, i1]) => {
       const xa = xs(gm.xEdges[i0]!);
@@ -531,12 +603,46 @@ export default function ParameterMap(props: ParameterMapProps) {
     return { obs, cands };
   }, [view, layers.observations, layers.candidates, observations, candidates]);
 
+  const wholeGap = useMemo(() => {
+    if (!layers.coverage || !sparse || !sparse.runs.length) return false;
+    const cells = sparse.geom.nx * sparse.geom.ny;
+    return cells > 0 && sparse.runs.reduce((a, r) => a + (r[2] - r[1]), 0) / cells >= 0.9;
+  }, [layers.coverage, sparse]);
+
+  // ---- candidates (D3): off-slice detection, coincident markers merged, rank 1 drawn last (on top)
+  const sliceInfo = coverage?.slice ?? surface?.slice ?? null;
+  const scales = coverage?.scales ?? surface?.scales ?? null;
+  const candGroups: CandGroup[] = useMemo(() => {
+    const s0 = sliceInfo?.value;
+    const isOff = (v: number | null | undefined) => {
+      if (v == null || s0 == null || !Number.isFinite(v)) return false;
+      if (plane === "o2_flow") return v > 0 && s0 > 0 ? Math.abs(Math.log(v / s0)) > (scales?.p ?? 0.1) + 1e-9 : false;
+      return v >= 0 && s0 >= 0 ? Math.abs(Math.log1p(v) - Math.log1p(s0)) > (scales?.flow ?? 0.5) + 1e-9 : false;
+    };
+    const groups: CandGroup[] = [];
+    for (const c of [...vis.cands].sort((a, b) => a.rank - b.rank)) {
+      const X = xs(c.x);
+      const Y = ys(c.y);
+      const m: CandMember = { ...c, off: isOff(c.slice) };
+      const g = groups.find((q) => Math.hypot(q.X - X, q.Y - Y) < 12);
+      if (g) g.members.push(m);
+      else groups.push({ key: `c:${c.id}`, X, Y, members: [m], anyOn: false, label: "", half: 11 });
+    }
+    for (const g of groups) {
+      g.anyOn = g.members.some((m) => !m.off);
+      g.label = g.members.map((m) => m.rank).join(", ");
+      g.half = g.members.length > 1 ? Math.max(11, textW(g.label, 10, 600) / 2 + 9) : 11;
+    }
+    return groups;
+  }, [vis.cands, xs, ys, plane, sliceInfo?.value, scales?.p, scales?.flow]);
+  const candGroupByKey = useMemo(() => new Map(candGroups.map((g) => [g.key, g])), [candGroups]);
+
   const items: Item[] = useMemo(
     () => [
       ...vis.obs.map((o) => ({ key: `o:${o.id}`, kind: "obs" as const, id: o.id, px: xs(o.x), py: ys(o.y) })),
-      ...vis.cands.map((c) => ({ key: `c:${c.id}`, kind: "cand" as const, id: c.id, px: xs(c.x), py: ys(c.y) })),
+      ...candGroups.map((g) => ({ key: g.key, kind: "cand" as const, id: g.members[0]!.id, px: g.X, py: g.Y })),
     ],
-    [vis, xs, ys],
+    [vis.obs, candGroups, xs, ys],
   );
   const tabKey = items.some((i) => i.key === activeKey) ? activeKey : (items[0]?.key ?? null);
   const highlight = useMemo(() => new Set(highlightObservationIds ?? []), [highlightObservationIds]);
@@ -557,7 +663,11 @@ export default function ParameterMap(props: ParameterMapProps) {
       e.preventDefault();
       e.stopPropagation();
       if (it.kind === "obs") onSelectObservation?.(it.id === selectedObservationId ? null : it.id);
-      else onSelectCandidate?.(it.id === selectedCandidateId ? null : it.id);
+      else {
+        const g = candGroupByKey.get(it.key);
+        const anySel = g ? g.members.some((m) => m.id === selectedCandidateId) : it.id === selectedCandidateId;
+        onSelectCandidate?.(anySel ? null : it.id);
+      }
       return;
     }
     const dir: Record<string, [number, number]> = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
@@ -621,13 +731,22 @@ export default function ParameterMap(props: ParameterMapProps) {
     const i = bisect(src.xEdges, xv);
     const j = bisect(src.yEdges.slice().sort((a, b) => a - b), yv);
     if (i < 0 || j < 0) return setHover(null);
-    setHover({ kind: "cell", i, j: src.yAscending ? j : src.ny - 1 - j, x: xv, y: yv, px: lx + M.l, py: ly + M.t });
+    const jj = src.yAscending ? j : src.ny - 1 - j;
+    // Cell content changes only with the cell; the tooltip follows the pointer through a ref (no re-render).
+    if (hover && hover.kind === "cell" && hover.i === i && hover.j === jj) {
+      const el = tipRef.current;
+      if (el) el.style.transform = tipTransform(lx + M.l, ly + M.t);
+      return;
+    }
+    setHover({ kind: "cell", i, j: jj, x: lx + M.l, y: ly + M.t });
   };
 
   const xLabel = "Oxygen (% by volume)";
   const yLabel = plane === "o2_flow" ? "Airflow (cm/s, log scale)" : "Total pressure (kPa)";
   const yName = plane === "o2_flow" ? "Airflow" : "Pressure";
   const yUnit = plane === "o2_flow" ? "cm/s" : "kPa";
+  const sliceName = plane === "o2_flow" ? "pressure" : "airflow";
+  const sliceUnit = plane === "o2_flow" ? "kPa" : "cm/s";
 
   const counts = useMemo(() => {
     let s = 0;
@@ -638,7 +757,8 @@ export default function ParameterMap(props: ParameterMapProps) {
     }
     return { s, n };
   }, [vis.obs]);
-  const summary = `${ariaLabel}. ${vis.obs.length} of ${observations.length} observations in view (${counts.s} flame sustained, ${counts.n} not sustained). Oxygen ${fmt(lo(view.x), 1)} to ${fmt(hi(view.x), 1)} percent, ${yName.toLowerCase()} ${fmt(lo(view.y))} to ${fmt(hi(view.y))} ${yUnit}. Focus the map, then use arrow keys to pan, plus and minus to zoom, 0 to reset, arrow keys to move between points, Tab to leave the map, Enter to select, Escape to clear.`;
+  const summary = `${ariaLabel}. ${vis.obs.length} of ${observations.length} observations in view (${counts.s} flame sustained, ${counts.n} flame not sustained). Oxygen ${fmt(lo(view.x), 1)} to ${fmt(hi(view.x), 1)} percent, ${yName.toLowerCase()} ${fmt(lo(view.y))} to ${fmt(hi(view.y))} ${yUnit}.`;
+  const kbdHint = "Arrows pan · + / − zoom · 0 reset · Tab to points, arrows between points, Enter select, Esc clear";
 
   const hasAssumed = vis.obs.some((o) => o.pressureAssumed);
   const hasUnlabelled = vis.obs.some((o) => o.label === null);
@@ -654,27 +774,43 @@ export default function ParameterMap(props: ParameterMapProps) {
       return (
         <>
           <div className="font-medium text-fg">{o.title}</div>
-          <div className="text-muted">Experiment {o.experimentId}</div>
-          <dl className="mt-1 grid grid-cols-[auto_1fr] gap-x-3 font-mono text-[11px] tabular-nums">
-            <dt className="text-muted">O2</dt><dd>{fmt(o.x, 1)} %</dd>
-            <dt className="text-muted">{yName}</dt><dd>{fmt(o.y)} {yUnit}</dd>
+          <dl className="mt-1 grid grid-cols-[auto_1fr] gap-x-3 text-[12px]">
             <dt className="text-muted">Outcome</dt>
-            <dd>{o.label === 1 ? "flame sustained" : o.label === 0 ? "not sustained" : "not determined"}</dd>
-            <dt className="text-muted">Pressure</dt><dd>{o.pressureAssumed ? "assumed" : "measured"}</dd>
-            {Object.entries(o.detail).map(([k, v]) => (
-              <span key={k} className="contents"><dt className="text-muted">{k}</dt><dd className="break-words font-sans">{v}</dd></span>
-            ))}
+            <dd>{o.label === 1 ? "Flame sustained" : o.label === 0 ? "Flame not sustained" : "Not used for training"}</dd>
+            <dt className="text-muted">O₂</dt><dd className="num">{fmt(o.x, 1)} %</dd>
+            {plane === "o2_flow" ? (
+              <><dt className="text-muted">Airflow</dt><dd className="num">{fmt(o.y)} cm/s</dd></>
+            ) : (
+              <><dt className="text-muted">Pressure</dt><dd className="num">{fmt(o.y, 1)} kPa{o.pressureAssumed ? " (assumed)" : ""}</dd></>
+            )}
+            {Object.entries(o.detail)
+              .filter(([k]) => k !== "Outcome" && k !== "Oxygen" && k !== (plane === "o2_flow" ? "Airflow" : "Pressure"))
+              .map(([k, v]) => (
+                <span key={k} className="contents"><dt className="text-muted">{k}</dt><dd className="break-words">{v}</dd></span>
+              ))}
           </dl>
         </>
       );
     }
     if (hover.kind === "cand") {
-      const c = candById.get(hover.id);
-      if (!c) return null;
+      const g = candGroupByKey.get(`c:${hover.id}`);
+      const members = g?.members ?? (candById.get(hover.id) ? [{ ...candById.get(hover.id)!, off: false }] : []);
+      if (!members.length) return null;
       return (
         <>
-          <div className="font-medium text-fg">Candidate {c.rank}: {c.title}</div>
-          <div className="font-mono text-[11px] tabular-nums text-muted">O2 {fmt(c.x, 1)} %, {yName.toLowerCase()} {fmt(c.y)} {yUnit}</div>
+          <div className="font-medium text-fg">{members.length > 1 ? `Research candidates ${g?.label}` : `Research candidate ${members[0]!.rank}`}</div>
+          <div className="num text-[11px] text-muted">O₂ {fmt(members[0]!.x, 1)} %, {yName.toLowerCase()} {fmt(members[0]!.y)} {yUnit}</div>
+          {members.length > 1 || members.some((m) => m.off) ? (
+            <ul className="mt-1 space-y-0.5 text-[12px]">
+              {members.map((m) => (
+                <li key={m.id}>
+                  <span className="num">{m.rank}</span>
+                  {m.slice != null ? <span className="num"> · {sliceName} {fmt(m.slice)} {sliceUnit}</span> : null}
+                  {m.off ? <span className="text-muted"> · off this slice</span> : null}
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </>
       );
     }
@@ -692,33 +828,127 @@ export default function ParameterMap(props: ParameterMapProps) {
     }
     const gm = rasters?.geom ?? sparse?.geom;
     if (!gm) return null;
+    const axisSrc = rasters ? surface : (coverage ?? surface);
+    const cx = axisSrc?.x.values[hover.i];
+    const cy = axisSrc?.y.values[hover.j];
     const p = surface && (hypotheticalSurface?.p_sustained ?? surface.p_sustained)?.[hover.j]?.[hover.i];
     const u = surface && (hypotheticalSurface?.latent_std_ratio ?? surface.latent_std_ratio)?.[hover.j]?.[hover.i];
     const v = surface?.verdict?.[hover.j]?.[hover.i];
     const nn = (coverage?.nn_distance ?? surface?.nn_distance)?.[hover.j]?.[hover.i];
     return (
-      <dl className="grid grid-cols-[auto_1fr] gap-x-3 font-mono text-[11px] tabular-nums">
-        <dt className="text-muted">O2</dt><dd>{fmt(hover.x, 1)} %</dd>
-        <dt className="text-muted">{yName}</dt><dd>{fmt(hover.y)} {yUnit}</dd>
-        {layers.prediction && (<><dt className="text-muted">p(sustained)</dt><dd>{typeof p === "number" && v !== "insufficient_evidence" ? fmt(p) : "no supported estimate"}</dd></>)}
-        {layers.prediction && v && (<><dt className="text-muted">Verdict</dt><dd>{v.replace("_", " ")}</dd></>)}
-        {layers.uncertainty && (<><dt className="text-muted">Std ratio</dt><dd>{typeof u === "number" ? fmt(u) : "n/a"}</dd></>)}
-        {layers.coverage && (<><dt className="text-muted">Nearest obs.</dt><dd>{typeof nn === "number" ? `${fmt(nn)} ${threshold != null && nn > threshold ? "(sparse)" : ""}` : "n/a"}</dd></>)}
+      <dl className="grid grid-cols-[auto_1fr] gap-x-3 text-[12px]">
+        <dt className="text-muted">O₂</dt><dd className="num">{typeof cx === "number" ? fmt(cx, 1) : "n/a"} %</dd>
+        <dt className="text-muted">{yName}</dt><dd className="num">{typeof cy === "number" ? fmt(cy) : "n/a"} {yUnit}</dd>
+        {layers.prediction && (<><dt className="text-muted">P(sustained)</dt><dd className="num">{typeof p === "number" && v === "supported" ? fmt(p) : "not shown (not supported)"}</dd></>)}
+        {layers.prediction && v && (<><dt className="text-muted">Verdict</dt><dd>{verdictLabel(v)}</dd></>)}
+        {layers.uncertainty && (<><dt className="text-muted">Knowledge uncertainty</dt><dd className="num">{typeof u === "number" ? fmt(u) : "n/a"}</dd></>)}
+        {layers.coverage && (<><dt className="text-muted">Nearest observation</dt><dd className="num">{typeof nn === "number" ? `${fmt(nn)} ref. dist.${threshold != null && nn > threshold ? " (sparse)" : ""}` : "n/a"}</dd></>)}
       </dl>
     );
   })();
 
   const kb = "Ctrl/Cmd + scroll or pinch to zoom, drag to pan";
 
-  // ---- annotation geometry
-  const YY = (v: number) => ys(yScale === "log" ? Math.max(v, 1e-3) : v);
   const clampX = (v: number) => Math.max(0, Math.min(iw, v));
   const clampY = (v: number) => Math.max(0, Math.min(ih, v));
+  // ---- label layout: candidates are fixed obstacles; then the target label, the contour label, context labels
+  const labelLayout = (() => {
+    const placed: Box[] = candGroups.map((g) => ({ x: g.X - g.half - 2, y: g.Y - 13, w: g.half * 2 + 4 + (g.members.some((m) => m.off) ? 70 : 0), h: 26 }));
+    const free = (b: Box) => b.x >= 0 && b.x + b.w <= iw && b.y >= 0 && b.y + b.h <= ih && !placed.some((q) => hit(q, b));
+    const YYl = (v: number) => ys(yScale === "log" ? Math.max(v, 1e-3) : v);
+    let tgt: { rx: number; ry: number; rw: number; rh: number; nx: number; ny: number; lab: { x: number; y: number; text: string } | null } | null = null;
+    if (target) {
+      const x0 = xs(target.xRange[0]);
+      const x1 = xs(target.xRange[1]);
+      const y0 = YYl(target.yRange[1]);
+      const y1 = YYl(target.yRange[0]);
+      const rx = Math.min(x0, x1);
+      const ry = Math.min(y0, y1);
+      const rw = Math.abs(x1 - x0);
+      const rh = Math.abs(y1 - y0);
+      const nx = xs(target.nominal[0]);
+      const ny = YYl(target.nominal[1]);
+      let text = `Target: ${target.label}`;
+      const maxW = Math.max(40, iw - 8);
+      while (text.length > 10 && textW(text, 11, 500) > maxW) text = `${text.slice(0, -2)}…`;
+      const tw = textW(text, 11, 500);
+      const cl = (x: number) => Math.max(2, Math.min(iw - tw - 2, x));
+      const options: Box[] = [
+        ...(rw >= tw + 8 && rh >= 22 ? [{ x: rx + 4, y: ry + 3, w: tw, h: 14 }] : []),
+        { x: cl(rx), y: Math.min(ry, ny - 10) - 18, w: tw, h: 14 },
+        { x: cl(rx), y: Math.min(ry, ny) - 32, w: tw, h: 14 },
+        { x: cl(nx - tw / 2), y: Math.max(ry + rh, ny) + 18, w: tw, h: 14 },
+        { x: cl(rx), y: Math.max(ry + rh, ny + 10) + 4, w: tw, h: 14 },
+        { x: cl(nx + 16), y: ny - 7, w: tw, h: 14 },
+        { x: cl(nx - tw - 16), y: ny - 7, w: tw, h: 14 },
+      ];
+      const pick = options.find(free) ?? options.find((b) => b.y >= 0 && b.y + b.h <= ih) ?? options[0]!;
+      placed.push(pick);
+      tgt = { rx, ry, rw, rh, nx, ny, lab: { x: pick.x, y: pick.y + 11, text } };
+    }
+    let contour: { x: number; y: number } | null = null;
+    const mid = predPaths.find((c) => c.level === 0.5);
+    if (layers.prediction && mid && rasters) {
+      const gm = rasters.geom;
+      const sortedY = gm.yEdges.slice().sort((a, b) => a - b);
+      const okPt = (X: number, Y: number) => {
+        const i = bisect(gm.xEdges, xs.invert(X));
+        const j0 = bisect(sortedY, ys.invert(Y));
+        if (i < 0 || j0 < 0) return false;
+        const j = gm.yAscending ? j0 : gm.ny - 1 - j0;
+        return surface?.verdict?.[j]?.[i] === "supported";
+      };
+      const tw = textW(CONTOUR_LABEL, 11, 500);
+      const pts = mid.visPts.filter(([X, Y]) => okPt(X, Y));
+      const order = pts.map((_, k) => k).sort((a, b) => Math.abs(a - pts.length / 2) - Math.abs(b - pts.length / 2));
+      for (const k of order) {
+        const [X, Y] = pts[k]!;
+        const b = { x: Math.min(iw - tw - 2, X + 6), y: Y - 20, w: tw, h: 14 };
+        if (free(b)) {
+          placed.push(b);
+          contour = { x: b.x, y: b.y + 11 };
+          break;
+        }
+      }
+    }
+    const env = contextEnvelopes.flatMap((e, ei) => {
+      const x0 = clampX(xs(e.xRange[0] ?? lo(fullX)));
+      const x1 = clampX(xs(e.xRange[1] ?? hi(fullX)));
+      const y0 = clampY(YYl(e.yRange[1] ?? hi(fullY)));
+      const y1 = clampY(YYl(e.yRange[0] ?? lo(fullY)));
+      const w = Math.abs(x1 - x0);
+      const h = Math.abs(y1 - y0);
+      if (w < 1 || h < 1) return [];
+      const x = Math.min(x0, x1);
+      const y = Math.min(y0, y1);
+      // Readable tag (e.g. "Saffire-VI") instead of a numbered code; drawn only where it fits, full name on hover.
+      const badge = e.short || `C${ei + 1}`;
+      const bw = textW(badge, 10) + 2;
+      let lab: { x: number; y: number } | null = null;
+      if (w >= bw + 6 && h >= 16) {
+        for (const b of [{ x: x + 3, y: y + 2, w: bw, h: 12 }, { x: x + w - bw - 3, y: y + 2, w: bw, h: 12 }, { x: x + 3, y: y + h - 14, w: bw, h: 12 }]) {
+          if (free(b)) {
+            placed.push(b);
+            lab = { x: b.x + 1, y: b.y + 10 };
+            break;
+          }
+        }
+      }
+      return [{ id: e.id, x, y, w, h, badge, label: e.label, lab }];
+    });
+    return { tgt, contour, env };
+  })();
+  const tgt = labelLayout.tgt;
+  const contourLabel = labelLayout.contour;
+  const envBoxes = labelLayout.env;
+
+  // ---- annotation geometry
+  const YY = (v: number) => ys(yScale === "log" ? Math.max(v, 1e-3) : v);
 
   return (
     <div className="w-full">
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-        <p className="text-[12px] text-muted" id={`${uid}-hint`}>{asTable ? "Table of observations currently in view." : kb}</p>
+        <p className="text-[12px] text-muted" id={`${uid}-hint`}>{asTable ? "Table of observations currently in view." : wrapFocus ? kbdHint : `${kb}; focus the map for keyboard controls`}</p>
         <div className="flex items-center gap-1.5">
           {!asTable && (
             <>
@@ -766,17 +996,19 @@ export default function ParameterMap(props: ParameterMapProps) {
       ) : (
         <div
           ref={wrapRef}
-          className="relative w-full select-none rounded-md border border-border bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-          style={{ height }}
+          className={`relative w-full select-none bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${heightProp === undefined ? plotClassName ?? "h-[520px]" : ""}`}
+          style={heightProp === undefined ? undefined : { height: heightProp }}
           tabIndex={0}
           role="group"
           aria-label={summary}
           aria-describedby={`${uid}-hint`}
           onKeyDown={onWrapKey}
+          onFocus={(e) => { if (e.target === e.currentTarget) setWrapFocus(true); }}
+          onBlur={() => setWrapFocus(false)}
           onPointerLeave={() => setHover(null)}
         >
           <canvas ref={canvasRef} className="pointer-events-none absolute left-0 top-0" style={{ width, height }} aria-hidden />
-          <svg width={width} height={height} className="absolute left-0 top-0" style={{ overflow: "visible" }}>
+          <svg width={width} height={height} role="none" className="absolute left-0 top-0" style={{ overflow: "visible" }}>
             <defs>
               <clipPath id={`${uid}-plot`}><rect x={0} y={0} width={iw} height={ih} /></clipPath>
               {supportedClip && (
@@ -815,56 +1047,45 @@ export default function ParameterMap(props: ParameterMapProps) {
                 {layers.prediction && predPaths.length > 0 && (
                   <g clipPath={supportedClip ? `url(#${uid}-sup)` : undefined} pointerEvents="none">
                     {predPaths.map((c) => (
-                      <path key={c.level} d={c.d} fill="none" stroke={INK} strokeWidth={c.level === 0.5 ? 2 : 1} opacity={c.level === 0.5 ? 1 : 0.6} strokeLinejoin="round" />
+                      <path key={c.level} d={c.d} fill="none" stroke={INK} strokeWidth={c.level === 0.5 ? 1.75 : 1} opacity={c.level === 0.5 ? 1 : 0.55} strokeDasharray={c.level === 0.5 ? undefined : "4 3"} strokeLinejoin="round" />
                     ))}
                   </g>
                 )}
 
-                {layers.context && contextEnvelopes.map((e, ei) => {
-                  const x0 = clampX(xs(e.xRange[0] ?? lo(xDomain)));
-                  const x1 = clampX(xs(e.xRange[1] ?? hi(xDomain)));
-                  const y0 = clampY(YY(e.yRange[1] ?? hi(yDomain)));
-                  const y1 = clampY(YY(e.yRange[0] ?? lo(yDomain)));
-                  const w = Math.abs(x1 - x0);
-                  const h = Math.abs(y1 - y0);
-                  if (w < 1 || h < 1) return null;
-                  const badge = `C${ei + 1}`;
-                  return (
-                    <g key={e.id} pointerEvents="none">
-                      <rect x={Math.min(x0, x1)} y={Math.min(y0, y1)} width={w} height={h} fill="none" stroke={MUTED} strokeWidth={1} strokeDasharray="3 3" />
-                      <rect x={Math.min(x0, x1)} y={Math.min(y0, y1)} width={20} height={13} fill="var(--surface)" stroke={MUTED} strokeWidth={1} />
-                      <text x={Math.min(x0, x1) + 10} y={Math.min(y0, y1) + 10} fontSize={9.5} textAnchor="middle" fill={MUTED}>{badge}</text>
-                      <title>{`${badge}: ${e.label}: documented test conditions (not integrated)`}</title>
-                    </g>
-                  );
-                })}
+                {layers.context && envBoxes.map((b) => (
+                  <g key={b.id} pointerEvents="none">
+                    <rect x={b.x} y={b.y} width={b.w} height={b.h} fill="none" stroke={MUTED} strokeOpacity={0.45} strokeWidth={1} strokeDasharray="2 3" />
+                    {b.lab && (
+                      <text x={b.lab.x} y={b.lab.y} fontSize={10} fill={MUTED} stroke="var(--surface)" strokeWidth={3} paintOrder="stroke">{b.badge}<title>{`${b.label}: documented test conditions, not integrated into the model`}</title></text>
+                    )}
+                  </g>
+                ))}
 
-                {layers.target && target && (() => {
-                  const x0 = xs(target.xRange[0]);
-                  const x1 = xs(target.xRange[1]);
-                  const y0 = YY(target.yRange[1]);
-                  const y1 = YY(target.yRange[0]);
-                  const nx = xs(target.nominal[0]);
-                  const ny = YY(target.nominal[1]);
-                  const rx = Math.min(x0, x1);
-                  const ry = Math.min(y0, y1);
-                  const ly = ry < 14 ? ry + 12 : ry - 5;
-                  return (
-                    <g pointerEvents="none">
-                      <rect x={rx} y={ry} width={Math.abs(x1 - x0)} height={Math.abs(y1 - y0)} fill="none" stroke={INK} strokeWidth={1.5} strokeDasharray="6 3" />
-                      <path d={`M${nx - 8},${ny}H${nx + 8}M${nx},${ny - 8}V${ny + 8}`} stroke={INK} strokeWidth={1.5} />
-                      <text x={Math.max(2, rx)} y={ly} fontSize={11} fontWeight={500} fill={INK} stroke="var(--surface)" strokeWidth={3} paintOrder="stroke">{`Target: ${target.label}`}</text>
-                    </g>
-                  );
-                })()}
+                {layers.target && tgt && (
+                  <g pointerEvents="none">
+                    <rect x={tgt.rx} y={tgt.ry} width={tgt.rw} height={tgt.rh} fill="none" stroke={INK} strokeWidth={1.5} strokeDasharray="6 3" />
+                    <path d={`M${tgt.nx - 8},${tgt.ny}H${tgt.nx + 8}M${tgt.nx},${tgt.ny - 8}V${tgt.ny + 8}`} stroke={INK} strokeWidth={1.5} />
+                  </g>
+                )}
 
                 {layers.context && contextPoints.map((c) => {
                   const X = xs(c.x);
                   const Y = YY(c.y);
                   return (
-                    <g key={c.id} onPointerEnter={() => setHover({ kind: "ctx", id: c.id, x: X + M.l, y: Y + M.t })} onPointerLeave={() => setHover(null)}>
+                    <g
+                      key={c.id}
+                      tabIndex={0}
+                      role="img"
+                      aria-label={`Context test (not modelled): ${c.investigation}, ${c.label}, oxygen ${fmt(c.x, 1)} percent, ${yName.toLowerCase()} ${fmt(c.y)} ${yUnit}`}
+                      style={{ outline: "none" }}
+                      onPointerEnter={() => setHover({ kind: "ctx", id: c.id, x: X + M.l, y: Y + M.t })}
+                      onPointerLeave={() => setHover(null)}
+                      onFocus={() => { setFocusKey(`x:${c.id}`); setHover({ kind: "ctx", id: c.id, x: X + M.l, y: Y + M.t }); }}
+                      onBlur={() => { setFocusKey(null); setHover(null); }}
+                    >
+                      {focusKey === `x:${c.id}` && <circle cx={X} cy={Y} r={9} fill="none" stroke={ACCENT} strokeWidth={2} />}
                       <circle cx={X} cy={Y} r={9} fill="transparent" />
-                      <path d={`M${X},${Y - 5}L${X + 4.5},${Y + 3.5}H${X - 4.5}Z`} fill="var(--surface)" stroke={MUTED} strokeWidth={1.2} />
+                      <path d={`M${X},${Y - 4.5}L${X + 4},${Y + 3}H${X - 4}Z`} fill="var(--surface)" stroke={MUTED} strokeWidth={1} />
                     </g>
                   );
                 })}
@@ -893,7 +1114,7 @@ export default function ParameterMap(props: ParameterMapProps) {
                       onBlur={() => { setFocusKey(null); setHover(null); }}
                     >
                       <circle cx={X} cy={Y} r={10} fill="transparent" />
-                      {o.pressureAssumed && <circle cx={X} cy={Y} r={7.5} fill="none" stroke={OBSERVED} strokeWidth={1} strokeDasharray="2 2" />}
+                      {o.pressureAssumed && <circle cx={X} cy={Y} r={7} fill="none" stroke={OBSERVED} strokeWidth={0.75} strokeOpacity={0.45} strokeDasharray="2 2" />}
                       <circle cx={X} cy={Y} r={4.5} fill={fill} stroke={o.label === 1 ? "var(--surface)" : OBSERVED} strokeWidth={o.label === 1 ? 1 : 1.5} />
                       {hl && <circle cx={X} cy={Y} r={9.5} fill="none" stroke={ACCENT} strokeWidth={1.5} />}
                       {(sel || focusKey === key) && <circle cx={X} cy={Y} r={12} fill="none" stroke={ACCENT} strokeWidth={2.5} />}
@@ -901,11 +1122,15 @@ export default function ParameterMap(props: ParameterMapProps) {
                   );
                 })}
 
-                {vis.cands.map((c) => {
-                  const key = `c:${c.id}`;
-                  const X = xs(c.x);
-                  const Y = ys(c.y);
-                  const sel = c.id === selectedCandidateId;
+                {[...candGroups].reverse().map((g) => {
+                  const { key, X, Y, half } = g;
+                  const top = g.members[0]!;
+                  const sel = g.members.some((m) => m.id === selectedCandidateId);
+                  const offRanks = g.members.filter((m) => m.off).map((m) => m.rank);
+                  const shape = (h: number, e: number) => `M${X - h - e},${Y}L${X - h + 11},${Y - 11 - e}H${X + h - 11}L${X + h + e},${Y}L${X + h - 11},${Y + 11 + e}H${X - h + 11}Z`;
+                  const desc = g.members
+                    .map((m) => `Research candidate ${m.rank}${m.slice != null ? `, ${sliceName} ${fmt(m.slice)} ${sliceUnit}` : ""}${m.off ? ", off this slice" : ""}`)
+                    .join("; ");
                   return (
                     <g
                       key={key}
@@ -913,18 +1138,28 @@ export default function ParameterMap(props: ParameterMapProps) {
                       role="button"
                       tabIndex={tabKey === key ? 0 : -1}
                       aria-pressed={sel}
-                      aria-label={`Candidate ${c.rank}: ${c.title}, oxygen ${fmt(c.x, 1)} percent, ${yName.toLowerCase()} ${fmt(c.y)} ${yUnit}`}
+                      aria-label={`${desc}. Oxygen ${fmt(top.x, 1)} percent, ${yName.toLowerCase()} ${fmt(top.y)} ${yUnit}`}
                       style={{ outline: "none", cursor: "pointer" }}
-                      onClick={(e) => { e.stopPropagation(); onSelectCandidate?.(sel ? null : c.id); }}
-                      onKeyDown={(e) => onItemKey(e, items.find((i) => i.key === key) ?? { key, kind: "cand", id: c.id, px: X, py: Y })}
-                      onPointerEnter={() => setHover({ kind: "cand", id: c.id, x: X + M.l, y: Y + M.t })}
+                      onClick={(e) => { e.stopPropagation(); onSelectCandidate?.(sel ? null : top.id); }}
+                      onKeyDown={(e) => onItemKey(e, items.find((i) => i.key === key) ?? { key, kind: "cand", id: top.id, px: X, py: Y })}
+                      onPointerEnter={() => setHover({ kind: "cand", id: top.id, x: X + M.l, y: Y + M.t })}
                       onPointerLeave={() => setHover(null)}
-                      onFocus={() => { setActiveKey(key); setFocusKey(key); setHover({ kind: "cand", id: c.id, x: X + M.l, y: Y + M.t }); }}
+                      onFocus={() => { setActiveKey(key); setFocusKey(key); setHover({ kind: "cand", id: top.id, x: X + M.l, y: Y + M.t }); }}
                       onBlur={() => { setFocusKey(null); setHover(null); }}
                     >
-                      <path d={`M${X},${Y - 11}L${X + 11},${Y}L${X},${Y + 11}L${X - 11},${Y}Z`} fill={ACCENT} stroke="var(--surface)" strokeWidth={1.5} />
-                      <text x={X} y={Y + 3.5} textAnchor="middle" fontSize={10} fontWeight={600} fill="#fff" pointerEvents="none">{c.rank}</text>
-                      {(sel || focusKey === key) && <path d={`M${X},${Y - 15}L${X + 15},${Y}L${X},${Y + 15}L${X - 15},${Y}Z`} fill="none" stroke={INK} strokeWidth={2} />}
+                      <path
+                        d={shape(half, 0)}
+                        fill={g.anyOn ? ACCENT : "var(--surface)"}
+                        stroke={g.anyOn ? "var(--surface)" : ACCENT}
+                        strokeWidth={1.5}
+                      />
+                      <text x={X} y={Y + 3.5} textAnchor="middle" fontSize={10} fontWeight={600} fill={g.anyOn ? "#fff" : ACCENT} pointerEvents="none" style={{ fontVariantNumeric: "tabular-nums" }}>{g.label}</text>
+                      {offRanks.length > 0 && (
+                        <text x={X + half + 5} y={Y + 3.5} fontSize={10} fill={MUTED} stroke="var(--surface)" strokeWidth={3} paintOrder="stroke" pointerEvents="none">
+                          {offRanks.length === g.members.length ? "off-slice" : `${offRanks.join(", ")} off-slice`}
+                        </text>
+                      )}
+                      {(sel || focusKey === key) && <path d={shape(half, 4)} fill="none" stroke={INK} strokeWidth={2} />}
                     </g>
                   );
                 })}
@@ -933,14 +1168,18 @@ export default function ParameterMap(props: ParameterMapProps) {
 
             {/* labels that must sit above everything */}
             <g transform={`translate(${M.l},${M.t})`} pointerEvents="none" clipPath={`url(#${uid}-plot)`}>
-              {(() => {
-                const mid = predPaths.find((c) => c.level === 0.5);
-                if (!layers.prediction || !mid?.labelPt) return null;
-                const [X, Y] = mid.labelPt;
-                return (
-                  <text x={X + 6} y={Y - 6} fontSize={11} fontWeight={500} fill={INK} stroke="var(--surface)" strokeWidth={3.5} paintOrder="stroke">predicted flammability boundary (p = 0.5)</text>
-                );
-              })()}
+              {layers.target && tgt?.lab && (
+                <text x={tgt.lab.x} y={tgt.lab.y} fontSize={11} fontWeight={500} fill={INK} stroke="var(--surface)" strokeWidth={3} paintOrder="stroke">{tgt.lab.text}</text>
+              )}
+              {contourLabel && (
+                <text x={contourLabel.x} y={contourLabel.y} fontSize={11} fontWeight={500} fill={INK} stroke="var(--surface)" strokeWidth={3.5} paintOrder="stroke">{CONTOUR_LABEL}</text>
+              )}
+              {layers.prediction && rasters && !rasters.supportedRuns.length && (
+                <text x={iw / 2} y={ih - 12} textAnchor="middle" fontSize={12} fill={MUTED} stroke="var(--surface)" strokeWidth={4} paintOrder="stroke">No supported model estimate on this slice; P(sustained) is not drawn.</text>
+              )}
+              {wholeGap && (
+                <text x={iw / 2} y={ih - 12} textAnchor="middle" fontSize={12} fill={MUTED} stroke="var(--surface)" strokeWidth={4} paintOrder="stroke">Sparse coverage across this whole slice</text>
+              )}
               {modelMissing && (
                 <text x={iw / 2} y={ih / 2} textAnchor="middle" fontSize={13} fill={MUTED} stroke="var(--surface)" strokeWidth={4} paintOrder="stroke">No fitted model grid for this group: prediction and uncertainty are not available.</text>
               )}
@@ -951,12 +1190,10 @@ export default function ParameterMap(props: ParameterMapProps) {
           </svg>
           {hover && tip && (
             <div
+              ref={tipRef}
               role="tooltip"
-              className="pointer-events-none absolute z-10 max-w-[260px] rounded-md bg-surface px-2.5 py-2 text-[12px] shadow-popover"
-              style={{
-                left: Math.min(hover.x + 14, Math.max(8, width - 270)),
-                top: Math.max(8, Math.min(hover.kind === "cell" ? hover.py + 14 : hover.y + 14, height - 150)),
-              }}
+              className="pointer-events-none absolute left-0 top-0 z-10 w-max max-w-[260px] rounded-md bg-surface px-2.5 py-2 text-[12px] shadow-popover"
+              style={{ transform: tipTransform(hover.x, hover.y) }}
             >
               {tip}
             </div>

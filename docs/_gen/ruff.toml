@@ -1,0 +1,8 @@
+# Lint and format settings for the documentation generator: the same rules as the analysis service,
+# with this directory as the first-party source root (its modules import each other by name).
+extend = "../../services/analysis/pyproject.toml"
+src = ["."]
+
+[lint]
+# Long lines here are Markdown prose inside string templates; wrapping them would change the generated documents.
+extend-ignore = ["E501"]

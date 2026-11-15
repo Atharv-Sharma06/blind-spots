@@ -10,7 +10,7 @@ from typing import Any
 import numpy as np
 
 from blindspots import config
-from blindspots.acquisition.batch import JointPosterior, _record
+from blindspots.acquisition.batch import JointPosterior, candidate_record, greedy_from
 from blindspots.acquisition.candidates import STATUS_TEXT, CandidateSet, build_candidates
 from blindspots.acquisition.counterfactual import counterfactual
 from blindspots.acquisition.evr import expected_target_mi_reduction
@@ -20,8 +20,9 @@ from blindspots.api.errors import ApiError
 from blindspots.api.models import Target
 from blindspots.api.services import context as ctxmod
 from blindspots.api.services import modeling
+from blindspots.api.services.assess import BAND_SOURCE_TEXT, fmt_flow
 from blindspots.api.services.targets import ResolvedSpec, resolve_target
-from blindspots.coverage.coverage import SCALES, nn_distance, to_coords
+from blindspots.coverage.coverage import SCALES, standardized_distances, to_coords
 from blindspots.coverage.grid import DEFAULT_SLICE
 from blindspots.models.gp_laplace import GPLaplaceClassifier
 from blindspots.models.registry import GroupModel
@@ -41,6 +42,7 @@ HIGH_COVARIANCE_CORR = 0.5
 HIGH_UNCERTAINTY_RATIO = 0.85
 BOUNDARY_P_RANGE = (0.3, 0.7)
 GAP_NN_DISTANCE = 1.0
+AT_TARGET_DISTANCE = 1.0  # reference distances from the nearest target point (LEAD_DECISIONS D4)
 MIN_INFORMATIVE_FRACTION = 1e-4  # below this the best candidate carries no usable information
 ROUND = 4
 
@@ -120,11 +122,17 @@ def _candidate_stats(
     corr = float((w * np.abs(cross) / np.sqrt(var_t * var_c)).sum())
     mi = expected_target_mi_reduction(model, t, x, w)
     mi_frac = float(mi["reduction"][0] / mi["mi_before"]) if mi["mi_before"] > 0 else 0.0
+    ratio = np.asarray(u["latent_std_ratio"])
+    ev = modeling.explain_points(
+        x, modeling.evidence_coords(model), ratio, np.asarray(u["aleatoric"]), np.asarray(u["total"])
+    )
     return {
         "p": float(u["p_mean"][0]),
-        "ratio": float(u["latent_std_ratio"][0]),
+        "ratio": float(ratio[0]),
         "corr": corr,
         "mi_frac": mi_frac,
+        "verdict": ev["verdict"][0],
+        "target_d": float(standardized_distances(x, t).min()),
     }
 
 
@@ -141,15 +149,42 @@ def build_candidate(
     cid: str,
     rank: int | None,
     fractions_by_setting: list[float] | None = None,
+    n_grid: int | None = None,
 ) -> dict[str, Any]:
     o2, p, u = rec["o2"], rec["pressure_kpa"], rec["airflow_cm_s"]
     x = to_coords(o2, p, u)
     st = _candidate_stats(model, ctx.t, ctx.w, x)
     nn = rec["reasons"]["coverage_nn_d"]
-    # Far from every integrated observation the predicted probability only reverts to the training base
-    # rate (fixed pressure length scale), so it is not reported as an estimate.
-    p_supported = nn is not None and nn <= GAP_NN_DISTANCE
+    # P(sustained) only where the candidate point itself is supported (LEAD_DECISIONS D2); elsewhere the
+    # prediction mostly reverts to the training base rate (fixed pressure length scale).
+    p_supported = st["verdict"] == "supported"
+    frac, marg = rec["standalone_fraction"], rec["marginal_fraction"]
     reasons: list[dict[str, Any]] = []
+    if rank == 1:
+        msg = (
+            f"Highest expected uncertainty reduction over the target among the {n_grid} grid candidates: "
+            f"{_pct(frac)} of the target's current latent variance."
+            if n_grid
+            else f"Highest expected uncertainty reduction over the target: {_pct(frac)}."
+        )
+    elif rank is not None:
+        msg = (
+            f"Largest additional expected uncertainty reduction after the higher-ranked picks: {_pct(marg)} "
+            f"({_pct(frac)} on its own)."
+        )
+    else:
+        msg = f"Expected uncertainty reduction over the target if this condition were tested: {_pct(frac)}."
+    reasons.append(_reason("expected_uncertainty_reduction", msg, frac))
+    if st["target_d"] <= AT_TARGET_DISTANCE:
+        reasons.append(
+            _reason(
+                "at_target_conditions",
+                "This condition lies within one reference distance of the target conditions. The most "
+                "informative single experiment is at the target conditions themselves; this follows from the "
+                "model's distance-based (stationary) correlation assumption.",
+                st["target_d"],
+            )
+        )
     if st["corr"] >= HIGH_COVARIANCE_CORR:
         reasons.append(
             _reason(
@@ -200,22 +235,22 @@ def build_candidate(
                     s,
                 )
             )
-    frac, marg = rec["standalone_fraction"], rec["marginal_fraction"]
-    name = f"Candidate {cid}"
+    name = "The selected candidate" if cid == "selected" else f"Candidate {cid}"
     sentence = (
-        f"{name} (O2 {o2:.1f} %, {p:.1f} kPa, {u:.2f} cm/s) has an expected reduction of "
+        f"{name} ({o2:.1f}% O₂, {p:.1f} kPa, {fmt_flow(u)} cm/s) has an expected uncertainty reduction of "
         f"{_pct(frac)} of the weighted latent variance over the target region"
     )
     if rank is not None and rank > 1:
         sentence += f" ({_pct(marg)} after the higher-ranked picks)"
     if p_supported:
         sentence += (
-            f"; the model estimates P(sustained) = {st['p']:.2f} with latent std ratio {st['ratio']:.2f}"
+            f"; the model estimates P(sustained) = {st['p']:.2f} with remaining uncertainty (latent std "
+            f"ratio) {st['ratio']:.2f}"
         )
     else:
         sentence += (
-            f"; no supported estimate of P(sustained) is given here (predictions this far from the data "
-            f"revert to the training base rate), latent std ratio {st['ratio']:.2f}"
+            "; no P(sustained) estimate is given because this condition is not supported by comparable "
+            f"observations (remaining uncertainty, latent std ratio, {st['ratio']:.2f})"
         )
     sentence += (
         f" and the nearest integrated observation is {nn:.1f} reference distances away."
@@ -238,6 +273,8 @@ def build_candidate(
         "p_sustained": _r(st["p"], 4) if p_supported else None,
         "latent_std_ratio": _r(st["ratio"], 4),
         "nn_distance": _r(nn, 3),
+        "verdict": st["verdict"],
+        "target_distance": _r(st["target_d"], 3),
         "feasibility_status": status,
         "feasibility_note": STATUS_TEXT[status],
         "reasons": reasons,
@@ -262,43 +299,36 @@ def candidate_set(ctx: Ctx) -> CandidateSet:
     return build_candidates(ctx.evidence, target_pressure_kpa=extra)
 
 
-def _greedy(jp: JointPosterior, cs: CandidateSet, k: int) -> list[dict[str, Any]]:
-    remaining = np.arange(len(cs))
-    out = []
-    for rank in range(1, min(k, len(cs)) + 1):
-        gains = jp.evr(remaining)
-        j = int(np.argmax(gains))
-        i = int(remaining[j])
-        out.append(_record(jp, cs, i, rank, float(gains[j]), "greedy_evr"))
-        jp.downdate(i)
-        remaining = np.delete(remaining, j)
-    return out
-
-
 def _assumptions(ctx: Ctx) -> list[str]:
     lo, hi = modeling.observed_pressure_range_kpa(ctx.model)
     spec = ctx.spec
     out = [
         f"The GP pressure length scale is fixed at {ctx.lp:g} (ln-pressure units) and cannot be learned: "
-        f"the training observations of this group span only {lo:.1f}-{hi:.1f} kPa. Any candidate or "
-        "prediction at other pressures is assumption-driven.",
+        + (
+            f"all training observations of this group sit at {lo:.1f} kPa. "
+            if f"{lo:.1f}" == f"{hi:.1f}"
+            else f"the training observations of this group span only {lo:.1f}\u2013{hi:.1f} kPa. "
+        )
+        + "Any candidate or prediction at other pressures is assumption-driven.",
         "Expected variance reduction (EVR) is the expected drop in the weighted latent variance over the "
         "target region from one hypothetical new observation, as a fraction of the current variance "
         "(Gaussian surrogate of the Laplace posterior; hyperparameters held fixed).",
-        f"Target airflow band {spec.airflow_min_cm_s:g}-{spec.airflow_max_cm_s:g} cm/s "
-        f"(airflow_band_source: {spec.airflow_band_source}).",
+        f"Target airflow band {fmt_flow(spec.airflow_min_cm_s)}\u2013{fmt_flow(spec.airflow_max_cm_s)} cm/s "
+        f"({BAND_SOURCE_TEXT.get(spec.airflow_band_source, 'analysis band')}).",
+        "The model's correlation depends only on the distance between conditions (a stationary kernel whose "
+        "length scales were learned near 1 atm); away from the data the ranking follows this assumption.",
     ]
     note = ctx.resolved.payload.get("airflow_band_note")
     if note:
-        out.append(note)
+        out.append(str(note).removeprefix("Airflow band: "))
     for flag in ctx.resolved.flags:
         if flag == "documented_upper_bound_used":
             out.append(
                 "The target oxygen nominal is not documented; the documented upper bound is analysed "
-                "(higher O2 is the worst case for flammability) [flag: documented_upper_bound_used]."
+                "(higher O₂ is the worst case for flammability)."
             )
         elif flag in ("documented_bound_used", "documented_lower_bound_used"):
-            out.append(f"A documented bound is used where no nominal value exists [flag: {flag}].")
+            out.append("A documented bound is used where no nominal value exists.")
     d = CANDIDATE_DOMAIN
     out.append(
         f"Candidate domain: O2 {d['oxygen_percent'][0]:g}-{d['oxygen_percent'][1]:g} %, pressure "
@@ -401,9 +431,9 @@ def rank(group_id: str, target: Target, k: int, lp: float) -> dict[str, Any]:
         top_i = int(np.argmax(gains))
         if abs(s - ctx.lp) < 1e-12:
             jp_default = jp
-            picks = _greedy(jp, cs, k)
+            picks = greedy_from(jp, cs, k)
         else:
-            picks = [_record(jp, cs, top_i, 1, float(gains[top_i]), "greedy_evr")]
+            picks = [candidate_record(jp, cs, top_i, 1, float(gains[top_i]), "greedy_evr")]
         tops[s] = picks[0]
         if abs(s - ctx.lp) < 1e-12:
             default_picks = picks
@@ -420,10 +450,13 @@ def rank(group_id: str, target: Target, k: int, lp: float) -> dict[str, Any]:
             cid=f"c{rec['rank']}",
             rank=rec["rank"],
             fractions_by_setting=dep_fracs(rec["candidate_index"]),
+            n_grid=len(cs),
         )
         for rec in default_picks
     ]
-    # baselines, scored with the same standalone EVR fraction
+    # baselines, scored with the same standalone EVR fraction. Kept inline rather than calling
+    # acquisition.baselines: its random baseline draws with rng.choice (a different index for the same
+    # seed than rng.integers here), so switching would change published rankings.
     seed = request_seed({"g": group_id, "t": target.model_dump(), "k": k, "lp": lp})
     rng = np.random.default_rng(seed)
     baseline_idx: dict[str, int | None] = {
@@ -442,7 +475,7 @@ def rank(group_id: str, target: Target, k: int, lp: float) -> dict[str, Any]:
         if i is None:
             baselines[name] = None
             continue
-        rec = _record(jp_default, cs, i, 1, jp_default.evr_initial(i), name)
+        rec = candidate_record(jp_default, cs, i, 1, jp_default.evr_initial(i), name)
         rec["candidate_index"] = i
         baselines[name] = build_candidate(
             ctx, ctx.model, rec, cid=name, rank=None, fractions_by_setting=dep_fracs(i)
@@ -460,8 +493,15 @@ def rank(group_id: str, target: Target, k: int, lp: float) -> dict[str, Any]:
         )
     notes = _assumptions(ctx)
     changed = [e["pressure_length_scale"] for e in sensitivity if not e["same_top_as_default"]]
+    top_c = candidates[0]
+    at_target_pressure = abs(float(top_c["pressure_kpa"]) - ctx.spec.pressure_nominal_kpa) <= 1.0
     notes.append(
-        "Top candidate is unchanged across pressure length scales 0.15 / 0.3 / 0.6."
+        (
+            "Top candidate is unchanged across pressure length scales 0.15 / 0.3 / 0.6 (it sits at the "
+            "target pressure, so this check is uninformative here)."
+            if at_target_pressure
+            else "Top candidate is unchanged across pressure length scales 0.15 / 0.3 / 0.6."
+        )
         if not changed
         else "The top candidate changes under pressure length scale(s) "
         + ", ".join(f"{c:g}" for c in changed)
@@ -469,9 +509,10 @@ def rank(group_id: str, target: Target, k: int, lp: float) -> dict[str, Any]:
     )
     if all(c["rank"] is not None for c in candidates):
         notes.append(
-            f"Ranked {len(candidates)} of {len(cs)} grid candidates by greedy batch expected variance "
-            "reduction; baselines are random (seeded by a hash of the request), uncertainty sampling and "
-            "nearest gap."
+            f"Ranked {len(candidates)} of {len(cs)} grid candidates by greedy batch expected uncertainty "
+            "reduction. Baselines (random, seeded by a hash of the request; uncertainty sampling; nearest "
+            "gap) are scored with the same measure: the expected reduction if that baseline's pick were "
+            "tested instead."
         )
     return {
         **base,
@@ -507,7 +548,7 @@ def compare(group_id: str, target: Target, a: Any, b: Any) -> dict[str, Any]:
     by_setting = {s: fractions(modeling.model_for_lp(ctx.gm, s)) for s in modeling.PRESSURE_LS_SENSITIVITY}
 
     def rec_for(i: int, jp: JointPosterior) -> dict[str, Any]:
-        rec = _record(jp, cs, i, 1, jp.evr_initial(i), "compare")
+        rec = candidate_record(jp, cs, i, 1, jp.evr_initial(i), "compare")
         rec["candidate_index"] = i
         return rec
 
@@ -559,17 +600,37 @@ def describe_point(group_id: str, target: Target, point: Any, cid: str = "select
     raw = np.array([[point.oxygen_percent, point.pressure_kpa, point.airflow_cm_s]])
     cs = build_candidates(ctx.evidence, raw=raw)
     jp = JointPosterior(ctx.model, ctx.t, cs.X, ctx.w)
-    rec = _record(jp, cs, 0, 1, jp.evr_initial(0), "selected")
+    rec = candidate_record(jp, cs, 0, 1, jp.evr_initial(0), "selected")
     return build_candidate(ctx, ctx.model, rec, cid=cid, rank=None)
+
+
+def evr_fractions_by_setting(
+    group_id: str, target: Target, o2: float, pressure_kpa: float, airflow_cm_s: float
+) -> list[float]:
+    """Standalone expected uncertainty reduction at one point under pressure length scales 0.15/0.3/0.6."""
+    from blindspots.acquisition.evr import evr_fraction
+
+    ctx = require_ctx(group_id, target)
+    x = to_coords(o2, pressure_kpa, airflow_cm_s)
+    return [
+        float(evr_fraction(modeling.model_for_lp(ctx.gm, s), ctx.t, x, ctx.w)[0])
+        for s in modeling.PRESSURE_LS_SENSITIVITY
+    ]
 
 
 # --- counterfactual --------------------------------------------------------------------------------
 
 
-def _scenario_surface(model: GPLaplaceClassifier, plane: str, slice_value: float | None) -> dict[str, Any]:
+def _scenario_surface(
+    model: GPLaplaceClassifier,
+    plane: str,
+    slice_value: float | None,
+    x_min: float | None = None,
+    x_max: float | None = None,
+) -> dict[str, Any]:
     from blindspots.api.routes_data import resolve_plane_params
 
-    p = resolve_plane_params(plane, slice_value, 61, 41, None, None, None, None)
+    p = resolve_plane_params(plane, slice_value, 61, 41, x_min, x_max, None, None)
     x0, x1 = p["x_range"]
     y0, y1 = p["y_range"]
     xs = np.linspace(x0, x1, 61)
@@ -590,8 +651,19 @@ def _scenario_surface(model: GPLaplaceClassifier, plane: str, slice_value: float
 
 
 def counterfactual_response(
-    group_id: str, target: Target, cand: Any, plane: str | None, slice_value: float | None
+    group_id: str,
+    target: Target,
+    cand: Any,
+    plane: str | None,
+    slice_value: float | None,
+    x_min: float | None = None,
+    x_max: float | None = None,
 ) -> dict[str, Any]:
+    if plane is not None:
+        from blindspots.api.routes_data import resolve_plane_params
+
+        # Validate the axis parameters before any model work (422 on bad ranges).
+        resolve_plane_params(plane, slice_value, 61, 41, x_min, x_max, None, None)
     ctx = require_ctx(group_id, target)
     x = to_coords(cand.oxygen_percent, cand.pressure_kpa, cand.airflow_cm_s)
     res = counterfactual(ctx.model, x, ctx.t, ctx.w)
@@ -603,7 +675,7 @@ def counterfactual_response(
         surface = None
         if plane is not None:
             m2 = ctx.model.condition_on(x, np.array([s["outcome"]]))
-            surface = _scenario_surface(m2, plane, slice_value)
+            surface = _scenario_surface(m2, plane, slice_value, x_min, x_max)
         scenarios.append(
             {
                 "outcome": outcome,
@@ -617,16 +689,35 @@ def counterfactual_response(
                 "surface": surface,
             }
         )
-    from blindspots.api.services.assess import target_verdict
-
-    target_supported = target_verdict(ctx.gm, ctx.t) != "insufficient_evidence"
-    nn_c = float(nn_distance(x, ctx.evidence)[0]) if len(ctx.evidence) else None
-    cand_supported = nn_c is not None and nn_c <= GAP_NN_DISTANCE
+    # P(sustained) only over the currently supported target points, and at the candidate only when the
+    # candidate itself is supported (LEAD_DECISIONS D2); null otherwise.
+    a_t = modeling.assess_points(ctx.model, ctx.t)
+    ev_t = modeling.explain_points(ctx.t, ctx.evidence, a_t["ratio"], a_t["aleatoric"], a_t["total"])
+    sup = np.asarray(ev_t["verdict"]) == "supported"
+    p_sup: dict[str, float] | None = None
+    if sup.any():
+        res_s = counterfactual(ctx.model, x, ctx.t[sup], ctx.w[sup])
+        p_sup = {"current": res_s["current"]["target_p_mean"]}
+        for s_ in res_s["scenarios"]:
+            p_sup[str(s_["outcome"])] = s_["target_p_mean"]
+    for sc, raw_s in zip(scenarios, res["scenarios"], strict=True):
+        sc["target_p_mean"] = None if p_sup is None else p_sup[str(raw_s["outcome"])]
+    u_c = ctx.model.uncertainty(x)
+    ev_c = modeling.explain_points(
+        x,
+        ctx.evidence,
+        np.asarray(u_c["latent_std_ratio"]),
+        np.asarray(u_c["aleatoric"]),
+        np.asarray(u_c["total"]),
+    )
+    cand_supported = ev_c["verdict"][0] == "supported"
     return {
         "p_sustained_at_candidate": res["p_sustained_at_candidate"] if cand_supported else None,
-        "target_p_supported": target_supported,
+        "target_p_supported": bool(sup.any()),
+        "target_points_supported": int(sup.sum()),
+        "n_target_points": len(ctx.t),
         "current": {
-            "target_p_mean": cur["target_p_mean"],
+            "target_p_mean": None if p_sup is None else p_sup["current"],
             "target_latent_var": cur["target_latent_var"],
             "target_epistemic": cur["target_epistemic_mi"],
         },

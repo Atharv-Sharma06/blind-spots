@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections import OrderedDict
 from collections.abc import Callable
-from threading import Lock
+from threading import BoundedSemaphore, Lock
 from typing import Any
 
 import numpy as np
@@ -44,8 +44,18 @@ _MEMO_LOCK = Lock()
 _MEMO_MAX = 512
 
 
-def memo(name: str, request: Any, compute: Callable[[], Any]) -> Any:
-    """Cache keyed by endpoint, canonical request and artifact versions (responses are deterministic)."""
+# At most this many heavy computations (rank, counterfactual) run at once; FastAPI runs sync routes on a
+# 40-thread pool, so 20 parallel ranks would otherwise each hold a candidate-pool covariance in memory.
+HEAVY_CONCURRENCY = 2
+_HEAVY = BoundedSemaphore(HEAVY_CONCURRENCY)
+
+
+def memo(name: str, request: Any, compute: Callable[[], Any], heavy: bool = False) -> Any:
+    """Cache keyed by endpoint, canonical request and artifact versions (responses are deterministic).
+
+    `heavy` computations run through a small semaphore; the cache is re-checked after acquiring it, so
+    identical requests queued behind a running one reuse its result.
+    """
     key = ranking.canonical(
         [
             name,
@@ -60,7 +70,17 @@ def memo(name: str, request: Any, compute: Callable[[], Any]) -> Any:
         if key in _MEMO:
             _MEMO.move_to_end(key)
             return _MEMO[key]
-    value = compute()
+    if not heavy:
+        return _store_memo(key, compute())
+    with _HEAVY:
+        with _MEMO_LOCK:
+            if key in _MEMO:
+                _MEMO.move_to_end(key)
+                return _MEMO[key]
+        return _store_memo(key, compute())
+
+
+def _store_memo(key: str, value: Any) -> Any:
     with _MEMO_LOCK:
         _MEMO[key] = value
         while len(_MEMO) > _MEMO_MAX:
@@ -224,7 +244,9 @@ def target_assess(req: AssessRequest) -> dict[str, Any]:
 def candidates_rank(req: RankRequest) -> dict[str, Any]:
     deps.require_store()
     lp = req.assumptions.pressure_length_scale
-    return memo("rank", req.model_dump(), lambda: ranking.rank(req.group_id, req.target, req.k, lp))
+    return memo(
+        "rank", req.model_dump(), lambda: ranking.rank(req.group_id, req.target, req.k, lp), heavy=True
+    )
 
 
 @router.post("/candidates/compare", response_model=CompareResponse)
@@ -240,8 +262,9 @@ def candidates_counterfactual(req: CounterfactualRequest) -> dict[str, Any]:
         "counterfactual",
         req.model_dump(),
         lambda: ranking.counterfactual_response(
-            req.group_id, req.target, req.candidate, req.plane, req.slice
+            req.group_id, req.target, req.candidate, req.plane, req.slice, req.x_min, req.x_max
         ),
+        heavy=True,
     )
 
 
@@ -253,11 +276,21 @@ MODEL_LIMITATIONS = [
     "Training labels are heavily imbalanced toward 'sustained'; compare every metric with the "
     "majority-class baseline and read the confidence intervals (group bootstrap over experiments).",
     "Small samples: groups have few experiments; uncertainty is wide and validation metrics are unstable.",
-    "Flow values are mostly derived from borrowed calibrations (extrapolated at low flow); oxygen is "
-    "partly interpolated between initial and final values.",
+    "Oxygen is partly interpolated between initial and final values; airflow provenance is listed below.",
     "Outputs are computational research candidates requiring qualified scientific review, established "
     "safety procedures and formal feasibility assessment.",
 ]
+
+
+def _model_limitations(store: deps.DataStore) -> list[str]:
+    from blindspots.api.routes_data import flow_provenance_sentence, stationarity_sentence
+
+    out = list(MODEL_LIMITATIONS)
+    flow = flow_provenance_sentence(store)
+    if flow:
+        out.insert(4, "Airflow provenance: " + flow)
+    out.insert(1, stationarity_sentence(store))
+    return out
 
 
 @router.get("/model/metadata", response_model=ModelMetadata)
@@ -295,7 +328,7 @@ def model_metadata(group: str) -> dict[str, Any]:
         "seed": reg.config.seed,
         "trained_at": reg.trained_at,
         "dataset_version": reg.dataset_version,
-        "limitations": MODEL_LIMITATIONS,
+        "limitations": _model_limitations(store),
     }
 
 

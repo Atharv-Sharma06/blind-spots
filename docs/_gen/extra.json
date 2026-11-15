@@ -1,14 +1,1 @@
-{
- "TEST_STATUS": "backend `uv run pytest -q`: 241 passed; `uv run mypy src` clean (66 source files); `uv run ruff check .` and `uv run ruff format --check .` were clean on the files this documentation covers but flagged line-length/format issues in `src/blindspots/pipeline/export_artifacts.py`, which was still being edited when this was written, so re-run them before release. Web: `npm run typecheck` clean; `npm run lint` 0 errors (1 unused-variable warning in `tests/e2e/methodology-brief.spec.ts`); `node --test tests/unit/` 14 passed; `node scripts/check-snapshot-keys.mjs` reports a few experiment ids that contain a space (for example `PSI-98:SAFFIRE-I S2`) as not round-tripping and no missing files; `NEXT_PUBLIC_DATA_MODE=snapshot npm run build` succeeds and its `next start` output was driven headlessly (guided demo, methodology, experiments) with numbers equal to the live API; the Playwright e2e suite was not run for this documentation (it uses fixed ports 8205/3305/3306).",
- "DEMO_SCENE_S": 10,
- "DEMO_GROUP_LABEL": "Thin PMMA films, opposed flow",
- "DEMO_GROUP_EXP": 16,
- "DEMO_GROUP_OBS": 49,
- "DEMO_GROUP_TRAIN": "48 training rows: 37 sustained, 11 not",
- "DEMO_PROFILE": "Space Shuttle staged pre-EVA cabin, 10.2 psia / 26.5 % O2 (70.3 kPa)",
- "DEMO_COMPARABLE": 0,
- "DEMO_NN": "4.24",
- "DEMO_TOP": "27.0 % O2, 70.3 kPa, 1.71 cm/s",
- "DEMO_EVR": "18.9%",
- "DEMO_CF_EVR": "18.9%"
-}
+{}

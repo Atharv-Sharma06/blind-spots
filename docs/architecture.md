@@ -68,13 +68,13 @@ Command line: `uv run blindspots {build-dataset,raw-manifest,fetch-raw,train,ret
 2. **Curation**: free-text flow schedules and outcomes of BASS / BASS-II are interpreted into `data/curation/tests` and `steps` CSVs by independent transcriptions that are adjudicated; each step cites the
    exact source token. For BASS-II, outcomes are cross-checked against NASA/TM-20210011385 Appendix A (`data/curation/evidence`).
 3. **Normalization** (`build-dataset`): re-reads the original workbooks, verifies every token against its cell, converts flows with the documented calibration, applies the label rule and training filter,
-   flags quality issues and writes the dataset plus `dataset_report.json`. Current build: dataset `8783ff5aa6a2`, 276 experiments, 749 observations, 0 provenance failures, 0 curation problems.
-4. **Training** (`train`): per analysis group, fits the GP, uses the configured mean function (constant), runs the validation suite and the blind-spot test, and writes `models/<model_version>/`. Current model: `gp-laplace-v1+8783ff5a.adfbbd`.
+   flags quality issues and writes the dataset plus `dataset_report.json`. Current build: dataset `4fe55f76142a`, 276 experiments, 749 observations, 0 provenance failures, 0 curation problems.
+4. **Training** (`train`): per analysis group, fits the GP, uses the configured mean function (constant), runs the validation suite and the blind-spot test, and writes `models/<model_version>/`. Current model: `gp-laplace-v1+4fe55f76.adfbbd`.
    The model version is a hash of data and configuration, so identical inputs give identical artifacts (checked: a rebuild into a scratch root reproduced the committed dataset, model and retrospective JSON exactly, ignoring timestamps).
 5. **Serving** (`serve`): FastAPI loads the dataset and the model registry. Responses are memoised by endpoint, canonical request and dataset/model versions and are deterministic (the random baseline is seeded by a hash of the request).
    Without artifacts, data endpoints return 503 `artifact_missing` and health reports `degraded`.
 6. **Snapshot** (`export-artifacts`): writes the JSON of every GET endpoint, coverage/surface grids for every group x plane x snapshot slice, and target/assess, candidates/rank, counterfactual and brief
-   for every documented profile x group, plus `manifest.json`. The snapshot is generated per deployment (git-ignored); the build this documentation describes uses dataset `8783ff5aa6a2` and model `gp-laplace-v1+8783ff5a.adfbbd`.
+   for every documented profile x group, plus `manifest.json`. The snapshot is generated per deployment (git-ignored); the build this documentation describes uses dataset `4fe55f76142a` and model `gp-laplace-v1+4fe55f76.adfbbd`.
 7. **Web**: `lib/api.ts` is a typed client with three data modes (`live`, `snapshot`, `auto`). Browser code calls relative `/api/*` paths; Next rewrites them to `ANALYSIS_API_ORIGIN`, so there is no CORS and one origin to configure.
    In snapshot mode the interface states plainly what needs the live service.
 

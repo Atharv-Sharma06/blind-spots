@@ -8,6 +8,8 @@ export const DATA_CREDIT = "Data: NASA Physical Sciences Informatics (CC0)";
 export const CANDIDATE_FRAMING =
   "Computational research candidates requiring qualified scientific review, established safety procedures and formal feasibility assessment.";
 
-export const SITE_TITLE = "Blind Spots — What should NASA test next?";
-export const SITE_DESCRIPTION =
-  "Blind Spots maps where NASA microgravity solid-fuel combustion experiments have and have not established evidence, models flame sustainment with calibrated uncertainty, and ranks computational research candidates.";
+/** LEAD_DECISIONS D1 product line (never "What should NASA test next?"). */
+export const PRODUCT_LINE = "Blind Spots: where NASA's microgravity fire evidence ends, and what to learn next.";
+/** D1: the method, named in plain words (the challenge's "SI"). */
+export const METHOD_LINE =
+  "Machine learning: a Gaussian-process model that says when it does not know, plus active learning that ranks the most informative next experiment.";

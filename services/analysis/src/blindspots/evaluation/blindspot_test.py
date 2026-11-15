@@ -186,93 +186,176 @@ def experiment_level(
     }
 
 
-def verdict_from(point: dict[str, Any], group: dict[str, Any], diag: dict[str, Any] | None = None) -> str:
-    """supported = positive at both levels AND (when computed) epistemic uncertainty still tracks error after
-    controlling for aleatoric uncertainty (partial rho > 0, p < 0.05): otherwise the association could
-    come from predictive entropy alone (independent numerical review, 2026-11-15)."""
+VERDICT_RULE = (
+    "Supported when Spearman rho > 0 with one-sided p < 0.05 at both the point level and the experiment "
+    "level, and the point-level partial rho of knowledge (epistemic) uncertainty with log loss, controlling "
+    "for outcome-variability (aleatoric) uncertainty, is > 0 with p < 0.05; not supported when rho <= 0 at "
+    "both levels; otherwise inconclusive."
+)
+CRITERIA_LABELS = {
+    "point_level": "point-level correlation positive and significant",
+    "experiment_level": "experiment-level correlation positive and significant",
+    "partial": "point-level association persists after controlling for outcome variability",
+}
 
-    def positive(d: dict[str, Any]) -> bool:
-        return d["spearman_rho"] is not None and d["spearman_rho"] > 0 and (d["p_value"] or 1.0) < ALPHA
 
-    def nonpositive(d: dict[str, Any]) -> bool:
-        return d["spearman_rho"] is not None and d["spearman_rho"] <= 0
+def _positive(d: dict[str, Any]) -> bool:
+    return d["spearman_rho"] is not None and d["spearman_rho"] > 0 and (d["p_value"] or 1.0) < ALPHA
 
-    partial_ok = True
+
+def _nonpositive(d: dict[str, Any]) -> bool:
+    return d["spearman_rho"] is not None and d["spearman_rho"] <= 0
+
+
+def criteria(
+    point: dict[str, Any], group: dict[str, Any], diag: dict[str, Any] | None = None
+) -> dict[str, bool | None]:
+    """Each criterion of :data:`VERDICT_RULE`; ``partial`` is None when it was not computed."""
+    partial: bool | None = None
     if diag is not None and "partial_p_value" in diag:
         pr, pp = diag.get("partial_rho_epistemic_given_aleatoric"), diag.get("partial_p_value")
-        partial_ok = pr is not None and pr > 0 and pp is not None and pp < ALPHA
-    if positive(point) and positive(group) and partial_ok:
+        partial = pr is not None and pr > 0 and pp is not None and pp < ALPHA
+    return {"point_level": _positive(point), "experiment_level": _positive(group), "partial": partial}
+
+
+def verdict_from(point: dict[str, Any], group: dict[str, Any], diag: dict[str, Any] | None = None) -> str:
+    """See :data:`VERDICT_RULE`. Without the partial criterion, an association of epistemic uncertainty with
+    error could come from outcome variability alone (independent numerical review, 2026-11-15)."""
+    c = criteria(point, group, diag)
+    if c["point_level"] and c["experiment_level"] and c["partial"] is not False:
         return "supported"
-    if nonpositive(point) and nonpositive(group):
+    if _nonpositive(point) and _nonpositive(group):
         return "not_supported"
     return "inconclusive"
 
 
 def _fmt(v: float | None, nd: int = 2) -> str:
+    return "n/a" if v is None else f"{v:.{nd}f}"
+
+
+def _p(v: float | None) -> str:
+    """'p = 0.028' or 'p < 0.001'."""
     if v is None:
-        return "n/a"
-    return f"<{10**-nd:.{nd}f}" if nd >= 3 and 0 < v < 10**-nd else f"{v:.{nd}f}"
+        return "p = n/a"
+    return "p < 0.001" if v < 0.001 else f"p = {v:.3f}"
+
+
+def _count(n: int, noun: str) -> str:
+    return f"{n} {noun}" + ("" if n == 1 else "s")
+
+
+def _auroc_text(point: dict[str, Any]) -> str:
+    n_mis = point["n_misclassified"]
+    if n_mis == 0 or point["auroc_error_detection"] is None:
+        return "no point is misclassified, so error detection (AUROC) is undefined"
+    return (
+        f"AUROC for flagging the {_count(n_mis, 'misclassified point')} = "
+        f"{_fmt(point['auroc_error_detection'])}"
+    )
+
+
+def _level_failure(name: str, d: dict[str, Any]) -> str:
+    if d["spearman_rho"] is None:
+        return f"the {name} correlation could not be computed"
+    if d["spearman_rho"] <= 0:
+        return f"the {name} correlation is not positive (rho = {_fmt(d['spearman_rho'])})"
+    return f"the {name} correlation is positive but not significant ({_p(d['p_value'])})"
 
 
 def interpretation(verdict: str, point: dict[str, Any], group: dict[str, Any], diag: dict[str, Any]) -> str:
+    """Plain-language reading generated from the numbers; it never contradicts ``verdict``."""
+    c = criteria(point, group, diag)
+    pr, pp = diag.get("partial_rho_epistemic_given_aleatoric"), diag.get("partial_p_value")
+    ra = diag.get("rho_aleatoric_point")
     base = (
-        f"Point level (n={point['n']}): Spearman rho={_fmt(point['spearman_rho'])} "
-        f"(one-sided p={_fmt(point['p_value'], 3)}) between pre-reveal epistemic uncertainty and log loss; "
-        f"AUROC for flagging {point['n_misclassified']} misclassified points = "
-        f"{_fmt(point['auroc_error_detection'])}. "
-        f"Experiment level (n={group['n_groups']} held-out experiments): rho={_fmt(group['spearman_rho'])} "
-        f"(p={_fmt(group['p_value'], 3)}). "
+        f"Point level (n = {point['n']}): Spearman rho = {_fmt(point['spearman_rho'])} "
+        f"(one-sided {_p(point['p_value'])}) between pre-reveal knowledge (epistemic) uncertainty and log "
+        f"loss; {_auroc_text(point)}. "
+        f"Experiment level (n = {group['n_groups']} held-out experiments): rho = "
+        f"{_fmt(group['spearman_rho'])} ({_p(group['p_value'])}). "
     )
+    if pr is not None:
+        base += (
+            f"Controlling for outcome-variability (aleatoric) uncertainty, the point-level association is "
+            f"{_fmt(pr)} ({_p(pp)}). "
+        )
     if verdict == "supported":
         tail = (
-            "Withheld experiments with higher pre-reveal epistemic uncertainty tended to be predicted worse "
-            "at both levels; this is an association in a small, imbalanced sample, not a guarantee."
+            "All criteria hold: withheld experiments with higher pre-reveal knowledge uncertainty were "
+            "predicted worse at both levels"
         )
-    elif verdict == "not_supported":
-        tail = "Epistemic uncertainty did not track error at either level."
-    else:
-        tail = (
-            "The two levels do not agree, or the evidence is below the 0.05 threshold; treat as inconclusive."
+        tail += (
+            ", and the association persists after controlling for outcome variability."
+            if c["partial"]
+            else "."
         )
-    ra_all = diag.get("rho_aleatoric_point")
-    part = diag.get("partial_rho_epistemic_given_aleatoric")
+        if (
+            ra is not None
+            and point["spearman_rho"] is not None
+            and ra >= point["spearman_rho"]
+            and c["partial"]
+        ):
+            tail += (
+                f" Outcome variability tracks log loss at least as strongly (rho = {_fmt(ra)}); the "
+                "significant partial correlation shows knowledge uncertainty adds information beyond it."
+            )
+        tail += " This is an association in a small, imbalanced sample, not a guarantee."
+        n_mis = point["n_misclassified"]
+        share_neg = diag.get("share_not_sustained_flow_off_transient")
+        if n_mis <= 2 or (share_neg is not None and share_neg >= 0.5):
+            caveat = (
+                f" Caveat: no point of {point['n']} is misclassified"
+                if n_mis == 0
+                else f" Caveat: only {_count(n_mis, 'point')} of {point['n']} "
+                + ("is" if n_mis == 1 else "are")
+                + " misclassified"
+            )
+            if share_neg is not None and share_neg > 0:
+                caveat += (
+                    f" and {share_neg:.0%} of the not-sustained observations are flow-turned-off transients"
+                )
+            tail += (
+                caveat + ", so the test says little about physical extinction boundaries; treat it as "
+                "unproven there."
+            )
+        return base + tail
+    if verdict == "not_supported":
+        return base + "Knowledge uncertainty did not track error at either level (rho <= 0 at both)."
+    met = [CRITERIA_LABELS[k] for k, v in c.items() if v]
+    failing = []
+    if not c["point_level"]:
+        failing.append(_level_failure("point-level", point))
+    if not c["experiment_level"]:
+        failing.append(_level_failure("experiment-level", group))
+    if c["partial"] is False:
+        what = "not positive" if pr is None or pr <= 0 else "not significant"
+        failing.append(
+            f"controlling for outcome variability the point-level association is {what} "
+            f"({_fmt(pr)}, {_p(pp)}), so it may come from outcome variability alone"
+        )
+    tail = "Inconclusive. "
+    if met:
+        tail += "Met: " + "; ".join(met) + ". "
+    tail += "Not met: " + "; ".join(failing) + "."
+    reasons = []
     if (
-        verdict == "supported"
-        and ra_all is not None
+        c["partial"] is False
+        and ra is not None
         and point["spearman_rho"] is not None
-        and ra_all >= point["spearman_rho"]
+        and ra > point["spearman_rho"]
     ):
-        tail += (
-            f" Caveat: aleatoric (predictive-entropy) uncertainty tracks log loss at least as strongly "
-            f"(rho={_fmt(ra_all)}), and the epistemic-loss association controlling for it is "
-            f"{_fmt(part)}; so this does not show that epistemic uncertainty adds information beyond "
-            "the model's overall predictive uncertainty."
+        reasons.append(
+            f"outcome-variability (aleatoric) uncertainty tracks log loss more strongly (rho = {_fmt(ra)}), "
+            "so errors concentrate where the model already expects mixed outcomes"
         )
-    pr, pp = diag.get("partial_rho_epistemic_given_aleatoric"), diag.get("partial_p_value")
-    if pr is not None:
-        tail += (
-            f" Controlling for aleatoric uncertainty, the point-level association is "
-            f"{_fmt(pr)} (p={_fmt(pp, 3)})."
+    share = diag.get("share_misclassified_flow_off_transient")
+    if share:
+        reasons.append(
+            f"{share:.0%} of misclassified points are flow-turned-off transient labels, which are not a "
+            "physical extinction boundary"
         )
-    if verdict != "supported":
-        reasons = []
-        ra = diag.get("rho_aleatoric_point")
-        re = point["spearman_rho"]
-        if ra is not None and re is not None and ra > re:
-            reasons.append(
-                f"aleatoric (outcome-variability) uncertainty tracks log loss more strongly "
-                f"(rho={_fmt(ra)}), "
-                "so errors concentrate where the model already expects mixed outcomes "
-                "rather than where data are sparse"
-            )
-        share = diag.get("share_misclassified_flow_off_transient")
-        if share:
-            reasons.append(
-                f"{share:.0%} of misclassified points are flow-turned-off transient labels, which are not a "
-                "physical quench boundary"
-            )
-        if reasons:
-            tail += " Possible reasons: " + "; ".join(reasons) + "."
+    if reasons:
+        tail += " Possible reasons: " + "; ".join(reasons) + "."
     return base + tail
 
 
@@ -303,11 +386,15 @@ def run_blindspot_test(
     }
     if flow_off is not None and wrong.any():
         diag["share_misclassified_flow_off_transient"] = float(np.mean(flow_off[wrong]))
+    if flow_off is not None and (y == 0).any():
+        diag["share_not_sustained_flow_off_transient"] = float(np.mean(flow_off[y == 0]))
     verdict = verdict_from(pt, grp, diag)
     return {
         "point_level": pt,
         "group_level": grp,
         "verdict": verdict,
+        "rule": VERDICT_RULE,
+        "criteria": criteria(pt, grp, diag),
         "interpretation": interpretation(verdict, pt, grp, diag),
         "diagnostics": diag,
     }

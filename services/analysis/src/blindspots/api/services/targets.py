@@ -26,6 +26,22 @@ DEFAULT_BAND_NOTE = (
 )
 
 
+MAX_PRESSURE_KPA = 1000.0
+MAX_AIRFLOW_CM_S = 1000.0
+
+
+def _check_bounds(rng: dict[str, Any], lo_excl: float, hi_incl: float, name: str, unit: str) -> None:
+    """422 unless every given value is in (lo_excl, hi_incl] and min <= nominal <= max where given."""
+    vals = [rng.get(k) for k in ("min", "nominal", "max")]
+    if any(v is not None and not (lo_excl < v <= hi_incl) for v in vals):
+        raise ApiError(
+            422, "validation_error", f"Custom {name} values must be > {lo_excl:g} and <= {hi_incl:g} {unit}."
+        )
+    given = [v for v in vals if v is not None]
+    if given != sorted(given):
+        raise ApiError(422, "validation_error", f"Custom {name} range needs min <= nominal <= max.")
+
+
 @dataclass(frozen=True)
 class ResolvedSpec:
     spec: TargetSpec
@@ -126,6 +142,12 @@ def resolve_target(target: Target) -> ResolvedSpec:
         o2 = c.oxygen_percent.model_dump()
         pr = c.total_pressure_kpa.model_dump()
         airflow = c.airflow_cm_s.model_dump() if c.airflow_cm_s else None
+        _check_bounds(o2, 0.0, 100.0, "O2", "%")
+        _check_bounds(pr, 0.0, MAX_PRESSURE_KPA, "Pressure", "kPa")
+        if pn > MAX_PRESSURE_KPA:
+            raise ApiError(422, "validation_error", f"Custom pressure must be <= {MAX_PRESSURE_KPA:g} kPa.")
+        if airflow is not None:
+            _check_bounds(airflow, 0.0, MAX_AIRFLOW_CM_S, "Airflow", "cm/s")
         if airflow and airflow.get("nominal") is not None and airflow.get("min") is None:
             airflow = {"nominal": airflow["nominal"], "min": airflow["nominal"], "max": airflow["nominal"]}
         if airflow and (airflow.get("min") is None) != (airflow.get("max") is None):
@@ -150,8 +172,8 @@ def resolve_target(target: Target) -> ResolvedSpec:
     (lo, hi), source, note, vent_sources = _ventilation_band(airflow)
     if target.custom is not None and source == "profile":
         source = "custom"
-    if hi < lo or lo < 0:
-        raise ApiError(422, "validation_error", "Airflow band needs 0 <= min <= max.")
+    if hi < lo or lo <= 0:
+        raise ApiError(422, "validation_error", "Custom airflow band needs 0 < min <= max (cm/s).")
     spec = dataclasses.replace(spec, airflow_min_cm_s=lo, airflow_max_cm_s=hi, airflow_band_source=source)
     if source == "default_band":
         flags.append("default_band")

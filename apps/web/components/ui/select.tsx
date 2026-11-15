@@ -30,7 +30,7 @@ export function Select({ value, onValueChange, options, placeholder = "Select", 
         id={id}
         aria-label={aria["aria-label"]}
         className={cn(
-          "inline-flex h-8 w-full min-w-0 items-center justify-between gap-2 rounded-md border border-border bg-surface px-2.5 text-[13px] text-fg transition-colors",
+          "inline-flex h-8 w-full min-w-0 items-center justify-between gap-2 rounded-md border border-border bg-surface px-2.5 text-ui text-fg transition-colors",
           "hover:border-border-strong data-[placeholder]:text-muted disabled:cursor-not-allowed disabled:opacity-50",
           className,
         )}
@@ -55,7 +55,7 @@ export function Select({ value, onValueChange, options, placeholder = "Select", 
                 key={o.value}
                 value={o.value}
                 disabled={o.disabled}
-                className="relative flex h-7 cursor-default select-none items-center rounded-sm pr-7 pl-2 text-[13px] text-fg outline-none data-[disabled]:opacity-50 data-[highlighted]:bg-subtle"
+                className="relative flex h-7 cursor-default select-none items-center rounded-sm pr-7 pl-2 text-ui text-fg outline-none data-[disabled]:opacity-50 data-[highlighted]:bg-subtle"
               >
                 <SelectPrimitive.ItemText>{o.label}</SelectPrimitive.ItemText>
                 <SelectPrimitive.ItemIndicator className="absolute right-2 inline-flex">

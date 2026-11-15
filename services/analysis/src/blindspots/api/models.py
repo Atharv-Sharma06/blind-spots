@@ -7,6 +7,7 @@ target/assess, candidates, model, brief) are defined here so one module is the s
 
 from __future__ import annotations
 
+import math
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -33,7 +34,8 @@ Plane = Literal["o2_flow", "o2_pressure"]
 
 
 class ApiModel(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    # NaN/Infinity are rejected with 422 (never silently turned into null).
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
 
 
 class LooseModel(BaseModel):
@@ -259,6 +261,11 @@ class CustomTarget(ApiModel):
         for name in ("oxygen_percent", "total_pressure_kpa"):
             if getattr(self, name).nominal is None:
                 raise ValueError(f"custom target {name} needs a nominal value")
+        for name in ("oxygen_percent", "total_pressure_kpa", "airflow_cm_s"):
+            rng = getattr(self, name)
+            for v in (rng.nominal, rng.min, rng.max) if rng is not None else ():
+                if v is not None and not math.isfinite(v):
+                    raise ValueError(f"custom target {name} values must be finite numbers")
         return self
 
 
@@ -336,6 +343,40 @@ class DocumentedContext(ApiModel):
     reason_not_integrated: str | None = None
 
 
+class PointVerdictCounts(ApiModel):
+    supported: int
+    extrapolation: int
+    insufficient_evidence: int
+
+
+EnvelopeOverlap = Literal[
+    "contains_target_nominal", "overlaps_target_region", "outside_target_region", "not_documented"
+]
+
+
+class InvestigationRelevance(ApiModel):
+    """One investigation ranked by relevance to the target (deterministic, from data and manifests)."""
+
+    id: str
+    name: str
+    role: Literal[
+        "integrated_model", "integrated_context", "documented_not_integrated", "catalogued_not_integrated"
+    ]
+    relevance_rank: int
+    comparable_observations: int | None = None
+    comparable_records_all_groups: int | None = None
+    nearest_distance: float | None = None
+    envelope_overlap: (
+        Literal[
+            "contains_target_nominal", "overlaps_target_region", "outside_target_region", "not_documented"
+        ]
+        | None
+    ) = None
+    doi: str | None = None
+    url: str | None = None
+    summary: str
+
+
 class AssessRequest(ApiModel):
     group_id: str
     target: Target
@@ -347,8 +388,11 @@ class AssessResponse(ApiModel):
     coverage: TargetCoverage
     model: TargetModelSummary
     verdict: Verdict
+    points_supported: int
+    point_verdicts: PointVerdictCounts
     reasons: list[Reason]
     documented_context: list[DocumentedContext]
+    investigation_relevance: list[InvestigationRelevance] = []
     summary: str
 
 
@@ -386,6 +430,8 @@ class Candidate(ApiModel):
     p_sustained: float | None = None
     latent_std_ratio: float | None = None
     nn_distance: float | None = None
+    verdict: Verdict | None = None
+    target_distance: float | None = None
     feasibility_status: Literal["within_demonstrated_envelope", "outside_demonstrated_envelope"]
     feasibility_note: str
     reasons: list[Reason] = []
@@ -439,6 +485,10 @@ class CounterfactualRequest(ApiModel):
     candidate: Point
     plane: Plane | None = None
     slice: float | None = None
+    # Optional oxygen-axis range for the scenario surfaces (same meaning as /api/surface x_min/x_max),
+    # so far targets (Skylab, Apollo) get what-if grids on the extended axis instead of 10-40 %.
+    x_min: float | None = None
+    x_max: float | None = None
 
 
 class ScenarioSurface(ApiModel):
@@ -447,7 +497,7 @@ class ScenarioSurface(ApiModel):
 
 
 class CounterfactualCurrent(ApiModel):
-    target_p_mean: float
+    target_p_mean: float | None
     target_latent_var: float
     target_epistemic: float
 
@@ -456,7 +506,7 @@ class Scenario(ApiModel):
     outcome: Literal["sustained", "not_sustained"]
     label: str
     probability: float
-    target_p_mean: float
+    target_p_mean: float | None
     target_latent_var: float
     target_epistemic: float
     variance_reduction_fraction: float
@@ -468,6 +518,8 @@ class CounterfactualResponse(ApiModel):
     # False when the target verdict is insufficient_evidence: target_p_mean values then only reflect
     # reversion to the training base rate and must not be shown as estimates.
     target_p_supported: bool = True
+    target_points_supported: int = 0
+    n_target_points: int = 0
     current: CounterfactualCurrent
     scenarios: list[Scenario]
     expected_variance_reduction_fraction: float
@@ -636,6 +688,45 @@ class ValidationReport(LooseModel):
     acquisition_retrospective: AcquisitionRetrospective
 
 
+# --- headline ------------------------------------------------------------------------------------
+
+
+class HeadlineGroup(ApiModel):
+    group_id: str
+    label: str
+    comparable_observations: int
+    points_with_comparable: int
+
+
+class HeadlineProfile(ApiModel):
+    profile_id: str
+    label: str
+    status: str
+    oxygen_percent: float
+    total_pressure_kpa: float
+    n_target_points: int
+    comparable_observations: int
+    groups_with_comparable: int
+    n_groups: int
+    by_group: list[HeadlineGroup]
+
+
+class HeadlineEnvelope(ApiModel):
+    investigations: list[str]
+    n_experiments: int
+    n_steps: int
+    oxygen_percent: list[float] | None
+    pressure_kpa: list[float] | None
+    pressure_measured_kpa: list[float] | None
+    n_steps_pressure_assumed: int
+    airflow_cm_s: list[float] | None
+
+
+class HeadlineResponse(ApiModel):
+    profiles: list[HeadlineProfile]
+    envelope: HeadlineEnvelope
+
+
 # --- methodology / sources -------------------------------------------------------------------------
 
 
@@ -655,6 +746,9 @@ class MethodConfig(ApiModel):
     pressure_length_scale_default: float
     pressure_length_scale_sensitivity: list[float]
     pressure_length_scale_fixed: bool
+    # Airflow provenance of the training steps (n_training, n_recorded, n_converted_bass2_calibration,
+    # n_borrowed_calibration, n_below_calibration_range); null without a dataset.
+    training_flow_provenance: dict[str, int] | None = None
 
 
 class MethodDates(ApiModel):

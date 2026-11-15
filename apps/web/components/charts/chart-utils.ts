@@ -1,4 +1,30 @@
 /** Shared helpers for the small SVG charts (no chart library). */
+import { useEffect, useRef, useState, type RefObject } from "react";
+
+/** Chart text sizes in CSS pixels. Charts render at their real pixel width, so these are the sizes users see (minimum 11 px). */
+export const TEXT = { tick: 11, label: 12, value: 11 } as const;
+
+/**
+ * Measures the width of the chart container so the SVG is drawn 1:1 (no viewBox scaling that would shrink
+ * text on phones). Falls back to `fallback` until the first measurement.
+ */
+export function useChartWidth(fallback: number, max = fallback): [RefObject<HTMLDivElement | null>, number] {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [w, setW] = useState(fallback);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const update = () => {
+      const cw = Math.floor(el.clientWidth);
+      if (cw > 0) setW(Math.min(max, Math.max(260, cw)));
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [max]);
+  return [ref, w];
+}
 
 export interface LinearScale {
   (v: number): number;
@@ -66,3 +92,4 @@ export const CHART = {
 } as const;
 
 export const FONT = "var(--font-mono), ui-monospace, monospace";
+export const SANS = "var(--font-sans), ui-sans-serif, system-ui, sans-serif";

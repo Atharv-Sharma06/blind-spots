@@ -22,7 +22,7 @@ export function BackendGate({ loading, children, compact, align }: BackendGatePr
   const { state, error, refetch } = useHealth();
   if (state === "loading") return <>{loading}</>;
   if (state === "unavailable") {
-    return <ErrorState code={error?.code ?? "backend_unavailable"} message={error?.message} onRetry={refetch} compact={compact} align={align} />;
+    return <ErrorState code={error?.code ?? "backend_unavailable"} error={error} message={error?.message} onRetry={refetch} compact={compact} align={align} />;
   }
   return (
     <>

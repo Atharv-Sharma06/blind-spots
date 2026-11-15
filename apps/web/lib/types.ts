@@ -148,6 +148,10 @@ export interface Observation {
   quality_flags: string[];
   included_in_training: boolean;
   exclusion_reason: string | null;
+  /** Step-level evidence from the steps CSV (CONTRACTS 2.5); optional until the API sends it. */
+  evidence_source?: string | null;
+  evidence_page?: string | null;
+  evidence_quote?: string | null;
 }
 
 /** Observation as returned by /api/observations and /api/experiments/{id} (adds `group_id`). */
@@ -183,6 +187,12 @@ export interface AtmosphereProfile {
   total_pressure_psia?: Range | null;
   o2_partial_pressure_kpa?: Range | null;
   airflow_cm_s: Range | null;
+  /**
+   * Requested from the backend (.work/requests/data-layer.md): the airflow band the analysis uses for this
+   * profile (documented band, else the ventilation range with the near-quiescent extension). Lets the UI
+   * pick the O2 x pressure slice without waiting for /target/assess. Absent until the backend adds it.
+   */
+  analysis_airflow_cm_s?: Range | null;
   sources: SourceRef[];
   notes: string | null;
 }
@@ -199,7 +209,11 @@ export type ReasonCode =
   | "outcome_variability"
   | "model_instability"
   | "other_family_evidence_only"
-  | "no_model";
+  | "no_model"
+  /** Science team (D2): point not supported because the latent std ratio is high; value = the ratio. */
+  | "high_knowledge_uncertainty"
+  /** Science team (D2): share of target points not supported. */
+  | "target_points_not_supported";
 
 export type CandidateReasonCode =
   | "high_target_covariance"
@@ -323,6 +337,8 @@ export interface ExperimentDetail {
 export interface VentilationBand {
   min_cm_s: number;
   max_cm_s: number;
+  /** Requested: lower end of the analysis band (near-quiescent extension, an analysis choice). */
+  analysis_min_cm_s?: number | null;
   sources: SourceRef[];
 }
 
@@ -376,6 +392,7 @@ export interface GroundFlammability {
   result_definition: string | null;
   source_title: string;
   source_url: string | null;
+  ntrs_id?: string | null;
   page: string | null;
   table: string | null;
 }
@@ -432,9 +449,16 @@ export interface CoverageResponse {
   sparse_threshold: number;
   scales: { o2: number; flow: number; p: number };
   observations_in_slice: string[];
+  /** Observations in this group usable as coverage evidence (API CoverageResponse). */
+  n_evidence_observations?: number;
 }
 
-export interface SurfaceResponse extends Omit<CoverageResponse, "nn_distance" | "comparable_count" | "inside_hull"> {
+/**
+ * NOTE (a14-13): the API's SurfaceResponse does not send sparse_threshold / scales / observations_in_slice;
+ * they are typed as present only so existing map code keeps compiling. Read them from CoverageResponse
+ * (request filed to the map team); they will become optional here once that lands.
+ */
+export interface SurfaceResponse extends Omit<CoverageResponse, "nn_distance" | "comparable_count" | "inside_hull" | "n_evidence_observations"> {
   nn_distance?: Grid | null;
   comparable_count?: Grid | null;
   inside_hull?: Grid<boolean | number> | null;
@@ -493,15 +517,22 @@ export type AirflowBandSource =
   | "profile"
   | "ventilation_standard_with_near_quiescent_extension"
   | "ventilation_standard"
-  | "default_band";
+  | "default_band"
+  /** Custom target with a user-given airflow band. */
+  | "custom";
 
 export interface ResolvedTarget {
   label: string;
+  /** null for custom targets. */
+  profile_id?: string | null;
   status: AtmosphereStatus | string;
+  kind?: "operating_point" | string;
   oxygen_percent: Range;
   total_pressure_kpa: Range;
   airflow_cm_s: Range;
   airflow_band_source: AirflowBandSource;
+  /** Plain-language note on how the airflow band was chosen (ventilation range + analysis extension). */
+  airflow_band_note?: string | null;
   /** e.g. "documented_upper_bound_used". Present when the backend adds flags. */
   flags?: string[];
   sources: SourceRef[];
@@ -527,6 +558,10 @@ export interface TargetCoverage {
   nearest_observations: NearestObservation[];
 }
 
+/**
+ * D2: P values are ranges over *supported* target points only; all P fields are null when no target point
+ * is supported (never show a P then).
+ */
 export interface TargetModelSummary {
   model_status: ModelStatus;
   p_sustained_mean: number | null;
@@ -541,8 +576,38 @@ export interface DocumentedContextItem {
   id: string;
   name: string;
   overlap: "contains_target_nominal" | "overlaps_target_region";
-  data_availability: string;
-  reason_not_integrated: string;
+  data_availability: string | null;
+  reason_not_integrated: string | null;
+}
+
+/** Per-target-point verdict counts (D2). */
+export interface PointVerdictCounts {
+  supported: number;
+  extrapolation: number;
+  insufficient_evidence: number;
+}
+
+export type InvestigationRelevanceRole =
+  | "integrated_model"
+  | "integrated_context"
+  | "documented_not_integrated"
+  | "catalogued_not_integrated";
+
+export type EnvelopeOverlap = "contains_target_nominal" | "overlaps_target_region" | "outside_target_region" | "not_documented";
+
+/** One investigation ranked by relevance to the target (deterministic, from data and manifests). */
+export interface InvestigationRelevance {
+  id: string;
+  name: string;
+  role: InvestigationRelevanceRole;
+  relevance_rank: number;
+  comparable_observations?: number | null;
+  comparable_records_all_groups?: number | null;
+  nearest_distance?: number | null;
+  envelope_overlap?: EnvelopeOverlap | null;
+  doi?: string | null;
+  url?: string | null;
+  summary: string;
 }
 
 export interface AssessResponse {
@@ -551,8 +616,12 @@ export interface AssessResponse {
   coverage: TargetCoverage;
   model: TargetModelSummary;
   verdict: Verdict;
+  /** D2: target points individually supported; show with coverage.n_target_points ("19 of 27"). */
+  points_supported?: number | null;
+  point_verdicts?: PointVerdictCounts | null;
   reasons: Reason[];
   documented_context: DocumentedContextItem[];
+  investigation_relevance?: InvestigationRelevance[];
   summary: string;
 }
 
@@ -574,12 +643,13 @@ export type FeasibilityStatus = "within_demonstrated_envelope" | "outside_demons
 export interface RelatedInvestigation {
   id: string;
   name: string;
-  data_availability: string;
+  data_availability: string | null;
   note: string;
 }
 
 export interface Candidate {
   candidate_id: string;
+  /** Ranked candidates always carry it; the API sends null for baseline picks and compare a/b. */
   rank: number;
   oxygen_percent: number;
   pressure_kpa: number;
@@ -588,10 +658,14 @@ export interface Candidate {
   evr_fraction: number;
   marginal_evr_fraction: number;
   mi_reduction_fraction: number;
-  /** null when the candidate is farther than one reference distance from every integrated observation. */
+  /** D2: null unless the candidate point is supported by comparable evidence. Never show a P when null. */
   p_sustained: number | null;
   latent_std_ratio: number;
   nn_distance: number;
+  /** Point-level verdict at the candidate (D2); optional on older payloads. */
+  verdict?: Verdict | null;
+  /** Minimum reference distance from the candidate to the target region (D4). */
+  target_distance?: number | null;
   feasibility_status: FeasibilityStatus;
   feasibility_note: string;
   reasons: Reason<CandidateReasonCode>[];
@@ -651,6 +725,9 @@ export interface CounterfactualRequest {
   candidate: Point;
   plane: Plane | null;
   slice: number | null;
+  /** Oxygen axis of the scenario surfaces (same keys and meaning as /api/surface); for far targets. */
+  x_min?: number | null;
+  x_max?: number | null;
 }
 
 export type HypotheticalOutcome = "sustained" | "not_sustained";
@@ -658,7 +735,12 @@ export type HypotheticalOutcome = "sustained" | "not_sustained";
 export interface CounterfactualScenario {
   outcome: HypotheticalOutcome;
   label: string;
-  probability: number;
+  /** null where the evidence does not support an estimate (D2). */
+  probability: number | null;
+  /**
+   * The API sends null when no target point is supported (target_p_supported false, D2); typed as number until
+   * components/recommendations/counterfactual-panel.tsx narrows it (it already gates on target_p_supported).
+   */
   target_p_mean: number;
   target_latent_var: number;
   target_epistemic: number;
@@ -670,10 +752,56 @@ export interface CounterfactualResponse {
   p_sustained_at_candidate: number | null;
   /** false when the target verdict is insufficient_evidence (target P values are base-rate reversion). */
   target_p_supported?: boolean;
+  target_points_supported?: number | null;
+  n_target_points?: number | null;
+  /** current.target_p_mean is null when target_p_supported is false (see CounterfactualScenario). */
   current: { target_p_mean: number; target_latent_var: number; target_epistemic: number };
   scenarios: CounterfactualScenario[];
   expected_variance_reduction_fraction: number;
   note: string;
+}
+
+// ---- GET /api/headline (finding strip, LEAD_DECISIONS D1) ---------------------------------
+
+/** Comparable observations for one profile in one analysis group. */
+export interface HeadlineGroup {
+  group_id: string;
+  label: string;
+  comparable_observations: number;
+  points_with_comparable: number;
+}
+
+/** Finding-strip numbers for one atmosphere profile (ISS cabin, NASA Exploration Atmosphere), from data. */
+export interface HeadlineProfile {
+  profile_id: string;
+  label: string;
+  status: string;
+  oxygen_percent: number;
+  total_pressure_kpa: number;
+  n_target_points: number;
+  /** Comparable observations summed over all analysis groups. */
+  comparable_observations: number;
+  groups_with_comparable: number;
+  n_groups: number;
+  by_group: HeadlineGroup[];
+}
+
+/** Envelope of all integrated records ("13.5–22.7 % O2, 98–102 kPa"); ranges are [min, max] or null. */
+export interface HeadlineEnvelope {
+  investigations: string[];
+  n_experiments: number;
+  n_steps: number;
+  oxygen_percent: [number, number] | null;
+  pressure_kpa: [number, number] | null;
+  pressure_measured_kpa: [number, number] | null;
+  n_steps_pressure_assumed: number;
+  airflow_cm_s: [number, number] | null;
+}
+
+/** GET /api/headline (services/analysis api/models.py HeadlineResponse). */
+export interface HeadlineResponse {
+  profiles: HeadlineProfile[];
+  envelope: HeadlineEnvelope;
 }
 
 // ---- GET /api/model/* -------------------------------------------------------------------
@@ -685,7 +813,7 @@ export interface ModelMetadata {
   algorithm: string;
   features: string[] | Record<string, unknown>;
   hyperparameters: Record<string, unknown>;
-  fixed_hyperparameters: Record<string, unknown>;
+  fixed_hyperparameters: string[] | Record<string, unknown>;
   priors: Record<string, unknown>;
   training: {
     n_observations: number;
@@ -794,6 +922,15 @@ export interface ValidationResponse {
 
 // ---- GET /api/methodology, /api/sources -------------------------------------------------
 
+/** Airflow provenance of the training rows (methodology team request; D5 sentence). */
+export interface TrainingFlowProvenance {
+  n_training: number;
+  n_recorded: number;
+  n_converted_bass2_calibration: number;
+  n_borrowed_calibration: number;
+  n_below_calibration_range?: number | null;
+}
+
 export interface MethodologyResponse {
   versions: { dataset_version: string | null; model_version: string | null; pipeline_version: string | null; api_version: string };
   config: {
@@ -803,6 +940,10 @@ export interface MethodologyResponse {
     candidate_domain: unknown;
     seeds: unknown;
     pressure_length_scale_default: number;
+    pressure_length_scale_sensitivity?: number[];
+    pressure_length_scale_fixed?: boolean;
+    /** D5 flow-provenance counts over training rows; optional until the API sends it. */
+    training_flow_provenance?: TrainingFlowProvenance | null;
   };
   dates: { data_retrieved: string; last_analysis: string | null };
   limitations: string[];

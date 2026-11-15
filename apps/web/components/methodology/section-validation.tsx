@@ -12,7 +12,8 @@ import type { ApiQuery } from "@/hooks/api";
 import type { GroupSummary } from "@/lib/types";
 import { fmtCount, fmtFractionPercent } from "@/lib/format";
 import type { ExtGroupValidation, ExtScenario, ExtValidation } from "./types";
-import { Mono, P, QueryBoundary, Section, Sub } from "./primitives";
+import { P, QueryBoundary, Section, Sub } from "./primitives";
+import { STRATEGY_LABEL, blindspotShortfall, modelLabel, scenarioLabel, subgroupLabel, variantLabel, VERDICT_WORD } from "./labels";
 
 const f = (v: number | null | undefined, d = 3): string => (typeof v === "number" && Number.isFinite(v) ? v.toFixed(d) : "—");
 const ci = (c: [number, number] | null | undefined, d = 3): string => (c ? `${f(c[0], d)} to ${f(c[1], d)}` : "—");
@@ -28,11 +29,13 @@ const METRICS = [
 type MetricKey = (typeof METRICS)[number]["value"];
 
 const STRATEGY_STYLE: Record<string, { label: string; stroke: string; dash?: string }> = {
-  evr: { label: "EVR (target-aware)", stroke: "var(--accent)" },
-  uncertainty_sampling: { label: "Uncertainty sampling", stroke: "var(--plum-6)", dash: "6 3" },
-  nearest_gap: { label: "Nearest gap", stroke: "var(--fg)", dash: "2 3" },
-  random: { label: "Random", stroke: "var(--muted)", dash: "10 3 2 3" },
+  evr: { label: STRATEGY_LABEL.evr ?? "evr", stroke: "var(--accent)" },
+  uncertainty_sampling: { label: STRATEGY_LABEL.uncertainty_sampling ?? "uncertainty_sampling", stroke: "var(--fg)", dash: "6 3" },
+  nearest_gap: { label: STRATEGY_LABEL.nearest_gap ?? "nearest_gap", stroke: "var(--fg)", dash: "1.5 3" },
+  random: { label: STRATEGY_LABEL.random ?? "random", stroke: "var(--muted)", dash: "10 3 2 3" },
 };
+/** AUCs computed on fewer than this many not-sustained rows are not interpretable. */
+const MIN_NEG_FOR_AUC = 3;
 
 function Fig({ title, children, note }: { title: string; children: React.ReactNode; note?: React.ReactNode }) {
   return (
@@ -49,7 +52,7 @@ function ModelComparison({ g }: { g: ExtGroupValidation }) {
   const info = METRICS.find((m) => m.value === metric)!;
   const maj = g.cv.models.find((m) => m.name === "majority_class");
   const refVal = maj?.[metric]?.value ?? null;
-  const rows = g.cv.models.map((m) => ({ label: m.name, value: m[metric].value, ci: m[metric].ci95, emphasis: m.name === "gp" }));
+  const rows = g.cv.models.map((m) => ({ label: modelLabel(m.name), value: m[metric].value, ci: m[metric].ci95, emphasis: m.name === "gp" }));
   const vs = g.cv.gp_vs_majority;
   const verdictFor = (c: { value: number | null; ci95: [number, number] | null } | undefined) => {
     if (!c || c.value === null || !c.ci95) return "not evaluated";
@@ -66,7 +69,7 @@ function ModelComparison({ g }: { g: ExtGroupValidation }) {
         <DotPlot
           rows={rows}
           xLabel={`${info.label} (out-of-fold)`}
-          reference={refVal !== null ? { value: refVal, label: "majority class" } : null}
+          reference={refVal !== null ? { value: refVal, label: "majority-class guess" } : null}
           ariaLabel={`${info.label} with 95 percent intervals for each model; majority-class value ${f(refVal)} marked`}
         />
         <Table>
@@ -83,7 +86,7 @@ function ModelComparison({ g }: { g: ExtGroupValidation }) {
           <TableBody>
             {g.cv.models.map((m) => (
               <TableRow key={m.name} className={m.name === "gp" ? "bg-subtle/60" : undefined}>
-                <TableCell className="num">{m.name}</TableCell>
+                <TableCell className={m.name === "gp" ? "font-medium" : undefined}>{modelLabel(m.name)}</TableCell>
                 {(["brier", "log_loss", "auc", "ece"] as const).map((k) => (
                   <TableCell key={k} numeric className="h-auto whitespace-nowrap py-1 leading-tight">
                     {f(m[k].value)}
@@ -96,7 +99,7 @@ function ModelComparison({ g }: { g: ExtGroupValidation }) {
         </Table>
       </div>
       {vs ? (
-        <Callout variant="info" title="GP minus majority class (negative favours the GP)">
+        <Callout variant="info" title="GP minus the majority-class guess (negative favours the GP)">
           <ul className="space-y-0.5">
             <li>
               Log loss <span className="num">{signed(vs.log_loss?.value)}</span> [<span className="num">{ci(vs.log_loss?.ci95)}</span>]: {verdictFor(vs.log_loss)}.
@@ -106,6 +109,12 @@ function ModelComparison({ g }: { g: ExtGroupValidation }) {
             </li>
           </ul>
         </Callout>
+      ) : null}
+      {g.calibration?.text ? (
+        <p className="max-w-[72ch] text-[13px] leading-relaxed text-fg" data-testid="calibration-text">
+          <strong>Calibration{g.calibration.claim_calibrated ? "" : " (uncertainty-aware, not claimed calibrated)"}.</strong> {g.calibration.text}{" "}
+          <span className="text-muted">Rule: {g.calibration.rule}.</span>
+        </p>
       ) : null}
       <p className="text-xs text-muted">
         {g.cv.scheme}
@@ -118,21 +127,24 @@ function ModelComparison({ g }: { g: ExtGroupValidation }) {
 
 function Blindspot({ g }: { g: ExtGroupValidation }) {
   const b = g.blindspot_test;
-  const tone = b.verdict === "supported" ? "accent" : b.verdict === "inconclusive" ? "gap" : "warn";
+  const short = blindspotShortfall(g);
   const pairs = b.group_level.pairs.map((p) => ({ x: p.pre_reveal_uncertainty, y: p.error, label: p.experiment_id }));
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
-        <Badge tone={tone}>{b.verdict.replace("_", " ")}</Badge>
-        <span className="text-xs text-muted">
-          Does the model flag in advance the experiments it will predict worst? Each experiment is withheld, the model is refitted, and its epistemic uncertainty before the reveal is compared with its log loss afterwards.
-        </span>
+        <Badge tone="neutral">{VERDICT_WORD[b.verdict] ?? b.verdict}</Badge>
+        {short ? <span className="text-xs text-muted">Why: {short}.</span> : null}
       </div>
+      <p className="max-w-[72ch] text-xs leading-relaxed text-muted">
+        Does the model flag in advance where it will be wrong? Rule: <strong className="font-medium text-fg">supported</strong> when the Spearman correlation between pre-reveal knowledge (epistemic) uncertainty and log loss is
+        positive with one-sided p &lt; 0.05 at both levels (points, and withheld experiments refitted without them), <em>and</em> the point-level partial correlation of knowledge uncertainty with log loss, controlling for outcome-variability
+        (aleatoric) uncertainty, is positive with p &lt; 0.05; <strong className="font-medium text-fg">not supported</strong> when the correlation is 0 or negative at both levels; otherwise inconclusive.
+      </p>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,480px)_minmax(0,1fr)]">
         {pairs.length ? (
           <ScatterPlot
             points={pairs}
-            xLabel="Epistemic uncertainty before reveal (nats)"
+            xLabel="Knowledge uncertainty before reveal (nats)"
             yLabel="Error after reveal (log loss)"
             ariaLabel={`Scatter of epistemic uncertainty before reveal against error after reveal for ${pairs.length} withheld experiments`}
           />
@@ -181,6 +193,7 @@ function Blindspot({ g }: { g: ExtGroupValidation }) {
       <Callout variant="info" title="Interpretation (generated from the numbers)">
         {b.interpretation}
       </Callout>
+      {b.rule ? <p className="max-w-[72ch] text-xs leading-relaxed text-muted">Verdict rule: {b.rule}</p> : null}
     </div>
   );
 }
@@ -201,11 +214,11 @@ function Retrospective({ scenarios }: { scenarios: ExtScenario[] }) {
           <label htmlFor="retro-scenario" className="mb-1 block text-xs text-muted">
             Pseudo-target scenario
           </label>
-          <Select id="retro-scenario" value={String(idx)} onValueChange={(v) => setIdx(Number(v))} options={scenarios.map((s, i) => ({ value: String(i), label: s.name }))} />
+          <Select id="retro-scenario" value={String(idx)} onValueChange={(v) => setIdx(Number(v))} options={scenarios.map((s, i) => ({ value: String(i), label: scenarioLabel(s.name) }))} />
         </div>
       ) : null}
       <P className="text-muted">
-        <Mono>{sc.name}</Mono>: {sc.target_definition}. <span className="num">{sc.n_seeds}</span> seeds, <span className="num">{sc.n_rounds}</span> acquisition rounds
+        <span className="font-medium text-fg">{scenarioLabel(sc.name)}</span>: {sc.target_definition}. <span className="num">{sc.n_seeds}</span> seeds, <span className="num">{sc.n_rounds}</span> acquisition rounds
         {typeof sc.n_target_experiments === "number" ? <>, <span className="num">{sc.n_target_experiments}</span> held-out target experiments ({fmtCount(sc.n_target_observations)} observations
         {sc.target_class_balance ? <>, <span className="num">{sc.target_class_balance.sustained}</span> sustained / <span className="num">{sc.target_class_balance.not_sustained}</span> not sustained</> : null})</> : null}
         {typeof sc.n_pool_experiments === "number" ? <>; pool of <span className="num">{sc.n_pool_experiments}</span> experiments to acquire from</> : null}.
@@ -215,7 +228,7 @@ function Retrospective({ scenarios }: { scenarios: ExtScenario[] }) {
         xLabel="Experiments acquired"
         yLabel={sc.metric}
         reference={typeof maj?.target_log_loss === "number" ? { value: maj.target_log_loss, label: "majority-class constant" } : null}
-        ariaLabel={`${sc.metric} against experiments acquired for four selection strategies, scenario ${sc.name}, with 95 percent intervals across seeds`}
+        ariaLabel={`${sc.metric} against experiments acquired for four selection strategies, scenario ${scenarioLabel(sc.name)}, with 95 percent intervals across seeds`}
       />
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Table>
@@ -240,9 +253,9 @@ function Retrospective({ scenarios }: { scenarios: ExtScenario[] }) {
             <caption className="sr-only">Paired differences in area under the curve</caption>
             <TableHeader>
               <TableRow>
-                <TableHead>EVR minus</TableHead>
+                <TableHead>Blind Spots minus</TableHead>
                 <TableHead numeric>Difference [95 % CI]</TableHead>
-                <TableHead numeric>Seeds EVR better</TableHead>
+                <TableHead numeric>Seeds where Blind Spots is better</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -288,14 +301,14 @@ function GroupValidationView({ g, summary, retro }: { g: ExtGroupValidation; sum
       </div>
 
       {smallSample ? (
-        <Callout variant="warning" title="Small sample">
+        <Callout variant="info" title="Small sample">
           {fmtCount(g.n_experiments)} experiments{not !== null ? ` and ${fmtCount(not)} not-sustained observations` : ""}. Intervals are wide and point estimates are unstable; read the differences between models through their intervals, not their
           point values.
         </Callout>
       ) : null}
       {flowOffLeft ? (
-        <Callout variant="warning" title="Most not-sustained rows are flow-turned-off steps">
-          When flow-off transient rows are dropped, {flowOffLeft.n_not_sustained} not-sustained row(s) remain in this group, so any gain over the majority class largely reflects &quot;flow near zero means no flame&quot; rather than a learned flammability
+        <Callout variant="info" title="Most not-sustained rows are flow-turned-off steps">
+          When flow-turned-off steps are dropped, {flowOffLeft.n_not_sustained} not-sustained {flowOffLeft.n_not_sustained === 1 ? "row remains" : "rows remain"} in this group, so any gain over the majority class largely reflects &quot;flow near zero means no flame&quot; rather than a learned flammability
           boundary.
         </Callout>
       ) : null}
@@ -379,7 +392,7 @@ function GroupValidationView({ g, summary, retro }: { g: ExtGroupValidation; sum
           <TableBody>
             {g.subgroups.map((s) => (
               <TableRow key={s.name}>
-                <TableCell>{s.name}</TableCell>
+                <TableCell>{subgroupLabel(s.name)}</TableCell>
                 <TableCell numeric>{s.n}</TableCell>
                 <TableCell numeric>{typeof s.n_not_sustained === "number" ? s.n_not_sustained : "—"}</TableCell>
                 <TableCell numeric>{f(s.brier)}</TableCell>
@@ -411,19 +424,21 @@ function GroupValidationView({ g, summary, retro }: { g: ExtGroupValidation; sum
           <TableBody>
             {g.sensitivity.map((s) => (
               <TableRow key={s.variant}>
-                <TableCell className="h-auto py-1.5">{s.variant}</TableCell>
+                <TableCell className="h-auto py-1.5">{variantLabel(s.variant)}</TableCell>
                 <TableCell numeric>{s.n_training}</TableCell>
                 <TableCell numeric>{typeof s.n_not_sustained === "number" ? s.n_not_sustained : "—"}</TableCell>
                 <TableCell numeric>{f(s.brier)}</TableCell>
                 <TableCell numeric>{f(s.log_loss)}</TableCell>
-                <TableCell numeric>{f(s.auc)}</TableCell>
+                <TableCell numeric>
+                  {typeof s.n_not_sustained === "number" && s.n_not_sustained < MIN_NEG_FOR_AUC ? <span className="text-xs text-muted" title={`AUC ${f(s.auc)} on ${s.n_not_sustained} not-sustained rows`}>not interpretable</span> : f(s.auc)}
+                </TableCell>
                 <TableCell numeric>{signed(s.delta_vs_primary)}</TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
         <p className="text-xs text-muted">
-          Each variant is evaluated on its own rows with the same cross-validation, so the delta is not like-for-like when the row set differs. Pressure length-scale variants change nothing in-sample because pressure does not vary in the data; they
+          AUC is shown as not interpretable when fewer than {MIN_NEG_FOR_AUC} not-sustained rows remain. Each variant is evaluated on its own rows with the same cross-validation, so the delta is not like-for-like when the row set differs. Pressure length-scale variants change nothing in-sample because pressure does not vary in the data; they
           matter only for extrapolation.
         </p>
       </Sub>
@@ -463,7 +478,7 @@ function ReadThisFirst({ v, labels }: { v: ExtValidation; labels: Map<string, Gr
     const row = g.sensitivity.find((x) => FLOW_OFF.test(x.variant));
     const a0 = gpAuc(g);
     if (!row || a0 === null) return [];
-    const noNeg = row.n_not_sustained === 0;
+    const noNeg = typeof row.n_not_sustained === "number" && row.n_not_sustained < MIN_NEG_FOR_AUC;
     // With no other not-sustained rows the ablated AUC is undefined; that is itself the dependence.
     if (noNeg) return [{ g, a0, a1: null as number | null, noNeg }];
     if (row.auc === null || a0 - row.auc < 0.1) return [];
@@ -482,7 +497,7 @@ function ReadThisFirst({ v, labels }: { v: ExtValidation; labels: Map<string, Gr
   };
   const parts = [cmp("evr_vs_random", "vs random"), cmp("evr_vs_uncertainty_sampling", "vs uncertainty sampling"), cmp("evr_vs_nearest_gap", "vs nearest gap")].filter((x): x is string => x !== null);
   return (
-    <Callout variant="info" title="Read this first: what limits these results" data-testid="read-this-first">
+    <Callout variant="info" title="What limits these results" data-testid="read-this-first">
       <ul className="mt-1 list-disc space-y-1.5 pl-4 text-xs">
         <li>
           <strong>Against a majority-class baseline</strong>, the GP is clearly better (log-loss interval excludes 0) in {beats.length} of {gs.length} groups
@@ -491,17 +506,20 @@ function ReadThisFirst({ v, labels }: { v: ExtValidation; labels: Map<string, Gr
         {flowOff.length ? (
           <li>
             <strong>Sphere results depend on flow-turned-off steps.</strong> Dropping them lowers the cross-validated AUC:{" "}
-            {flowOff.map((x) => (x.noNeg ? `${name(x.g.group_id)} ${f(x.a0, 2)}, with no other not-sustained rows to discriminate` : `${name(x.g.group_id)} ${f(x.a0, 2)} to ${f(x.a1, 2)}`)).join("; ")}. Those labels are a transient from turning the flow off, not a physical quench boundary.
+            {flowOff.map((x) => {
+              const left = x.g.sensitivity.find((r) => FLOW_OFF.test(r.variant))?.n_not_sustained ?? 0;
+              return x.noNeg ? `${name(x.g.group_id)} ${f(x.a0, 2)}, but only ${left} not-sustained ${left === 1 ? "row remains" : "rows remain"} without them, so discrimination cannot be re-evaluated` : `${name(x.g.group_id)} ${f(x.a0, 2)} to ${f(x.a1, 2)}`;
+            }).join("; ")}. Those labels are a transient from turning the flow off, not a physical quench boundary.
           </li>
         ) : null}
         {below.length ? (
           <li>
-            <strong>Many near-quench steps rely on the documented below-calibration flow interpolation.</strong> Without those rows:{" "}
-            {below.map((x) => `${name(x.g.group_id)} keeps ${x.kept} of ${x.n} training rows`).join("; ")}.
+            <strong>Many near-quench steps rely on the documented below-calibration flow interpolation toward the fan-off point.</strong> Without those rows:{" "}
+            {below.map((x) => `${name(x.g.group_id)} keeps ${x.kept} of ${x.n} training observations`).join("; ")}.
           </li>
         ) : null}
         <li>
-          <strong>Blind-spot test</strong> (strict rule, including partial correlation given aleatoric uncertainty): supported in {supported.length} group{supported.length === 1 ? "" : "s"}
+          <strong>Blind-spot test</strong> (rule in the blind-spot subsection below, including the partial correlation given outcome variability): supported in {supported.length} group{supported.length === 1 ? "" : "s"}
           {supported.length ? ` (${supported.map((g) => name(g.group_id)).join("; ")})` : ""}, inconclusive in {inconclusive.length}.
         </li>
         {ranges.length ? (
@@ -512,7 +530,7 @@ function ReadThisFirst({ v, labels }: { v: ExtValidation; labels: Map<string, Gr
         ) : null}
         {summary ? (
           <li>
-            <strong>Acquisition retrospective</strong> ({summary.n_scenarios} pseudo-target scenarios, expected-variance-reduction ranking {parts.join("; ")}): modest small-sample evidence. There is no reliable advantage over the
+            <strong>Acquisition retrospective</strong> ({summary.n_scenarios} pseudo-target scenarios, target-aware ranking {parts.join("; ")}): modest small-sample evidence. There is no reliable advantage over the
             nearest-gap baseline, and the scenarios are not independent.
           </li>
         ) : null}
@@ -558,7 +576,7 @@ export function ValidationSection({
           return (
             <>
               <ReadThisFirst v={v} labels={labels} />
-              <div className="flex flex-wrap items-end gap-4">
+              <div id="validation-detail" className="flex scroll-mt-[calc(var(--header-h)+16px)] flex-wrap items-end gap-4">
                 <div className="w-full max-w-sm">
                   <label htmlFor="val-group" className="mb-1 block text-xs text-muted">
                     Analysis group
@@ -589,7 +607,7 @@ export function ValidationSection({
                     <TableBody>
                       {notModelled.map(([k, r]) => (
                         <TableRow key={k}>
-                          <TableCell className="num h-auto py-1.5">{k}</TableCell>
+                          <TableCell className="h-auto py-1.5">{labels.get(k)?.label ?? k}</TableCell>
                           <TableCell className="h-auto py-1.5 text-muted">{r}</TableCell>
                         </TableRow>
                       ))}

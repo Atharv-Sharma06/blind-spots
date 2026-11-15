@@ -5,6 +5,8 @@ from __future__ import annotations
 import csv
 import io
 import json
+import math
+import os
 from typing import Any
 
 import numpy as np
@@ -20,6 +22,7 @@ from blindspots.api.models import (
     ExperimentDetail,
     ExperimentWithGroup,
     GroupSummary,
+    HeadlineResponse,
     HealthResponse,
     MethodologyResponse,
     ObservationWithGroup,
@@ -41,7 +44,11 @@ CANDIDATE_DOMAIN = {
 SPARSE_THRESHOLD = 1.0
 PRESSURE_LENGTH_SCALE_DEFAULT = 0.3
 PRESSURE_LENGTH_SCALE_SENSITIVITY = [0.15, 0.3, 0.6]
-REPOSITORY_URL: str | None = None  # not published; never invented
+REPOSITORY_ENV = "BLINDSPOTS_REPOSITORY_URL"  # set only once the public repository exists; never invented
+HEADLINE_PROFILES = ["iss_cabin_nominal", "exploration_atmosphere_8p2_34"]
+DASH = "\u2013"
+
+AXIS_MAX = 1000.0  # kPa on the pressure axis, cm/s on the airflow axis
 
 DEFAULT_AXES = {
     "o2_flow": {"x": (10.0, 40.0), "y": (0.2, 50.0)},
@@ -95,7 +102,9 @@ def _filter_experiments(
     q: str | None,
     included: bool | None,
 ) -> list[dict[str, Any]]:
-    if group is not None:
+    if group is not None and not any(r["group_id"] == group for r in store.experiments):
+        # Context-only groups (e.g. Saffire `other__concurrent`) are valid filters even though they are
+        # not analysis groups; only ids that appear on no record at all are unknown.
         deps.get_group(group, store)
     rows = store.experiments
     if investigation:
@@ -262,23 +271,104 @@ def sources() -> dict[str, Any]:
     }
 
 
+def flow_provenance_counts(store: deps.DataStore | None) -> dict[str, int] | None:
+    """Airflow provenance counts over the training observations (included and labelled), from the store."""
+    if store is None:
+        return None
+    train = [o for o in store.observations if o["included_in_training"] and o.get("label") is not None]
+    if not train:
+        return None
+
+    def flagged(o: dict[str, Any], flag: str) -> bool:
+        return flag in (o.get("quality_flags") or [])
+
+    borrowed_flag = "calibration_borrowed_from_bass2"
+    return {
+        "n_training": len(train),
+        "n_recorded": sum(1 for o in train if o.get("airflow_basis") in ("air_display", "stated_cm_s")),
+        "n_converted_bass2_calibration": sum(
+            1
+            for o in train
+            if o.get("airflow_basis") in ("fan_calibration", "pot_calibration")
+            and not flagged(o, borrowed_flag)
+        ),
+        "n_borrowed_calibration": sum(1 for o in train if flagged(o, borrowed_flag)),
+        "n_below_calibration_range": sum(1 for o in train if flagged(o, "below_calibration_range")),
+    }
+
+
+def flow_provenance_sentence(store: deps.DataStore | None) -> str | None:
+    """LEAD_DECISIONS D5: airflow provenance of the training observations, computed from the store."""
+    c = flow_provenance_counts(store)
+    if c is None:
+        return None
+    borrowed = c["n_borrowed_calibration"]
+    out = (
+        f"{c['n_recorded']} of {c['n_training']} training steps use a recorded airflow (duct reading or a "
+        f"value stated in the source); {c['n_converted_bass2_calibration']} are converted from fan or pot "
+        "settings with the BASS-II calibration; "
+        + ("none use a borrowed calibration" if borrowed == 0 else f"{borrowed} use a borrowed calibration")
+        + "."
+    )
+    if c["n_below_calibration_range"]:
+        out += (
+            f" {c['n_below_calibration_range']} lie below the calibrated range and are linearly extrapolated "
+            "and flagged."
+        )
+    return out
+
+
+def _context_names(store: deps.DataStore | None) -> str:
+    if store is None:
+        return "context records"
+    names = sorted(
+        {
+            str(i.get("acronym") or i["investigation_id"])
+            for i in store.investigations
+            if i["role"] == "integrated_context"
+        }
+    )
+    return ", ".join(names) if names else "no context records"
+
+
+def stationarity_sentence(store: deps.DataStore | None) -> str:
+    rng = ""
+    if store is not None:
+        o2 = [
+            o["oxygen_percent"]
+            for o in store.observations
+            if o["included_in_training"]
+            and o.get("label") is not None
+            and o.get("oxygen_percent") is not None
+        ]
+        if o2:
+            rng = f" and {min(o2):.1f}{DASH}{max(o2):.1f}% O₂"
+    return (
+        "The GP's correlation depends only on the distance between conditions (a stationary kernel whose "
+        f"length scales were learned near 1 atm{rng}). Away from the data, the candidate ranking follows "
+        "this assumption: the most informative single experiment is then usually at the target conditions "
+        "themselves."
+    )
+
+
 def _limitations(store: deps.DataStore | None) -> list[str]:
     out = [
-        "Evidence is limited to the integrated NASA PSI records (BASS and BASS-II; Saffire-I/III as "
-        "context). "
-        "Conditions outside them are 'not represented in the integrated records', which does not mean NASA "
-        "has not studied them (see the documented investigations that are not integrated).",
+        "Evidence is limited to the integrated NASA PSI records (BASS and BASS-II). "
+        f"{_context_names(store)} records and ground-test records are shown as context only, never modelled. "
+        "Conditions outside the integrated records are 'not represented in the integrated records', which "
+        "does not mean NASA has not studied them (see the related NASA work that is not integrated).",
         "Every integrated observation is at about 1 atm (BASS measured, BASS-II assumed 101.353 kPa "
         "and flagged). "
         "The GP pressure length scale is fixed at 0.3 (ln units) and cannot be learned, so any pressure "
         "extrapolation is assumption-driven; sensitivity at 0.15 / 0.3 / 0.6 is reported.",
-        "Flow values are mostly derived from borrowed fan and pot calibrations; below the calibration "
-        "range they "
-        "are linearly extrapolated and flagged.",
+        stationarity_sentence(store),
         "Outputs are computational research candidates requiring qualified scientific review, "
         "established safety "
         "procedures and formal feasibility assessment; not a certified fire-safety assessment.",
     ]
+    flow = flow_provenance_sentence(store)
+    if flow:
+        out.insert(2, "Airflow provenance: " + flow)
     if store is not None:
         train = [o for o in store.observations if o["included_in_training"] and o.get("label") is not None]
         n1 = sum(1 for o in train if o["label"] == 1)
@@ -287,11 +377,11 @@ def _limitations(store: deps.DataStore | None) -> list[str]:
         if train:
             out.insert(
                 1,
-                f"Training data are imbalanced: {len(train)} observations, {n1} sustained and {n0} "
-                "not sustained "
-                f"({100 * n1 / len(train):.0f}% sustained); {flow_off} of the {n0} not-sustained rows are "
-                "flow-turned-off transients. Compare every metric with the majority-class baseline; small "
-                "groups give wide uncertainty.",
+                f"Training data are imbalanced: {len(train)} observations, {n1} flame sustained and {n0} "
+                "flame not sustained "
+                f"({100 * n1 / len(train):.0f}% sustained); {flow_off} of the {n0} not-sustained "
+                "observations are flow-turned-off transients. Compare every metric with the majority-class "
+                "baseline; small groups give wide uncertainty.",
             )
     return out
 
@@ -322,19 +412,26 @@ def methodology() -> dict[str, Any]:
                 "sparse_nn_distance": SPARSE_THRESHOLD,
                 "comparable_radius": 1.0,
                 "hull": "convex hull over varying dimensions; degenerate dimensions within 1 scale unit",
+                "point_supported": "inside the observed region or >= 3 comparable observations, and latent "
+                "std ratio < 0.6",
+                "point_insufficient_evidence": "no comparable observation and latent std ratio > 0.85",
+                "target_supported_fraction": 0.5,
+                "target_insufficient_evidence": "no target point has a comparable observation",
+                "p_sustained_shown": "only at supported points",
             },
             "candidate_domain": CANDIDATE_DOMAIN,
             "seeds": registry.seeds if registry else None,
             "pressure_length_scale_default": PRESSURE_LENGTH_SCALE_DEFAULT,
             "pressure_length_scale_sensitivity": PRESSURE_LENGTH_SCALE_SENSITIVITY,
             "pressure_length_scale_fixed": True,
+            "training_flow_provenance": flow_provenance_counts(store),
         },
         "dates": {
             "data_retrieved": str(retrieved) if retrieved else None,
             "last_analysis": registry.trained_at if registry else None,
         },
         "limitations": _limitations(store),
-        "repository_url": REPOSITORY_URL,
+        "repository_url": os.environ.get(REPOSITORY_ENV) or None,
     }
 
 
@@ -362,15 +459,21 @@ def resolve_plane_params(
 ) -> dict[str, Any]:
     """Validate/default the grid parameters shared by /api/coverage and /api/surface."""
     d = DEFAULT_AXES[plane]
+    given = [v for v in (slice_value, x_min, x_max, y_min, y_max) if v is not None]
+    if not all(math.isfinite(v) for v in given):
+        raise ApiError(422, "validation_error", "Numeric parameters must be finite.")
     xr = (d["x"][0] if x_min is None else x_min, d["x"][1] if x_max is None else x_max)
     yr = (d["y"][0] if y_min is None else y_min, d["y"][1] if y_max is None else y_max)
     if not (xr[0] < xr[1] and yr[0] < yr[1]):
         raise ApiError(422, "validation_error", "Axis ranges need min < max.")
-    if plane == "o2_flow" and yr[0] <= 0:
-        raise ApiError(422, "validation_error", "y_min must be > 0 on the log airflow axis.")
+    if xr[0] < 0 or xr[1] > 100:
+        raise ApiError(422, "validation_error", "The oxygen axis must lie within 0-100 %.")
+    if yr[0] <= 0 or yr[1] > AXIS_MAX:
+        unit = "cm/s" if plane == "o2_flow" else "kPa"
+        raise ApiError(422, "validation_error", f"The y axis must lie within (0, {AXIS_MAX:g}] {unit}.")
     sv = DEFAULT_SLICE[plane] if slice_value is None else slice_value
-    if sv <= 0:
-        raise ApiError(422, "validation_error", "slice must be > 0.")
+    if sv <= 0 or sv > AXIS_MAX:
+        raise ApiError(422, "validation_error", f"slice must be > 0 and <= {AXIS_MAX:g}.")
     return {"slice_value": sv, "nx": nx, "ny": ny, "x_range": xr, "y_range": yr}
 
 
@@ -413,3 +516,86 @@ def coverage(
         "observations_in_slice": rows.loc[mask, "observation_id"].tolist() if len(rows) else [],
         "n_evidence_observations": len(rows),
     }
+
+
+# --- headline (finding strip) ----------------------------------------------------------------------
+
+
+@router.get("/headline", response_model=HeadlineResponse)
+def headline(profiles: str | None = None) -> dict[str, Any]:
+    """Comparable observations for headline targets across all groups, plus the integrated envelope.
+
+    Always includes the ISS nominal profile and the NASA Exploration Atmosphere; ``profiles`` adds more
+    operating-point profile ids (comma-separated).
+    """
+    from blindspots.acquisition.targets import target_points
+    from blindspots.api.models import Target
+    from blindspots.api.services.targets import resolve_target
+    from blindspots.coverage.coverage import count_within, standardized_distances
+    from blindspots.models.groups import training_rows
+
+    store = deps.require_store()
+    ids = list(HEADLINE_PROFILES)
+    for pid in (profiles or "").split(","):
+        if pid.strip() and pid.strip() not in ids:
+            ids.append(pid.strip())
+    known = {p["profile_id"] for p in deps.profiles_manifest().get("profiles", [])}
+    groups = deps.groups_with_status(store)
+    out_profiles = []
+    for pid in ids:
+        if pid not in known:
+            if pid in HEADLINE_PROFILES:
+                continue  # manifest without this profile: omit rather than invent
+            raise ApiError(404, "not_found", f"Unknown target profile {pid!r}.", {"profile_id": pid})
+        resolved = resolve_target(Target(profile_id=pid))
+        t, _ = target_points(resolved.spec)
+        by_group = []
+        for g in groups:
+            coords, _rows = store.evidence(g["group_id"])
+            if not len(coords):
+                continue
+            d = standardized_distances(t, coords).min(axis=0)
+            by_group.append(
+                {
+                    "group_id": g["group_id"],
+                    "label": g["label"],
+                    "comparable_observations": int((d <= 1.0 + 1e-12).sum()),
+                    "points_with_comparable": int((count_within(t, coords) > 0).sum()),
+                }
+            )
+        by_group.sort(key=lambda r: (-r["comparable_observations"], r["group_id"]))
+        payload = resolved.payload
+        out_profiles.append(
+            {
+                "profile_id": pid,
+                "label": payload["label"],
+                "status": payload["status"],
+                "oxygen_percent": payload["oxygen_percent"]["nominal"],
+                "total_pressure_kpa": payload["total_pressure_kpa"]["nominal"],
+                "n_target_points": len(t),
+                "comparable_observations": sum(r["comparable_observations"] for r in by_group),
+                "groups_with_comparable": sum(1 for r in by_group if r["comparable_observations"] > 0),
+                "n_groups": len(by_group),
+                "by_group": by_group,
+            }
+        )
+    train = training_rows(store.obs_df)
+    inv_ids = sorted(set(train["investigation_id"])) if len(train) else []
+    acr = {i["investigation_id"]: i.get("acronym") or i["investigation_id"] for i in store.investigations}
+
+    def span(col: Any) -> list[float] | None:
+        v = col.dropna()
+        return [float(v.min()), float(v.max())] if len(v) else None
+
+    assumed = int(train["total_pressure_kpa"].isna().sum()) if "total_pressure_kpa" in train else len(train)
+    envelope = {
+        "investigations": [str(acr.get(i, i)) for i in inv_ids],
+        "n_experiments": int(train["experiment_id"].nunique()) if len(train) else 0,
+        "n_steps": len(train),
+        "oxygen_percent": span(train["oxygen_percent"]) if len(train) else None,
+        "pressure_kpa": span(train["pressure_for_analysis_kpa"]) if len(train) else None,
+        "pressure_measured_kpa": span(train["total_pressure_kpa"]) if len(train) else None,
+        "n_steps_pressure_assumed": assumed,
+        "airflow_cm_s": span(train["airflow_cm_s"]) if len(train) else None,
+    }
+    return {"profiles": out_profiles, "envelope": envelope}

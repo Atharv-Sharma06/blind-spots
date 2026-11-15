@@ -32,6 +32,9 @@ export interface ExtSubgroup {
 }
 
 export interface ExtBlindspot extends Omit<BlindspotTest, "point_level" | "group_level"> {
+  /** Full verdict rule, including the partial-correlation criterion. */
+  rule?: string;
+  criteria?: { point_level?: boolean; experiment_level?: boolean; partial?: boolean };
   point_level: BlindspotTest["point_level"] & { n_misclassified?: number; p_value_note?: string };
   group_level: Omit<BlindspotTest["group_level"], "pairs"> & {
     pairs: { experiment_id: string; pre_reveal_uncertainty: number; error: number; n_points?: number }[];
@@ -59,6 +62,16 @@ export interface ExtGroupValidation extends Omit<GroupValidation, "cv" | "logo" 
   blindspot_test: ExtBlindspot;
   sensitivity: ExtSensitivityRow[];
   subgroups: ExtSubgroup[];
+  /** Per-group calibration verdict (science team); "calibrated" is claimed only when claim_calibrated is true. */
+  calibration?: {
+    claim_calibrated: boolean;
+    verdict: "calibrated" | "not_established" | "worse_than_baseline";
+    ece: number | null;
+    ece_ci95: [number, number] | null;
+    majority_class_ece: number | null;
+    rule: string;
+    text: string;
+  } | null;
 }
 
 export interface ExtScenario extends Omit<AcquisitionScenario, "curves"> {

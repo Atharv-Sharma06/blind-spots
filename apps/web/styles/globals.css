@@ -66,6 +66,24 @@
   --color-plum-6: var(--plum-6);
   --color-plum-7: var(--plum-7);
 
+  /* Type scale: six sizes only (see .work/requests/shell-announcements.md).
+     text-label 12/16 · text-ui 13/20 · text-prose 14/22 · text-title 16/24 · text-heading 20/28 · text-display 26/32 */
+  --text-label: 12px;
+  --text-label--line-height: 16px;
+  --text-ui: 13px;
+  --text-ui--line-height: 20px;
+  --text-prose: 14px;
+  --text-prose--line-height: 22px;
+  --text-title: 16px;
+  --text-title--line-height: 24px;
+  --text-title--letter-spacing: -0.01em;
+  --text-heading: 20px;
+  --text-heading--line-height: 28px;
+  --text-heading--letter-spacing: -0.015em;
+  --text-display: 26px;
+  --text-display--line-height: 32px;
+  --text-display--letter-spacing: -0.02em;
+
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
 
@@ -102,28 +120,36 @@
   }
 }
 
-/* Numbers: Geist Mono with tabular figures. Use on every measured value. */
+/* Numbers: Geist Mono with tabular figures. Put it on the LEAF value element only (<dd>, a value <span>,
+   a numeric table cell), never on dl/p/ul/li/div wrappers: labels and sentences stay in Geist Sans. */
 @utility num {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums slashed-zero;
   font-feature-settings: "tnum" 1, "zero" 1;
 }
+/* Sans digits with tabular figures: numbers inside sentences or tables where mono would be noisy. */
 @utility tabular {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
+}
+/* Focus ring drawn inside the element, for items in overflow-clipped containers (tables, scroll areas). */
+@utility focus-inset {
+  &:focus-visible { outline-offset: -2px; }
 }
 
 @layer base {
   html {
     background: var(--bg);
     -webkit-text-size-adjust: 100%;
+    /* Anchors and focused elements never hide under the sticky header (WCAG 2.4.11). */
+    scroll-padding-top: calc(var(--header-h) + 12px);
   }
   body {
     background: var(--bg);
     color: var(--fg);
     font-family: var(--font-sans);
-    font-size: 14px;
-    line-height: 1.5;
+    font-size: var(--text-prose);
+    line-height: var(--text-prose--line-height);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
@@ -140,6 +166,25 @@
   ::selection { background: var(--accent-tint); color: var(--fg); }
 
   button, [role="button"], summary { cursor: pointer; }
+
+  /* No heavy UA triangles: every <summary> gets the same quiet chevron. The Disclosure primitive
+     (components/ui/disclosure.tsx) draws its own icon and opts out with data-disclosure. */
+  summary { list-style: none; }
+  summary::-webkit-details-marker { display: none; }
+  summary:not([data-disclosure])::before {
+    content: "";
+    display: inline-block;
+    width: 0.7em;
+    height: 0.7em;
+    margin-right: 0.4em;
+    vertical-align: 0.02em;
+    background-color: currentColor;
+    opacity: 0.6;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 18 6-6-6-6'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 18 6-6-6-6'/%3E%3C/svg%3E") center / contain no-repeat;
+    transition: transform 120ms ease-out;
+  }
+  details[open] > summary:not([data-disclosure])::before { transform: rotate(90deg); }
   button:disabled, [aria-disabled="true"] { cursor: not-allowed; }
 }
 

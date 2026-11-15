@@ -10,6 +10,9 @@ Layout of ``PSI-25_Reference Data_Fan calibration data.xlsx`` (verified against 
   ``no restrictor`` (row 4), ``1 restrictor`` (row 14) and ``2 resrictor`` (row 23). Section order
   is therefore 0, 1, 2 restrictors for every block; sections without Air readings stay empty.
 * The note ``*U =1.0066(AIR)`` gives the duct speed: U = 1.0066 x AIR.
+* A row belongs to a section when its Pot cell is numeric and its Fan Display or Air Display cell is
+  numeric. Some rows have an empty Fan Display cell but a real Air reading (2014-202, 2 restrictors,
+  cells CA32/CC32: pot 0.5 -> air 3); they are kept for pot conversions and skipped for fan-display ones.
 """
 
 from __future__ import annotations
@@ -38,7 +41,7 @@ FAN_OFF_DISPLAY = 38.0
 @dataclass(frozen=True)
 class CalPoint:
     pot: float
-    fan_display: float
+    fan_display: float | None
     air_display: float | None
 
 
@@ -94,16 +97,46 @@ def parse_calibration_sheet(ws: Any) -> list[CalBlock]:
         in_run = False
         for r in range(FIRST_DATA_ROW, ws.max_row + 1):
             pot, fan = _num(ws.cell(r, s).value), _num(ws.cell(r, s + 1).value)
-            if pot is None or fan is None:
+            air = _num(ws.cell(r, s + 2).value)
+            if pot is None:
                 in_run = False
                 continue
+            if fan is None and air is None:
+                continue  # pot setting with neither reading (e.g. 2014-195 row 32): no data, same section
             if not in_run:
                 section += 1
                 in_run = True
             idx = min(section, 2)  # stray trailing rows (e.g. the pot 0 row) belong to the last section
-            block.sections.setdefault(idx, []).append(CalPoint(pot, fan, _num(ws.cell(r, s + 2).value)))
+            block.sections.setdefault(idx, []).append(CalPoint(pot, fan, air))
         blocks.append(block)
     return blocks
+
+
+def suspect_duplicate_sections(
+    by_day: dict[tuple[int, int, int], list[CalPoint]], min_points: int = 3
+) -> set[tuple[int, int, int]]:
+    """Restrictor sections of one calibration day whose (pot, air) readings are identical to another section.
+
+    A restrictor changes the duct flow at a given pot setting (on every day with two sections the
+    readings differ), so two sections that agree at every shared pot setting (at least ``min_points``
+    non-zero readings) of one day cannot both be measurements: one is a copy and
+    the sheet does not say which. Both are treated as suspect and skipped (CONTRACTS 2.4). Example: day
+    2014-210 "no restrictor" rows 7-12 repeat its "2 restrictor" rows 26-31 (20, 15, 10, 7, 3, 0).
+    """
+    out: set[tuple[int, int, int]] = set()
+    days = sorted({(y, d) for (y, d, _n) in by_day})
+    for y, d in days:
+        readings = {
+            n: {p.pot: p.air_display for p in by_day.get((y, d, n), []) if p.air_display is not None}
+            for n in (0, 1, 2)
+        }
+        for n1 in (0, 1, 2):
+            for n2 in range(n1 + 1, 3):
+                shared = sorted(set(readings[n1]) & set(readings[n2]))
+                nonzero = [x for x in shared if readings[n1][x] > 0]
+                if len(nonzero) >= min_points and all(readings[n1][x] == readings[n2][x] for x in shared):
+                    out.update({(y, d, n1), (y, d, n2)})
+    return out
 
 
 class FlowCalibration:
@@ -111,7 +144,7 @@ class FlowCalibration:
 
     def __init__(self, blocks: list[CalBlock]) -> None:
         self.blocks = blocks
-        self.tables: dict[tuple[int, int], list[tuple[float, float, float | None]]] = {}
+        self.tables: dict[tuple[int, int], list[tuple[float, float | None, float | None]]] = {}
         # per (year, gmt_day, n) -> points, kept separate from the pooled public tables
         self._by_day: dict[tuple[int, int, int], list[CalPoint]] = {}
         for b in blocks:
@@ -120,6 +153,7 @@ class FlowCalibration:
                     (p.pot, p.fan_display, p.air_display) for p in pts
                 )
                 self._by_day.setdefault((b.year, b.gmt_day, n), []).extend(pts)
+        self.suspect_duplicates: set[tuple[int, int, int]] = suspect_duplicate_sections(self._by_day)
 
     @classmethod
     def from_workbook(cls, path: Path) -> FlowCalibration:
@@ -127,11 +161,16 @@ class FlowCalibration:
         return cls(parse_calibration_sheet(wb.worksheets[0]))
 
     # ------------------------------------------------------------------ selection
-    def usable_days(self, n_restrictors: int) -> list[tuple[int, int]]:
-        """(year, gmt_day) pairs with at least two non-zero air readings for this restrictor count."""
+    def usable_days(self, n_restrictors: int, skip_suspect: bool = True) -> list[tuple[int, int]]:
+        """(year, gmt_day) pairs with at least two non-zero air readings for this restrictor count.
+
+        Sections flagged by :func:`suspect_duplicate_sections` are skipped unless ``skip_suspect`` is False.
+        """
         out = []
         for (year, day, n), pts in sorted(self._by_day.items()):
             nonzero = {p.pot for p in pts if p.air_display and p.air_display > 0}
+            if skip_suspect and (year, day, n) in self.suspect_duplicates:
+                continue
             if n == n_restrictors and len(nonzero) >= 2:  # a single point cannot define a curve
                 out.append((year, day))
         return out
@@ -152,6 +191,8 @@ class FlowCalibration:
             if p.air_display is None or p.air_display <= 0:
                 continue
             x = p.pot if kind == "pot" else p.fan_display
+            if x is None:  # no fan display recorded for this row: usable for pot conversions only
+                continue
             acc.setdefault(x, []).append(p.air_display)
         return sorted((x, float(np.mean(v))) for x, v in acc.items())
 
@@ -167,8 +208,28 @@ class FlowCalibration:
 
         ``year=None`` means the test is not from the calibration campaign (BASS 2012-13): the nearest
         calibration day by day of year is used and the caller must add ``calibration_borrowed_from_bass2``.
+        When skipping a suspected duplicate section changed the chosen day, the result carries the flag
+        ``calibration_block_suspect_duplicate``.
         """
-        days = self.usable_days(n_restrictors)
+        res = self._convert(kind, value, n_restrictors, year, gmt_day, skip_suspect=True)
+        if res is None or not any(n == n_restrictors for (_y, _d, n) in self.suspect_duplicates):
+            return res
+        unfiltered = self._convert(kind, value, n_restrictors, year, gmt_day, skip_suspect=False)
+        if unfiltered is not None and unfiltered.calibration_ref != res.calibration_ref:
+            flags = (*res.flags, "calibration_block_suspect_duplicate")
+            return FlowResult(res.u_cm_s, res.uncertainty_cm_s, res.calibration_ref, flags)
+        return res
+
+    def _convert(
+        self,
+        kind: Kind,
+        value: float,
+        n_restrictors: int,
+        year: int | None,
+        gmt_day: int | None,
+        skip_suspect: bool,
+    ) -> FlowResult | None:
+        days = self.usable_days(n_restrictors, skip_suspect)
         if not days or gmt_day is None:
             return None
         curves = {d: self._curve(self._by_day[(d[0], d[1], n_restrictors)], kind) for d in days}

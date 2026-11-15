@@ -68,7 +68,7 @@ Reading:
 ## 5. Was the uncertainty useful? (blind-spot test)
 
 The test asks whether the model's epistemic uncertainty, computed before an outcome is revealed, ranks where it makes larger errors on withheld experiments (point level on out-of-fold predictions, experiment level with leave-one-experiment-out refits).
-Verdict rule: supported if rho > 0 with p < 0.05 at both levels; not supported if rho <= 0 at both; otherwise inconclusive.
+Verdict rule: supported if rho > 0 with p < 0.05 at both levels and the point-level partial rho of epistemic uncertainty given aleatoric uncertainty is > 0 with p < 0.05; not supported if rho <= 0 at both; otherwise inconclusive.
 
 {{BLINDSPOT_TABLE}}
 

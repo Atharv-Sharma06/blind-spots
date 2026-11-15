@@ -12,19 +12,19 @@ export interface SectionHeaderProps {
 }
 
 const SIZES = {
-  h1: "text-[22px] font-semibold leading-tight tracking-[-0.02em] md:text-[26px]",
-  h2: "text-[15px] font-semibold tracking-[-0.01em]",
-  h3: "text-[13px] font-semibold",
+  h1: "text-heading font-semibold md:text-display",
+  h2: "text-title font-semibold",
+  h3: "text-ui font-semibold",
 } as const;
 
 export function SectionHeader({ title, description, actions, as: Tag = "h2", className }: SectionHeaderProps) {
   return (
-    <div className={cn("flex items-start justify-between gap-4", className)}>
+    <div className={cn("flex min-w-0 items-start justify-between gap-x-4 gap-y-3", className)}>
       <div className="min-w-0">
         <Tag className={cn("text-fg", SIZES[Tag])}>{title}</Tag>
-        {description ? <p className={cn("mt-1 max-w-[62ch] text-muted", Tag === "h1" ? "text-[15px]" : "text-[13px]")}>{description}</p> : null}
+        {description ? <p className={cn("mt-1 max-w-[62ch] text-muted", Tag === "h1" ? "text-prose" : "text-ui")}>{description}</p> : null}
       </div>
-      {actions ? <div className="flex shrink-0 items-center gap-2">{actions}</div> : null}
+      {actions ? <div className="flex min-w-0 max-w-full items-center gap-2">{actions}</div> : null}
     </div>
   );
 }

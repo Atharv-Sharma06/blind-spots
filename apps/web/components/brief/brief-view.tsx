@@ -13,7 +13,7 @@ import { pickDefaultGroup, pickDefaultProfile } from "@/lib/explore-store";
 import { DISCLAIMER } from "@/lib/copy";
 import { shortVersion } from "@/lib/format";
 import type { BriefResponse } from "@/lib/types";
-import { MarkdownLite } from "./markdown-lite";
+import { MarkdownLite, cleanBriefText } from "./markdown-lite";
 import { parseBriefQuery } from "./link";
 
 /** Section order and headings follow the API's `sections` keys (UI constants; text comes from the API). */
@@ -35,7 +35,17 @@ function download(name: string, text: string) {
   document.body.appendChild(a);
   a.click();
   a.remove();
-  URL.revokeObjectURL(url);
+  // Revoking synchronously can cancel the download in some browsers.
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/** "2026-11-15T18:44:59Z" -> "15 Nov 2026, 18:44 UTC" (unparseable values are shown as given). */
+function fmtGenerated(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const p2 = (n: number) => String(n).padStart(2, "0");
+  return `${d.getUTCDate()} ${months[d.getUTCMonth()]} ${d.getUTCFullYear()}, ${p2(d.getUTCHours())}:${p2(d.getUTCMinutes())} UTC`;
 }
 
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60);
@@ -66,16 +76,17 @@ export function BriefView() {
       <style>{`
         .brief-prose,.brief-prose *{overflow-wrap:anywhere;min-width:0}
         .brief-prose pre{overflow-x:auto}
-        .brief-prose{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;font-size:16.5px;line-height:1.62;color:var(--fg)}
-        .brief-prose h1,.brief-prose h2,.brief-ui{font-family:var(--font-sans)}
+        .brief-prose{font-size:15px;line-height:1.65;color:var(--fg)}
+        .brief-prose p,.brief-prose li{max-width:72ch}
         @media print{
           body>header,body>footer,body>a,.no-print{display:none!important}
           html,body{background:#fff!important}
           @page{size:A4;margin:18mm 16mm}
           .brief-root{max-width:none!important;padding:0!important}
-          .brief-prose{font-size:10.5pt;line-height:1.5}
-          .brief-prose h2{break-after:avoid}
-          .brief-prose section,.brief-prose li{break-inside:avoid}
+          .brief-prose{font-size:10pt;line-height:1.45}
+          .brief-prose h1,.brief-prose h2{break-after:avoid;page-break-after:avoid}
+          .brief-prose li:not(:has(ul,ol)){break-inside:avoid}
+          .brief-prose p,.brief-prose li{orphans:3;widows:3}
           .brief-prose a{color:inherit;text-decoration:none}
         }
       `}</style>
@@ -85,7 +96,7 @@ export function BriefView() {
           <Link href={exploreHref}><ArrowLeft aria-hidden />Back to Explore</Link>
         </Button>
         <div className="ml-auto flex gap-2">
-          <Button variant="secondary" disabled={!brief} onClick={() => brief && download(`blind-spots-brief-${slug(groupId ?? "group")}.md`, brief.markdown)}>
+          <Button variant="secondary" disabled={!brief} onClick={() => brief && download(`blind-spots-brief-${slug(groupId ?? "group")}.md`, cleanBriefText(brief.markdown))}>
             <Download aria-hidden />Download .md
           </Button>
           <Button variant="primary" disabled={!brief} onClick={() => window.print()}>
@@ -112,7 +123,7 @@ export function BriefView() {
             <p className="brief-ui text-xs font-medium uppercase tracking-[0.08em] text-muted">Blind Spots · Research brief</p>
             <h1 className="mt-2 text-[28px] font-semibold leading-tight tracking-[-0.02em]">{brief.title.replace(/^Research brief:\s*/, "")}</h1>
             <dl className="brief-ui num mt-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted">
-              <div className="flex gap-1.5"><dt>Generated</dt><dd className="text-fg">{brief.generated_at}</dd></div>
+              <div className="flex gap-1.5"><dt>Generated</dt><dd className="text-fg">{fmtGenerated(brief.generated_at)}</dd></div>
               <div className="flex gap-1.5"><dt>Dataset</dt><dd className="text-fg">{shortVersion(brief.dataset_version)}</dd></div>
               <div className="flex gap-1.5"><dt>Model</dt><dd className="text-fg">{brief.model_version}</dd></div>
             </dl>
@@ -127,7 +138,7 @@ export function BriefView() {
             if (!text || text.trim() === "") return null;
             return (
               <section key={key} className="mt-7" aria-labelledby={`brief-${key}`}>
-                <h2 id={`brief-${key}`} className="mb-2 border-b border-border pb-1 text-[17px] font-semibold tracking-[-0.01em]">{title}</h2>
+                <h2 id={`brief-${key}`} className="mb-2 border-b border-border pb-1 text-[18px] font-semibold tracking-[-0.01em]">{title}</h2>
                 <MarkdownLite markdown={text} />
               </section>
             );

@@ -7,7 +7,7 @@ from typing import Any
 
 import numpy as np
 
-from blindspots.coverage.coverage import SCALES, inside_hull, nn_distance, to_coords
+from blindspots.coverage.coverage import SCALES, inside_hull, nn_distance, standardized_distances, to_coords
 
 WITHIN = "within_demonstrated_envelope"
 OUTSIDE = "outside_demonstrated_envelope"
@@ -18,6 +18,18 @@ STATUS_TEXT = {
     ),
     OUTSIDE: "Feasibility not verified; requires qualified review.",
 }
+
+AT_TARGET_DISTANCE = 1.0  # reference distances
+AT_TARGET_SENTENCE = (
+    "The most informative single experiment is at the target conditions themselves; this follows from the "
+    "model's distance-based (stationary) correlation assumption."
+)
+
+
+def target_distance(cand_X: np.ndarray, target_X: np.ndarray) -> np.ndarray:
+    """Reference distance from each candidate to the nearest target point (see AT_TARGET_DISTANCE)."""
+    return np.asarray(standardized_distances(np.atleast_2d(cand_X), np.atleast_2d(target_X)).min(axis=1))
+
 
 O2_GRID = np.arange(12.0, 40.0 + 1e-9, 1.0)
 PRESSURE_GRID_KPA = (50.0, 56.5, 60.0, 70.3, 80.0, 90.0, 101.3)

@@ -1,9 +1,10 @@
 import { create } from "zustand";
 import {
   getDataMode,
-  loadSnapshotManifest,
+  loadedSnapshotManifest,
+  preloadSnapshotManifest,
   readSnapshotEntry,
-  snapshotFileUrl,
+  resolveSnapshotFile,
   SnapshotError,
   type QueryParams,
 } from "./snapshot";
@@ -28,6 +29,7 @@ import type {
   GridQuery,
   GroupSummary,
   HealthResponse,
+  HeadlineResponse,
   Investigation,
   MethodologyResponse,
   ModelMetadata,
@@ -52,11 +54,24 @@ export class ApiError extends Error {
    * (the UI says "requires the live analysis service"). `code` is `backend_unavailable` in that case.
    */
   readonly snapshotUnavailable: boolean;
+  /**
+   * Why `backend_unavailable` happened, for honest copy:
+   *  - "service_unreachable": the live analysis service did not answer (and no snapshot could stand in);
+   *  - "snapshot_missing": snapshot mode, but /snapshot/manifest.json could not be loaded (nothing deployed);
+   *  - "snapshot_entry_missing": the snapshot loaded but has no entry for this request (needs the live service).
+   * null for every other code.
+   */
+  readonly reason: ApiErrorReason | null;
 
   constructor(
     code: ApiErrorCode,
     message: string,
-    opts: { status?: number | null; details?: Record<string, unknown> | null; snapshotUnavailable?: boolean } = {},
+    opts: {
+      status?: number | null;
+      details?: Record<string, unknown> | null;
+      snapshotUnavailable?: boolean;
+      reason?: ApiErrorReason | null;
+    } = {},
   ) {
     super(message);
     this.name = "ApiError";
@@ -64,8 +79,11 @@ export class ApiError extends Error {
     this.status = opts.status ?? null;
     this.details = opts.details ?? null;
     this.snapshotUnavailable = opts.snapshotUnavailable ?? false;
+    this.reason = opts.reason ?? (code === "backend_unavailable" ? (this.snapshotUnavailable ? "snapshot_entry_missing" : "service_unreachable") : null);
   }
 }
+
+export type ApiErrorReason = "service_unreachable" | "snapshot_missing" | "snapshot_entry_missing";
 
 export function isApiError(e: unknown): e is ApiError {
   return e instanceof ApiError;
@@ -74,6 +92,32 @@ export function isApiError(e: unknown): e is ApiError {
 /** The snapshot has no entry for this request: show "requires the live analysis service". */
 export function isSnapshotUnavailable(e: unknown): boolean {
   return e instanceof ApiError && e.snapshotUnavailable;
+}
+
+/**
+ * Plain-language copy for a `backend_unavailable` error that matches its real cause (never tells a
+ * visitor of the static snapshot deployment to start a service). null for other errors.
+ */
+export function unavailableCopy(e: unknown): { title: string; description: string } | null {
+  if (!(e instanceof ApiError) || e.code !== "backend_unavailable") return null;
+  switch (e.reason) {
+    case "snapshot_missing":
+      return {
+        title: "Snapshot data not found",
+        description:
+          "This build serves precomputed results from /snapshot/, which is missing or could not be loaded. Retry; if it persists, the snapshot was not deployed with this build.",
+      };
+    case "snapshot_entry_missing":
+      return {
+        title: "Not in the precomputed snapshot",
+        description: "This view is not part of the precomputed results; it is available in the full (local) version with the analysis service.",
+      };
+    default:
+      return {
+        title: "Analysis service unavailable",
+        description: "The analysis service did not respond, so no data can be shown. Retry in a moment.",
+      };
+  }
 }
 
 const KNOWN_CODES: ReadonlySet<string> = new Set<ApiErrorCode>([
@@ -200,10 +244,29 @@ async function liveFetch<T>(method: "GET" | "POST", path: string, opts: RequestO
 
 // ---- Mode-aware request ---------------------------------------------------------------------------
 
-function snapshotToApiError(e: unknown): ApiError {
+/** Experiment detail: the snapshot exports every experiment, so a missing entry means "no such record". */
+const DETAIL_PATH = /^\/api\/experiments\/[^/]+$/;
+
+function snapshotToApiError(e: unknown, method: "GET" | "POST", path: string): ApiError {
   if (e instanceof ApiError) return e;
-  const message = e instanceof SnapshotError ? e.message : "The precomputed snapshot could not be read.";
-  return new ApiError("backend_unavailable", message, { snapshotUnavailable: true });
+  if (e instanceof SnapshotError) {
+    if (e.kind === "no_manifest") {
+      return new ApiError("backend_unavailable", e.message, { snapshotUnavailable: true, reason: "snapshot_missing", status: e.status });
+    }
+    if (e.kind === "missing_entry" && method === "GET" && DETAIL_PATH.test(path)) {
+      return new ApiError("not_found", "That record is not in the integrated records.", { status: 404 });
+    }
+    return new ApiError("backend_unavailable", e.message, { snapshotUnavailable: true, reason: "snapshot_entry_missing" });
+  }
+  return new ApiError("backend_unavailable", "The precomputed snapshot could not be read.", { snapshotUnavailable: true, reason: "snapshot_entry_missing" });
+}
+
+function reportSnapshot(manifest: { model_version?: string | null; generated_at?: string | null } | null): void {
+  useDataSourceStore.getState().report({
+    status: "snapshot",
+    modelVersion: manifest?.model_version ?? null,
+    generatedAt: manifest?.generated_at ?? null,
+  });
 }
 
 async function fromSnapshot<T>(
@@ -219,20 +282,24 @@ async function fromSnapshot<T>(
       generated_at: hit.manifest.generated_at,
       model_version: hit.manifest.model_version ?? null,
     };
-    useDataSourceStore.getState().report({ status: "snapshot", modelVersion: meta.model_version, generatedAt: meta.generated_at ?? null });
+    reportSnapshot(hit.manifest);
     let data: unknown;
     if (opts.text) data = hit.text;
     else {
       try {
         data = JSON.parse(hit.text);
       } catch {
-        throw new SnapshotError("A snapshot file is not valid JSON.");
+        throw new SnapshotError("A snapshot file is not valid JSON.", "bad_file");
       }
     }
     return { data: data as T, meta };
   } catch (e) {
     if (e instanceof DOMException && e.name === "AbortError") throw e;
-    throw snapshotToApiError(e);
+    // Keep the badge honest on a miss too: the manifest answered, so answers come from the snapshot.
+    const manifest = loadedSnapshotManifest();
+    if (manifest) reportSnapshot(manifest);
+    else if (e instanceof SnapshotError && e.kind === "no_manifest") useDataSourceStore.getState().report({ status: "unavailable" });
+    throw snapshotToApiError(e, method, path);
   }
 }
 
@@ -260,7 +327,7 @@ export async function request<T>(
   if (!skipLive) {
     try {
       const data = await liveFetch<T>(method, path, opts);
-      useDataSourceStore.setState({ liveDownAt: null });
+      if (useDataSourceStore.getState().liveDownAt !== null) useDataSourceStore.setState({ liveDownAt: null });
       useDataSourceStore.getState().report({ status: "live" });
       return { data, meta: { source: "live" } };
     } catch (e) {
@@ -271,25 +338,19 @@ export async function request<T>(
         throw e;
       }
       useDataSourceStore.getState().markLiveDown(Date.now());
-      // auto: fall through to the snapshot.
+      // auto: fall through to the snapshot (fromSnapshot reports the new status, hit or miss).
     }
   }
 
   try {
     return await fromSnapshot<T>(method, path, qb, opts);
   } catch (e) {
-    // No snapshot deployed at all: the honest error is that the service is unreachable.
-    if (e instanceof ApiError && e.snapshotUnavailable) {
-      let manifestLoaded = true;
-      try {
-        await loadSnapshotManifest();
-      } catch {
-        manifestLoaded = false;
-      }
-      if (!manifestLoaded) {
-        useDataSourceStore.getState().report({ status: "unavailable" });
-        throw new ApiError("backend_unavailable", "The analysis service could not be reached and no precomputed snapshot is available.");
-      }
+    // auto with no snapshot deployed at all: the honest error is that the service is unreachable.
+    if (e instanceof ApiError && e.reason === "snapshot_missing") {
+      useDataSourceStore.getState().report({ status: "unavailable" });
+      throw new ApiError("backend_unavailable", "The analysis service could not be reached and no precomputed snapshot is available.", {
+        reason: "service_unreachable",
+      });
     }
     throw e;
   }
@@ -313,6 +374,8 @@ export const api = {
   observations: (group?: string | null, signal?: AbortSignal) =>
     get<ApiObservation[]>("/api/observations", { group }, signal),
   targets: (signal?: AbortSignal) => get<TargetsResponse>("/api/targets", undefined, signal),
+  /** Finding-strip numbers (LEAD_DECISIONS D1), computed by the backend; also in the snapshot. */
+  headline: (signal?: AbortSignal) => get<HeadlineResponse>("/api/headline", undefined, signal),
   context: (signal?: AbortSignal) => get<ContextResponse>("/api/context", undefined, signal),
   coverage: (query: GridQuery, signal?: AbortSignal) =>
     get<CoverageResponse>("/api/coverage", query as unknown as QueryParams, signal),
@@ -337,19 +400,24 @@ export const api = {
 };
 
 /**
- * href for a download link to the experiments CSV. Live: the API URL. `snapshot: true`: the snapshot file
- * (null when the snapshot has no matching entry).
+ * href for a download link to the experiments CSV. Live: the API URL. Snapshot (or `snapshot: true`):
+ * the snapshot file, looked up in the manifest without downloading it; null when the snapshot has no
+ * matching entry.
  */
 export async function exportExperimentsCsvHref(
   query: { investigation?: string; group?: string } | undefined,
   opts: { snapshot?: boolean } = {},
 ): Promise<string | null> {
   const mode = getDataMode();
-  if (mode !== "snapshot" && !opts.snapshot) return buildUrl("/api/export/experiments.csv", query as QueryParams | undefined);
+  const useSnapshot = mode === "snapshot" || opts.snapshot || (mode === "auto" && useDataSourceStore.getState().status === "snapshot");
+  if (!useSnapshot) return buildUrl("/api/export/experiments.csv", query as QueryParams | undefined);
   try {
-    const hit = await readSnapshotEntry("GET", "/api/export/experiments.csv", query);
-    return snapshotFileUrl(hit.manifest.entries[hit.key] as string);
+    return (await resolveSnapshotFile("GET", "/api/export/experiments.csv", query)).url;
   } catch {
     return null;
   }
 }
+
+// Snapshot builds: start downloading the manifest as soon as the client bundle runs (before hydration and
+// before the first query), so data requests do not wait for an extra round trip.
+if (typeof window !== "undefined" && getDataMode() === "snapshot") preloadSnapshotManifest();

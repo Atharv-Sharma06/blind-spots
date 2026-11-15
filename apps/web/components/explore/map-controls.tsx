@@ -69,6 +69,17 @@ export function PlaneSwitch({ plane, onChange }: { plane: Plane; onChange: (p: P
   );
 }
 
+/** Snapshot slices that print identically at 0.1 precision are one option (keeps the value with more decimals: the profile nominal). */
+function dedupeSlices(values: number[]): number[] {
+  const byLabel = new Map<string, number>();
+  for (const v of values) {
+    const k = v.toFixed(1);
+    const prev = byLabel.get(k);
+    if (prev === undefined || String(v).length > String(prev).length) byLabel.set(k, v);
+  }
+  return [...byLabel.values()].sort((a, b) => a - b);
+}
+
 export function SliceControl({
   plane,
   value,
@@ -89,19 +100,19 @@ export function SliceControl({
 
   if (snapValues && snapValues.length > 0) {
     return (
-      <div className="min-w-[160px]">
-        <label id={id} className="mb-1 block text-xs text-muted">{ax.title} slice (snapshot values)</label>
+      <div className="min-w-[150px]">
+        <label id={id} className="mb-1 block text-xs text-muted">{ax.title} slice</label>
         <Select
           aria-label={`${ax.title} slice`}
-          value={String(snapValues.reduce((b, v) => (Math.abs(v - value) < Math.abs(b - value) ? v : b), snapValues[0] as number))}
+          value={String(dedupeSlices(snapValues).reduce((b, v) => (Math.abs(v - value) < Math.abs(b - value) ? v : b), snapValues[0] as number))}
           onValueChange={(v) => onCommit(Number(v))}
-          options={snapValues.map((v) => ({ value: String(v), label: `${fmtFixed(v, 1)} ${ax.unit}` }))}
+          options={dedupeSlices(snapValues).map((v) => ({ value: String(v), label: `${fmtFixed(v, 1)} ${ax.unit}` }))}
         />
       </div>
     );
   }
   return (
-    <div className="min-w-[200px] flex-1">
+    <div className="min-w-[200px] max-w-[320px] flex-1">
       <div className="mb-1 flex items-baseline justify-between gap-2">
         <label id={id} className="text-xs text-muted">{ax.title} slice</label>
         <span className="num text-xs text-fg" data-testid="slice-value">
@@ -135,10 +146,8 @@ export function MaterialSelect({
   value: string | null;
   onChange: (id: string) => void;
 }) {
-  const g = groups.find((x) => x.group_id === value) ?? null;
-  const bal = g ? groupBalance(g) : null;
   return (
-    <div className="min-w-[220px] flex-1">
+    <div className="min-w-[220px] max-w-[400px] flex-[1_1_260px]">
       <label className="mb-1 block text-xs text-muted" id="material-label">Material and flame configuration</label>
       <Select
         aria-label="Material and flame configuration"
@@ -148,15 +157,33 @@ export function MaterialSelect({
           value: x.group_id,
           label: `${x.label} · ${x.n_experiments} exp. · ${x.model_status === "modeled" ? "modelled" : "coverage only"}`,
         }))}
-        placeholder="Select group"
+        placeholder={groups.length ? "Select group" : "Loading groups…"}
       />
-      {g ? (
-        <p className="num mt-1 text-xs text-muted" data-testid="group-facts">
-          {modelStatusLabel(g.model_status)} · {g.n_experiments} experiments, {g.n_observations} observations
-          {bal && bal.n > 0 ? ` · ${g.n_training} training rows (${bal.sustained} sustained / ${bal.notSustained} not sustained; ${g.n_observations - g.n_training} not used for the model)` : ""}
-          {g.pressure_kpa_range ? ` · pressure ${fmtPair(g.pressure_kpa_range, "kPa", 1)} (${g.pressure_measured ? "measured" : "partly assumed"})` : ""}
-        </p>
-      ) : null}
     </div>
+  );
+}
+
+/** One sans line of group facts (numbers in mono only on the values). */
+export function GroupFacts({ group }: { group: GroupSummary }) {
+  const bal = groupBalance(group);
+  const pr = group.pressure_kpa_range;
+  const degenerate = pr ? fmtFixed(pr[0], 1) === fmtFixed(pr[1], 1) : false;
+  const basis = group.pressure_measured ? "measured" : degenerate ? "assumed, not recorded" : "partly assumed";
+  return (
+    <p className="text-xs text-muted" data-testid="group-facts">
+      <span className="text-fg">{group.label}</span> · {modelStatusLabel(group.model_status)} · <span className="num">{group.n_experiments}</span> experiments,{" "}
+      <span className="num">{group.n_observations}</span> observations
+      {bal.n > 0 ? (
+        <>
+          {" "}· <span className="num">{group.n_training}</span> training observations (<span className="num">{bal.sustained}</span> sustained /{" "}
+          <span className="num">{bal.notSustained}</span> not sustained)
+        </>
+      ) : null}
+      {pr ? (
+        <>
+          {" "}· pressure <span className="num">{degenerate ? `${fmtFixed(pr[0], 1)} kPa` : fmtPair(pr, "kPa", 1)}</span> ({basis})
+        </>
+      ) : null}
+    </p>
   );
 }

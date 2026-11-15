@@ -13,6 +13,7 @@ export const queryKeys = {
   experiment: (id: string) => ["api", "experiment", id] as const,
   observations: (group: string | null | undefined) => ["api", "observations", group ?? null] as const,
   targets: () => ["api", "targets"] as const,
+  headline: () => ["api", "headline"] as const,
   context: () => ["api", "context"] as const,
   coverage: (q: unknown) => ["api", "coverage", canonicalJson(q)] as const,
   surface: (q: unknown) => ["api", "surface", canonicalJson(q)] as const,

@@ -9,7 +9,7 @@ export interface TableProps extends React.TableHTMLAttributes<HTMLTableElement> 
 /** Compact data table. The header sticks to the top of the scroll container. */
 export const Table = React.forwardRef<HTMLTableElement, TableProps>(({ className, containerClassName, ...props }, ref) => (
   <div tabIndex={0} role="region" aria-label={props["aria-label"] ? `${props["aria-label"]} (scrollable)` : "Scrollable table"} className={cn("relative w-full overflow-auto rounded-md border border-border bg-surface focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent", containerClassName)}>
-    <table ref={ref} className={cn("w-full caption-bottom border-separate border-spacing-0 text-[13px]", className)} {...props} />
+    <table ref={ref} className={cn("w-full caption-bottom border-separate border-spacing-0 text-ui", className)} {...props} />
   </div>
 ));
 Table.displayName = "Table";

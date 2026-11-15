@@ -4,7 +4,7 @@
   "experiments": 276,
   "observations": 749,
   "experiments_included_in_training": 210,
-  "observations_included_in_training": 566,
+  "observations_included_in_training": 565,
   "experiments_by_investigation": {
    "NTRS-20030111833": 8,
    "NTRS-20080034883": 6,
@@ -65,19 +65,19 @@
    "wake": 116
   },
   "observations_by_label": {
-   "0": 147,
-   "1": 587,
+   "0": 150,
+   "1": 584,
    "null": 15
   },
   "observations_by_confidence": {
-   "high": 243,
-   "low": 169,
-   "medium": 337
+   "high": 244,
+   "low": 170,
+   "medium": 335
   },
   "training_observations_by_family": {
    "nomex_fabric": 6,
    "paraffin_slab": 3,
-   "pmma_rod": 227,
+   "pmma_rod": 226,
    "pmma_slab": 102,
    "pmma_sphere": 104,
    "pmma_thin_film": 48,
@@ -88,7 +88,7 @@
  },
  "exclusions": {
   "observations_by_reason": {
-   "low_confidence": 164,
+   "low_confidence": 165,
    "n2_suppression": 2,
    "no_numeric_airflow": 4,
    "not_ignited": 13
@@ -129,10 +129,11 @@
   "observations": {
    "air_factor_from_bass2_note": 86,
    "below_calibration_range": 232,
+   "calibration_block_suspect_duplicate": 6,
    "calibration_borrowed_from_bass2": 154,
-   "calibration_day_gap_over_30_days": 13,
-   "calibration_nearest_day": 293,
-   "calibration_same_day_not_covering_value": 15,
+   "calibration_day_gap_over_30_days": 9,
+   "calibration_nearest_day": 279,
+   "calibration_same_day_not_covering_value": 13,
    "flow_approximate": 5,
    "flow_interpolated_to_fan_off": 232,
    "flow_off_transient": 26,
@@ -141,7 +142,7 @@
    "no_sustained_propagation": 27,
    "o2_initial_only": 353,
    "o2_interpolated": 396,
-   "outcome_evidence_nasa_tm_20210011385": 209,
+   "outcome_evidence_nasa_tm_20210011385": 213,
    "pressure_assumed": 431
   },
   "range_check_counts": {
@@ -460,9 +461,9 @@
     "fraction_missing": 0.0
    },
    "flow_calibration_ref": {
-    "missing": 338,
+    "missing": 359,
     "total": 749,
-    "fraction_missing": 0.4513
+    "fraction_missing": 0.4793
    },
    "total_pressure_kpa": {
     "missing": 431,
@@ -480,9 +481,9 @@
     "fraction_missing": 0.0
    },
    "extinction_mode": {
-    "missing": 627,
+    "missing": 624,
     "total": 749,
-    "fraction_missing": 0.8371
+    "fraction_missing": 0.8331
    },
    "label": {
     "missing": 15,
@@ -520,9 +521,9 @@
     "fraction_missing": 0.0
    },
    "exclusion_reason": {
-    "missing": 566,
+    "missing": 565,
     "total": 749,
-    "fraction_missing": 0.7557
+    "fraction_missing": 0.7543
    }
   }
  },
@@ -563,7 +564,7 @@
  },
  "curation_problems": [],
  "atmosphere_profiles": {
-  "n_profiles": 11,
+  "n_profiles": 12,
   "errors": [],
   "keys_outside_schema": {},
   "file_present": true
@@ -576,18 +577,13 @@
  "curation_step_tests_without_test_row": [],
  "pressure_assumption_sourced": true,
  "evidence": {
-  "steps_with_tm_evidence": 209,
-  "tests_with_tm_evidence_steps": 105,
-  "steps_with_tm_evidence_in_training": 206,
+  "steps_with_tm_evidence": 213,
+  "tests_with_tm_evidence_steps": 106,
+  "steps_with_tm_evidence_in_training": 209,
   "experiments_with_tm_notes": 126,
   "configuration_changes_vs_previous_labels": {
-   "n_changed": 21,
-   "by_transition": {
-    "opposed -> unknown": 2,
-    "stagnation -> unknown": 12,
-    "unknown -> concurrent": 5,
-    "unknown -> stagnation": 2
-   },
+   "n_changed": 0,
+   "by_transition": {},
    "compared_with": "data/normalized/experiments.json before this build"
   },
   "context_records_by_source": {
@@ -600,5 +596,5 @@
   "n_context_records": 22
  },
  "context_problems": [],
- "dataset_version": "8783ff5aa6a2"
+ "dataset_version": "4fe55f76142a"
 }

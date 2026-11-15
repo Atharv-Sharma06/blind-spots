@@ -135,6 +135,10 @@ Rules: record only what the source supports. Do not create a step for a flow who
 unknown. Do not convert units in the CSV (the pipeline converts). If the fan list and air list describe
 the same steps, emit one row per physical step and choose the most direct flow evidence (`air_cm_s` if
 the air reading is a steady numeric value; else `fan_display`/`pot`); mention the other in `note`.
+A same-row air reading counts as belonging to a step when the air list pairs 1:1 with the fan/pot list, the
+cell pairs them explicitly (e.g. `(49, 62, ...)` after the air values), or it is the first air value for the
+first listed setting; it must be a plain positive number (not `0`, `<1`, `?`, a range, `max`, `incr to`).
+Applied 2026-11-15 (audit a10-02) to O5a, O10, O13a, O15a, O15b, O18, O20, O22, B8, B15, B22.
 
 ### 2.3 Pipeline label rule (implemented in code, documented in methodology)
 - `sustained` → label 1 (flame sustained).
@@ -152,13 +156,34 @@ the air reading is a steady numeric value; else `fan_display`/`pot`); mention th
   GMT day when present; otherwise the nearest calibration day with that restrictor count; record
   `flow_calibration_ref`. Restrictor mapping: matrix "Flow restrictor" 0/1/2 ↔ calibration blocks
   "no restrictor"/"1 restrictor"/"2 restrictor" (verify against the sheet; document).
-- Below the lowest calibrated non-zero point (pot < 0.5, fan display < ~42): linear extrapolation of the
-  chosen day's curve through its two lowest non-zero calibration points, floored at 0 cm/s; flags
-  `below_calibration_range` and `flow_extrapolated_linear`; uncertainty = ± max(0.5 cm/s, half the lowest
-  calibrated flow). Why: the near-quench steps (pots 0.275–0.36) must keep their order; a constant value
-  would merge "sustained at 0.305" and "extinguished at 0.275" into one point. The implied zero-flow point
-  (~pot 0.14, fan ~3.9 V) is consistent with the calibration sheet's note that the fan stops above 3.8 V.
-  (Superseded rule, 2026-11-15: "half of the lowest calibrated flow".)
+- Suspected duplicate sections: when two restrictor sections of one calibration day agree at every shared pot
+  setting (at least 3 non-zero air readings), one must be a copy (a restrictor changes the flow at a given
+  pot) and the sheet does not say which, so both are skipped and the conversion falls back to the nearest
+  valid day; flag `calibration_block_suspect_duplicate` when the skip changed the chosen day. Current sheet:
+  2014-210 "no restrictor" (rows 7-12) repeats its "2 restrictor" rows 26-31 (20, 15, 10, 7, 3, 0).
+- Parsing: a calibration row is used when its Pot cell is numeric and its Fan Display or Air Display cell is
+  numeric; a row with an empty Fan Display cell but a real Air reading is kept for pot conversions only
+  (2014-202, 2 restrictors, cells CA32/CC32: pot 0.5 → air 3). Fixed 2026-11-15 (audit a10-04); before, the
+  row was dropped and 39 PSI-25 training steps (P12, P16-P20, P23, P24, O5a, O10, O13a, O15a, O15b, O17)
+  converted with day 2014-190 (pot 0.5 → air 0.5) instead of the nearer day 2014-202.
+- Day choice: the same GMT day when its curve (non-zero air points, duplicates averaged) reaches down to the
+  value; otherwise the nearest day whose curve does (flags `calibration_nearest_day`, plus
+  `calibration_same_day_not_covering_value` when a same-day curve exists and `calibration_day_gap_over_30_days`
+  when the chosen day is more than 30 days away); if no day reaches down to the value, the day with the lowest
+  calibrated point (ties: nearest day).
+- Below the lowest calibrated non-zero point of the chosen day (pot < 0.5 or fan display below that day's
+  lowest calibrated reading): U is interpolated linearly between the calibration sheet's fan-off row
+  (pot 0 / fan display 38 → air 0) and the chosen day's lowest calibrated non-zero point,
+  U = U_low × (x − x_off) / (x_low − x_off) with x_off = 0 (pot) or 38 (fan display), and U = 0 at or below
+  x_off; flags `below_calibration_range` and `flow_interpolated_to_fan_off`; uncertainty
+  = ± max(0.5 cm/s, U_low / 2), where U_low = 1.0066 × the lowest calibrated air reading. Why: the
+  near-quench steps (pots 0.275–0.36) must keep their order; a constant value would merge "sustained at 0.305"
+  and "extinguished at 0.275" into one point. Caveats: the fan-off point is an assumption (the sheet's note
+  says "the fan turns off at a finite voltage (above 3.8 volts), so it is recommended to not use the 3.8 volts
+  zero flow value"), so the true low-flow curve is unknown; and the lowest calibrated point itself varies
+  between days (2 restrictors, pot 0.5: air 0.5 on 2014-190 to 3.75 on 2014-175), which the ± U_low / 2 band
+  does not cover. (Superseded descriptions: "half of the lowest calibrated flow"; "linear extrapolation
+  through the two lowest points, flag `flow_extrapolated_linear`", which did not match the code.)
 - BASS (PSI-26, 2012–13) has no fan calibration in the integrated files: prefer air/cm·s values; fan/pot
   values convert with the BASS-II calibration under flag `calibration_borrowed_from_bass2`, confidence low.
 

@@ -36,6 +36,7 @@ FloatArray = NDArray[np.float64]
 MODEL_NAMES = ("gp", "logistic_o2_flow", "logistic_o2", "majority_class", "bootstrap_logistic_ensemble")
 METRICS = ("brier", "log_loss", "auc", "ece")
 ERROR_BINS = 10
+MIN_NOT_SUSTAINED_FOR_AUC = 3  # below this an AUC is one or two points' ranks, not a discrimination estimate
 CV_SCHEME_FMT = "grouped {k}-fold by experiment x {r} repeats"
 
 
@@ -92,7 +93,7 @@ def bootstrap_models(
     rng = np.random.default_rng(seed)
     est = {m: _metric_values(np.tile(y, R), p.reshape(-1), m == "majority_class") for m, p in preds.items()}
     draws: dict[str, dict[str, list[float]]] = {m: {k: [] for k in METRICS} for m in preds}
-    diffs: dict[str, list[float]] = {"brier": [], "log_loss": []}
+    diffs: dict[str, list[float]] = {"brier": [], "log_loss": [], "ece": []}
     for _ in range(B):
         pick = rng.integers(0, len(rows), size=len(rows))
         idx = np.concatenate([rows[i] for i in pick])
@@ -284,6 +285,8 @@ def _eval_variant(
     base["n_not_sustained"] = int((ts.y == 0).sum())
     if ts.n_groups < 3 or np.unique(ts.y).size < 2:
         return {**base, "brier": None, "log_loss": None, "auc": None, "delta_vs_primary": None,
+                "few_not_sustained": base["n_not_sustained"] < MIN_NOT_SUSTAINED_FOR_AUC,
+                "auc_note": f"{base['n_not_sustained']} not-sustained observations remain; not evaluated",
                 "note": "too few experiments or a single class; not evaluated"}  # fmt: skip
     res = run_repeated_cv(lambda: config.gp_factory(mean), ts, config)
     P = stack(res)
@@ -295,8 +298,18 @@ def _eval_variant(
     )
     d_b = None if primary["brier"] is None or m["brier"] is None else m["brier"] - primary["brier"]
     d_a = None if primary["auc"] is None or m["auc"] is None else m["auc"] - primary["auc"]
+    n0 = base["n_not_sustained"]
+    few = n0 < MIN_NOT_SUSTAINED_FOR_AUC
     return {
         **base,
+        "few_not_sustained": few,
+        "auc_note": (
+            f"only {n0} not-sustained observation{' remains' if n0 == 1 else 's remain'}; the AUC is "
+            f"the rank of {'that point' if n0 == 1 else 'those points'} among the sustained ones and is "
+            "not interpretable"
+            if few
+            else None
+        ),
         "brier": m["brier"],
         "log_loss": m["log_loss"],
         "auc": m["auc"],
@@ -366,6 +379,7 @@ def validate_group(
         "ci_method": f"percentile, group bootstrap over experiments (B={config.n_bootstrap})",
     }
     primary = {m: boot["models"]["gp"][m]["value"] for m in METRICS}
+    calibration = calibration_summary(boot["models"]["gp"]["ece"], boot["models"]["majority_class"]["ece"])
 
     curve = reliability_curve(np.tile(y, preds["gp"].shape[0]), preds["gp"].reshape(-1))
     reliability = {
@@ -394,6 +408,7 @@ def validate_group(
         "cv": cv,
         "logo": _logo(ts, config, mean),
         "reliability": reliability,
+        "calibration": calibration,
         "error_distribution": _error_distribution(y, preds["gp"]),
         "subgroups": _subgroups(ts, side, preds["gp"]),
         "sensitivity": _sensitivity(obs, exp, group_id, config, mean, primary, ts.n),
@@ -409,6 +424,47 @@ def validate_group(
         )
     result["runtime_s"] = round(time.time() - t0, 1)
     return result
+
+
+CALIBRATION_ECE_MAX = 0.05  # "calibrated" may be claimed only if the ECE upper 95 % bound is below this
+
+
+def calibration_summary(gp_ece: dict[str, Any], majority_ece: dict[str, Any]) -> dict[str, Any]:
+    """Whether 'calibrated' may be said for a group (LEAD_DECISIONS D4), from out-of-fold ECE.
+
+    Claimed only when the upper 95 % bound of the GP ECE is <= CALIBRATION_ECE_MAX and the GP ECE is no higher
+    than the majority-class baseline's. No recalibration is applied anywhere.
+    """
+    v, ci, maj = gp_ece.get("value"), gp_ece.get("ci95"), majority_ece.get("value")
+    if v is None:
+        return {"claim_calibrated": False, "verdict": "not_assessed", "ece": None, "ece_ci95": None,
+                "majority_class_ece": maj, "text": "Calibration could not be assessed."}  # fmt: skip
+    hi = None if ci is None else ci[1]
+    worse = maj is not None and v > maj
+    claim = hi is not None and hi <= CALIBRATION_ECE_MAX and not worse
+    ci_txt = "" if ci is None else f" (95% CI {ci[0]:.2f}\u2013{ci[1]:.2f})"
+    text = f"Out-of-fold ECE {v:.3f}{ci_txt}"
+    text += "" if maj is None else f"; majority-class baseline {maj:.3f}"
+    if claim:
+        verdict = "calibrated"
+        text += ". Calibration checked out of fold, not forced."
+    elif worse:
+        verdict = "worse_than_baseline"
+        text += ". Higher than the baseline, so calibration is not established."
+    else:
+        verdict = "not_established"
+        text += ". The interval is too wide to establish calibration."
+    return {
+        "claim_calibrated": bool(claim),
+        "verdict": verdict,
+        "ece": v,
+        "ece_ci95": ci,
+        "majority_class_ece": maj,
+        "rule": (
+            f"claim only if the ECE 95% upper bound <= {CALIBRATION_ECE_MAX} and ECE <= majority-class ECE"
+        ),
+        "text": text,
+    }
 
 
 def _nan_none(v: Any) -> float | None:

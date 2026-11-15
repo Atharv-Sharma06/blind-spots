@@ -35,12 +35,12 @@ function NotIntegratedRow({ n }: { n: NotIntegratedInvestigation }) {
             <span className="font-medium text-fg">Not integrated because:</span> {n.reason_not_integrated}
           </p>
         </details>
-        <ul className="mt-1 space-y-0.5">
+        <ul className="mt-1 space-y-1">
           {n.sources
             .filter((s) => safeUrl(s.url))
             .filter((s, i, arr) => arr.findIndex((o) => o.url === s.url) === i)
             .map((s) => (
-              <li key={s.url}>
+              <li key={s.url} className="flex min-h-6 items-center">
                 <ExtLink href={safeUrl(s.url)}>{s.url.replace(/^https?:\/\/(www\.)?/, "").slice(0, 56)}</ExtLink>
               </li>
             ))}
@@ -81,7 +81,7 @@ export function SourcesSection({ sources, context }: { sources: ApiQuery<Sources
                         <TableCell>
                           <Badge tone={i.role === "integrated_model" ? "accent" : "neutral"}>{ROLE_LABEL[i.role]}</Badge>
                         </TableCell>
-                        <TableCell className="num text-xs">{i.doi ? <ExtLink href={`https://doi.org/${i.doi}`}>{i.doi}</ExtLink> : "none"}</TableCell>
+                        <TableCell className="num whitespace-nowrap text-xs">{i.doi ? <ExtLink href={`https://doi.org/${i.doi}`}>{i.doi}</ExtLink> : "none"}</TableCell>
                         <TableCell numeric>{fmtCount(i.n_experiments)}</TableCell>
                         <TableCell numeric>{fmtCount(i.n_observations)}</TableCell>
                       </TableRow>
@@ -153,8 +153,8 @@ export function SourcesSection({ sources, context }: { sources: ApiQuery<Sources
         </QueryBoundary>
       </Sub>
 
-      <Sub title="NASA investigations not integrated here">
-        <Callout variant="warning" title="Not represented in the integrated records">
+      <Sub title="Related NASA work, not integrated">
+        <Callout variant="info" title="Not represented in the integrated records">
           These investigations exist and may already inform conditions the integrated records do not cover. They are listed so the gaps on the map are not read as &quot;NASA has not studied this&quot;. Their data are not used by any model.
         </Callout>
         <QueryBoundary query={context} rows={4}>

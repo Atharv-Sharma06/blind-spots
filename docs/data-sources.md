@@ -1,7 +1,7 @@
 # Data sources
 
 Every number in the product traces to a file listed here. Source files under `data/raw/` are never modified; interpretations are stored in separate tables with cell-level provenance.
-Counts below are from `data/normalized/dataset_report.json` (dataset `8783ff5aa6a2`).
+Counts below are from `data/normalized/dataset_report.json` (dataset `4fe55f76142a`).
 
 ## 1. Integrated investigations
 
@@ -28,12 +28,12 @@ Landing pages follow `https://psi.nasa.gov/physci/repo/data/investigations/<PSI-
 - Free text is interpreted into `data/curation/tests/*.csv` and `data/curation/steps/*.csv` by two independent transcriptions per chunk that are adjudicated (D-004). Each step records the exact `raw_token`,
   its column and its row; the build re-reads the original workbook and rejects any token that is not an exact substring of the cited cell (0 provenance failures in this build).
 - Outcome evidence for BASS-II is cross-checked against NASA/TM-20210011385 (the BASS-II Summary Report, NTRS 20210011385), Appendix A, transcribed to `data/curation/evidence/bass2_tm_appendix_a.csv`
-  (126 rows, each observation text verified as a substring of its PDF column). In this build 209 steps in 105 tests carry TM evidence (206 of those steps are in training) and 126 experiments carry TM notes.
-  Applying the TM labels changed 21 flame-configuration labels relative to the previous build (opposed -> unknown: 2, stagnation -> unknown: 12, unknown -> concurrent: 5, unknown -> stagnation: 2); conflicts with the ReadMe were resolved conservatively to `unknown`.
+  (126 rows, each observation text verified as a substring of its PDF column). In this build 213 steps in 106 tests carry TM evidence (209 of those steps are in training) and 126 experiments carry TM notes.
+  Applying the TM labels changed 0 flame-configuration labels relative to the previous build (); conflicts with the ReadMe were resolved conservatively to `unknown`.
 - Flow conversion: duct "air display" values use U = 1.0066 x AIR (note in the PSI-25 fan-calibration workbook); fan and pot settings are converted with the PSI-25 fan calibration (same restrictor count and day when possible, otherwise nearest day), with linear extrapolation below the calibrated range (flagged `below_calibration_range`).
   BASS (PSI-26) has no fan calibration in the integrated files, so its fan/pot values borrow the BASS-II calibration (flag `calibration_borrowed_from_bass2`, confidence low).
 - Pressure: BASS records pressure per test (measured). BASS-II records none: the ISS cabin nominal 101.353 kPa from the atmosphere profile is stored in `pressure_assumed_kpa` (flag `pressure_assumed`), never in a measurement field (D-006).
-- Training-eligible observations: 566 of 749 (see section 5 for exclusions).
+- Training-eligible observations: 565 of 749 (see section 5 for exclusions).
 
 ### Context records (not modelled)
 
@@ -71,7 +71,7 @@ Because of this file, Blind Spots reports gaps as "not represented in the integr
 
 ## 3. Target atmosphere profiles
 
-`data/manifests/atmosphere_profiles.json` holds 11 profiles; every profile carries verbatim NASA quotes that were machine-checked against the downloaded documents. Nominal values may be null where a source gives only a bound:
+`data/manifests/atmosphere_profiles.json` holds 12 profiles; every profile carries verbatim NASA quotes that were machine-checked against the downloaded documents. Nominal values may be null where a source gives only a bound:
 
 | profile | status | O2 % | total pressure kPa | NASA sources |
 |---|---|---|---|---|
@@ -79,7 +79,8 @@ Because of this file, Blind Spots reports gaps as "not represented in the integr
 | `iss_materials_worst_case` | documented_nasa | nominal 24.1 | nominal 101.353 | 3 |
 | `shuttle_nominal` | documented_nasa | nominal 21 | nominal 101.353 | 2 |
 | `shuttle_staged_pre_eva` | documented_nasa | nominal 26.5 | nominal 70.327 | 3 |
-| `exploration_atmosphere_8p2_34` | nasa_design_recommendation | nominal 34 | nominal 56.537 | 5 |
+| `exploration_atmosphere_8p2_34` | nasa_design_recommendation | nominal 34 | nominal 56.537 | 6 |
+| `artemis_surface_habitat_10p2_26p5` | nasa_design_recommendation | nominal 26.5 | nominal 70.327 | 1 |
 | `eawg_2006_8p0_32` | nasa_design_recommendation | nominal 32 | nominal 55.158 | 3 |
 | `orion_cm_lunar_design_10p2` | nasa_design_recommendation | max 30 | nominal 70.327 | 2 |
 | `orion_cm_14p7_o2_limit` | historical_nasa | max 25.6 | nominal 101.353 | 1 |
@@ -102,11 +103,11 @@ Because of this file, Blind Spots reports gaps as "not represented in the integr
 
 ## 5. What was used and what was excluded
 
-Of 749 flow-step observations, 566 are training observations and 183 are excluded (label 1 (sustained) 587, label 0 (not sustained) 147, no label 15):
+Of 749 flow-step observations, 565 are training observations and 184 are excluded (label 1 (sustained) 584, label 0 (not sustained) 150, no label 15):
 
 | reason (observations) | count |
 |---|---|
-| low_confidence | 164 |
+| low_confidence | 165 |
 | not_ignited | 13 |
 | no_numeric_airflow | 4 |
 | n2_suppression | 2 |

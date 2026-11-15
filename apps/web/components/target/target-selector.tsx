@@ -17,9 +17,9 @@ import type { AtmosphereProfile, CustomTarget } from "@/lib/types";
 export const CUSTOM_LABEL = "User-selected hypothetical conditions";
 
 const STATUS_ORDER: Array<{ status: string; title: string }> = [
-  { status: "documented_nasa", title: "Documented NASA" },
-  { status: "historical_nasa", title: "Historical NASA" },
-  { status: "nasa_design_recommendation", title: "Design recommendation" },
+  { status: "documented_nasa", title: "Documented NASA cabins" },
+  { status: "nasa_design_recommendation", title: "Exploration design recommendations" },
+  { status: "historical_nasa", title: "Earlier NASA cabins and designs" },
 ];
 
 const KPA_PER_PSI = 6.894757293168361;
@@ -58,9 +58,10 @@ export function TargetSelector() {
       }}
     >
       <SheetTrigger asChild>
-        <Button variant="secondary" size="md" className="max-w-full min-w-0 justify-between gap-2" aria-label={`Target ${currentLabel}. Change target`} data-testid="target-selector">
-          <span className="text-muted">Target</span>
+        <Button variant="secondary" size="md" className="max-w-full min-w-0 justify-between gap-2" data-testid="target-selector">
+          <span className="text-muted">Target</span>{" "}
           <span className="truncate font-medium">{currentLabel}</span>
+          <span className="sr-only">, change target</span>
           <ChevronDown aria-hidden />
         </Button>
       </SheetTrigger>
@@ -125,11 +126,11 @@ export function TargetSelector() {
             ) : null}
             <section aria-label="Custom target">
               <h3 className="mb-1.5 text-xs font-medium tracking-wide text-muted uppercase">Custom</h3>
-              <Button variant="secondary" onClick={() => setView("custom")} disabled={dm.snapshotOnly} className="w-full justify-start">
+              <Button variant="secondary" onClick={() => setView("custom")} disabled={dm.isSnapshot} className="w-full justify-start">
                 Custom target…
               </Button>
-              {dm.snapshotOnly ? (
-                <p className="mt-1.5 text-xs text-muted">Custom targets require the live analysis service. This deployment serves a precomputed snapshot.</p>
+              {dm.isSnapshot ? (
+                <p className="mt-1.5 text-xs text-muted">Custom targets are computed on demand; this version serves precomputed results for the documented atmospheres only.</p>
               ) : null}
             </section>
           </div>

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import math
 from typing import Any
 
 from fastapi import FastAPI, Request
@@ -16,9 +17,13 @@ logger = logging.getLogger("blindspots.api")
 _STATUS_CODES = {
     400: "validation_error",
     404: "not_found",
+    405: "validation_error",
     422: "validation_error",
     503: "artifact_missing",
 }
+# Validation error entries echo neither the offending input (a 100 000-point predict request would come
+# back whole, and NaN inputs are not JSON-serialisable) nor pydantic's internal context.
+_DROPPED_ERROR_KEYS = ("input", "ctx", "url")
 
 
 class ApiError(Exception):
@@ -34,11 +39,22 @@ class ApiError(Exception):
         self.details = details or {}
 
 
+def _finite(value: Any) -> Any:
+    """NaN/inf to None recursively, so an error body is always valid JSON."""
+    if isinstance(value, dict):
+        return {k: _finite(v) for k, v in value.items()}
+    if isinstance(value, list | tuple):
+        return [_finite(v) for v in value]
+    if isinstance(value, float) and not math.isfinite(value):
+        return None
+    return value
+
+
 def error_response(
     status_code: int, code: str, message: str, details: dict[str, Any] | None = None
 ) -> JSONResponse:
     body = {"error": {"code": code, "message": message, "details": details or {}}}
-    return JSONResponse(status_code=status_code, content=jsonable_encoder(body))
+    return JSONResponse(status_code=status_code, content=_finite(jsonable_encoder(body)))
 
 
 async def _api_error_handler(_: Request, exc: Exception) -> JSONResponse:
@@ -56,9 +72,11 @@ async def _http_exception_handler(_: Request, exc: Exception) -> JSONResponse:
 
 async def _validation_handler(_: Request, exc: Exception) -> JSONResponse:
     assert isinstance(exc, RequestValidationError)
-    return error_response(
-        422, "validation_error", "Request validation failed.", {"errors": jsonable_encoder(exc.errors())}
-    )
+    errors = [
+        {k: v for k, v in e.items() if k not in _DROPPED_ERROR_KEYS} if isinstance(e, dict) else e
+        for e in exc.errors()
+    ]
+    return error_response(422, "validation_error", "Request validation failed.", {"errors": errors})
 
 
 async def _unexpected_handler(_: Request, exc: Exception) -> JSONResponse:

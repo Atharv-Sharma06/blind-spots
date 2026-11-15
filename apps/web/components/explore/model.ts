@@ -172,12 +172,21 @@ export function observationsForMap(plane: Plane, obs: readonly ApiObservation[],
 // ---- Context ------------------------------------------------------------------------------------
 
 export interface ContextMapData {
-  envelopes: Array<{ id: string; label: string; xRange: [number | null, number | null]; yRange: [number | null, number | null] }>;
+  envelopes: Array<{ id: string; label: string; short: string; xRange: [number | null, number | null]; yRange: [number | null, number | null] }>;
   points: Array<{ id: string; x: number; y: number; label: string; investigation: string }>;
 }
 
 /** Same pressure window as the observation slice (|ln(p / slice)| <= 0.1). */
 const SLICE_WINDOW_LN = 0.1;
+
+/**
+ * Short readable tag for a context box ("SoFIE-GEL", "Saffire-VI", "NASA Glenn"): the name up to its first
+ * parenthesis, comma or colon; when that is still long, its first two words.
+ */
+export function contextShortLabel(name: string): string {
+  const head = (name.split(/\s\(|,|:/)[0] ?? name).trim();
+  return head.length <= 14 ? head : head.split(/\s+/).slice(0, 2).join(" ");
+}
 
 export function contextForMap(plane: Plane, ctx: ContextResponse | null | undefined, slice?: number): ContextMapData {
   const out: ContextMapData = { envelopes: [], points: [] };
@@ -186,7 +195,7 @@ export function contextForMap(plane: Plane, ctx: ContextResponse | null | undefi
     const x = n.oxygen_percent_range;
     const y = plane === "o2_flow" ? n.flow_cm_s_range : n.pressure_kpa_range;
     if (!x && !y) continue;
-    out.envelopes.push({ id: n.id, label: n.name, xRange: x ? [x[0], x[1]] : [null, null], yRange: y ? [y[0], y[1]] : [null, null] });
+    out.envelopes.push({ id: n.id, label: n.name, short: contextShortLabel(n.name), xRange: x ? [x[0], x[1]] : [null, null], yRange: y ? [y[0], y[1]] : [null, null] });
   }
   for (const e of ctx.context_experiments as ApiExperiment[]) {
     const x = e.oxygen_percent ?? e.oxygen_percent_initial;

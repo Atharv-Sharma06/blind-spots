@@ -34,9 +34,9 @@ export const SheetContent = React.forwardRef<React.ElementRef<typeof DialogPrimi
       >
         <div className="flex items-start justify-between gap-4 border-b border-border px-5 py-4">
           <div className="min-w-0">
-            <DialogPrimitive.Title className="text-[15px] font-semibold tracking-[-0.01em] text-fg">{title}</DialogPrimitive.Title>
+            <DialogPrimitive.Title className="text-title font-semibold text-fg">{title}</DialogPrimitive.Title>
             {description ? (
-              <DialogPrimitive.Description className="mt-1 text-[13px] text-muted">{description}</DialogPrimitive.Description>
+              <DialogPrimitive.Description className="mt-1 text-ui text-muted">{description}</DialogPrimitive.Description>
             ) : null}
           </div>
           <DialogPrimitive.Close

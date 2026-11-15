@@ -18,7 +18,7 @@ export function Metric({ label, value, unit, n, size = "md", className, ...props
     <div className={cn("min-w-0", className)} {...props}>
       <div className="text-xs text-muted">{label}</div>
       <div className="mt-0.5 flex items-baseline gap-1">
-        <span className={cn("num text-fg", size === "lg" ? "text-xl font-medium tracking-[-0.01em]" : "text-sm")}>
+        <span className={cn("num text-fg", size === "lg" ? "text-heading font-medium" : "text-ui")}>
           {missing ? (
             <>
               <span aria-hidden>&ndash;</span>

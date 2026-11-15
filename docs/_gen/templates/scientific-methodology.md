@@ -4,8 +4,8 @@ This page describes what the code in `services/analysis/src/blindspots` does. Nu
 
 ## 1. Question and scope
 
-Blind Spots asks, for a documented or hypothetical cabin atmosphere (O2 fraction, total pressure, airflow band): *how much comparable experimental evidence exists in the integrated NASA records, what does a
-calibrated model say there, and which additional condition would most reduce the model's uncertainty about that target?* It does not predict spacecraft fire behaviour, certify any material or atmosphere, or replace NASA-STD-6001-style qualification.
+Blind Spots asks, for a documented or hypothetical cabin atmosphere (O2 fraction, total pressure, airflow band): *how much comparable experimental evidence exists in the integrated NASA records, what does an
+uncertainty-aware model say there, and which additional condition would most reduce the model's uncertainty about that target?* It does not predict spacecraft fire behaviour, certify any material or atmosphere, or replace NASA-STD-6001-style qualification.
 Findings apply to the integrated records only.
 
 ## 2. Observation, label and training filter
@@ -15,7 +15,7 @@ Findings apply to the integrated records only.
   `brief_flame_no_sustain` is label 0 (flag `no_sustained_propagation`). `not_ignited` and `n2_suppression` are excluded from flammability training with the reason recorded.
 - **Training filter**: label present, provenance verified, numeric airflow, material family, O2 present, and curated confidence high or medium. Low-confidence steps stay in the records and return only in a sensitivity analysis (D-008).
   Result: {{N_TRAIN_OBS}} training observations from {{N_TRAIN_EXP}} experiments ({{POS}} sustained, {{NEG}} not sustained; confidence {{TRAIN_CONF}}). Not-sustained modes in training: {{NEG_MODES}}.
-- **Airflow basis in training**: {{BASIS}}. {{T_BELOW_CAL}} training observations are below the calibrated range (linear extrapolation, flagged); {{T_O2_INTERP}} have linearly interpolated O2 (initial to final across the steps of a test); {{T_O2_INITIAL_ONLY}} use the initial O2 only.
+- **Airflow basis in training**: {{FLOW_PROVENANCE}} ({{BASIS}}.) {{T_BELOW_CAL}} training observations are below the calibrated range (linear extrapolation, flagged); {{T_O2_INTERP}} have linearly interpolated O2 (initial to final across the steps of a test); {{T_O2_INITIAL_ONLY}} use the initial O2 only.
 - **Known label weakness**: most "sustained" labels come from list order in decreasing-flow schedules (no outcome token in the source); the final unrecorded setting is deliberately omitted, so the boundary is thinly observed. Of the not-sustained rows, {{FLOW_OFF}} are flow-off transients.
 
 ## 3. Analysis groups and the modelability rule
@@ -61,7 +61,7 @@ For a query point the GP gives a latent mean and variance; the predictive probab
 
 **Verdict** (`supported | extrapolation | insufficient_evidence`) is deterministic: *supported* if the point is inside the convex hull of the group's observations (or has at least 3 comparable observations) and `latent_std_ratio` < 0.6;
 *insufficient_evidence* if there is no comparable observation and the ratio > 0.85; otherwise *extrapolation*. Reason codes (`sparse_observations`, `outside_hull`, `unobserved_pressure`, `outcome_variability`, `no_model`) carry the numbers behind the verdict.
-For `insufficient_evidence` the interface shows exactly: "Insufficient experimental evidence for a reliable estimate." Target assessments aggregate per-point verdicts: supported if at least 75% of target points are supported; insufficient if at least 50% are; otherwise extrapolation.
+For `insufficient_evidence` the interface shows exactly: "Insufficient experimental evidence for a reliable estimate." Target assessments aggregate per-point verdicts (lead decision D2): supported when at least 50 % of the target points are individually supported; insufficient evidence when no target point has any comparable observation; otherwise extrapolation. P(sustained) is reported only for supported points.
 
 ## 7. Target region
 
@@ -89,6 +89,8 @@ A target is a documented profile (`/api/targets`) or a user-defined hypothetical
 - **Counterfactual**: for a candidate, refits the model with a hypothetical outcome (sustained / not sustained) and fixed hyperparameters and reports the change in target mean, latent variance and epistemic uncertainty. Hypothetical outcomes are labelled as such, not experimental results.
 - Every candidate carries the disclaimer: "Computational research candidate requiring qualified scientific review, established safety procedures and formal feasibility assessment." No operational instructions are produced.
 
+**Stationarity.** Kernel length scales learned near 1 atm and {{O2_MIN}} to {{O2_MAX}} % O2 are assumed to hold elsewhere (the correlation depends only on distance). Away from the data the EVR ranking reflects that assumption, which is why the most informative candidate for a far target often sits at the target conditions themselves.
+
 ## 9. Validation (summary)
 
 Repeated grouped K-fold by experiment (k = min({{CV_K}}, experiments), {{CV_REPEATS}} repeats), hyperparameters refit inside each training fold, headline metrics from stacked out-of-fold predictions, group-bootstrap 95% CIs ({{N_BOOT}} draws), leave-one-campaign-out where a group spans more than one campaign,
@@ -109,7 +111,7 @@ Rebuilding the committed inputs (`build-dataset`, `train`, `retrospective`) was 
 ## 12. Caveats that bound every metric
 
 1. **Flow-off negatives.** In the sphere groups most negatives are flow-turned-off steps ("flow near zero means no flame"). Grouped-CV AUC of the GP before and after dropping them: {{FLOWOFF_AUC}}.
-2. **Below-calibration flow interpolation.** Many near-quench negatives depend on flow values extrapolated below the calibrated range. Rows remaining when those are dropped: {{BELOWCAL_RELIANT}}.
+2. **Below-calibration flow extrapolation.** Many near-quench negatives depend on flow values extrapolated below the calibrated range. Rows remaining when those are dropped: {{BELOWCAL_RELIANT}}.
 3. **Where the GP beats the majority-class baseline** (CI excludes 0): {{GP_BETTER_GROUPS}}. Roughly at baseline: {{GP_INDIST_GROUPS}}.
 4. **Pressure.** All integrated observations lie at {{P_MIN}} to {{P_MAX}} kPa and the pressure length scale is fixed ({{LP}}, ln units). At low pressure predictions revert to the prior: a value near 0.6 at 34 % O2 and 56.5 kPa is reversion (latent std ratio about 1), not a pressure effect. For `insufficient_evidence` targets the interface shows no p(sustained).
 5. **Blind-spot test** (strict rule including partial correlation given aleatoric uncertainty): supported in {{BS_SUPPORTED}} groups, inconclusive in {{BS_INCONCLUSIVE}}.

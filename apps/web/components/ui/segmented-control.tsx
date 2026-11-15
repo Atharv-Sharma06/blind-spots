@@ -35,7 +35,7 @@ export function SegmentedControl({ options, value, onValueChange, size = "md", c
           value={o.value}
           disabled={o.disabled}
           className={cn(
-            "inline-flex items-center justify-center rounded-sm px-2.5 text-[13px] font-medium text-muted transition-colors",
+            "inline-flex items-center justify-center rounded-sm px-2.5 text-ui font-medium text-muted transition-colors",
             "hover:text-fg disabled:opacity-50 data-[state=on]:bg-surface data-[state=on]:text-fg data-[state=on]:shadow-[0_0_0_1px_var(--border)]",
             size === "sm" ? "h-6" : "h-7",
           )}

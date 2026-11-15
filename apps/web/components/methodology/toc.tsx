@@ -41,7 +41,7 @@ export function Toc({ items }: { items: TocItem[] }) {
                 active === it.id ? "border-accent bg-accent-tint font-medium text-fg" : "border-transparent text-muted hover:bg-subtle hover:text-fg",
               )}
             >
-              <span className="num text-xs text-muted">{i + 1}</span>
+              <span className="num w-3 text-xs text-muted">{i === 0 ? "" : i}</span>
               {it.label}
             </a>
           </li>

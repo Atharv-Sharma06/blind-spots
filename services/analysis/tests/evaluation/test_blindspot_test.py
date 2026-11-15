@@ -7,6 +7,8 @@ import pytest
 from scipy.stats import spearmanr
 
 from blindspots.evaluation.blindspot_test import (
+    VERDICT_RULE,
+    criteria,
     interpretation,
     partial_spearman,
     pointwise_log_loss,
@@ -56,7 +58,39 @@ def test_interpretation_is_generated_from_numbers() -> None:
     pt = {"n": 50, "spearman_rho": 0.4, "p_value": 0.0005, "n_misclassified": 4, "auroc_error_detection": 0.7}
     gr = {"n_groups": 12, "spearman_rho": 0.1, "p_value": 0.4}
     text = interpretation("inconclusive", pt, gr, {"rho_aleatoric_point": 0.8})
-    assert "n=50" in text and "rho=0.40" in text and "aleatoric" in text and "<0.001" in text
+    assert "n = 50" in text and "rho = 0.40" in text and "p < 0.001" in text
+    assert "experiment-level correlation is positive but not significant (p = 0.400)" in text
+
+
+def test_interpretation_never_contradicts_verdict() -> None:
+    pt = {
+        "n": 108,
+        "spearman_rho": 0.42,
+        "p_value": 0.0005,
+        "n_misclassified": 21,
+        "auroc_error_detection": 0.6,
+    }
+    gr = {"n_groups": 24, "spearman_rho": 0.38, "p_value": 0.028}
+    diag = {
+        "rho_aleatoric_point": 0.69,
+        "partial_rho_epistemic_given_aleatoric": 0.14,
+        "partial_p_value": 0.074,
+    }
+    assert verdict_from(pt, gr, diag) == "inconclusive"
+    assert criteria(pt, gr, diag) == {"point_level": True, "experiment_level": True, "partial": False}
+    text = interpretation("inconclusive", pt, gr, diag)
+    assert "do not agree" not in text and "not significant (0.14, p = 0.074)" in text
+    diag_ok = {
+        "rho_aleatoric_point": 0.91,
+        "partial_rho_epistemic_given_aleatoric": 0.63,
+        "partial_p_value": 0.0005,
+        "share_not_sustained_flow_off_transient": 0.8,
+    }
+    pt2 = {**pt, "n": 33, "n_misclassified": 2}
+    sup = interpretation(verdict_from(pt2, gr, diag_ok), pt2, gr, diag_ok)
+    assert "does not show" not in sup and "adds information beyond it" in sup
+    assert "only 2 points of 33 are misclassified" in sup and "80% of the not-sustained" in sup
+    assert "predictive-entropy" not in sup + text and "partial rho" in VERDICT_RULE
 
 
 def test_pointwise_log_loss_clips() -> None:

@@ -1,11 +1,11 @@
 # Scientific methodology
 
-This page describes what the code in `services/analysis/src/blindspots` does. Numbers are from the current artifacts (dataset `8783ff5aa6a2`, model `gp-laplace-v1+8783ff5a.adfbbd`). Rationale for individual choices is in [decisions.md](decisions.md).
+This page describes what the code in `services/analysis/src/blindspots` does. Numbers are from the current artifacts (dataset `4fe55f76142a`, model `gp-laplace-v1+4fe55f76.adfbbd`). Rationale for individual choices is in [decisions.md](decisions.md).
 
 ## 1. Question and scope
 
-Blind Spots asks, for a documented or hypothetical cabin atmosphere (O2 fraction, total pressure, airflow band): *how much comparable experimental evidence exists in the integrated NASA records, what does a
-calibrated model say there, and which additional condition would most reduce the model's uncertainty about that target?* It does not predict spacecraft fire behaviour, certify any material or atmosphere, or replace NASA-STD-6001-style qualification.
+Blind Spots asks, for a documented or hypothetical cabin atmosphere (O2 fraction, total pressure, airflow band): *how much comparable experimental evidence exists in the integrated NASA records, what does an
+uncertainty-aware model say there, and which additional condition would most reduce the model's uncertainty about that target?* It does not predict spacecraft fire behaviour, certify any material or atmosphere, or replace NASA-STD-6001-style qualification.
 Findings apply to the integrated records only.
 
 ## 2. Observation, label and training filter
@@ -14,8 +14,8 @@ Findings apply to the integrated records only.
 - **Label rule** (`processing/labels.py`): `sustained` is label 1. `extinguished` with mode `quench_low_flow`, `blowoff_high_flow` or `at_constant_flow` is label 0. `extinguished` by `flow_turned_off` is label 0 at the recorded near-zero flow, flagged `flow_off_transient`.
   `brief_flame_no_sustain` is label 0 (flag `no_sustained_propagation`). `not_ignited` and `n2_suppression` are excluded from flammability training with the reason recorded.
 - **Training filter**: label present, provenance verified, numeric airflow, material family, O2 present, and curated confidence high or medium. Low-confidence steps stay in the records and return only in a sensitivity analysis (D-008).
-  Result: 566 training observations from 210 experiments (447 sustained, 119 not sustained; confidence high 231, medium 335). Not-sustained modes in training: quench_low_flow 40, brief_flame_no_sustain 26, flow_turned_off 24, at_constant_flow 20, blowoff_high_flow 9.
-- **Airflow basis in training**: air_display 237, pot_calibration 222, stated_cm_s 75, fan_calibration 32. 139 training observations are below the calibrated range (linear extrapolation, flagged); 387 have linearly interpolated O2 (initial to final across the steps of a test); 179 use the initial O2 only.
+  Result: 565 training observations from 210 experiments (443 sustained, 122 not sustained; confidence high 232, medium 333). Not-sustained modes in training: quench_low_flow 40, brief_flame_no_sustain 26, flow_turned_off 24, at_constant_flow 20, blowoff_high_flow 12.
+- **Airflow basis in training**: 332 of 565 training steps use a recorded airflow (duct reading or a value stated in the source); 233 are converted from fan or pot settings with the BASS-II calibration; none use a borrowed calibration. (air_display 257, pot_calibration 202, stated_cm_s 75, fan_calibration 31.) 139 training observations are below the calibrated range (linear extrapolation, flagged); 386 have linearly interpolated O2 (initial to final across the steps of a test); 179 use the initial O2 only.
 - **Known label weakness**: most "sustained" labels come from list order in decreasing-flow schedules (no outcome token in the source); the final unrecorded setting is deliberately omitted, so the boundary is thinly observed. Of the not-sustained rows, 24 are flow-off transients.
 
 ## 3. Analysis groups and the modelability rule
@@ -29,8 +29,8 @@ Modelled groups in this build:
 |---|---|---|---|---|---|---|---|
 | `pmma_rod__opposed` | 24 | 108 | 87 | 21 | 81% | constant | BASS-II/Fernandez-Pello |
 | `pmma_slab__opposed` | 22 | 95 | 80 | 15 | 84% | constant | BASS-II/Miller, BASS/2013 |
-| `pmma_rod__stagnation` | 15 | 67 | 51 | 16 | 76% | constant | BASS-II/Olson |
-| `pmma_rod__unknown` | 12 | 52 | 46 | 6 | 88% | constant | BASS-II/Fernandez-Pello, BASS-II/Olson |
+| `pmma_rod__stagnation` | 15 | 66 | 48 | 18 | 73% | constant | BASS-II/Olson |
+| `pmma_rod__unknown` | 12 | 52 | 45 | 7 | 87% | constant | BASS-II/Fernandez-Pello, BASS-II/Olson |
 | `pmma_thin_film__opposed` | 16 | 48 | 37 | 11 | 77% | constant | BASS-II/Bhattacharjee |
 | `pmma_sphere__wake` | 24 | 42 | 32 | 10 | 76% | constant | BASS/2012, BASS/2013 |
 | `sibal_fabric__concurrent` | 25 | 42 | 29 | 13 | 69% | constant | BASS-II/T'ien |
@@ -83,7 +83,7 @@ For a query point the GP gives a latent mean and variance; the predictive probab
 
 **Verdict** (`supported | extrapolation | insufficient_evidence`) is deterministic: *supported* if the point is inside the convex hull of the group's observations (or has at least 3 comparable observations) and `latent_std_ratio` < 0.6;
 *insufficient_evidence* if there is no comparable observation and the ratio > 0.85; otherwise *extrapolation*. Reason codes (`sparse_observations`, `outside_hull`, `unobserved_pressure`, `outcome_variability`, `no_model`) carry the numbers behind the verdict.
-For `insufficient_evidence` the interface shows exactly: "Insufficient experimental evidence for a reliable estimate." Target assessments aggregate per-point verdicts: supported if at least 75% of target points are supported; insufficient if at least 50% are; otherwise extrapolation.
+For `insufficient_evidence` the interface shows exactly: "Insufficient experimental evidence for a reliable estimate." Target assessments aggregate per-point verdicts (lead decision D2): supported when at least 50 % of the target points are individually supported; insufficient evidence when no target point has any comparable observation; otherwise extrapolation. P(sustained) is reported only for supported points.
 
 ## 7. Target region
 
@@ -111,6 +111,8 @@ A target is a documented profile (`/api/targets`) or a user-defined hypothetical
 - **Counterfactual**: for a candidate, refits the model with a hypothetical outcome (sustained / not sustained) and fixed hyperparameters and reports the change in target mean, latent variance and epistemic uncertainty. Hypothetical outcomes are labelled as such, not experimental results.
 - Every candidate carries the disclaimer: "Computational research candidate requiring qualified scientific review, established safety procedures and formal feasibility assessment." No operational instructions are produced.
 
+**Stationarity.** Kernel length scales learned near 1 atm and 13.5 to 22.7 % O2 are assumed to hold elsewhere (the correlation depends only on distance). Away from the data the EVR ranking reflects that assumption, which is why the most informative candidate for a far target often sits at the target conditions themselves.
+
 ## 9. Validation (summary)
 
 Repeated grouped K-fold by experiment (k = min(5, experiments), 5 repeats), hyperparameters refit inside each training fold, headline metrics from stacked out-of-fold predictions, group-bootstrap 95% CIs (1000 draws), leave-one-campaign-out where a group spans more than one campaign,
@@ -131,9 +133,9 @@ Rebuilding the committed inputs (`build-dataset`, `train`, `retrospective`) was 
 ## 12. Caveats that bound every metric
 
 1. **Flow-off negatives.** In the sphere groups most negatives are flow-turned-off steps ("flow near zero means no flame"). Grouped-CV AUC of the GP before and after dropping them: `pmma_sphere__wake` 0.99 to 0.82; `pmma_sphere__stagnation` 0.96 to 0.67; `pmma_sphere__unknown` has no other negatives (CV AUC 1.00 with them; not evaluable without).
-2. **Below-calibration flow interpolation.** Many near-quench negatives depend on flow values extrapolated below the calibrated range. Rows remaining when those are dropped: `pmma_rod__opposed` (36 of 108 training rows and 4 of 21 negatives remain); `pmma_rod__stagnation` (33 of 67 training rows and 11 of 16 negatives remain); `pmma_rod__unknown` (35 of 52 training rows and 1 of 6 negatives remain); `pmma_thin_film__opposed` (37 of 48 training rows and 3 of 11 negatives remain).
-3. **Where the GP beats the majority-class baseline** (CI excludes 0): `pmma_thin_film__opposed`, `pmma_sphere__wake`, `pmma_sphere__stagnation`, `pmma_sphere__unknown`. Roughly at baseline: `pmma_rod__opposed`, `pmma_slab__opposed`, `pmma_rod__stagnation`, `pmma_rod__unknown`, `sibal_fabric__concurrent`.
+2. **Below-calibration flow extrapolation.** Many near-quench negatives depend on flow values extrapolated below the calibrated range. Rows remaining when those are dropped: `pmma_rod__opposed` (36 of 108 training rows and 4 of 21 negatives remain); `pmma_rod__stagnation` (32 of 66 training rows and 13 of 18 negatives remain); `pmma_rod__unknown` (35 of 52 training rows and 2 of 7 negatives remain); `pmma_thin_film__opposed` (37 of 48 training rows and 3 of 11 negatives remain).
+3. **Where the GP beats the majority-class baseline** (CI excludes 0): `pmma_rod__stagnation`, `pmma_rod__unknown`, `pmma_thin_film__opposed`, `pmma_sphere__wake`, `pmma_sphere__stagnation`, `pmma_sphere__unknown`. Roughly at baseline: `pmma_rod__opposed`, `pmma_slab__opposed`, `sibal_fabric__concurrent`.
 4. **Pressure.** All integrated observations lie at 98.3 to 102.2 kPa and the pressure length scale is fixed (0.3, ln units). At low pressure predictions revert to the prior: a value near 0.6 at 34 % O2 and 56.5 kPa is reversion (latent std ratio about 1), not a pressure effect. For `insufficient_evidence` targets the interface shows no p(sustained).
-5. **Blind-spot test** (strict rule including partial correlation given aleatoric uncertainty): supported in 3 groups, inconclusive in 6.
-6. **Retrospective acquisition test**: EVR beat random in 10 of 18 scenarios (indistinguishable 3, worse 5) and uncertainty sampling in 9 (4, 5): modest small-sample evidence.
+5. **Blind-spot test** (strict rule including partial correlation given aleatoric uncertainty): supported in 4 groups, inconclusive in 5.
+6. **Retrospective acquisition test**: EVR beat random in 11 of 18 scenarios (indistinguishable 5, worse 2) and uncertainty sampling in 13 (2, 3): modest small-sample evidence.
 7. **Mean function.** Every group uses a constant GP mean fixed a priori; no mean function is selected from the data.

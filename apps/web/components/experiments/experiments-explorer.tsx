@@ -5,8 +5,8 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ArrowDown, ArrowUp, Download, Search, X } from "lucide-react";
 import { useExperiments, useGroups, useInvestigations } from "@/hooks/api";
 import { exportExperimentsCsvHref } from "@/lib/api";
+import { getDataMode } from "@/lib/snapshot";
 import { fmtCount, fmtFixed, MISSING } from "@/lib/format";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
@@ -14,7 +14,6 @@ import { Select } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tooltip } from "@/components/ui/tooltip";
-import { DataSourceBadge } from "@/components/data-source-badge";
 import { cn } from "@/lib/cn";
 import type { ApiExperiment } from "@/lib/types";
 import { ExperimentDrawer } from "./experiment-drawer";
@@ -24,12 +23,21 @@ import {
   activeFilterCount,
   airflowOf,
   applyFilters,
+  configurationLabel,
+  confidenceLabel,
+  exclusionShort,
   exclusionText,
+  experimentTitle,
   fmtAirflow,
   groupLabel,
-  humanize,
+  materialLabel,
+  OUTCOME_DESCRIBED,
+  outcomeBucket,
+  outcomeLabel,
+  outcomeShort,
   oxygenOf,
   pressureOf,
+  snapshotCsvHref,
   sortRows,
   uniqueSorted,
   type Filters,
@@ -38,18 +46,22 @@ import {
 
 const FILTER_KEYS = ["q", "investigation", "platform", "group", "outcome", "training", "confidence"] as const;
 
-const COLUMNS: { key: SortKey; label: string; numeric?: boolean }[] = [
-  { key: "experiment", label: "Experiment" },
-  { key: "material", label: "Material / group" },
+// Narrow screens scroll the table sideways; the first column stays put so each row keeps its name.
+const STICKY = "max-md:sticky max-md:left-0 max-md:z-[1] max-md:bg-surface max-md:shadow-[inset_-1px_0_0_var(--border)]";
+
+const COLUMNS: { key: SortKey; label: string; numeric?: boolean; className?: string }[] = [
+  { key: "experiment", label: "Experiment", className: STICKY },
+  { key: "material", label: "Material" },
   { key: "configuration", label: "Configuration" },
   { key: "oxygen", label: "O₂ initial %", numeric: true },
   { key: "pressure", label: "Pressure kPa", numeric: true },
   { key: "airflow", label: "Airflow cm/s", numeric: true },
   { key: "outcome", label: "Outcome" },
-  { key: "steps", label: "Steps", numeric: true },
-  { key: "quality", label: "Quality" },
+  { key: "steps", label: "Steps", numeric: true, className: "max-xl:hidden" },
+  { key: "quality", label: "Confidence", className: "max-xl:hidden" },
   { key: "training", label: "Training" },
 ];
+const SORT_KEYS = new Set<string>(["experiment", "material", "configuration", "oxygen", "pressure", "airflow", "outcome", "steps", "quality", "training"]);
 
 export function ExperimentsExplorer() {
   const router = useRouter();
@@ -93,9 +105,14 @@ export function ExperimentsExplorer() {
   const invs = useInvestigations();
   const groups = useGroups();
 
-  const [sort, setSort] = React.useState<{ key: SortKey; dir: "asc" | "desc" }>({ key: "experiment", dir: "asc" });
+  // Sort lives in the URL (?sort=&dir=) so a shared link keeps it; default experiment/asc is omitted.
+  const sortParam = params.get("sort");
+  const sort: { key: SortKey; dir: "asc" | "desc" } = {
+    key: sortParam && SORT_KEYS.has(sortParam) ? (sortParam as SortKey) : "experiment",
+    dir: params.get("dir") === "desc" ? "desc" : "asc",
+  };
   const all = exps.data?.data;
-  const rows = React.useMemo(() => (all ? sortRows(applyFilters(all, filters), sort.key, sort.dir) : []), [all, filters, sort]);
+  const rows = React.useMemo(() => (all ? sortRows(applyFilters(all, filters), sort.key, sort.dir) : []), [all, filters, sort.key, sort.dir]);
 
   const options = React.useMemo(() => {
     const rowsAll = all ?? [];
@@ -118,7 +135,9 @@ export function ExperimentsExplorer() {
       ),
       outcome: withAll(
         "All outcomes",
-        uniqueSorted(rowsAll.map((e) => e.observed_outcome ?? "unknown")).map((v) => ({ value: v, label: humanize(v).slice(0, 48) })),
+        uniqueSorted(rowsAll.map((e) => outcomeBucket(e.observed_outcome)))
+          .map((v) => ({ value: v, label: v === OUTCOME_DESCRIBED ? "Described in words (Saffire)" : outcomeLabel(v) }))
+          .sort((a, b) => a.label.localeCompare(b.label)),
       ),
       training: [
         { value: ALL, label: "Any training status" },
@@ -127,7 +146,7 @@ export function ExperimentsExplorer() {
       ],
       confidence: withAll(
         "Any confidence",
-        ["high", "medium", "low"].map((v) => ({ value: v, label: humanize(v) })),
+        ["high", "medium", "low"].map((v) => ({ value: v, label: confidenceLabel(v) })),
       ),
     };
   }, [all, groups.data]);
@@ -139,14 +158,30 @@ export function ExperimentsExplorer() {
     if (filters.group !== ALL) q.group = filters.group;
     return q;
   }, [filters.investigation, filters.group]);
-  const [csvHref, setCsvHref] = React.useState<string | null>(null);
+  // The link is built without downloading anything: a URL in live mode, a manifest lookup for the snapshot
+  // (also when auto mode fell back to it). If the snapshot has no file for these filters, offer the full file.
+  const fromSnapshot = getDataMode() === "snapshot" || exps.data?.meta.source === "snapshot";
+  const [csv, setCsv] = React.useState<{ href: string; filtered: boolean } | null>(null);
   React.useEffect(() => {
     let live = true;
-    exportExperimentsCsvHref(exportQuery).then((h) => live && setCsvHref(h), () => live && setCsvHref(null));
+    const filtered = Object.keys(exportQuery).length > 0;
+    const resolve = async () => {
+      if (!fromSnapshot) return { href: (await exportExperimentsCsvHref(exportQuery)) ?? "", filtered };
+      const h = await snapshotCsvHref(exportQuery);
+      if (h) return { href: h, filtered };
+      const full = filtered ? await snapshotCsvHref({}) : null;
+      return full ? { href: full, filtered: false } : null;
+    };
+    resolve().then(
+      (r) => live && setCsv(r && r.href ? r : null),
+      () => live && setCsv(null),
+    );
     return () => {
       live = false;
     };
-  }, [exportQuery]);
+  }, [exportQuery, fromSnapshot]);
+  const csvHref = csv?.href ?? null;
+  const csvPartial = !!csv && !csv.filtered && Object.keys(exportQuery).length > 0;
   const backendDown = exps.isError;
   const extraFilters = filters.q || filters.platform !== ALL || filters.outcome !== ALL || filters.training !== ALL || filters.confidence !== ALL;
 
@@ -156,7 +191,8 @@ export function ExperimentsExplorer() {
   const focusRow = (i: number) => {
     const n = Math.max(0, Math.min(rows.length - 1, i));
     setFocusIdx(n);
-    requestAnimationFrame(() => bodyRef.current?.querySelectorAll<HTMLElement>("tr")[n]?.focus());
+    // Focus synchronously (the rows already exist) so key repeat never drops presses.
+    bodyRef.current?.rows[n]?.focus();
   };
   const onRowKey = (e: React.KeyboardEvent, i: number, row: ApiExperiment) => {
     const move = (n: number) => {
@@ -165,6 +201,8 @@ export function ExperimentsExplorer() {
     };
     if (e.key === "ArrowDown") move(i + 1);
     else if (e.key === "ArrowUp") move(i - 1);
+    else if (e.key === "PageDown") move(i + 10);
+    else if (e.key === "PageUp") move(i - 10);
     else if (e.key === "Home") move(0);
     else if (e.key === "End") move(rows.length - 1);
     else if (e.key === "Enter" || e.key === " ") {
@@ -173,8 +211,10 @@ export function ExperimentsExplorer() {
     }
   };
 
-  const toggleSort = (key: SortKey) =>
-    setSort((s) => (s.key === key ? { key, dir: s.dir === "asc" ? "desc" : "asc" } : { key, dir: "asc" }));
+  const toggleSort = (key: SortKey) => {
+    const dir = sort.key === key && sort.dir === "asc" ? "desc" : "asc";
+    setParams({ sort: key === "experiment" ? null : key, dir: dir === "asc" ? null : dir });
+  };
 
   const filtersActive = activeFilterCount(filters) > 0;
   const clear = () => {
@@ -183,7 +223,7 @@ export function ExperimentsExplorer() {
   };
 
   if (exps.isError && !all) {
-    return <ErrorState code={exps.error.code} message={exps.error.message} onRetry={() => void exps.refetch()} />;
+    return <ErrorState code={exps.error.code} error={exps.error} message={exps.error.message} onRetry={() => void exps.refetch()} />;
   }
 
   return (
@@ -226,9 +266,8 @@ export function ExperimentsExplorer() {
           )}
         </p>
         <div className="flex min-w-0 max-w-full flex-wrap items-center gap-2">
-          <DataSourceBadge meta={exps.data?.meta} />
           {backendDown || !csvHref ? (
-            <Tooltip content={backendDown ? "The analysis service is unavailable, so the export cannot be generated." : "No export is available for these filters."}>
+            <Tooltip content={backendDown ? "The data could not be loaded, so there is nothing to export." : "No export file is available in this version."}>
               <span tabIndex={0} className="inline-flex">
                 <Button disabled aria-disabled="true" className="h-auto min-h-8 max-w-full whitespace-normal">
                   <Download aria-hidden /> Download normalized records (CSV)
@@ -238,14 +277,16 @@ export function ExperimentsExplorer() {
           ) : (
             <Tooltip
               content={
-                extraFilters
-                  ? "The file follows the investigation and group filters; search, platform, outcome, training and confidence apply to the table only."
-                  : "Normalized experiment records, one row per test."
+                csvPartial
+                  ? "This version has no separate file for these filters, so the download contains every record."
+                  : extraFilters
+                    ? "The file follows the investigation and group filters; search, platform, outcome, training and confidence apply to the table only."
+                    : "Normalized experiment records, one row per test."
               }
             >
               <Button asChild className="h-auto min-h-8 max-w-full whitespace-normal">
                 <a href={csvHref} download="experiments.csv">
-                  <Download aria-hidden /> Download normalized records (CSV)
+                  <Download aria-hidden /> {csvPartial ? "Download all normalized records (CSV)" : "Download normalized records (CSV)"}
                 </a>
               </Button>
             </Tooltip>
@@ -279,7 +320,7 @@ export function ExperimentsExplorer() {
               {COLUMNS.map((c) => {
                 const active = sort.key === c.key;
                 return (
-                  <TableHead key={c.key} numeric={c.numeric} aria-sort={active ? (sort.dir === "asc" ? "ascending" : "descending") : "none"}>
+                  <TableHead key={c.key} numeric={c.numeric} className={c.className} aria-sort={active ? (sort.dir === "asc" ? "ascending" : "descending") : "none"}>
                     <button
                       type="button"
                       onClick={() => toggleSort(c.key)}
@@ -313,12 +354,13 @@ export function ExperimentsExplorer() {
       )}
 
       <p className="text-xs text-muted">
-        Arrow keys move between rows, Enter opens the record, Escape closes it. Pressure marked <em>assumed</em> was not recorded in the source.
+        Arrow keys (and Page Up/Down) move between rows, Enter opens the record, Escape closes it. Pressure marked <em>assumed</em> was not recorded in the source.
         Missing values are shown as {MISSING}.
       </p>
 
       <ExperimentDrawer
         id={selectedId}
+        known={all && selectedId ? all.some((r) => r.experiment_id === selectedId) : undefined}
         investigations={invs.data?.data}
         groups={groups.data?.data}
         onClose={() => setParams({ id: null })}
@@ -364,6 +406,7 @@ function ExperimentRow(props: {
   const p = pressureOf(e);
   const flags = e.quality_flags.length;
   const af = airflowOf(e);
+  const sameName = e.test_label.startsWith(e.investigation_acronym);
   return (
     <TableRow
       tabIndex={tabIndex}
@@ -371,41 +414,41 @@ function ExperimentRow(props: {
       onClick={onOpen}
       onKeyDown={onKeyDown}
       className="cursor-pointer focus-visible:outline-offset-[-2px]"
-      aria-label={`${e.investigation_acronym} test ${e.test_label}`}
+      aria-label={experimentTitle(e)}
     >
-      <TableCell className="whitespace-nowrap">
-        <span className="num font-medium text-fg">{e.test_label}</span> <span className="text-muted">{e.investigation_acronym}</span>
-      </TableCell>
-      <TableCell className="whitespace-nowrap" title={`Group: ${groupName}`}>
-        {humanize(e.material_family)}
-        {e.group_id ? null : <span className="text-muted"> · no group</span>}
-      </TableCell>
-      <TableCell className="whitespace-nowrap">{humanize(e.flame_configuration)}</TableCell>
-      <TableCell numeric>{fmtFixed(oxygenOf(e), 1)}</TableCell>
-      <TableCell numeric>
-        <span className="inline-flex items-center justify-end gap-1.5">
-          {p.assumed ? <Badge>assumed</Badge> : null}
-          {fmtFixed(p.kpa, 1)}
+      <TableCell className={cn("whitespace-nowrap", STICKY)} title={`${e.test_label} · ${e.investigation_name}`}>
+        <span className="flex max-w-56 items-baseline gap-1.5 overflow-hidden">
+          <span className="num min-w-0 shrink truncate font-medium text-fg">{e.test_label}</span>
+          {sameName ? null : <span className="min-w-0 max-w-28 shrink-[2] truncate text-muted">{e.investigation_acronym}</span>}
         </span>
       </TableCell>
-      <TableCell numeric data-airflow={af.lo ?? ""}>
+      <TableCell className="whitespace-nowrap" title={`Analysis group: ${groupName}`}>
+        {materialLabel(e.material_family)}
+      </TableCell>
+      <TableCell className="whitespace-nowrap">{configurationLabel(e.flame_configuration)}</TableCell>
+      <TableCell numeric>{fmtFixed(oxygenOf(e), 1)}</TableCell>
+      <TableCell numeric className="whitespace-nowrap">
+        {p.assumed ? <span className="mr-1.5 text-xs text-muted" title="Not recorded in the source; ISS cabin nominal assumed">assumed</span> : null}
+        {fmtFixed(p.kpa, 1)}
+      </TableCell>
+      <TableCell numeric className="whitespace-nowrap" data-airflow={af.lo ?? ""}>
         {fmtAirflow(e)}
       </TableCell>
-      <TableCell className="max-w-56 truncate" title={humanize(e.observed_outcome ?? "unknown")}>
-        {humanize(e.observed_outcome ?? "unknown")}
+      <TableCell className="max-w-52 truncate" title={outcomeLabel(e.observed_outcome)}>
+        {outcomeShort(e.observed_outcome)}
       </TableCell>
-      <TableCell numeric>{e.n_observations}</TableCell>
-      <TableCell className="whitespace-nowrap">
-        {humanize(e.extraction_confidence)}
-        <span className="num text-muted"> · {flags} {flags === 1 ? "flag" : "flags"}</span>
+      <TableCell numeric className="max-xl:hidden">{e.n_observations}</TableCell>
+      <TableCell className="whitespace-nowrap max-xl:hidden">
+        {confidenceLabel(e.extraction_confidence)}
+        {flags ? <span className="num text-muted"> · {flags} {flags === 1 ? "flag" : "flags"}</span> : null}
       </TableCell>
       <TableCell className="whitespace-nowrap">
         {e.included_in_training ? (
           <span>Included</span>
         ) : (
           <Tooltip content={exclusionText(e.exclusion_reason) || "Excluded from training"}>
-            <span className="text-muted underline decoration-dotted underline-offset-2" title={exclusionText(e.exclusion_reason)}>
-              Excluded
+            <span className="text-muted">
+              Excluded{e.exclusion_reason ? <span className="text-xs"> · {exclusionShort(e.exclusion_reason)}</span> : null}
             </span>
           </Tooltip>
         )}

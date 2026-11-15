@@ -1,4 +1,4 @@
-import { CHART, FONT, tickLabel, type LinearScale } from "./chart-utils";
+import { CHART, FONT, SANS, TEXT, tickLabel, type LinearScale } from "./chart-utils";
 
 export interface Margin {
   top: number;
@@ -16,13 +16,13 @@ export function XAxis({ scale, y, ticks, label, height }: { scale: LinearScale; 
         <g key={t} transform={`translate(${scale(t)},0)`}>
           {height ? <line y1={y} y2={y - height} stroke={CHART.grid} /> : null}
           <line y1={y} y2={y + 4} stroke={CHART.axis} />
-          <text y={y + 15} textAnchor="middle" fontSize={10} fill={CHART.muted} fontFamily={FONT}>
+          <text y={y + 16} textAnchor="middle" fontSize={TEXT.tick} fill={CHART.muted} fontFamily={FONT}>
             {tickLabel(t)}
           </text>
         </g>
       ))}
       {label ? (
-        <text x={(x0 + x1) / 2} y={y + 31} textAnchor="middle" fontSize={11} fill={CHART.muted}>
+        <text x={(x0 + x1) / 2} y={y + 34} textAnchor="middle" fontSize={TEXT.label} fill={CHART.muted} fontFamily={SANS}>
           {label}
         </text>
       ) : null}
@@ -39,13 +39,13 @@ export function YAxis({ scale, x, ticks, label, width }: { scale: LinearScale; x
         <g key={t} transform={`translate(0,${scale(t)})`}>
           {width ? <line x1={x} x2={x + width} stroke={CHART.grid} /> : null}
           <line x1={x - 4} x2={x} stroke={CHART.axis} />
-          <text x={x - 7} dy="0.32em" textAnchor="end" fontSize={10} fill={CHART.muted} fontFamily={FONT}>
+          <text x={x - 7} dy="0.32em" textAnchor="end" fontSize={TEXT.tick} fill={CHART.muted} fontFamily={FONT}>
             {tickLabel(t)}
           </text>
         </g>
       ))}
       {label ? (
-        <text transform={`translate(${x - 38},${(y0 + y1) / 2}) rotate(-90)`} textAnchor="middle" fontSize={11} fill={CHART.muted}>
+        <text transform={`translate(${x - 42},${(y0 + y1) / 2}) rotate(-90)`} textAnchor="middle" fontSize={TEXT.label} fill={CHART.muted} fontFamily={SANS}>
           {label}
         </text>
       ) : null}

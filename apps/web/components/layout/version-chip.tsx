@@ -42,9 +42,9 @@ export function VersionChip({ className }: { className?: string }) {
     label = (
       <>
         {state === "degraded" ? <span className="mr-1">Degraded</span> : null}
-        <span className="num">
-          data {data ?? "n/a"}
-          <span className="hidden sm:inline"> &middot; model {model ?? "n/a"}</span>
+        <span>
+          data <span className="num">{data ?? "n/a"}</span>
+          <span> &middot; model <span className="num">{model ?? "n/a"}</span></span>
         </span>
       </>
     );
@@ -54,14 +54,14 @@ export function VersionChip({ className }: { className?: string }) {
   }
 
   return (
-    <Tooltip content={detail} side="bottom" align="end">
+    <Tooltip content={detail} side="top" align="end">
       <button
         type="button"
         data-testid="version-chip"
         data-state={state}
         aria-label={state === "ok" || state === "degraded" ? `data ${data ?? "n/a"}, model ${model ?? "n/a"}. ${detail}` : `${state === "loading" ? "Checking" : "Backend unavailable"}. ${detail}`}
         className={cn(
-          "inline-flex h-6 items-center gap-1.5 rounded-sm border border-border bg-surface px-2 text-xs text-muted transition-colors hover:border-border-strong hover:text-fg",
+          "-mx-1.5 inline-flex h-6 items-center gap-1.5 rounded-sm border border-transparent px-1.5 text-label text-muted transition-colors hover:border-border hover:text-fg",
           className,
         )}
       >

@@ -233,8 +233,11 @@ def test_rank_schema_and_content(client: TestClient, gid: str) -> None:
         text = (c["feasibility_note"]).lower()
         assert not any(w in text for w in FORBIDDEN_FEASIBILITY)
         assert c["explanation"]
+        assert c["reasons"] and c["reasons"][0]["code"] == "expected_uncertainty_reduction"
         for rs in c["reasons"]:
             assert rs["code"] in {
+                "expected_uncertainty_reduction",
+                "at_target_conditions",
                 "high_target_covariance",
                 "high_candidate_uncertainty",
                 "near_decision_boundary",
@@ -343,6 +346,18 @@ def test_counterfactual(client: TestClient, gid: str) -> None:
         assert abs(sum(s.probability for s in r2.scenarios) - 1.0) < 1e-9
     # observing the more probable outcome at a candidate cannot increase the expected variance
     assert r.current.target_latent_var >= min(s.target_latent_var for s in r.scenarios) - 1e-9
+    # optional oxygen-axis range (far targets): same grid size, different axis, validated like /api/surface
+    wide = {**body, "plane": "o2_pressure", "slice": 10.0, "x_min": 10.0, "x_max": 100.0}
+    r3 = models.CounterfactualResponse.model_validate(post(client, "/api/candidates/counterfactual", wide))
+    s3 = r3.scenarios[0].surface
+    assert s3 is not None and len(s3.p_sustained) == 41 and len(s3.p_sustained[0]) == 61
+    narrow = models.CounterfactualResponse.model_validate(
+        post(client, "/api/candidates/counterfactual", {**wide, "x_min": None, "x_max": None})
+    )
+    assert narrow.scenarios[0].surface is not None
+    assert narrow.scenarios[0].surface.p_sustained != s3.p_sustained
+    bad = client.post("/api/candidates/counterfactual", json={**wide, "x_min": 50.0, "x_max": 20.0})
+    assert bad.status_code == 422
 
 
 # --- model card / validation / brief ---------------------------------------------------------------
@@ -472,11 +487,10 @@ def test_no_probability_estimate_when_unsupported(client: TestClient, gid: str) 
         assert "Model estimate of P(sustained)" not in a["summary"]
     r = rank(client, gid, EXPLORATION)
     for c in [*r["candidates"], *[b for b in r["baselines"].values() if b]]:
-        if c["nn_distance"] is not None and c["nn_distance"] > 1.0:
-            assert c["p_sustained"] is None
+        # D2: candidate P(sustained) only where the candidate point itself is supported
+        assert (c["p_sustained"] is not None) == (c["verdict"] == "supported")
+        if c["p_sustained"] is None:
             assert "the model estimates P(sustained)" not in c["explanation"]
-        else:
-            assert c["p_sustained"] is not None
 
 
 def test_rank_flags_uninformative_candidates(client: TestClient, gid: str) -> None:
@@ -517,3 +531,99 @@ def test_lp_model_cache_is_bounded(client: TestClient, gid: str) -> None:
     for i in range(modeling._LP_CACHE_MAX + 8):
         modeling.model_for_lp(gm, 0.51 + 0.01 * i)
     assert len(modeling._LP_CACHE) <= modeling._LP_CACHE_MAX
+
+
+# --- lead decisions D2 / D6: target verdict from points, P gating, brief labels ----------------------
+
+
+def test_target_verdict_from_points_and_p_gating(client: TestClient, groups: list[dict[str, Any]]) -> None:
+    for g in [g for g in groups if g["model_status"] == "modeled"][:4]:
+        for target in (ISS, EXPLORATION):
+            a = post(client, "/api/target/assess", {"group_id": g["group_id"], "target": target})
+            n, pv = a["coverage"]["n_target_points"], a["point_verdicts"]
+            assert sum(pv.values()) == n and a["points_supported"] == pv["supported"]
+            if a["coverage"]["points_with_comparable"] == 0:
+                assert a["verdict"] == "insufficient_evidence"
+                assert "not represented in the integrated records" in a["summary"]
+            else:
+                assert "not represented in the integrated records" not in a["summary"]
+            if pv["supported"] / n >= 0.5:
+                assert a["verdict"] == "supported"
+            if pv["supported"] == 0:
+                assert a["model"]["p_sustained_mean"] is None and a["model"]["p_sustained_min"] is None
+            else:
+                assert a["model"]["p_sustained_mean"] is not None
+            assert a["reasons"], "the 'why' list is never empty"
+            rel = a["investigation_relevance"]
+            assert [r["relevance_rank"] for r in rel] == list(range(1, len(rel) + 1))
+            assert {r["role"] for r in rel} >= {"integrated_model", "documented_not_integrated"}
+            assert all(r["summary"] for r in rel)
+
+
+def test_brief_candidate_labels(client: TestClient, gid: str) -> None:
+    top = rank(client, gid, ISS)["candidates"][0]
+    null = post(client, "/api/brief", {"group_id": gid, "target": ISS, "candidate": None})
+    sel = post(client, "/api/brief", {"group_id": gid, "target": ISS, "candidate": pick(top)})
+    assert "Source of candidate: top-ranked candidate" in null["markdown"]
+    assert "Source of candidate: selected candidate (rank 1 under default assumptions)" in sel["markdown"]
+    for b in (null, sel):
+        md = b["markdown"]
+        assert "- Pressure sensitivity" in md and "- Assumptions:" in md
+        assert "min None" not in md and "max None" not in md and "user-selected candidate" not in md
+        assert "documented_nasa" not in md and "ventilation_standard_with" not in md
+
+
+def test_nan_inputs_are_422(client: TestClient, gid: str) -> None:
+    body = {"group_id": gid, "points": [{"oxygen_percent": 1.5, "airflow_cm_s": 1, "pressure_kpa": 101}]}
+    raw = json.dumps(body).replace("1.5", "NaN")
+    r = client.post("/api/predict", content=raw, headers={"content-type": "application/json"})
+    assert r.status_code == 422 and r.json()["error"]["code"] == "validation_error"
+    assert all("input" not in e for e in r.json()["error"]["details"]["errors"])
+    custom = {
+        "custom": {
+            "label": "x",
+            "oxygen_percent": {"nominal": 21.0},
+            "total_pressure_kpa": {"nominal": 101.3, "min": None, "max": None},
+            "airflow_cm_s": None,
+        }
+    }
+    raw2 = json.dumps({"group_id": gid, "target": custom}).replace('"nominal": 101.3', '"nominal": Infinity')
+    r2 = client.post("/api/target/assess", content=raw2, headers={"content-type": "application/json"})
+    assert r2.status_code == 422
+
+
+def test_memo_heavy_computes_once_under_parallel_requests() -> None:
+    """Heavy routes (rank, counterfactual) are capped by a semaphore and identical requests compute once."""
+    import threading
+
+    from blindspots.api import routes_model
+
+    clear_memo()
+    calls: list[int] = []
+    active = [0]
+    peak = [0]
+    lock = threading.Lock()
+
+    def compute(i: int) -> int:
+        with lock:
+            active[0] += 1
+            peak[0] = max(peak[0], active[0])
+        time.sleep(0.02)
+        with lock:
+            active[0] -= 1
+            calls.append(i)
+        return i
+
+    threads = [
+        threading.Thread(target=routes_model.memo, args=("t", {"r": i % 4}, lambda i=i: compute(i), True))
+        for i in range(20)
+    ]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    assert peak[0] <= routes_model.HEAVY_CONCURRENCY
+    # requests queued behind the semaphore reuse the cached result (at most one run per permit and key)
+    assert len(calls) <= 4 * routes_model.HEAVY_CONCURRENCY
+    assert {i % 4 for i in calls} == {0, 1, 2, 3}
+    clear_memo()

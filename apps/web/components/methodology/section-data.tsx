@@ -1,6 +1,10 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
+import { api } from "@/lib/api";
+import { queryKeys } from "@/hooks/api";
 import { Callout } from "@/components/ui/callout";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { ApiQuery } from "@/hooks/api";
@@ -29,6 +33,61 @@ const REASON_TEXT: Record<string, string> = {
   "different apparatus and scale: context only": "Context record from a different apparatus and scale",
 };
 
+type FlowCounts = { n: number; recorded: number; converted: number; borrowed: number; below: number };
+
+/**
+ * D5 flow-provenance sentence, computed from data: from /api/methodology config.training_flow_provenance when the
+ * service provides it, otherwise counted from GET /api/observations (fetched only when this paragraph scrolls into view).
+ */
+function FlowProvenance({ methodology }: { methodology: ApiQuery<MethodologyResponse> }) {
+  const fromConfig = (methodology.data?.data.config as unknown as Record<string, unknown> | undefined)?.training_flow_provenance as
+    | { n_training?: number; n_recorded?: number; n_converted_bass2_calibration?: number; n_borrowed_calibration?: number; n_below_calibration_range?: number }
+    | undefined;
+  const ref = useRef<HTMLParagraphElement | null>(null);
+  const [near, setNear] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || near || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver((es) => es.some((e) => e.isIntersecting) && setNear(true), { rootMargin: "800px 0px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [near]);
+  const obs = useQuery({
+    queryKey: queryKeys.observations(null),
+    queryFn: ({ signal }) => api.observations(null, signal),
+    enabled: near && !fromConfig && !methodology.isPending,
+    staleTime: Infinity,
+  });
+  let c: FlowCounts | null = null;
+  if (fromConfig && typeof fromConfig.n_training === "number") {
+    c = { n: fromConfig.n_training, recorded: fromConfig.n_recorded ?? 0, converted: fromConfig.n_converted_bass2_calibration ?? 0, borrowed: fromConfig.n_borrowed_calibration ?? 0, below: fromConfig.n_below_calibration_range ?? 0 };
+  } else if (obs.data) {
+    const rows = obs.data.data.filter((o) => o.included_in_training && o.label !== null);
+    c = {
+      n: rows.length,
+      recorded: rows.filter((o) => o.airflow_basis === "air_display" || o.airflow_basis === "stated_cm_s").length,
+      converted: rows.filter((o) => (o.airflow_basis === "fan_calibration" || o.airflow_basis === "pot_calibration") && !o.quality_flags.includes("calibration_borrowed_from_bass2")).length,
+      borrowed: rows.filter((o) => o.quality_flags.includes("calibration_borrowed_from_bass2")).length,
+      below: rows.filter((o) => o.quality_flags.includes("below_calibration_range")).length,
+    };
+  }
+  return (
+    <p ref={ref} className="max-w-[72ch] text-[14px] leading-relaxed text-fg" data-testid="flow-provenance">
+      {c ? (
+        <>
+          <strong>Where the airflow numbers come from.</strong> <span className="num">{fmtCount(c.recorded)}</span> of <span className="num">{fmtCount(c.n)}</span> training steps use a recorded airflow (duct reading or a value stated in the source);{" "}
+          <span className="num">{fmtCount(c.converted)}</span> are converted from fan or pot settings with the BASS-II calibration; {c.borrowed === 0 ? "none use" : <><span className="num">{fmtCount(c.borrowed)}</span> use</>} a borrowed calibration.
+          {c.below ? <> <span className="num">{fmtCount(c.below)}</span> lie below the calibrated range and are interpolated toward the fan-off point (flagged).</> : null}
+        </>
+      ) : obs.isError ? (
+        <span className="text-muted">The airflow provenance counts are unavailable.</span>
+      ) : (
+        <span className="text-muted">Counting where the airflow numbers come from…</span>
+      )}
+    </p>
+  );
+}
+
 function ReasonTable({ caption, rows }: { caption: string; rows: [string, number][] }) {
   if (rows.length === 0) return <P className="text-muted">No exclusion counts are reported for {caption.toLowerCase()}.</P>;
   return (
@@ -53,6 +112,21 @@ function ReasonTable({ caption, rows }: { caption: string; rows: [string, number
       </TableBody>
     </Table>
   );
+}
+
+function pressureText(r: readonly [number, number] | null | undefined): string {
+  if (!r) return "—";
+  const a = r[0].toFixed(1);
+  const b = r[1].toFixed(1);
+  return a === b ? a : fmtPair(r, "", 1);
+}
+
+/** measured / assumed (not recorded) / partly assumed, from pressure_measured and the observed range. */
+function pressureBasis(g: GroupSummary) {
+  if (g.pressure_measured) return <Badge tone="neutral">measured</Badge>;
+  const r = g.pressure_kpa_range;
+  const same = r ? r[0].toFixed(1) === r[1].toFixed(1) : false;
+  return <span className="text-[13px] text-muted">{same ? "assumed (not recorded)" : "partly assumed"}</span>;
 }
 
 export function DataSection({ methodology, sources, groups }: { methodology: ApiQuery<MethodologyResponse>; sources: ApiQuery<SourcesResponse>; groups: ApiQuery<GroupSummary[]> }) {
@@ -90,12 +164,12 @@ export function DataSection({ methodology, sources, groups }: { methodology: Api
                     <TableRow key={i.investigation_id}>
                       <TableCell className="h-auto py-2">
                         <ExtLink href={i.landing_url}>
-                          {i.acronym} <span className="num text-xs text-muted">({i.investigation_id})</span>
+                          {i.acronym} <span className="num whitespace-nowrap text-xs text-muted">({i.investigation_id})</span>
                         </ExtLink>
                         <div className="max-w-[40ch] text-xs text-muted">{i.title}</div>
                       </TableCell>
-                      <TableCell>{i.doi ? <ExtLink href={`https://doi.org/${i.doi}`}>{i.doi}</ExtLink> : <span className="text-muted">none recorded</span>}</TableCell>
-                      <TableCell className="num">{i.license}</TableCell>
+                      <TableCell className="whitespace-nowrap">{i.doi ? <ExtLink href={`https://doi.org/${i.doi}`}>{i.doi}</ExtLink> : <span className="text-muted">none recorded</span>}</TableCell>
+                      <TableCell className="num whitespace-nowrap">{i.license}</TableCell>
                       <TableCell className="h-auto py-2 text-xs">{i.platform}</TableCell>
                       <TableCell numeric>{fmtCount(i.n_experiments)}</TableCell>
                       <TableCell numeric>{fmtCount(i.n_observations)}</TableCell>
@@ -157,7 +231,7 @@ export function DataSection({ methodology, sources, groups }: { methodology: Api
           {(m) => {
             const tf = isRecord(m.config.training_filter) ? m.config.training_filter : {};
             const ex = isRecord(tf.exclusions_in_dataset) ? tf.exclusions_in_dataset : null;
-            if (!ex) return <Callout variant="warning" title="Exclusion counts are not reported by the service">The dataset report did not include them, so none are shown.</Callout>;
+            if (!ex) return <Callout variant="info" title="Exclusion counts are not reported by the service">The dataset report did not include them, so none are shown.</Callout>;
             return (
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <ReasonTable caption="Observations excluded, by reason" rows={countMap(ex.observations_by_reason)} />
@@ -201,17 +275,23 @@ airflow_cm_s = 1.0066 x AIR        (duct "Air display" reading, per the BASS-II 
             same calibration day, otherwise the nearest day. The calibration reference is stored per observation.
           </li>
           <li>
-            <strong>Below the calibrated range</strong> (lowest non-zero calibration point), the curve is linearly extrapolated through its two lowest points, floored at 0 cm/s, and the step is flagged{" "}
-            <Mono>below_calibration_range</Mono> and <Mono>flow_extrapolated_linear</Mono> with an uncertainty of at least 0.5 cm/s. This keeps near-quench steps in order; those values are the least certain
+            Where a test row records a direct air-display reading for a step, that reading is used instead of converting the fan or pot setting (CONTRACTS 2.2).
+          </li>
+          <li>
+            <strong>Below the calibrated range</strong> (lowest non-zero calibration point), the flow is interpolated linearly between the calibration sheet&apos;s fan-off row
+            (0 cm/s) and the chosen day&apos;s lowest calibrated non-zero point, toward the fan-off point (an assumption; the NASA sheet notes the fan stops at a finite voltage above
+            3.8 V). The step is flagged <Mono>below_calibration_range</Mono> and <Mono>flow_interpolated_to_fan_off</Mono>, with an uncertainty of max(0.5 cm/s, half the lowest
+            calibrated flow). This keeps near-quench steps in order; those values are the least certain
             airflow numbers in the dataset. A sensitivity analysis drops them (section 4).
           </li>
           <li>
-            BASS has no fan calibration in the integrated files: stated cm/s values are preferred; other settings borrow the BASS-II calibration (flagged, low confidence).
+            BASS has no fan calibration in the integrated files: stated cm/s values are preferred; a BASS fan or pot setting would need the BASS-II calibration, so such steps are flagged low confidence and kept out of training.
           </li>
           <li>
             Oxygen is linearly interpolated between initial and final values across the steps of a test (flagged); a sensitivity analysis uses the initial value only.
           </li>
         </Bullets>
+        <FlowProvenance methodology={methodology} />
       </Sub>
 
       <Sub title="Missing data">
@@ -238,11 +318,11 @@ airflow_cm_s = 1.0066 x AIR        (duct "Air display" reading, per the BASS-II 
                   {gs.map((g) => (
                     <TableRow key={g.group_id}>
                       <TableCell className="h-auto py-1.5">
-                        {g.label} <span className="num text-xs text-muted">{g.group_id}</span>
+                        {g.label}
                       </TableCell>
                       <TableCell numeric>{fmtCount(g.n_experiments)}</TableCell>
-                      <TableCell numeric>{fmtPair(g.pressure_kpa_range, "", 1)}</TableCell>
-                      <TableCell>{g.pressure_measured ? <Badge tone="observed">measured</Badge> : <Badge tone="gap">assumed</Badge>}</TableCell>
+                      <TableCell numeric>{pressureText(g.pressure_kpa_range)}</TableCell>
+                      <TableCell>{pressureBasis(g)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -250,7 +330,7 @@ airflow_cm_s = 1.0066 x AIR        (duct "Air display" reading, per the BASS-II 
             )
           }
         </QueryBoundary>
-        <Callout variant="warning" title="Pressure does not vary in the integrated records">
+        <Callout variant="info" title="Pressure does not vary in the integrated records">
           Every integrated observation is at about 1 atm, so no pressure effect can be learned from them. Any statement about other pressures is assumption-driven (section 2).
           {" "}
           <span className="num">{fmtKpa(101.325, 3)}</span> is the standard atmosphere used as the reference for the pressure coordinate.

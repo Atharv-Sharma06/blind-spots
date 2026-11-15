@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useExploreStore } from "@/lib/explore-store";
 import { useDataSourceStore, type DataSourceStatus } from "@/lib/api";
 import { getDataMode, loadSnapshotManifest } from "@/lib/snapshot";
 import type { DataMode, SnapshotManifest } from "@/lib/types";
@@ -13,7 +15,10 @@ export interface UseDataMode {
   status: DataSourceStatus;
   /** True when answers come from the precomputed snapshot (snapshot mode, or auto after fallback). */
   isSnapshot: boolean;
-  /** True when slice values / custom targets must snap to / be limited by the snapshot. */
+  /**
+   * True when slice values / custom targets must snap to / be limited by the snapshot: snapshot mode, or
+   * auto mode while the live service is down (answers come from the snapshot; a05-13).
+   */
   snapshotOnly: boolean;
   manifest: SnapshotManifest | null;
   /** manifest.slices; null until the manifest loads (or when no snapshot is deployed). */
@@ -43,11 +48,16 @@ export function useDataMode(): UseDataMode {
   });
   const manifest = m.data ?? null;
   const isSnapshot = mode === "snapshot" || status === "snapshot";
+  // Explore slices snap to the exported slices while answers come from the snapshot (idempotent).
+  const snap = isSnapshot ? (manifest?.slices ?? null) : null;
+  useEffect(() => {
+    if (!isSnapshot || snap) useExploreStore.getState().setSnapSlices(snap);
+  }, [isSnapshot, snap]);
   return {
     mode,
     status,
     isSnapshot,
-    snapshotOnly: mode === "snapshot",
+    snapshotOnly: isSnapshot,
     manifest,
     slices: manifest?.slices ?? null,
     modelVersion: storeModel ?? manifest?.model_version ?? null,

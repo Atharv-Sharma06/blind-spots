@@ -49,23 +49,23 @@
       "medium"
     ]
   },
-  "dataset_version": "8783ff5aa6a2",
+  "dataset_version": "4fe55f76142a",
   "group_hashes": {
     "nomex_fabric__concurrent": "4826a1451bd4580477aa508c91bc09e302901fb0894ea2801ce7f7de83cf0cc5",
     "nomex_fabric__unknown": "174c8ae687d273f956a1804c254505ae5e43f20ef0ba22002cb39e84172dde5a",
     "paraffin_slab__concurrent": "4eb2dc5f8499e7f43876887aaf46a28a13a978e86a0e4ac2630d78d89820a1d5",
     "paraffin_slab__unknown": "4caab1d3924fde1ebea4ed0e03667115ad1359cc9cb8aafa48f7e8cbb47d28e2",
-    "pmma_rod__opposed": "6d935a550537b5a4affc41f82fc686f34f9030616fb0ad25b00071bd3c80ad12",
-    "pmma_rod__stagnation": "634c5b56475d64af5b40c7678af8427421e7532c6609d84ccf90c20a487198a1",
-    "pmma_rod__unknown": "15178c0c6355fad05ef98030dd8d4669b588feee76eca9e7b5f960f48761e853",
+    "pmma_rod__opposed": "44f6ac54e67fc7caaeff6cbcbbb5220f3536b35e72006434e6f4d406324873d9",
+    "pmma_rod__stagnation": "9d15926c9d85ea80c2d3f48a071faae3c86912cd2dddf0a3c72f2ff46a8755fb",
+    "pmma_rod__unknown": "0c984abf03448227a0bbe731f90f3010687323585bbe3a5d28692cf5e4a19318",
     "pmma_slab__concurrent": "60607a45a3f221361aa9fe5f9cebb429e8853de657237a86a867bda000e1a460",
-    "pmma_slab__opposed": "b668520dfbc9876d2a2d5c9cc96f79a5e120d73c147f8a9be762efd8455c716a",
+    "pmma_slab__opposed": "b6976c9f37e7bdf46829b44613eb922db98718d374fe107b66637077d27a31a7",
     "pmma_slab__unknown": "a63b4e4ccad10b0247331dbc5e6542cc07ecd4ae2f7377ecd6fb98edf9feefcf",
-    "pmma_sphere__stagnation": "9610b4676c216f1e700b984d439f32d6820e7511d9f86322fb611ec1a9fc0813",
-    "pmma_sphere__unknown": "a7aafee19232aa1f0a5569604dfdcc7be1c50ba71dbb506f7c26a6b497e570a4",
-    "pmma_sphere__wake": "0e92f6daf8c51810e30b1752a6fca63477037d6be7e12713859f1ed1420ccdeb",
-    "pmma_thin_film__opposed": "4edd596dff1e9a3384e6c07c2f2c8119c9e769dbba38525e8b3c0769d3f388f9",
-    "sibal_fabric__concurrent": "9fd81ccb62063ccd381f3ef614eee6a893a2d5e4ec123ac558c4e31932fcb676",
+    "pmma_sphere__stagnation": "be15a6b520ab39df3123b481457f88a842c378d5f392a2a81b13cf318349370c",
+    "pmma_sphere__unknown": "61e4e6e0def7bdab1835a3136386e22056ff2397e8d111672f913ef138325e9c",
+    "pmma_sphere__wake": "2de817ebd6da717659f385fd4b589c651da3d9fba30477eaf20cce099b1919d2",
+    "pmma_thin_film__opposed": "9ccdabe3cf78eac26a089808fb4d0dfbe3ffa345f288228ceabc5fdd742d1eab",
+    "sibal_fabric__concurrent": "f2419471df9cfbd9647b37f10891e32771a8da121f78bdd522cf2b76dbc24487",
     "sibal_fabric__opposed": "dda8012fe9e29d84d4f1575aaa25fe56d44cc35847d99e5df52583489b36d75b",
     "sibal_fabric__unknown": "3f7d48104a783ba0fd7efaee713cd388008f322df1975a19c7bbf64ab5f2bf02",
     "ultem_sheet__unknown": "78823aa713900e16091edc97f87b4c1fcd006436d0c7db78fbce7fc9a4229595",
@@ -111,15 +111,15 @@
       "model_status": "modeled",
       "n_experiments": 24,
       "n_observations": 108,
-      "sha256": "6d935a550537b5a4affc41f82fc686f34f9030616fb0ad25b00071bd3c80ad12"
+      "sha256": "44f6ac54e67fc7caaeff6cbcbbb5220f3536b35e72006434e6f4d406324873d9"
     },
     "pmma_rod__stagnation": {
       "mean_function": "constant",
       "model_reason": null,
       "model_status": "modeled",
       "n_experiments": 15,
-      "n_observations": 67,
-      "sha256": "634c5b56475d64af5b40c7678af8427421e7532c6609d84ccf90c20a487198a1"
+      "n_observations": 66,
+      "sha256": "9d15926c9d85ea80c2d3f48a071faae3c86912cd2dddf0a3c72f2ff46a8755fb"
     },
     "pmma_rod__unknown": {
       "mean_function": "constant",
@@ -127,7 +127,7 @@
       "model_status": "modeled",
       "n_experiments": 12,
       "n_observations": 52,
-      "sha256": "15178c0c6355fad05ef98030dd8d4669b588feee76eca9e7b5f960f48761e853"
+      "sha256": "0c984abf03448227a0bbe731f90f3010687323585bbe3a5d28692cf5e4a19318"
     },
     "pmma_slab__concurrent": {
       "mean_function": null,
@@ -143,7 +143,7 @@
       "model_status": "modeled",
       "n_experiments": 22,
       "n_observations": 95,
-      "sha256": "b668520dfbc9876d2a2d5c9cc96f79a5e120d73c147f8a9be762efd8455c716a"
+      "sha256": "b6976c9f37e7bdf46829b44613eb922db98718d374fe107b66637077d27a31a7"
     },
     "pmma_slab__unknown": {
       "mean_function": null,
@@ -159,7 +159,7 @@
       "model_status": "modeled",
       "n_experiments": 18,
       "n_observations": 33,
-      "sha256": "9610b4676c216f1e700b984d439f32d6820e7511d9f86322fb611ec1a9fc0813"
+      "sha256": "be15a6b520ab39df3123b481457f88a842c378d5f392a2a81b13cf318349370c"
     },
     "pmma_sphere__unknown": {
       "mean_function": "constant",
@@ -167,7 +167,7 @@
       "model_status": "modeled",
       "n_experiments": 18,
       "n_observations": 29,
-      "sha256": "a7aafee19232aa1f0a5569604dfdcc7be1c50ba71dbb506f7c26a6b497e570a4"
+      "sha256": "61e4e6e0def7bdab1835a3136386e22056ff2397e8d111672f913ef138325e9c"
     },
     "pmma_sphere__wake": {
       "mean_function": "constant",
@@ -175,7 +175,7 @@
       "model_status": "modeled",
       "n_experiments": 24,
       "n_observations": 42,
-      "sha256": "0e92f6daf8c51810e30b1752a6fca63477037d6be7e12713859f1ed1420ccdeb"
+      "sha256": "2de817ebd6da717659f385fd4b589c651da3d9fba30477eaf20cce099b1919d2"
     },
     "pmma_thin_film__opposed": {
       "mean_function": "constant",
@@ -183,7 +183,7 @@
       "model_status": "modeled",
       "n_experiments": 16,
       "n_observations": 48,
-      "sha256": "4edd596dff1e9a3384e6c07c2f2c8119c9e769dbba38525e8b3c0769d3f388f9"
+      "sha256": "9ccdabe3cf78eac26a089808fb4d0dfbe3ffa345f288228ceabc5fdd742d1eab"
     },
     "sibal_fabric__concurrent": {
       "mean_function": "constant",
@@ -191,7 +191,7 @@
       "model_status": "modeled",
       "n_experiments": 25,
       "n_observations": 42,
-      "sha256": "9fd81ccb62063ccd381f3ef614eee6a893a2d5e4ec123ac558c4e31932fcb676"
+      "sha256": "f2419471df9cfbd9647b37f10891e32771a8da121f78bdd522cf2b76dbc24487"
     },
     "sibal_fabric__opposed": {
       "mean_function": null,
@@ -235,11 +235,11 @@
     }
   },
   "has_validation": true,
-  "model_version": "gp-laplace-v1+8783ff5a.adfbbd",
+  "model_version": "gp-laplace-v1+4fe55f76.adfbbd",
   "timings_s": {
-    "fit": 2.3,
-    "total": 21.0,
-    "validation": 18.7
+    "fit": 4.2,
+    "total": 40.1,
+    "validation": 35.8
   },
-  "trained_at": "2026-11-15T18:00:12+00:00"
+  "trained_at": "2026-11-15T19:42:08+00:00"
 }

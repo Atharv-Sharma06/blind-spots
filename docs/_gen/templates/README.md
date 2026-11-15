@@ -1,20 +1,83 @@
 # Blind Spots
 
-Blind Spots maps where NASA microgravity solid-fuel combustion experiments have, and have not, established evidence; models flame
-sustainment with calibrated uncertainty; and ranks **computational research candidates** by how much they would reduce uncertainty about a
-chosen target cabin atmosphere. Built for the NASA Space Apps Challenge 2026 "Flame in Freefall". Not endorsed by NASA.
+**Blind Spots: where NASA's microgravity fire evidence ends, and what to learn next.**
 
-> This project is a data-analysis and research-planning tool. It is not a certified fire-safety assessment, makes no claim of NASA approval,
-> and contains no combustion-test or apparatus procedures. Candidates are "computational research candidates requiring qualified scientific
-> review, established safety procedures and formal feasibility assessment".
+Fire safety in crew cabins (spacecraft, Moon and Mars habitats) depends on how flames behave in microgravity at the cabin's
+oxygen level and pressure. Blind Spots measures how far NASA's integrated microgravity flame records reach toward a chosen
+cabin atmosphere. Its method is machine learning: a Gaussian-process model that says when it does not know, plus active
+learning that ranks the most informative next experiment. Built for NASA Space Apps Challenge 2026, "Flame in Freefall".
+Not endorsed by NASA.
 
-## Deployed app
+**Try it:** [live app]({{DEPLOYED_URL}}) (press **Guided demo**) · [30-second video]({{VIDEO_URL}}) · [source code]({{GITHUB_URL}})
 
-URL: <to be added>
+![Coverage map, oxygen against pressure: every integrated ISS flame observation sits at about 1 atm, far from a reduced-pressure cabin target](submission/stills/02-target-gap.png)
+
+## The 60-second pitch
+
+- **The question.** Future exploration cabins are planned at lower pressure and higher oxygen than the ISS (NASA's
+  Exploration Atmosphere: 8.2 psia / 34 % O2). {{LUNAR_SENTENCE}} How much of NASA's microgravity flame evidence
+  actually covers that air?
+- **What we built.** We turned {{ENV_N_EXP}} ISS flame tests (BASS and BASS-II, NASA PSI) into {{ENV_N_OBS}} flow-step
+  observations in which every value links to its NASA source cell. For a chosen cabin atmosphere, Blind Spots shows the
+  comparable evidence, what an uncertainty-aware model predicts, where it refuses to guess, and which computation would
+  reduce its uncertainty about that atmosphere the most.
+- **The finding.** All integrated ISS records lie at {{ENV_O2}} % O2 and {{ENV_P}} kPa. The ISS cabin has
+  {{H_ISS_COMPARABLE}} comparable observations across the {{H_N_GROUPS}} material and flame-configuration groups; the NASA
+  Exploration Atmosphere has {{H_EXPL_COMPARABLE}}, in every group (nearest {{H_EXPL_NN_MIN}} to {{H_EXPL_NN_MAX}}
+  reference distances). So the app answers "Insufficient experimental evidence for a reliable estimate." instead of
+  printing a probability.
+- **What is different.** Most dashboards show what was tested. Blind Spots shows where the integrated evidence stops for the
+  air a crew will breathe, keeps "lack of data" apart from "outcome variability", withholds estimates outside its
+  evidence, and ranks the next research question by expected information about that target, next to random,
+  uncertainty-sampling and nearest-gap baselines.
+
+## Headline finding
+
+Computed by `docs/_gen/build.py` from `POST /api/target/assess` for every analysis group (the same responses the static
+snapshot serves), dataset `{{DV}}`, model `{{MV}}`:
+
+{{H_PROFILE_TABLE}}
+
+- {{H_N_ZERO}} of the {{H_N_PROFILES_ANALYSED}} documented NASA atmospheres analysed have no comparable integrated observation
+  in any group, including all {{H_N_REDUCED}} below 1 atm ({{H_REDUCED_LIST}}).
+- Default view (thin PMMA films, opposed flow, the API's default group): {{DX_PTS_WITH}} of {{DX_NPTS}} Exploration
+  Atmosphere target points have a comparable observation; the nearest is {{DX_NN}} reference distances away.
+- Top-ranked computational research candidate for that target: {{TC_O2}} % O2, {{TC_P}} kPa, {{TC_U}} cm/s, expected
+  reduction of the target's model uncertainty {{TC_EVR}} (the baselines' picks, scored with the same model: random
+  {{TB_RANDOM}}, uncertainty sampling {{TB_UNC}}, nearest gap {{TB_GAP}}). {{DEMO_TOP_SENTENCE}}
+
+## What it does not claim
+
+- It is a research-planning tool, not a fire-safety assessment or a certification, and it contains no test or apparatus
+  procedures. Candidates are "computational research candidates requiring qualified scientific review, established safety
+  procedures and formal feasibility assessment".
+- A gap means "not represented in the integrated records", never "NASA has not studied this". Documented NASA and partner
+  work that is not integrated (for example SoFIE-GEL, Saffire-V/VI, the Glenn drop-tower exploration-atmosphere tests) is
+  listed beside every assessment.
+- The model is uncertainty-aware; its calibration is reported, not forced. It beats a majority-class
+  guess with a 95 % CI that excludes 0 in {{N_GP_BETTER}} of {{N_MODELLED}} modelled groups, and the app shows where it does not.
+- Predictions away from 1 atm rest on an assumption (the model's correlation depends only on distance, "stationarity"),
+  because every integrated observation is near 1 atm. No NASA approval or endorsement is claimed.
 
 ## AI-assistance disclosure
 
-This project was built with substantial assistance from Claude (Anthropic), an AI coding assistant: code, data curation of free-text test-matrix cells (double transcription with automated provenance checks) and documentation drafts; all data are NASA PSI/NTRS records cited in the app.
+Blind Spots was built with extensive use of Claude (Anthropic) as an AI coding, transcription, review and writing
+assistant:
+- code (Python analysis service, FastAPI API, Next.js app, tests);
+- the curation tables that turn free-text BASS/BASS-II matrix cells into values: two independent AI transcriptions per
+  chunk, adjudicated, with every quoted token machine-checked as an exact substring of the cited NASA cell
+  ({{N_PROVENANCE_FAIL}} provenance failures in this build); see [data/curation/README.md](data/curation/README.md);
+- transcription of tables from NASA reports (BASS-II Summary Report Appendix A, DARTFire, the Glenn drop-tower limits,
+  Saffire-IV/V/VI, ground flammability thresholds), each row carrying its page and table reference;
+- extraction of the verbatim NASA quotes behind the {{N_PROFILES}} atmosphere profiles, machine-checked against the
+  downloaded documents;
+- research summaries, code and science reviews, this documentation, and the scripted headless capture of the demo video
+  and screenshots (recordings of the real app; no AI-generated images, video or audio).
+
+Decisions and their rationale are logged in [docs/decisions.md](docs/decisions.md). The app itself uses no generative
+AI: predictions come from a Gaussian-process classifier, rankings from expected-variance-reduction active learning, and
+every explanation it shows is a deterministic template filled with computed numbers
+(`services/analysis/src/blindspots/uncertainty/explanations.py`).
 
 ## The problem
 
@@ -27,7 +90,7 @@ would teach us the most?*
 
 - **Coverage map**: for one material and flame-configuration group ("analysis group"), shows where integrated experiments exist in oxygen /
   airflow (and oxygen / pressure) space and how far any point is from the nearest comparable observation.
-- **Predictive model with uncertainty**: a Gaussian-process classifier (logit link, Laplace approximation) per group predicts the probability that a flame
+- **Predictive model with uncertainty (the machine learning)**: a Gaussian-process classifier (logit link, Laplace approximation) per group predicts the probability that a flame
   is sustained and splits uncertainty into epistemic (lack of data) and aleatoric (outcome variability). Where evidence is missing it answers
   "Insufficient experimental evidence for a reliable estimate." instead of a number.
 - **Target-aware active learning**: given a documented NASA atmosphere profile (or a user-defined hypothetical), ranks candidate conditions by expected variance
@@ -40,9 +103,10 @@ would teach us the most?*
 
 ## Key differentiator
 
-Most dashboards summarise what was measured. Blind Spots is organised around what was **not** measured relative to a stated target atmosphere, and it
-quantifies that with (a) model-independent coverage distances, (b) a calibrated model that abstains outside its evidence, (c) an acquisition score tied to
-the target rather than to generic uncertainty, and (d) a validation section that reports where the model is *not* better than a majority-class guess.
+Most dashboards summarise what was measured. Blind Spots is organised around what is **not** represented in the integrated records relative to a stated
+target atmosphere, and it quantifies that with (a) model-independent coverage distances, (b) a model that reports out-of-fold calibration and withholds its
+estimate where comparable evidence is missing, (c) an acquisition score tied to the target rather than to generic uncertainty, and (d) a validation section
+that reports where the model is *not* better than a majority-class guess.
 
 ## Data sources
 
@@ -54,12 +118,15 @@ All model data come from public NASA records; nothing is synthetic outside unit 
   outcomes are interpreted in curation tables with cell-level provenance (two independent transcriptions per chunk, adjudicated); the pipeline verifies every quoted token against the original cell.
 - **NASA/TM-20210011385 Appendix A evidence integration**: the BASS-II Summary Report (NTRS 20210011385) Appendix A is transcribed to `data/curation/evidence/bass2_tm_appendix_a.csv`
   and used to set outcome labels and flame-configuration labels where the matrices are silent or ambiguous. In this build {{TM_STEPS}} flow steps in {{TM_TESTS}} tests carry TM outcome evidence ({{TM_STEPS_TRAIN}} of those steps are in training), {{TM_NOTES}} experiments carry TM notes,
-  and {{CFG_CHANGED}} flame-configuration labels changed relative to the previous build; conflicts with the ReadMe were resolved conservatively to `unknown`.
+  and conflicts with the ReadMe were resolved conservatively to `unknown`.
 - **Context records (never used for modelling)**: {{N_CONTEXT_RECORDS}} transcribed context records ({{CONTEXT_BY_SOURCE}}) from NTRS reports: Saffire-IV, Saffire-V (NTRS 20210011521), Saffire-VI (NTRS 20240002981),
   the Glenn 5.18 s drop-tower flammability limits (NTRS 20080034883) and DARTFire (NTRS 20030111833); plus four large-scale Saffire-I (PSI-98) and Saffire-III (PSI-100) tests. They differ in apparatus or duration, so they are drawn on the map as context and are not training data.
-  Also context: ground (normal-gravity) flammability thresholds and a catalogue of 16 NASA investigations that are not integrated. For example SoFIE-GEL (PMMA spheres) is catalogued only with its documented envelope (13 to 34 % O2, 15.2 to 111.5 kPa), because no public per-test table was found; it is listed with
+  Also context: ground (normal-gravity) flammability thresholds and a catalogue of {{N_NOT_INTEGRATED}} further documented investigations (NASA and partner) that are not integrated. For example SoFIE-GEL (PMMA spheres) is catalogued only with its documented envelope (13 to 34 % O2, 15.2 to 111.5 kPa), because no public per-test table was found; it is listed with
   every target assessment as "not represented in the integrated records".
 - **Target atmospheres**: {{N_PROFILES}} profiles with verbatim NASA quotes in `data/manifests/atmosphere_profiles.json`.
+- **Counts, named by source**: {{N_PSI_SURVEYED}} PSI combustion records surveyed (`data/manifests/psi_investigations.json`); {{N_NOT_INTEGRATED}} further documented
+  investigations catalogued as not integrated (`data/manifests/known_investigations_not_integrated.json`); {{N_INV_RECORDS}} investigation records in the normalized dataset.
+- **Airflow provenance**: {{FLOW_PROVENANCE}}
 
 Full list, licences and caveats: [docs/data-sources.md](docs/data-sources.md). Current build: dataset `{{DV}}`
 ({{N_EXP}} experiments, {{N_OBS}} flow-step observations; {{N_TRAIN_EXP}} experiments and {{N_TRAIN_OBS}} observations used for training:
@@ -110,77 +177,72 @@ Components and data flow: [docs/architecture.md](docs/architecture.md).
 
 ## Installation
 
-Requirements: Python 3.12 with [uv](https://docs.astral.sh/uv/), Node.js with npm (the lockfile is `apps/web/package-lock.json`).
+Requirements: Python 3.12 with [uv](https://docs.astral.sh/uv/), Node.js with npm (lockfile `apps/web/package-lock.json`).
 
 ```bash
-# backend
-cd services/analysis
-uv sync
-# macOS iCloud Desktop quirk only: if `import blindspots` fails after uv sync, run
-#   chflags nohidden .venv/lib/python3.12/site-packages/*.pth
-# (the flag can come back after any `uv run`, so the robust fix is `export PYTHONPATH=src` in this shell)
-
-# web
-cd ../../apps/web
-npm ci
+cd services/analysis && uv sync          # backend
+cd ../../apps/web && npm ci              # web
 ```
 
 ## How to run
 
-Backend (from `services/analysis`). The repository already contains the generated artifacts (`data/normalized`, `{{MDIR}}`, `models/retrospective`), so the steps
-marked "rebuild" are only needed after changing curation tables or code. Each is deterministic: rebuilding the committed inputs reproduces dataset `{{DV}}` and model
-`{{MV}}` exactly.
+The repository contains the generated dataset and model (`data/normalized`, `{{MDIR}}`, `models/retrospective`). The
+static snapshot the public site serves is generated, not committed, so export it before any snapshot-mode run.
 
 ```bash
-uv run blindspots build-dataset     # rebuild: data/normalized/*  (about a second)
-uv run blindspots train             # rebuild: models/<version>/ + validation.json  (about half a minute)
-uv run blindspots retrospective     # rebuild: models/retrospective/<dataset_version>.json  (about ten seconds)
-uv run blindspots export-artifacts --snapshot ../../apps/web/public/snapshot   # static snapshot for the web app  (about twenty seconds)
+# 1. analysis API (live mode), from services/analysis
+uv run blindspots serve                  # http://127.0.0.1:8000  (health: /api/health)
 
-uv run blindspots serve             # API on http://127.0.0.1:8000  (health: /api/health)
-# another port:
-uv run uvicorn blindspots.api.app:create_app --factory --host 127.0.0.1 --port 8208
+# 2. web app against the live API, from apps/web
+npm run dev                              # http://localhost:3000, proxies /api/* to the analysis service
+
+# 3. static-snapshot mode (what the public deployment serves): export the snapshot first
+cd services/analysis && uv run blindspots export-artifacts --snapshot ../../apps/web/public/snapshot
+cd ../../apps/web && NEXT_PUBLIC_DATA_MODE=snapshot npm run build && npm run start
 ```
 
-Web (from `apps/web`):
+`NEXT_PUBLIC_DATA_MODE` is `live` (API only), `snapshot` (precomputed JSON only) or `auto` (default: live first, snapshot
+when the API is unavailable). Rebuild steps, only needed after changing curation tables or code; each is deterministic:
 
 ```bash
-npm run dev                         # http://localhost:3000, proxies /api/* to the analysis service
-# live backend on another port, separate build directory:
-ANALYSIS_API_ORIGIN=http://127.0.0.1:8208 NEXT_DIST_DIR=.next-docs2 npm run dev -- --port 3309
-# production build / static-snapshot mode (never calls the API):
-NEXT_PUBLIC_DATA_MODE=snapshot npm run build && npm run start
+uv run blindspots build-dataset          # data/normalized/*
+uv run blindspots train                  # models/<version>/ + validation.json
+uv run blindspots retrospective          # models/retrospective/<dataset_version>.json
+uv run blindspots fetch-raw              # optional: large raw NASA files (network; git-ignored)
 ```
 
-`NEXT_PUBLIC_DATA_MODE` is `live` (API only), `snapshot` (precomputed JSON only) or `auto` (default: live first, snapshot when the backend is unavailable).
-Raw NASA files are fetched on demand with `uv run blindspots fetch-raw` (requires network; large raw downloads are git-ignored).
+Regenerate every number in this README, `docs/*.md` and `submission/*.md` after a rebuild or retrain (one command; the
+three links come from `docs/_gen/links.json`; `--check` reports stale files):
+
+```bash
+cd services/analysis && PYTHONPATH=src uv run python ../../docs/_gen/build.py --install
+```
 
 ## How to test
 
 ```bash
 cd services/analysis
 uv run pytest -q
-uv run ruff check . && uv run ruff format --check .
-uv run mypy src
+uv run ruff check . && uv run ruff format --check . && uv run mypy src
 
 cd ../../apps/web
 npm run lint && npm run typecheck
-node --test tests/unit/             # unit tests of the data layer
-node scripts/check-snapshot-keys.mjs  # snapshot key round-trip
-npm run test:e2e                    # Playwright, headless chromium only (first run: npx playwright install chromium)
+node --test tests/unit/                  # data-layer unit tests
+node scripts/check-snapshot-keys.mjs     # snapshot key round-trip (needs an exported snapshot)
+npm run test:e2e                         # Playwright, headless Chromium (first run: npx playwright install chromium)
 ```
-
-Latest recorded run in this tree: {{TEST_STATUS}}
 
 ## Deployment notes
 
-- **Frontend on Vercel with the static snapshot** (the Space Apps default): set `NEXT_PUBLIC_DATA_MODE=snapshot`; the app then serves the JSON written by `export-artifacts`
-  (`apps/web/public/snapshot`, generated per deployment and git-ignored; it must be present in the upload, for example `.vercelignore` must not exclude it). Custom targets and arbitrary candidates need the live analysis service and show an honest
-  "requires the live analysis service" state; a "Precomputed snapshot" badge is always visible.
-- **Python service on any container host**: `uvicorn blindspots.api.app:create_app --factory` with the repository's `data/` and `models/` directories present
-  (`BLINDSPOTS_ROOT` overrides root discovery); point the web app at it with `ANALYSIS_API_ORIGIN`.
-- **Verified here**: the commands above on macOS (local runs; API on port 8208, web dev on 3309; a snapshot-mode production build served with `next start` gave the same guided-demo numbers as the live API); deterministic rebuild of dataset, model, retrospective and snapshot.
-  **Not verified**: an actual Vercel deployment, container image build, or any other host; this repository ships no Dockerfile or Vercel project configuration.
+- **Public site: Vercel, static snapshot.** Export the snapshot (step 3 above), then deploy with the Vercel CLI from
+  `apps/web` (`npx vercel deploy --prod --archive=tgz`). `apps/web/vercel.json` sets `NEXT_PUBLIC_DATA_MODE=snapshot` and
+  `apps/web/.vercelignore` makes the CLI upload the git-ignored snapshot. A Git-integrated Vercel build has no snapshot,
+  because it is git-ignored. Custom targets and arbitrary candidates need the live API and say so in the interface.
+- **Python API on a container host** (optional): `uvicorn blindspots.api.app:create_app --factory` with the repository's
+  `data/` and `models/` present (`BLINDSPOTS_ROOT` overrides root discovery); point the web app at it with
+  `ANALYSIS_API_ORIGIN`. Not verified: a container image build.
+- macOS iCloud Desktop only: if `import blindspots` fails after `uv sync`, run
+  `chflags nohidden .venv/lib/python3.12/site-packages/*.pth` or `export PYTHONPATH=src`.
 
 ## Validation results
 
@@ -194,10 +256,10 @@ See [docs/limitations.md](docs/limitations.md). The most important ones:
 
 - Strong class imbalance ({{POS_PCT}} of training rows are "sustained") and small samples ({{N_EXP_MIN}} to {{N_EXP_MAX}} experiments per modelled group); the GP is a statistically
   significant improvement over the majority-class baseline in {{N_GP_BETTER}} of {{N_MODELLED}} groups, and in {{N_FLOWOFF_IN_BETTER}} of those the gain is mostly "flow near zero means no flame".
-- The sphere groups' discrimination comes largely from flow-turned-off steps (grouped-CV AUC before and after dropping them: {{FLOWOFF_AUC}}); many near-quench rod steps rely on the documented below-calibration flow interpolation (rows remaining without them: {{BELOWCAL_RELIANT}}).
+- The sphere groups' discrimination comes largely from flow-turned-off steps (grouped-CV AUC before and after dropping them: {{FLOWOFF_AUC}}); many near-quench rod steps rely on the documented below-calibration flow extrapolation (rows remaining without them: {{BELOWCAL_RELIANT}}).
 - The GP clearly beats the majority-class baseline only in {{GP_BETTER_GROUPS}}; it is roughly at baseline in {{GP_INDIST_GROUPS}}. Every group uses a constant GP mean fixed a priori (no mean-function selection).
 - All integrated data are at about 1 atm ({{P_MIN}} to {{P_MAX}} kPa); BASS-II pressure is an assumption and the pressure length scale is fixed. At low pressure predictions revert to the prior (for example about 0.6 at 34 % O2 and 56.5 kPa is reversion, not a pressure effect), so the interface shows no p(sustained) for insufficient-evidence targets.
-- Many airflow values are derived from calibrations (not measured) and many "sustained" labels are implied by list order in the source matrices.
+- Airflow provenance: {{FLOW_PROVENANCE}} Many "sustained" labels are implied by list order in the source matrices.
 - Gaps are gaps in the integrated records, not in NASA's knowledge: SoFIE-GEL, Saffire-V/VI and others are not integrated.
 
 ## Future work
@@ -212,6 +274,6 @@ See [docs/future-work.md](docs/future-work.md). Nothing listed there is implemen
 
 ## Licence and attribution
 
-NASA PSI data (BASS, BASS-II, Saffire) are released by NASA under CC0-1.0; NTRS documents are cited with their NTRS identifiers. Source files are never modified; derived tables
-are labelled as interpretations. Blind Spots is an independent project and is **not endorsed by NASA**; it uses no NASA logos or branding. No licence file for the project's own code is
-present in this repository yet; add one before redistribution.
+NASA PSI data (BASS, BASS-II, Saffire) are released by NASA under CC0-1.0; NTRS documents are cited with their NTRS
+identifiers. Source files are never modified; derived tables are labelled as interpretations. Blind Spots is an
+independent project and is **not endorsed by NASA**; it uses no NASA logos or branding. {{LICENSE_LINE}}

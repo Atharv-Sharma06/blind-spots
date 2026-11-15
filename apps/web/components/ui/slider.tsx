@@ -30,7 +30,7 @@ export const Slider = React.forwardRef<React.ElementRef<typeof SliderPrimitive.R
           <SliderPrimitive.Thumb
             key={i}
             aria-label={thumbLabels?.[i]}
-            className="block size-3.5 rounded-full border border-fg bg-surface transition-colors hover:bg-subtle"
+            className="relative block size-4 rounded-full border border-fg bg-surface transition-colors before:absolute before:-inset-1 before:content-[''] hover:bg-subtle"
           />
         ))}
       </SliderPrimitive.Root>

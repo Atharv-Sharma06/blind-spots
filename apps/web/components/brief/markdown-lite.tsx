@@ -6,9 +6,33 @@ import { Fragment, type ReactNode } from "react";
  */
 const URL_RE = /(https?:\/\/[^\s,;)"]+[^\s,;).:"])/g;
 
+/**
+ * Reader-facing cleanup applied to both the screen and the downloaded .md (idempotent; a no-op once the API
+ * emits clean text): absent bounds stay missing ("not given", never invented), status codes become words.
+ */
+const STATUS_WORDS: Record<string, string> = {
+  nasa_design_recommendation: "NASA design recommendation",
+  documented_nasa: "documented NASA value",
+  historical_nasa: "historical NASA value",
+  user_hypothetical: "user-selected hypothetical",
+};
+const BAND_WORDS: Record<string, string> = {
+  ventilation_standard_with_near_quiescent_extension: "NASA-STD-3001 ventilation range, extended down to 0.5 cm/s",
+  ventilation_standard: "NASA-STD-3001 ventilation range",
+  default_band: "default analysis band",
+};
+export function cleanBriefText(text: string): string {
+  return text
+    .replace(/ \(min None, max None\)/g, "")
+    .replace(/\b(min|max) None\b/g, "$1 not given")
+    .replace(/\(status: ([a-z_]+)\)/g, (m, c: string) => (STATUS_WORDS[c] ? `(${STATUS_WORDS[c]})` : m))
+    .replace(/\b(ventilation_standard_with_near_quiescent_extension|ventilation_standard|default_band)\b/g, (c: string) => BAND_WORDS[c] ?? c)
+    .replace(/airflow_band_source: /g, "band source: ")
+    .replace(/p=<0\.001/g, "p<0.001");
+}
+
 function inline(raw: string): ReactNode[] {
-  // The API renders an absent bound as Python "None"; show it as "not given" (still missing, never invented).
-  const text = raw.replace(/\b(min|max) None\b/g, "$1 not given");
+  const text = cleanBriefText(raw);
   const out: ReactNode[] = [];
   let last = 0;
   for (const m of text.matchAll(URL_RE)) {
