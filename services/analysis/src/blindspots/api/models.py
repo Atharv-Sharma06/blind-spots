@@ -108,6 +108,8 @@ class GroupSummary(ApiModel):
     pressure_measured: bool
     model_status: ModelStatus
     model_reason: str | None
+    # Data-driven default for the UI (see api.deps.default_group_id).
+    is_default: bool = False
 
 
 # --- targets / context -----------------------------------------------------------------------------

@@ -242,16 +242,63 @@ def get_group(group_id: str, store: DataStore | None = None) -> dict[str, Any]:
     raise ApiError(404, "not_found", f"Unknown analysis group {group_id!r}.", {"group_id": group_id})
 
 
+DEFAULT_TARGET_PROFILE_ID = "iss_cabin_nominal"
+
+
+def _validation_auc(registry: Registry | None) -> dict[str, float]:
+    """Cross-validated GP AUC per group from validation.json (empty when unavailable)."""
+    if registry is None or not registry.has_validation:
+        return {}
+    try:
+        data = _read_json(registry.directory / "validation.json")
+    except (OSError, ValueError):
+        return {}
+    out: dict[str, float] = {}
+    for g in data.get("groups", []) if isinstance(data, dict) else []:
+        for m in (g.get("cv") or {}).get("models", []):
+            auc = (m.get("auc") or {}).get("value")
+            if str(m.get("name", "")).lower().startswith("gp") and isinstance(auc, int | float):
+                out[str(g.get("group_id"))] = float(auc)
+    return out
+
+
 def default_group_id(store: DataStore) -> str | None:
-    """pmma_rod__stagnation if modelled, else the modelled group with the most training rows."""
-    groups = groups_with_status(store)
-    modelled = [g for g in groups if g["model_status"] == "modeled"]
-    for g in modelled:
-        if g["group_id"] == "pmma_rod__stagnation":
-            return "pmma_rod__stagnation"
-    if modelled:
-        return str(max(modelled, key=lambda g: g["n_training"])["group_id"])
-    return None
+    """Data-driven default analysis group.
+
+    Among modelled groups: the most target points of the default target (ISS cabin nominal profile) with at
+    least one comparable observation, then the highest cross-validated GP AUC, then the most training rows.
+    Falls back to the group with the most observations when nothing is modelled.
+    """
+    registry = get_registry()
+
+    def build() -> str | None:
+        from blindspots.acquisition.targets import target_points
+        from blindspots.api.models import Target
+        from blindspots.api.services.targets import resolve_target
+        from blindspots.coverage.coverage import count_within
+
+        groups = groups_with_status(store)
+        modelled = [g for g in groups if g["model_status"] == "modeled"]
+        if not modelled:
+            return str(max(groups, key=lambda g: g["n_observations"])["group_id"]) if groups else None
+        try:
+            pts: np.ndarray | None = target_points(
+                resolve_target(Target(profile_id=DEFAULT_TARGET_PROFILE_ID)).spec
+            )[0]
+        except Exception:  # profile missing or invalid: fall back to AUC / size only
+            pts = None
+        auc = _validation_auc(registry)
+        scored = []
+        for g in modelled:
+            coords, _ = store.evidence(g["group_id"])
+            covered = (
+                float((count_within(pts, coords) >= 1).mean()) if pts is not None and len(coords) else 0.0
+            )
+            scored.append((covered, auc.get(g["group_id"], 0.0), g["n_training"], g["group_id"]))
+        return str(max(scored)[3])
+
+    key = (store.dataset_version, registry.version if registry else None)
+    return _cached("default_group", key, build)
 
 
 # --- manifests / context ---------------------------------------------------------------------------

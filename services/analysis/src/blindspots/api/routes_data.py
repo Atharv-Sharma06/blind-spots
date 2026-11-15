@@ -80,7 +80,9 @@ def investigations() -> list[dict[str, Any]]:
 
 @router.get("/groups", response_model=list[GroupSummary])
 def groups() -> list[dict[str, Any]]:
-    return deps.groups_with_status(deps.require_store())
+    store = deps.require_store()
+    default = deps.default_group_id(store)
+    return [{**g, "is_default": g["group_id"] == default} for g in deps.groups_with_status(store)]
 
 
 # --- experiments / observations --------------------------------------------------------------------
