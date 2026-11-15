@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib
 from collections.abc import Callable
+from pathlib import Path
 from typing import Any
 
 import typer
@@ -11,7 +12,7 @@ import typer
 app = typer.Typer(help="Blind Spots analysis service.", no_args_is_help=True, add_completion=False)
 
 
-def _run_pipeline(module: str) -> None:
+def _run_pipeline(module: str, *args: Any) -> None:
     """Import blindspots.pipeline.<module> lazily and call its main()."""
     name = f"blindspots.pipeline.{module}"
     try:
@@ -21,11 +22,11 @@ def _run_pipeline(module: str) -> None:
             typer.echo(f"not implemented yet: {name}", err=True)
             raise typer.Exit(code=2) from exc
         raise
-    main: Callable[[], Any] | None = getattr(mod, "main", None)
+    main: Callable[..., Any] | None = getattr(mod, "main", None)
     if main is None:
         typer.echo(f"not implemented yet: {name}", err=True)
         raise typer.Exit(code=2)
-    main()
+    main(*args)
 
 
 @app.command("build-dataset")
@@ -53,9 +54,19 @@ def train() -> None:
 
 
 @app.command("export-artifacts")
-def export_artifacts() -> None:
-    """Export model and coverage artifacts."""
-    _run_pipeline("export_artifacts")
+def export_artifacts(
+    snapshot: Path | None = typer.Option(
+        None, "--snapshot", help="Directory for the static JSON snapshot (default apps/web/public/snapshot)."
+    ),
+) -> None:
+    """Export the static snapshot of every API response (docs/API.md "Static snapshot")."""
+    _run_pipeline("export_artifacts", *([] if snapshot is None else [snapshot]))
+
+
+@app.command("retrospective")
+def retrospective() -> None:
+    """Retrospective evaluation of target-aware acquisition against baselines."""
+    _run_pipeline("retrospective")
 
 
 @app.command("serve")

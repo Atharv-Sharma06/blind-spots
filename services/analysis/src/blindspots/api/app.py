@@ -2,27 +2,14 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from blindspots import __version__, config
+from blindspots import __version__
+from blindspots.api import routes_data, routes_model
 from blindspots.api.errors import install_error_handlers
 
 CORS_ORIGINS = ["http://localhost:3000", "http://127.0.0.1:3000"]
-
-
-def health_payload() -> dict[str, Any]:
-    dataset = config.dataset_version()
-    model = config.model_version()
-    artifacts = {"dataset": dataset is not None, "models": model is not None}
-    return {
-        "status": "ok" if all(artifacts.values()) else "degraded",
-        "dataset_version": dataset,
-        "model_version": model,
-        "artifacts": artifacts,
-    }
 
 
 def create_app() -> FastAPI:
@@ -34,9 +21,6 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     install_error_handlers(app)
-
-    @app.get("/api/health")
-    def health() -> dict[str, Any]:
-        return health_payload()
-
+    app.include_router(routes_data.router)
+    app.include_router(routes_model.router)
     return app

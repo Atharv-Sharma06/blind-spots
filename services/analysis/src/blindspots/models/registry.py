@@ -72,9 +72,9 @@ class TrainConfig:
     ensemble_members: int = 200
     n_permutations: int = 2000
     loeo_refit_budget_s: float = 480.0  # soft budget for leave-one-experiment-out per group set
-    # Constant mean only, fixed a priori (decision "independent numerical review", 2026-11-15): choosing the mean on the same CV folds that produce the
-    # reported metrics biased them, and the linear-in-O2 mean extrapolated to confident predictions far
-    # from the data. "linear_o2" remains available for sensitivity runs.
+    # Constant mean only, fixed a priori (docs/decisions.d/lead-review-fixes.md): choosing the mean on the
+    # same CV folds that produce the reported metrics biased them, and the linear-in-O2 mean extrapolated
+    # to confident predictions far from the data. "linear_o2" remains available for sensitivity runs.
     mean_options: tuple[str, ...] = ("constant",)
     only_groups: tuple[str, ...] | None = None  # restrict (tests / smoke runs); part of the hash
 

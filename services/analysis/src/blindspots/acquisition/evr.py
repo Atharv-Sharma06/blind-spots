@@ -23,7 +23,8 @@ def mean_curvature(mu: np.ndarray, var: np.ndarray) -> np.ndarray:
     """wbar = E[sigmoid(f)(1 - sigmoid(f))], f ~ N(mu, var), by Gauss-Hermite.
 
     Kept for reference/tests. EVR uses :func:`update_factor` instead: averaging the curvature under the
-    prior predictive biased EVR low by 8-19 % against exact Laplace refits (independent numerical review, 2026-11-15).
+    prior predictive biased EVR low by 8-19 % against exact Laplace refits (independent numerical
+    review, 2026-11-15; docs/decisions.d/lead-review-fixes.md).
     """
     f = mu[:, None] + np.sqrt(np.maximum(var, 0.0))[:, None] * _GH_X[None, :]
     s = expit(f)

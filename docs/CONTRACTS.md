@@ -343,7 +343,10 @@ profile has none; cite the source when available), uniform weights.
 ```python
 # blindspots/acquisition/evr.py
 def expected_variance_reduction(model, targets, candidates, weights=None) -> np.ndarray
-#  EVR(c) = Σ_t w_t Σ(t,c)^2 / (Σ(c,c) + 1/w̄_c),   w̄_c = E_f[σ(f)(1−σ(f))], f ~ N(μ_c, Σ_cc)
+#  EVR(c) = Σ_t w_t Σ(t,c)^2 · F_c,   F_c = Σ_y p_y / (Σ(c,c) + 1/W(f̂_y))
+#  f̂_y = 1-D Laplace mode of the candidate latent after a hypothetical label y (prior N(μ_c, Σ_cc)),
+#  W(f) = σ(f)(1−σ(f)), p_y = current predictive probability of y. Revised 2026-11-15 after an independent
+#  numerical review: the earlier w̄_c = E_f[σ(f)(1−σ(f))] form was 8–19 % low against exact Laplace refits.
 def greedy_batch(model, targets, candidates, k, weights=None) -> list[dict]   # rank-1 updates
 def expected_target_mi_reduction(...)                                        # probability-scale view
 # blindspots/acquisition/baselines.py: random (seeded), uncertainty_sampling (max MI at candidate),
