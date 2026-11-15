@@ -3,7 +3,7 @@
 Paste this into **Project Demonstration \***:
 
 ```
-https://blind-spots-kappa.vercel.app/video/blind-spots-demo-30s.webm
+https://blindspots.earth/video/blind-spots-demo-30s.webm
 ```
 
 One-line description (if a caption is wanted anywhere):
@@ -70,7 +70,7 @@ or registration" (do not choose Private).
    The Moon/Mars Exploration Atmosphere (34 % oxygen, 56.5 kPa) is not represented in those records. The tool then
    ranks the computational research candidate that would most reduce the model's uncertainty.
 
-   Live site: https://blind-spots-kappa.vercel.app
+   Live site: https://blindspots.earth
    Source code: https://github.com/Atharv-Sharma06/blind-spots
 
    SI disclosure: we built this project, including its code and what this recording shows, with SI assistance from
@@ -92,7 +92,7 @@ or registration" (do not choose Private).
    is the OLD explorer tour (15:09 recording, 1,594,579 bytes). After recording the new video, copy
    `<out_dir>/blind-spots-demo-30s.webm` over `apps/web/public/video/blind-spots-demo-30s.webm`, commit, push and
    redeploy. Otherwise the link still plays the old tour.
-2. `curl -sIL https://blind-spots-kappa.vercel.app/video/blind-spots-demo-30s.webm` -> 200, `content-type: video/webm`,
+2. `curl -sIL https://blindspots.earth/video/blind-spots-demo-30s.webm` -> 200, `content-type: video/webm`,
    and a `content-length` equal to the new file's size.
 3. Open the link in a logged-out headless browser and confirm it plays the Cabins-page tour, not the old explorer one.
 4. Restyle (2026-11-15 evening): `/` is now a landing page and the Cabins tool moved to `/cabins`; the tour autostarts on

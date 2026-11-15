@@ -3,7 +3,7 @@
 Paste this into **Project \***:
 
 ```
-https://blind-spots-kappa.vercel.app
+https://blindspots.earth
 ```
 
 Put the code link in **Project Details** (first line, for example "Source code (MIT): https://github.com/Atharv-Sharma06/blind-spots").
@@ -28,7 +28,7 @@ Live site, before the planned redeploy (around 16:25). Page served from the Verc
 
 | URL | curl -sIL | Final URL | Headless load | Console errors |
 |---|---|---|---|---|
-| https://blind-spots-kappa.vercel.app/ | 200, 0 redirects | same (the page then adds `?group=pmma_thin_film__opposed&target=exploration_atmosphere_8p2_34&plane=o2_pressure` in the browser) | H1 "Blind Spots: where NASA's microgravity fire evidence ends, and what to learn next."; 30 SVG + 1 canvas; 9,045 chars of text | 0 |
+| https://blindspots.earth/ | 200, 0 redirects | same (the page then adds `?group=pmma_thin_film__opposed&target=exploration_atmosphere_8p2_34&plane=o2_pressure` in the browser) | H1 "Blind Spots: where NASA's microgravity fire evidence ends, and what to learn next."; 30 SVG + 1 canvas; 9,045 chars of text | 0 |
 | /explore | **404** | same | "Page not found" page | 1 (the 404 itself) |
 | /experiments | 200, 0 redirects | same | H1 "Experiments"; 29,965 chars (test table) | 0 |
 | /methodology | 200, 0 redirects | same | H1 "Methodology"; 69,107 chars | 0 |
@@ -52,7 +52,7 @@ Code repository:
 
 ## Issues for the lead before submitting
 
-1. **`/explore` returns 404 on the live site now.** `curl -sIL https://blind-spots-kappa.vercel.app/explore` gives 404,
+1. **`/explore` returns 404 on the live site now.** `curl -sIL https://blindspots.earth/explore` gives 404,
    and the page shows "Page not found". `apps/web/app/explore/` is untracked locally (`?? apps/web/app/explore/`), so it is
    not in the current deployment. The published README already sends people there ("**Explorer** (`/explore`) is the full
    expert workspace"). This should clear with the 16:25 redeploy. Re-run `curl -sIL` on all five routes afterwards.

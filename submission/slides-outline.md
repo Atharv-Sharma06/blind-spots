@@ -54,6 +54,6 @@ Space Apps limit: 7 slides including the title, English, public no-login link. G
 
 ## Slide 7: Try it
 
-**On the slide:** https://blind-spots-kappa.vercel.app · https://github.com/Atharv-Sharma06/blind-spots. For combustion scientists and cabin designers. Built with SI (super intelligence) assistance (Claude, by Anthropic); the app itself uses no generative AI. Not endorsed by NASA.
+**On the slide:** https://blindspots.earth · https://github.com/Atharv-Sharma06/blind-spots. For combustion scientists and cabin designers. Built with SI (super intelligence) assistance (Claude, by Anthropic); the app itself uses no generative AI. Not endorsed by NASA.
 
 **Speaker notes:** Open the Cabins page and press the 30-second tour. There's a lot we haven't built yet. We'd like to bring in SoFIE-GEL and Saffire-V/VI once per-test tables exist, add partial-gravity data, and have qualified reviewers check the method. Claude, by Anthropic, wrote much of the code and text. We directed the work, made the decisions and checked it, and the numbers come from NASA data through the code. Credits go to NASA PSI and NTRS, and the open-source libraries are listed on the project page.

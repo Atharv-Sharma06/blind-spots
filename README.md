@@ -5,7 +5,7 @@
 Blind Spots shows, for any crew cabin, whether NASA's ISS flame tests ran in air like it, and which next experiment
 would teach the most. Built for NASA Space Apps Challenge 2026, "Flame in Freefall". Not endorsed by NASA.
 
-**[Live app](https://blind-spots-kappa.vercel.app)** · **[30-second video](https://blind-spots-kappa.vercel.app/video/blind-spots-demo-30s.webm)** · [Source code](https://github.com/Atharv-Sharma06/blind-spots)
+**[Live app](https://blindspots.earth)** · **[30-second video](https://blindspots.earth/video/blind-spots-demo-30s.webm)** · [Source code](https://github.com/Atharv-Sharma06/blind-spots)
 
 > SI-assisted project: built with Claude (Anthropic). See [Use of SI](#use-of-si-super-intelligence).
 
@@ -13,7 +13,7 @@ would teach the most. Built for NASA Space Apps Challenge 2026, "Flame in Freefa
 
 ## How to use it
 
-Open the [live site](https://blind-spots-kappa.vercel.app). The home page asks the question and shows the key numbers. Press **Check a cabin**
+Open the [live site](https://blindspots.earth). The home page asks the question and shows the key numbers. Press **Check a cabin**
 to open the Cabins tool (`/cabins`).
 
 1. **Pick a cabin.** Each card shows the cabin's air and one label: Covered, Barely covered or Not covered.

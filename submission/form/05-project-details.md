@@ -46,7 +46,7 @@ Claude, by Anthropic, wrote much of the code and text. We directed the work, mad
 
 ## Links
 
-- Site: https://blind-spots-kappa.vercel.app
-- Cabins tool: https://blind-spots-kappa.vercel.app/cabins
+- Site: https://blindspots.earth
+- Cabins tool: https://blindspots.earth/cabins
 - Code: https://github.com/Atharv-Sharma06/blind-spots
-- 30-second video: https://blind-spots-kappa.vercel.app/video/blind-spots-demo-30s.webm
+- 30-second video: https://blindspots.earth/video/blind-spots-demo-30s.webm

@@ -15,7 +15,7 @@ Moon and Mars cabins may use thinner, oxygen-richer air than the ISS, and fire i
 
 ## Project Demonstration *
 ```
-https://blind-spots-kappa.vercel.app/video/blind-spots-demo-30s.webm
+https://blindspots.earth/video/blind-spots-demo-30s.webm
 ```
 Under 30 seconds, public, no login. It is a WebM file: it plays in Chrome, Edge and Firefox; Safari support varies. If you
 have two minutes, upload `submission/blind-spots-demo-30s.webm` to YouTube as **Unlisted** or **Public** (title "Blind
@@ -24,7 +24,7 @@ paste the YouTube link here instead. Backup (no more than 7 slides): https://git
 
 ## Project *
 ```
-https://blind-spots-kappa.vercel.app
+https://blindspots.earth
 ```
 (Code: https://github.com/Atharv-Sharma06/blind-spots, MIT licence; it is linked in the site header and in the details.)
 
@@ -78,10 +78,10 @@ Claude, by Anthropic, wrote much of the code and text. We directed the work, mad
 
 ## Links
 
-- Site: https://blind-spots-kappa.vercel.app
-- Cabins tool: https://blind-spots-kappa.vercel.app/cabins
+- Site: https://blindspots.earth
+- Cabins tool: https://blindspots.earth/cabins
 - Code: https://github.com/Atharv-Sharma06/blind-spots
-- 30-second video: https://blind-spots-kappa.vercel.app/video/blind-spots-demo-30s.webm
+- 30-second video: https://blindspots.earth/video/blind-spots-demo-30s.webm
 
 ## Use of Super Intelligence (SI) *
 Tick every option that means: **code generation / coding assistant**, **text / writing / documentation**,

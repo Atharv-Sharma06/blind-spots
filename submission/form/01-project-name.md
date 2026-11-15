@@ -37,5 +37,5 @@ README.md line 3 reads "**Do NASA's space-station fire tests cover the air in a 
 The "Project Name" section of submission/project-page.md still says only "Blind Spots". That works, but on its own
 it tells a reader nothing.
 
-The public deployment at https://blind-spots-kappa.vercel.app now serves the `<title>` "Blind Spots" on its landing
-page. The Cabins tool lives at https://blind-spots-kappa.vercel.app/cabins.
+The public deployment at https://blindspots.earth now serves the `<title>` "Blind Spots" on its landing
+page. The Cabins tool lives at https://blindspots.earth/cabins.

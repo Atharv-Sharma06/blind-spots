@@ -27,13 +27,13 @@ by NASA.
 
 ## Link to Project Demo
 
-30-second video: https://blind-spots-kappa.vercel.app/video/blind-spots-demo-30s.webm
+30-second video: https://blindspots.earth/video/blind-spots-demo-30s.webm
 
 ---
 
 ## Link to Final Project
 
-- Live app (no login): https://blind-spots-kappa.vercel.app
+- Live app (no login): https://blindspots.earth
 - Source code: https://github.com/Atharv-Sharma06/blind-spots
 
 ---
