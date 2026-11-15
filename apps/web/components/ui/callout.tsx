@@ -4,16 +4,16 @@ import { AlertTriangle, Info, CircleSlash } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { INSUFFICIENT_EVIDENCE_TEXT } from "@/lib/copy";
 
-const calloutVariants = cva("flex gap-3 rounded-lg border px-4 py-3 text-ui", {
+const calloutVariants = cva("flex gap-3 rounded-lg border px-5 py-4 text-ui", {
   variants: {
     variant: {
-      info: "border-white/[0.06] bg-[#18181b] text-fg",
+      info: "border-border bg-surface text-fg",
       // Red is text/icon only (CONTRACTS section 9): no red fill.
-      warning: "border-warn/30 bg-[#18181b] text-fg",
+      warning: "border-warn/40 bg-surface text-fg",
       // A single muted line with an icon, no box: for secondary notes that should not compete.
       plain: "border-transparent bg-transparent px-0 py-0 text-fg",
       // Uncertainty hue (plum): the model has too little evidence to say anything.
-      insufficient: "border-plum-4/60 bg-plum-1 text-fg",
+      insufficient: "border-plum-3 bg-plum-1 text-fg",
     },
   },
   defaultVariants: { variant: "info" },

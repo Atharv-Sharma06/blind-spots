@@ -54,19 +54,19 @@ export function LayerChips({ layers, onToggle, modelled }: { layers: Layers; onT
         data-testid={`layer-${c.layer}`}
         title={SHOW_HELP[c.layer]}
         className={cn(
-          "inline-flex h-10 items-center gap-2 rounded-full py-1 pr-1.5 pl-3.5 text-[13px] shadow-[inset_0_1px_0_rgb(255_255_255/.05)] ring-1 transition-colors",
-          on ? "bg-subtle font-medium text-fg ring-accent/45" : "bg-black/25 text-muted ring-border hover:text-fg",
+          "inline-flex h-10 items-center gap-2 rounded-full border bg-surface py-1 pr-2 pl-3.5 text-[14px] transition-colors",
+          on ? "border-fg font-medium text-fg" : "border-border text-muted hover:border-border-strong hover:text-fg",
           "disabled:cursor-not-allowed disabled:opacity-50",
         )}
       >
-        <span aria-hidden className="size-2.5 rounded-full ring-1 ring-white/25" style={{ background: c.swatch, opacity: on ? 1 : 0.85 }} />
+        <span aria-hidden className="size-2.5 rounded-full ring-1 ring-fg/15" style={{ background: c.swatch, opacity: on ? 1 : 0.85 }} />
         {c.label}
-        {/* Mini switch (decorative; aria-pressed carries the state): white knob on a dark track, yellow track when on. */}
-        <span aria-hidden className={cn("relative ml-0.5 inline-block h-[18px] w-[30px] shrink-0 rounded-full transition-colors", on ? "bg-accent" : "bg-[#2A2A2F]")}>
+        {/* Switch (decorative; aria-pressed carries the state): white knob, black track when on, grey when off. */}
+        <span aria-hidden className={cn("relative ml-0.5 inline-block h-[22px] w-[38px] shrink-0 rounded-full transition-colors", on ? "bg-fg" : "bg-border-strong")}>
           <span
             className={cn(
-              "absolute top-[3px] size-3 rounded-full shadow-[0_1px_2px_rgb(0_0_0/.5)] transition-[left] duration-150 motion-reduce:transition-none",
-              on ? "left-[15px] bg-[#0B0B0C]" : "left-[3px] bg-white",
+              "absolute top-[3px] size-4 rounded-full bg-white shadow-[0_1px_2px_rgb(0_0_0/.25)] transition-[left] duration-150 motion-reduce:transition-none",
+              on ? "left-[19px]" : "left-[3px]",
             )}
           />
         </span>
@@ -90,7 +90,7 @@ export function LayerChips({ layers, onToggle, modelled }: { layers: Layers; onT
           aria-expanded={more}
           aria-controls={moreId}
           onClick={() => setMore((v) => !v)}
-          className="inline-flex h-10 items-center gap-1 rounded-full px-3 text-[13px] text-muted transition-colors hover:bg-subtle hover:text-fg"
+          className="inline-flex h-10 items-center gap-1 rounded-full px-3 text-[14px] text-muted transition-colors hover:bg-subtle hover:text-fg"
         >
           <span aria-hidden className={cn("inline-block transition-transform", more && "rotate-90")}>›</span>
           More options
@@ -163,7 +163,7 @@ export function SliceControl({
     <div className="w-full min-w-[200px] sm:w-[250px]">
       <div className="flex items-baseline justify-between gap-2">
         <p id={id} className="text-xs font-medium tracking-[0.02em] text-muted">{label}</p>
-        <span className="num text-[13px] text-fg" data-testid="slice-value">
+        <span className="num text-[14px] text-fg" data-testid="slice-value">
           {fmtFixed(local, 1)} {ax.unit}
           {plane === "o2_flow" ? <span className="text-muted"> ({fmtPsia(kpaToPsia(local))})</span> : null}
         </span>

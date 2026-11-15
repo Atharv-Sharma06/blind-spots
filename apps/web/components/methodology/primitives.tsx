@@ -51,16 +51,16 @@ export function Section({ id, number, title, intro, children }: { id: string; nu
           aria-expanded={open}
           aria-controls={`${id}-body`}
           onClick={() => setOpen((o) => !o)}
-          className="group/section flex min-h-14 w-full items-center gap-3 rounded-[14px] py-4 text-left text-[18px] font-semibold tracking-[-0.015em] hover:text-accent focus-visible:outline-2 focus-visible:outline-accent"
+          className="group/section flex min-h-16 w-full items-center gap-4 rounded-[14px] py-5 text-left text-[20px] font-medium tracking-[-0.01em] hover:text-accent focus-visible:outline-2 focus-visible:outline-accent"
         >
-          <span className="num inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-subtle text-[13px] font-normal text-muted ring-1 ring-border group-hover/section:text-accent">{number}</span>
+          <span className="num inline-flex size-8 shrink-0 items-center justify-center rounded-full border border-border-strong text-[13px] font-normal text-muted group-hover/section:border-accent group-hover/section:text-accent">{number}</span>
           <span className="min-w-0 flex-1">{title}</span>
           <DisclosureChevron open={open} className="size-4" />
         </button>
       </h2>
-      {intro ? <p className="-mt-1.5 max-w-[68ch] pb-4 pl-10 text-[13px] leading-relaxed text-muted">{intro}</p> : null}
+      {intro ? <p className="-mt-2 max-w-[68ch] pb-5 pl-12 text-[14px] leading-relaxed text-muted">{intro}</p> : null}
       {open ? (
-        <div id={`${id}-body`} className="space-y-6 pb-10 pl-0 pt-1 sm:pl-10">
+        <div id={`${id}-body`} className="space-y-6 pb-10 pl-0 pt-1 sm:pl-12">
           {children}
         </div>
       ) : null}
@@ -71,7 +71,7 @@ export function Section({ id, number, title, intro, children }: { id: string; nu
 export function Sub({ title, children, id }: { title: string; children: ReactNode; id?: string }) {
   return (
     <div id={id} className="scroll-mt-[calc(var(--header-h)+16px)]">
-      <h3 className="mb-2 text-[14px] font-semibold">{title}</h3>
+      <h3 className="mb-2 text-[16px] font-medium">{title}</h3>
       <div className="space-y-3">{children}</div>
     </div>
   );
@@ -82,17 +82,17 @@ export function P({ children, className }: { children: ReactNode; className?: st
 }
 
 export function Bullets({ children }: { children: ReactNode }) {
-  return <ul className="max-w-[72ch] list-disc space-y-2 pl-5 text-[14px] leading-relaxed marker:text-gap">{children}</ul>;
+  return <ul className="max-w-[72ch] text-[14px] leading-relaxed [&>li]:relative [&>li]:border-t [&>li]:border-border [&>li]:py-2.5 [&>li]:pl-5 [&>li:first-child]:border-t-0 [&>li]:before:absolute [&>li]:before:left-0 [&>li]:before:top-[1.1em] [&>li]:before:size-1.5 [&>li]:before:rounded-full [&>li]:before:bg-fg">{children}</ul>;
 }
 
 export function Mono({ children }: { children: ReactNode }) {
-  return <code className="num rounded-[6px] bg-subtle px-1.5 py-px text-[12.5px] text-fg ring-1 ring-border [overflow-wrap:anywhere]">{children}</code>;
+  return <code className="num rounded-[6px] border border-border bg-subtle px-1.5 py-px text-[12.5px] text-fg [overflow-wrap:anywhere]">{children}</code>;
 }
 
 /** Legible formula block (plain text in mono; the symbols are defined directly underneath). */
 export function Formula({ children, label }: { children: ReactNode; label?: string }) {
   return (
-    <figure className="max-w-[72ch] rounded-[20px] border border-border bg-bg/60 px-5 py-4">
+    <figure className="max-w-[72ch] rounded-[12px] border border-border bg-subtle px-5 py-4">
       <div tabIndex={0} className="num overflow-x-auto whitespace-pre text-[13px] leading-relaxed text-fg focus-visible:outline-2 focus-visible:outline-accent" role="math" aria-label={label}>
         {children}
       </div>
@@ -117,7 +117,7 @@ export function QueryBoundary<T>({ query, children, rows = 3 }: { query: ApiQuer
     return (
       <div role="status" aria-label="Loading" className="space-y-1.5">
         {Array.from({ length: rows }, (_, i) => (
-          <Skeleton key={i} className="h-8 w-full rounded-[10px]" />
+          <Skeleton key={i} className="h-8 w-full rounded-[10px] bg-black/[0.06]" />
         ))}
       </div>
     );

@@ -61,9 +61,9 @@ import { PanelSkeleton } from "./query-state";
 const MAP_PLOT_CLASS = "h-[340px] sm:h-[440px] lg:h-[clamp(300px,calc(100vh-620px),640px)]";
 
 const Panel = ({ id, title, children, busy = false, lead }: { id: string; title: string; children: React.ReactNode; busy?: boolean; lead?: React.ReactNode }) => (
-  <section aria-labelledby={id} aria-busy={busy} className="card p-5 sm:p-6">
+  <section aria-labelledby={id} aria-busy={busy} className="card p-6 sm:p-7">
     <div className="flex items-baseline justify-between gap-3">
-      <h2 id={id} tabIndex={-1} className="text-[17px] font-medium leading-6 tracking-[-0.01em] text-fg outline-none">{title}</h2>
+      <h2 id={id} tabIndex={-1} className="text-[20px] font-medium leading-7 tracking-[-0.01em] text-fg outline-none">{title}</h2>
       {busy ? <span className="rounded-full bg-subtle px-2.5 py-0.5 text-xs text-muted motion-safe:animate-[fade-in_120ms_ease-out_150ms_both]">Updating…</span> : null}
     </div>
     {lead ? <div className="mt-4">{lead}</div> : null}
@@ -319,17 +319,17 @@ export function ExploreWorkspace() {
     <div className="flex flex-col gap-5">
       <header className="flex flex-col gap-2 px-1">
         <div className="flex flex-wrap items-center justify-between gap-x-4">
-          <h1 className="text-[28px] font-medium leading-tight tracking-[-0.02em] text-fg md:text-[34px] md:leading-10">Explorer</h1>
+          <h1 className="text-[28px] font-medium leading-[34px] tracking-[-0.02em] text-fg md:text-[40px] md:leading-[44px]">Explorer</h1>
           <Link
             href="/cabins"
-            className="inline-flex h-10 items-center gap-1.5 rounded-full bg-surface px-4 text-[13px] text-muted shadow-[inset_0_1px_0_rgb(255_255_255/.06)] ring-1 ring-border transition-colors hover:bg-subtle hover:text-fg"
+            className="inline-flex h-10 items-center gap-1.5 rounded-full border border-border bg-surface px-4 text-[14px] text-fg transition-colors hover:bg-subtle"
             data-testid="back-to-cabins"
           >
             <ArrowLeft className="size-3.5" aria-hidden />
             Cabins
           </Link>
         </div>
-        <p className="max-w-[760px] text-[15px] leading-6 text-muted">ISS tests for one material, with the model&apos;s estimate and next tests.</p>
+        <p className="max-w-[760px] text-[16px] leading-6 text-muted">ISS tests for one material, with the model&apos;s estimate and next tests.</p>
       </header>
 
       {/* Phones read top to bottom: the answer first, then the chart, then what to test next. At lg the map spans both rows of the left column. */}
@@ -338,9 +338,9 @@ export function ExploreWorkspace() {
           id="explorer-map"
           aria-labelledby="map-heading"
           data-testid="map-region"
-          className="card order-2 min-w-0 scroll-mt-20 lg:sticky lg:top-20 lg:order-none lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:max-h-[calc(100dvh-6rem)] lg:self-start lg:overflow-y-auto"
+          className="card order-2 min-w-0 scroll-mt-20 lg:sticky lg:top-6 lg:order-none lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:max-h-[calc(100dvh-3rem)] lg:self-start lg:overflow-y-auto"
         >
-          <div className="space-y-4 border-b border-white/[0.06] px-5 pt-5 pb-4 sm:px-6">
+          <div className="space-y-4 border-b border-border px-5 pt-5 pb-4 sm:px-6">
             <div className="flex flex-wrap items-start gap-x-4 gap-y-3">
               <h2 id="map-heading" className="sr-only">Coverage chart</h2>
               <MaterialSelect groups={groups} value={groupId} onChange={onGroup} />
@@ -351,18 +351,18 @@ export function ExploreWorkspace() {
               <LayerChips layers={layers} onToggle={onLayer} modelled={!!modelled} />
             </div>
           </div>
-          <p className="px-5 pt-4 text-xs text-muted sm:px-6" data-testid="chart-caption">
+          <p className="px-5 pt-4 text-[13px] text-muted sm:px-6" data-testid="chart-caption">
             Dots are ISS tests. The dashed box is this cabin. Numbers are next tests.
           </p>
           <div className="px-2 pt-2 pb-3 sm:px-4 sm:pb-4" aria-busy={mapBusy}>
             {mapNode}
           </div>
           {group && !modelled ? (
-            <p className="border-t border-white/[0.06] px-5 py-3 text-xs text-muted sm:px-6">
+            <p className="border-t border-border px-5 py-3 text-xs text-muted sm:px-6">
               <span className="font-medium text-fg">No estimate for this material.</span> Too few test results. Try another material.
             </p>
           ) : null}
-          <div className="space-y-1.5 border-t border-white/[0.06] px-5 py-3 sm:px-6">
+          <div className="space-y-1.5 border-t border-border px-5 py-3 sm:px-6">
             {group ? <GroupFacts group={group} /> : <p className="text-xs text-muted">&nbsp;</p>}
             {cov ? (
               <p className="text-xs text-muted" data-testid="obs-note">
@@ -373,7 +373,7 @@ export function ExploreWorkspace() {
             {dm.snapshotOnly ? <p className="text-xs text-muted">Precomputed version: preset values only. Your own cabin needs the full version.</p> : null}
           </div>
           {mapLayers.context && ctx.envelopes.length > 0 ? (
-            <details className="group mx-3 mb-3 rounded-[var(--radius-lg)] bg-black/25 px-4 py-2.5 text-xs ring-1 ring-white/[0.05] sm:mx-4 sm:mb-4" data-testid="context-list">
+            <details className="group mx-3 mb-3 rounded-[var(--radius-lg)] bg-subtle px-4 py-2.5 text-xs ring-1 ring-border sm:mx-4 sm:mb-4" data-testid="context-list">
               <summary className="block cursor-pointer list-none py-1.5 text-muted hover:text-fg [&::-webkit-details-marker]:hidden [&::marker]:content-none">
                 Related NASA work ({ctx.envelopes.length}): dotted boxes the model does not use
               </summary>

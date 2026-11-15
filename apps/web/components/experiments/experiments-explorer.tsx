@@ -7,8 +7,6 @@ import { useExperiments, useGroups, useHeadline, useInvestigations } from "@/hoo
 import { exportExperimentsCsvHref } from "@/lib/api";
 import { getDataMode } from "@/lib/snapshot";
 import { fmtCount, MISSING } from "@/lib/format";
-import { Button } from "@/components/ui/button";
-import { DotNumber } from "@/components/ui/dot-number";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -48,16 +46,24 @@ const SORT_KEYS = new Set<string>(COLUMNS.map((c) => c.key));
 /** The list shows experiments 25 at a time, so the page scrolls normally instead of trapping the mouse wheel in a tall table. */
 const PAGE_SIZE = 25;
 
-/** Charcoal pill fields (search, result filter). */
+/** Outlined pill fields (search, result filter). */
 const FIELD =
-  "h-11 w-full rounded-full border border-border bg-surface px-4 text-prose text-fg shadow-[inset_0_1px_0_rgb(255_255_255/0.05)] placeholder:text-muted hover:border-border-strong md:h-10 md:text-ui";
+  "h-11 w-full rounded-full border border-border-strong bg-transparent px-4 text-prose text-fg placeholder:text-muted hover:border-fg md:h-10 md:text-ui";
 
-/** One summary count: a big dot-matrix number in a charcoal squircle tile. */
-function CountTile({ value, label }: { value: string; label: string }) {
+/** Black pill primary action (the CSV download). */
+const INK_BTN =
+  "inline-flex h-11 items-center justify-center gap-2 rounded-[14px] bg-fg px-5 text-ui font-medium whitespace-nowrap text-bg transition-opacity hover:opacity-90 md:h-10";
+
+/** Outlined pill button (small actions such as Clear and Show more). */
+const PILL_BTN =
+  "inline-flex h-11 items-center justify-center gap-2 rounded-full border border-border-strong bg-transparent px-5 text-ui font-medium text-fg transition-colors hover:border-fg hover:bg-surface md:h-10";
+
+/** One summary count: a big number with a muted caption under it, set on the warm beige band. */
+function Stat({ value, label, first }: { value: string; label: string; first?: boolean }) {
   return (
-    <div className="card flex min-w-0 flex-col justify-between gap-3 rounded-xl bg-surface p-3.5 sm:rounded-2xl sm:p-5">
-      <span className="text-xs leading-4 text-muted sm:text-ui">{label}</span>
-      <DotNumber className="text-[28px] leading-none text-fg sm:text-[44px]">{value}</DotNumber>
+    <div className={cn("min-w-0", !first && "border-l border-fg/10 pl-4 sm:pl-8")}>
+      <p className="text-[28px] leading-none font-medium tracking-tight text-fg tabular-nums sm:text-[40px]">{value}</p>
+      <p className="mt-2 text-xs leading-4 text-muted sm:mt-3 sm:text-ui sm:leading-5">{label}</p>
     </div>
   );
 }
@@ -203,10 +209,10 @@ export function ExperimentsExplorer() {
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4">
       {all && used > 0 ? (
-        <div className="grid grid-cols-3 gap-2 sm:gap-3" data-summary="counts">
-          <CountTile value={fmtCount(total)} label="Experiments" />
-          <CountTile value={fmtCount(used)} label="The model uses" />
-          {steps ? <CountTile value={fmtCount(steps)} label="Test results" /> : null}
+        <div className="grid grid-cols-3 gap-4 rounded-2xl bg-[var(--band,#ECE9E0)] p-4 sm:gap-8 sm:p-8" data-summary="counts">
+          <Stat first value={fmtCount(total)} label="Experiments" />
+          <Stat value={fmtCount(used)} label="The model uses" />
+          {steps ? <Stat value={fmtCount(steps)} label="Test results" /> : null}
         </div>
       ) : null}
       <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 max-[359px]:grid-cols-1 md:grid-cols-[minmax(0,1fr)_14rem_auto]" role="search" aria-label="Filter experiments">
@@ -223,15 +229,13 @@ export function ExperimentsExplorer() {
           onChange={(v) => setParams({ result: v })}
         />
         {csvHref && !exps.isError ? (
-          <Button asChild className="h-11 rounded-full px-5 md:h-10">
-            <a href={csvHref} download="experiments.csv" title="Every experiment in our data, as a CSV file.">
-              <Download aria-hidden /> Download all (CSV)
-            </a>
-          </Button>
+          <a href={csvHref} download="experiments.csv" title="Every experiment in our data, as a CSV file." className={INK_BTN}>
+            <Download className="size-4" aria-hidden /> Download all (CSV)
+          </a>
         ) : (
-          <Button disabled aria-disabled="true" className="h-11 rounded-full px-5 md:h-10" title="No download is available right now.">
-            <Download aria-hidden /> Download all (CSV)
-          </Button>
+          <button type="button" disabled aria-disabled="true" className={cn(INK_BTN, "pointer-events-none opacity-50")} title="No download is available right now.">
+            <Download className="size-4" aria-hidden /> Download all (CSV)
+          </button>
         )}
       </div>
 
@@ -243,9 +247,9 @@ export function ExperimentsExplorer() {
             <span>
               <span className="num text-fg">{fmtCount(rows.length)}</span> of <span className="num">{fmtCount(total)}</span> experiments
             </span>
-            <Button variant="ghost" onClick={clear} className="h-10 rounded-full md:h-8">
-              <X aria-hidden /> Clear
-            </Button>
+            <button type="button" onClick={clear} className={cn(PILL_BTN, "h-10 px-4 md:h-8")}>
+              <X className="size-4" aria-hidden /> Clear
+            </button>
           </>
         ) : (
           // The count tiles above show these numbers; the sentence stays for screen readers.
@@ -275,22 +279,22 @@ export function ExperimentsExplorer() {
           ))}
         </div>
       ) : rows.length === 0 ? (
-        <div className="card rounded-2xl bg-surface">
+        <div className="rounded-2xl border border-border bg-surface px-6">
           <EmptyState
             icon={<Search aria-hidden />}
             title="No experiments match"
             description="Try a different word."
             action={
-              <Button onClick={clear}>
-                <X aria-hidden /> Clear
-              </Button>
+              <button type="button" onClick={clear} className={PILL_BTN}>
+                <X className="size-4" aria-hidden /> Clear
+              </button>
             }
           />
         </div>
       ) : (
         <>
-          {/* Desktop: a plain table. */}
-          <div className="card hidden overflow-x-auto rounded-2xl bg-surface px-2 pb-2 md:block" role="region" aria-label="Experiments (scrollable)" tabIndex={0}>
+          {/* Desktop: a plain table on a white card, hairlines between rows. */}
+          <div className="hidden overflow-x-auto rounded-2xl border border-border bg-surface md:block" role="region" aria-label="Experiments (scrollable)" tabIndex={0}>
             <table className="w-full table-fixed border-separate border-spacing-0 text-prose" aria-label="Experiments" aria-rowcount={rows.length + 1}>
               <colgroup>
                 <col className="w-[28%]" />
@@ -308,12 +312,12 @@ export function ExperimentsExplorer() {
                         key={c.key}
                         scope="col"
                         aria-sort={active ? (sort.dir === "asc" ? "ascending" : "descending") : "none"}
-                        className={cn("h-12 border-b border-white/[0.08] bg-[#212125] px-4 text-left text-ui font-medium text-muted", c.numeric && "text-right")}
+                        className={cn("h-12 border-b border-border px-5 text-left text-[11px] font-medium tracking-[0.08em] text-muted uppercase", c.numeric && "text-right")}
                       >
                         <button
                           type="button"
                           onClick={() => toggleSort(c.key)}
-                          className={cn("inline-flex min-h-8 items-center gap-1 rounded-full hover:text-fg", active && "text-fg")}
+                          className={cn("inline-flex min-h-8 items-center gap-1 rounded-full uppercase hover:text-fg", active && "text-fg")}
                         >
                           {c.label}
                           {active ? sort.dir === "asc" ? <ArrowUp className="size-3" aria-hidden /> : <ArrowDown className="size-3" aria-hidden /> : null}
@@ -334,21 +338,21 @@ export function ExperimentsExplorer() {
                       onClick={() => openRow(e, i)}
                       onKeyDown={(ev) => onRowKey(ev, i, e)}
                       aria-label={`${materialLabel(e.material_family)}, ${sourceLabel(e)}`}
-                      className="cursor-pointer transition-colors hover:bg-white/[0.035] focus-visible:outline-offset-[-2px] data-[state=selected]:bg-observed-tint [&:last-child>td]:border-b-0"
+                      className="cursor-pointer transition-colors hover:bg-subtle focus-visible:outline-offset-[-2px] data-[state=selected]:bg-observed-tint [&:last-child>td]:border-b-0"
                     >
-                      <td className="border-b border-white/[0.06] px-4 py-3 align-top">
+                      <td className="border-b border-border px-5 py-4 align-top">
                         <span className="block font-medium text-fg">{materialLabel(e.material_family)}</span>
                       </td>
-                      <td className="border-b border-white/[0.06] px-4 py-3 text-right align-top whitespace-nowrap">
+                      <td className="border-b border-border px-5 py-4 text-right align-top whitespace-nowrap">
                         <Measure value={fmtPlain(oxygenOf(e), 1)} unit="%" />
                       </td>
-                      <td className="border-b border-white/[0.06] px-4 py-3 text-right align-top whitespace-nowrap">
+                      <td className="border-b border-border px-5 py-4 text-right align-top whitespace-nowrap">
                         <Measure value={fmtAirflow(e)} unit="cm/s" />
                       </td>
-                      <td className="border-b border-white/[0.06] px-4 py-3 align-top">
+                      <td className="border-b border-border px-5 py-4 align-top">
                         <ResultChip kind={r.kind} label={r.label} />
                       </td>
-                      <td className="max-w-[16rem] border-b border-white/[0.06] px-4 py-3 align-top">
+                      <td className="max-w-[16rem] border-b border-border px-5 py-4 align-top">
                         <a
                           href={e.source_url}
                           target="_blank"
@@ -378,9 +382,9 @@ export function ExperimentsExplorer() {
                 <li
                   key={e.experiment_id}
                   data-state={e.experiment_id === selectedId ? "selected" : undefined}
-                  className="overflow-hidden rounded-xl border border-white/[0.06] bg-surface shadow-[inset_0_1px_0_rgb(255_255_255/0.06)] data-[state=selected]:border-observed"
+                  className="overflow-hidden rounded-2xl border border-border bg-surface data-[state=selected]:border-fg"
                 >
-                  <button type="button" data-exp-id={e.experiment_id} onClick={() => openRow(e, i)} className="block min-h-14 w-full rounded-xl px-4 py-3 text-left">
+                  <button type="button" data-exp-id={e.experiment_id} onClick={() => openRow(e, i)} className="block min-h-14 w-full rounded-2xl px-5 py-4 text-left">
                     <span className="sr-only">Open details: </span>
                     <span className="block text-prose font-medium text-fg">{materialLabel(e.material_family)}</span>
                     <span className="mt-1 flex flex-col items-start gap-1 text-ui">
@@ -399,9 +403,9 @@ export function ExperimentsExplorer() {
               <p className="text-ui text-muted" aria-live="polite">
                 Showing <span className="num text-fg">{fmtCount(shownCount)}</span> of <span className="num">{fmtCount(rows.length)}</span>
               </p>
-              <Button className="h-11 w-full rounded-full md:w-auto" onClick={() => setPageLimit({ sig: listSig, n: shownCount + PAGE_SIZE })}>
+              <button type="button" className={cn(PILL_BTN, "w-full md:w-auto")} onClick={() => setPageLimit({ sig: listSig, n: shownCount + PAGE_SIZE })}>
                 Show {fmtCount(Math.min(PAGE_SIZE, rows.length - shownCount))} more
-              </Button>
+              </button>
             </div>
           ) : null}
         </>

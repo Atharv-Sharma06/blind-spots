@@ -2,9 +2,10 @@ import * as React from "react";
 import { cn } from "@/lib/cn";
 
 export interface ProgressRingProps {
-  /** Share filled, 0 to 1. null draws no arc (a missing value stays missing). */
+  /** Share filled, 0 to 1. null draws no filled ticks (a missing value stays missing). */
   value: number | null;
   size?: number;
+  /** Scales the tick thickness. */
   stroke?: number;
   label?: React.ReactNode;
   sublabel?: React.ReactNode;
@@ -12,36 +13,41 @@ export interface ProgressRingProps {
   className?: string;
 }
 
-const TICKS = 60;
+const TICKS = 40;
+/** The gauge is an open arc: 250 degrees, gap at the bottom. */
+const SWEEP = (250 * Math.PI) / 180;
+const FADE = 3;
 
-/** Thin light track, a signal-yellow arc for the value, small tick marks on the unfilled part and a centred label
- *  (pass a <DotNumber>). Exposed as one image with ariaLabel; the visible label is hidden from assistive tech. */
+/** Radial tick gauge (BizLink style): about 40 thin tick lines on an open arc, black for the filled share and light grey
+ *  for the rest, with a centred label (pass a <DotNumber>) and a small caption. Exposed as one image with ariaLabel; the
+ *  visible label is hidden from assistive tech. */
 export function ProgressRing({ value, size = 120, stroke = 6, label, sublabel, ariaLabel, className }: ProgressRingProps) {
   const v = value == null || !Number.isFinite(value) ? null : Math.min(1, Math.max(0, value));
   const c = size / 2;
-  const r = c - stroke / 2 - 1;
-  const circ = 2 * Math.PI * r;
-  const arcLen = v == null ? 0 : v * circ;
-  // Ticks sit just inside the track and only on the part the arc has not reached.
-  const tickOuter = r - stroke / 2 - 3;
-  const tickInner = tickOuter - Math.max(3, size * 0.035);
+  const outer = c - 2;
+  const inner = outer - Math.max(8, size * 0.13);
+  const width = Math.max(1.25, stroke / 4);
+  const start = -Math.PI / 2 - SWEEP / 2;
+  const filledCount = v == null ? 0 : Math.round(v * TICKS);
   const ticks: React.ReactNode[] = [];
   for (let i = 0; i < TICKS; i++) {
-    const t = i / TICKS;
-    if (v != null && t < v) continue;
-    const a = t * 2 * Math.PI - Math.PI / 2;
+    const a = start + (i / (TICKS - 1)) * SWEEP;
     const cos = Math.cos(a);
     const sin = Math.sin(a);
+    const filled = i < filledCount;
+    // The last few filled ticks fade towards the grey remainder.
+    const fromEnd = filledCount - 1 - i;
+    const opacity = filled ? (fromEnd < FADE ? 0.55 + 0.15 * fromEnd : 1) : 1;
     ticks.push(
       <line
         key={i}
-        x1={c + tickInner * cos}
-        y1={c + tickInner * sin}
-        x2={c + tickOuter * cos}
-        y2={c + tickOuter * sin}
-        stroke="currentColor"
-        strokeOpacity={0.35}
-        strokeWidth={1}
+        x1={c + inner * cos}
+        y1={c + inner * sin}
+        x2={c + outer * cos}
+        y2={c + outer * sin}
+        stroke={filled ? "var(--fg)" : "var(--border-strong)"}
+        strokeOpacity={opacity}
+        strokeWidth={filled ? width * 1.15 : width}
         strokeLinecap="round"
       />,
     );
@@ -54,26 +60,12 @@ export function ProgressRing({ value, size = 120, stroke = 6, label, sublabel, a
       style={{ width: size, height: size }}
     >
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden="true" className="absolute inset-0">
-        <circle cx={c} cy={c} r={r} fill="none" stroke="currentColor" strokeOpacity={0.22} strokeWidth={Math.max(1, stroke / 4)} />
         {ticks}
-        {v != null && v > 0 ? (
-          <circle
-            cx={c}
-            cy={c}
-            r={r}
-            fill="none"
-            stroke="#f2d21b"
-            strokeWidth={stroke}
-            strokeLinecap="round"
-            strokeDasharray={`${arcLen} ${circ}`}
-            transform={`rotate(-90 ${c} ${c})`}
-          />
-        ) : null}
       </svg>
       {label != null || sublabel != null ? (
         <div aria-hidden="true" className="relative flex flex-col items-center justify-center text-center leading-none">
           {label != null ? <div>{label}</div> : null}
-          {sublabel != null ? <div className="mt-1.5 text-label text-current/80">{sublabel}</div> : null}
+          {sublabel != null ? <div className="mt-1.5 text-label text-muted">{sublabel}</div> : null}
         </div>
       ) : null}
     </div>

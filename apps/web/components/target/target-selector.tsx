@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Callout } from "@/components/ui/callout";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { SegmentedControl } from "@/components/ui/segmented-control";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/cn";
 import { useTargets, useDataMode } from "@/hooks/api";
 import { useExploreStore, analysisProfiles } from "@/lib/explore-store";
@@ -59,7 +58,7 @@ export function TargetSelector({ className }: { className?: string } = {}) {
       }}
     >
       <SheetTrigger asChild>
-        <Button variant="secondary" size="md" className={cn("max-w-full min-w-0 shrink justify-between gap-2", className)} data-testid="target-selector">
+        <Button variant="secondary" size="md" className={cn("max-w-full min-w-0 shrink justify-between gap-2 rounded-full border border-border bg-surface text-fg", className)} data-testid="target-selector">
           <span className="truncate font-medium">{currentLabel}</span>
           <span className="sr-only">, change cabin</span>
           <ChevronDown aria-hidden />
@@ -74,13 +73,13 @@ export function TargetSelector({ className }: { className?: string } = {}) {
               if (list.length === 0) return null;
               return (
                 <section key={status} aria-label={title}>
-                  <h3 className="mb-1.5 text-xs font-medium tracking-wide text-muted uppercase">{title}</h3>
-                  <ul className="card divide-y divide-border/70 overflow-hidden rounded-[var(--radius-xl)]">
+                  <h3 className="eyebrow mb-2 text-muted">{title}</h3>
+                  <ul className="card divide-y divide-border overflow-hidden">
                     {list.map((p) => {
                       const selected = "profile_id" in target && target.profile_id === p.profile_id;
                       const src = profileSourceLink(p);
                       return (
-                        <li key={p.profile_id} className={cn("flex items-stretch", selected && "bg-accent-tint shadow-[inset_3px_0_0_var(--accent)]")}>
+                        <li key={p.profile_id} className={cn("flex items-stretch", selected && "bg-subtle shadow-[inset_3px_0_0_var(--fg)]")}>
                           <button
                             type="button"
                             aria-pressed={selected}
@@ -88,9 +87,9 @@ export function TargetSelector({ className }: { className?: string } = {}) {
                               setTarget({ profile_id: p.profile_id });
                               setOpen(false);
                             }}
-                            className="min-h-12 min-w-0 flex-1 px-4 py-2.5 text-left hover:bg-white/5 focus-visible:relative"
+                            className="min-h-12 min-w-0 flex-1 px-5 py-3 text-left hover:bg-subtle focus-visible:relative"
                           >
-                            <span className="block text-[13px] font-medium text-fg">{shortCabinName(p.profile_id, p.name)}</span>
+                            <span className="block text-[15px] font-medium text-fg">{shortCabinName(p.profile_id, p.name)}</span>
                             <span className="num mt-0.5 block text-xs text-muted">{profileConditions(p)}</span>
                           </button>
                           {src ? (
@@ -113,11 +112,11 @@ export function TargetSelector({ className }: { className?: string } = {}) {
             })}
             {envelope.length > 0 ? (
               <section aria-label="Context only">
-                <h3 className="mb-1.5 text-xs font-medium tracking-wide text-muted uppercase">Context only</h3>
-                <ul className="rounded-[var(--radius-xl)] border border-dashed border-border-strong">
+                <h3 className="eyebrow mb-2 text-muted">Context only</h3>
+                <ul className="rounded-2xl border border-dashed border-border-strong bg-subtle">
                   {envelope.map((p) => (
-                    <li key={p.profile_id} className="px-4 py-2.5">
-                      <span className="block text-[13px] text-muted">{shortCabinName(p.profile_id, p.name)}</span>
+                    <li key={p.profile_id} className="px-5 py-3">
+                      <span className="block text-[15px] text-muted">{shortCabinName(p.profile_id, p.name)}</span>
                       <span className="mt-0.5 block text-xs text-muted">Crew-safety range. Not checked here.</span>
                     </li>
                   ))}
@@ -125,7 +124,7 @@ export function TargetSelector({ className }: { className?: string } = {}) {
               </section>
             ) : null}
             <section aria-label="Custom conditions">
-              <h3 className="mb-1.5 text-xs font-medium tracking-wide text-muted uppercase">Your own</h3>
+              <h3 className="eyebrow mb-2 text-muted">Your own</h3>
               <Button variant="secondary" onClick={() => setView("custom")} disabled={dm.isSnapshot} className="w-full justify-start">
                 Enter your own air…
               </Button>
@@ -179,7 +178,7 @@ function CustomTargetForm({ onCancel, onApply }: { onCancel: () => void; onApply
     });
   };
 
-  const field = "num h-10 w-full rounded-[var(--radius-md)] border border-border bg-subtle px-3 text-[14px] text-fg hover:border-border-strong";
+  const field = "num h-11 w-full rounded-xl border border-border bg-surface px-3.5 text-[15px] text-fg hover:border-border-strong";
   return (
     <form
       className="space-y-4"
@@ -188,7 +187,7 @@ function CustomTargetForm({ onCancel, onApply }: { onCancel: () => void; onApply
         submit();
       }}
     >
-      <Badge tone="neutral">{CUSTOM_LABEL}</Badge>
+      <span className="inline-flex min-h-7 items-center rounded-lg border border-border bg-surface px-2.5 text-xs font-medium text-fg">{CUSTOM_LABEL}</span>
       <div>
         <label htmlFor={`${id}-o2`} className="mb-1 block text-xs text-muted">Oxygen (%)</label>
         <input id={`${id}-o2`} inputMode="decimal" className={field} value={o2} onChange={(e) => setO2(e.target.value)} />

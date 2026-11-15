@@ -14,12 +14,12 @@ export const badgeVariants = cva(
   {
     variants: {
       tone: {
-        neutral: "border-white/[0.06] bg-subtle text-fg",
+        neutral: "border-border bg-subtle text-fg",
         outline: "border-border-strong bg-transparent text-fg",
-        observed: "border-periwinkle/25 bg-observed-tint text-periwinkle",
+        observed: "border-observed/25 bg-observed-tint text-observed",
         gap: "border-gap/30 bg-gap-tint text-gap-fg",
         accent: "border-accent/30 bg-accent-tint text-accent",
-        plum: "border-plum-4/60 bg-plum-2 text-plum-7",
+        plum: "border-plum-3 bg-plum-1 text-plum-7",
         warn: "border-transparent bg-transparent px-0 text-warn",
         quiet: "border-transparent bg-transparent px-0 text-muted",
       },

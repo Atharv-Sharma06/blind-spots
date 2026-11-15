@@ -1,16 +1,20 @@
 import { HeroText } from "./hero-text";
 import { StepHeading } from "./step-heading";
 import { PickerSkeleton } from "./cabin-picker";
-import { HOME_CONTAINER } from "./home-layout";
+import { StatsSkeleton } from "./stats-row";
+import { HOME_BAND, HOME_CONTAINER } from "./home-layout";
 
-/** Server-rendered first paint of "/cabins": the hero text and an empty card grid (no numbers, no fake status). */
+/** Server-rendered first paint of "/cabins": the hero text, an empty stats row and an empty board (no numbers, no fake status). */
 export function HomeFallback() {
   return (
     <div className={HOME_CONTAINER}>
-      <HeroText>
-        {/* Same footprint as the tour pill, so the cards do not jump when it mounts. */}
-        <div aria-hidden className="h-11 w-[10.5rem] rounded-full border border-border-strong bg-surface" />
-      </HeroText>
+      <section className={HOME_BAND}>
+        <HeroText>
+          {/* Same footprint as the tour pill, so the layout does not jump when it mounts. */}
+          <div aria-hidden className="h-11 w-[10.5rem] rounded-full border border-[#161616]/20 bg-surface" />
+        </HeroText>
+        <StatsSkeleton />
+      </section>
       <section aria-labelledby="cabins-h-fallback">
         <StepHeading n={1} id="cabins-h-fallback" title="Pick a cabin" />
         <div className="mt-6">

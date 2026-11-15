@@ -12,9 +12,9 @@ export interface SectionHeaderProps {
 }
 
 const SIZES = {
-  h1: "text-heading font-semibold tracking-tight md:text-display",
-  h2: "text-title font-semibold",
-  h3: "text-ui font-semibold",
+  h1: "text-heading font-medium tracking-tight md:text-display",
+  h2: "text-title font-medium",
+  h3: "text-ui font-medium",
 } as const;
 
 export function SectionHeader({ title, description, actions, as: Tag = "h2", className }: SectionHeaderProps) {

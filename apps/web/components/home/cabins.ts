@@ -99,6 +99,16 @@ export const COVERAGE_STATUS_LABEL: Record<CoverageStatus, string> = {
   covered: "Covered",
 };
 
+/** Board columns, left to right. */
+export const STATUS_COLUMNS: readonly CoverageStatus[] = ["none", "barely", "covered"];
+
+/** Status dot fills (always paired with the status word): black, amber, green. */
+export const STATUS_DOT: Record<CoverageStatus, string> = {
+  none: "bg-[#161616]",
+  barely: "bg-[#E8A33B]",
+  covered: "bg-[#2FD067]",
+};
+
 /** Tooltip for the chip: the rule, in plain words. */
 export const COVERAGE_STATUS_HELP =
   "Covered: nearby ISS tests for nearly all materials. Barely covered: some. Not covered: none.";

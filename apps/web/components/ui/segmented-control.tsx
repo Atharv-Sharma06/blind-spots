@@ -27,7 +27,7 @@ export function SegmentedControl({ options, value, onValueChange, size = "md", c
       value={value}
       onValueChange={(v) => v && onValueChange(v)}
       aria-label={aria["aria-label"]}
-      className={cn("inline-flex rounded-full border border-white/[0.06] bg-[#141416] p-1 shadow-[inset_0_1px_2px_rgb(0_0_0/0.6)]", className)}
+      className={cn("inline-flex rounded-full border border-border bg-subtle p-1", className)}
     >
       {options.map((o) => (
         <ToggleGroup.Item
@@ -36,7 +36,7 @@ export function SegmentedControl({ options, value, onValueChange, size = "md", c
           disabled={o.disabled}
           className={cn(
             "inline-flex items-center justify-center rounded-full px-3.5 text-ui font-medium text-muted transition-colors",
-            "hover:text-fg disabled:opacity-50 data-[state=on]:bg-[#2a2a2f] data-[state=on]:text-fg data-[state=on]:shadow-[inset_0_1px_0_rgb(255_255_255/0.08),0_2px_6px_-2px_rgb(0_0_0/0.8)]",
+            "hover:text-fg disabled:opacity-50 data-[state=on]:bg-surface data-[state=on]:text-fg data-[state=on]:shadow-[0_0_0_1px_var(--border)]",
             size === "sm" ? "h-8 max-md:h-10" : "h-9 max-md:h-10",
           )}
         >

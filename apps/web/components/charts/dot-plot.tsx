@@ -7,7 +7,7 @@ export interface DotRow {
   label: string;
   value: number | null;
   ci: [number, number] | null;
-  /** The model of interest is drawn in signal yellow; comparison rows are muted. */
+  /** The model of interest is drawn in black; comparison rows are muted grey. */
   emphasis?: boolean;
 }
 
@@ -39,7 +39,7 @@ export function DotPlot({ rows, xLabel, reference, ariaLabel, className }: DotPl
         <XAxis scale={x} y={yBottom} ticks={ticks} label={xLabel} height={rows.length * ROW_H} />
         {reference ? (
           <g>
-            <line x1={x(reference.value)} x2={x(reference.value)} y1={m.top - 4} y2={yBottom} stroke={CHART.muted} strokeOpacity={0.8} strokeDasharray="4 3" />
+            <line x1={x(reference.value)} x2={x(reference.value)} y1={m.top - 4} y2={yBottom} stroke={CHART.muted} strokeWidth={1.25} strokeDasharray="4 3" />
             <text x={x(reference.value)} y={m.top - 9} textAnchor="middle" fontSize={TEXT.value} fill={CHART.muted} fontFamily={SANS}>
               {reference.label}
             </text>
@@ -63,14 +63,14 @@ export function DotPlot({ rows, xLabel, reference, ariaLabel, className }: DotPl
                 {r.label}
               </text>
               {r.ci ? (
-                <g stroke={r.emphasis ? CHART.accent : CHART.muted} strokeWidth={r.emphasis ? 2 : 1.5}>
+                <g stroke={r.emphasis ? CHART.accent : CHART.muted} strokeWidth={r.emphasis ? 2.5 : 1.5} strokeLinecap="round">
                   <line x1={x(r.ci[0])} x2={x(r.ci[1])} y1={cy} y2={cy} />
                   <line x1={x(r.ci[0])} x2={x(r.ci[0])} y1={cy - 4} y2={cy + 4} />
                   <line x1={x(r.ci[1])} x2={x(r.ci[1])} y1={cy - 4} y2={cy + 4} />
                 </g>
               ) : null}
               {r.value !== null ? (
-                <circle cx={x(r.value)} cy={cy} r={r.emphasis ? 5.5 : 4.5} fill={r.emphasis ? CHART.accent : CHART.surface} stroke={r.emphasis ? CHART.accent : CHART.muted} strokeWidth={1.5}>
+                <circle cx={x(r.value)} cy={cy} r={r.emphasis ? 6 : 4.5} fill={r.emphasis ? CHART.accent : CHART.surface} stroke={r.emphasis ? CHART.accent : CHART.muted} strokeWidth={1.5}>
                   <title>{`${r.label}: ${r.value.toFixed(3)}${r.ci ? ` (95 % interval ${r.ci[0].toFixed(3)} to ${r.ci[1].toFixed(3)})` : ""}`}</title>
                 </circle>
               ) : (

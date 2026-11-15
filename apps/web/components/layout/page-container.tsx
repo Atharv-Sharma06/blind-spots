@@ -9,7 +9,7 @@ export interface PageContainerProps extends React.HTMLAttributes<HTMLDivElement>
 export function PageContainer({ width = "full", className, ...props }: PageContainerProps) {
   return (
     <div
-      className={cn("mx-auto w-full px-4 py-6 md:px-6 md:py-8", width === "full" ? "max-w-[1680px]" : "max-w-[880px]", className)}
+      className={cn("mx-auto w-full px-4 py-6 md:px-8 md:py-8", width === "full" ? "max-w-[1680px]" : "max-w-[880px]", className)}
       {...props}
     />
   );

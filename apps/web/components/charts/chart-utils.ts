@@ -79,21 +79,24 @@ export function tickLabel(v: number): string {
   return String(Number(v.toPrecision(3)));
 }
 
-/** Colours reference the design tokens (CSS variables), so they follow the theme. */
+/** Colours reference the design tokens (CSS variables). Light v2: hairline axes, black and blue marks, hatched comparison fills. */
 export const CHART = {
   ink: "var(--fg)",
   muted: "var(--muted)",
-  /** Faint guides: a hairline that reads on charcoal without competing with the data. */
-  grid: "rgb(255 255 255 / 0.07)",
+  /** Faint guides: a hairline on white that never competes with the data. */
+  grid: "rgb(22 22 22 / 0.08)",
   axis: "var(--border-strong)",
   surface: "var(--surface)",
   plum: "var(--plum-6)",
   plumBand: "var(--plum-3)",
-  /** Signal yellow: the model of interest / Blind Spots. */
-  accent: "var(--accent)",
-  /** Periwinkle: what ISS tests actually showed. */
+  /** Black: the model of interest / the headline series. */
+  accent: "var(--fg)",
+  /** Blue: what ISS tests actually showed. */
   observed: "var(--observed)",
+  /** Light grey hatch lines for comparison fills. */
+  hatch: "var(--border-strong)",
 } as const;
 
-export const FONT = "var(--font-mono), ui-monospace, monospace";
+/** Tick labels use the sans face with tabular figures (small, quiet, like the dashboard reference). */
+export const FONT = "var(--font-sans), ui-sans-serif, system-ui, sans-serif";
 export const SANS = "var(--font-sans), ui-sans-serif, system-ui, sans-serif";

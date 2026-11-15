@@ -91,7 +91,7 @@ function FlowProvenance({ methodology }: { methodology: ApiQuery<MethodologyResp
 function ReasonTable({ caption, rows }: { caption: string; rows: [string, number][] }) {
   if (rows.length === 0) return <P className="text-muted">No counts reported.</P>;
   return (
-    <Table containerClassName="rounded-[var(--radius-lg)] border-border/70">
+    <Table containerClassName="rounded-[var(--radius-md)] border-border">
       <caption className="sr-only">{caption}</caption>
       <TableHeader>
         <TableRow>
@@ -114,8 +114,8 @@ function ReasonTable({ caption, rows }: { caption: string; rows: [string, number
 /** Collapsed block with a plain summary line (>= 40 px tap target). */
 function More({ summary, children }: { summary: string; children: ReactNode }) {
   return (
-    <details className="card group/disclosure max-w-[78ch] rounded-[var(--radius-xl)] bg-surface px-4 sm:px-5">
-      <summary data-disclosure="" className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 rounded-[var(--radius-sm)] text-[14px] font-medium text-fg hover:text-accent focus-visible:outline-2 focus-visible:outline-accent [&::-webkit-details-marker]:hidden">
+    <details className="card group/disclosure max-w-[78ch] px-5 sm:px-6">
+      <summary data-disclosure="" className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 rounded-[var(--radius-sm)] text-[17px] font-medium tracking-[-0.01em] text-fg hover:text-accent focus-visible:outline-2 focus-visible:outline-accent [&::-webkit-details-marker]:hidden">
         <span>{summary}</span>
         <span aria-hidden className="grid size-8 shrink-0 place-items-center rounded-full bg-subtle">
           <DisclosureChevron />
@@ -151,7 +151,7 @@ export function DataSection({ methodology, sources, groups }: { methodology: Api
             const model = s.investigations.filter((i) => i.role === "integrated_model");
             if (model.length === 0) return <P className="text-muted">No studies are used for the model.</P>;
             return (
-              <Table containerClassName="rounded-[var(--radius-lg)] border-border/70">
+              <Table containerClassName="rounded-[var(--radius-md)] border-border">
                 <caption className="sr-only">NASA studies used by the model</caption>
                 <TableHeader>
                   <TableRow>
@@ -268,7 +268,7 @@ airflow_cm_s = 1.0066 x AIR        (duct "Air display" reading, per the BASS-II 
               gs.length === 0 ? (
                 <P className="text-muted">None available.</P>
               ) : (
-                <Table containerClassName="max-h-[340px] rounded-[var(--radius-lg)] border-border/70">
+                <Table containerClassName="max-h-[340px] rounded-[var(--radius-md)] border-border">
                   <caption className="sr-only">Pressure source per material and flame setup</caption>
                   <TableHeader>
                     <TableRow>

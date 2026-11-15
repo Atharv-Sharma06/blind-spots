@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 import type { ApiQuery } from "@/hooks/api";
 import type { GroupSummary, HeadlineResponse } from "@/lib/types";
 import { fmtCount } from "@/lib/format";
@@ -9,7 +9,6 @@ import type { ExtValidation } from "./types";
 import { blindspotShortfall, VERDICT_WORD } from "./labels";
 import { QueryBoundary } from "./primitives";
 import { Disclosure } from "@/components/ui/disclosure";
-import { DotNumber } from "@/components/ui/dot-number";
 import { modelOf as model, retroSummary, retroVsRandom, vsMajority } from "./summary";
 
 const f = (v: number | null | undefined, d = 2): string => (typeof v === "number" && Number.isFinite(v) ? v.toFixed(d) : "—");
@@ -18,22 +17,31 @@ function Tile({ value, label, note }: { value: string; label: string; note: stri
   // "7 of 9" -> big "7" + small "of 9"; "97–101 kPa" -> big "97–101" + small "kPa".
   const m = /^(\d+) (of \d+)$/.exec(value) ?? /^(.+) (kPa)$/.exec(value);
   return (
-    <div className="card min-w-0 rounded-[28px] px-5 py-5">
+    <div className="min-w-0 xl:border-l xl:border-fg/10 xl:pl-6 xl:first:border-l-0 xl:first:pl-0">
       <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 text-fg">
-        <DotNumber className="text-[36px] leading-[40px]">{m ? m[1] : value}</DotNumber>
-        {m ? <span className="num text-[14px] text-muted">{m[2]}</span> : null}
+        <span className="text-[40px] font-medium leading-[44px] tracking-[-0.02em] tabular-nums">{m ? m[1] : value}</span>
+        {m ? <span className="text-[16px] text-muted">{m[2]}</span> : null}
       </div>
-      <div className="mt-3 text-[14px] font-medium leading-5 text-fg">{label}</div>
-      <div className="mt-1 text-xs leading-snug text-muted">{note}</div>
+      <div className="mt-3 text-[16px] font-medium leading-6 text-fg">{label}</div>
+      <div className="mt-1 text-[14px] leading-5 text-muted">{note}</div>
     </div>
   );
 }
 
-/** One calm limit row: a small amber dot, then the text. */
+/** The stats row: big numbers with a short caption under each, on the beige band. */
+function StatsBand({ children, ...rest }: { children: ReactNode } & HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div className="band grid grid-cols-1 gap-x-8 gap-y-8 rounded-[24px] p-6 sm:grid-cols-2 sm:p-8 xl:grid-flow-col xl:auto-cols-fr" {...rest}>
+      {children}
+    </div>
+  );
+}
+
+/** One limit row of a clean numbered list: a small muted index, then the text, with a hairline between rows. */
 function Limit({ children }: { children: ReactNode }) {
   return (
-    <li className="flex gap-3 border-t border-border py-3 first:border-t-0">
-      <span aria-hidden className="mt-[9px] size-1.5 shrink-0 rounded-full bg-gap" />
+    <li className="flex gap-4 border-t border-border py-4 first:border-t-0 first:pt-0 last:pb-0 [counter-increment:limit]">
+      <span aria-hidden className="num w-6 shrink-0 pt-[3px] text-[13px] text-muted before:content-[counter(limit,decimal-leading-zero)]" />
       <span className="min-w-0">{children}</span>
     </li>
   );
@@ -41,7 +49,7 @@ function Limit({ children }: { children: ReactNode }) {
 
 /** Placeholder text block: wraps like the text it stands in for, so the section keeps its loaded height. */
 function Ghost({ children, className }: { children: ReactNode; className?: string }) {
-  return <span className={`rounded-sm bg-subtle text-transparent [box-decoration-break:clone] motion-safe:animate-pulse ${className ?? ""}`}>{children}</span>;
+  return <span className={`rounded-sm bg-black/[0.06] text-transparent [box-decoration-break:clone] motion-safe:animate-pulse ${className ?? ""}`}>{children}</span>;
 }
 
 /** Loading state with the loaded layout's structure (lead, tiles, limits, collapsed table), so later sections do not shift. */
@@ -55,21 +63,21 @@ function TrustSkeleton() {
   return (
     <div role="status" aria-label="Loading the validation summary">
       <div aria-hidden className="space-y-6">
-        <p className="max-w-[68ch] text-[16px] leading-relaxed">
+        <p className="max-w-[56ch] text-[20px] font-medium leading-7">
           <Ghost>Short answer: partly. On ISS tests it had not seen, the model beats a simple guess in 00 of 00 materials. Where ISS tests give no evidence, it says so.</Ghost>
         </p>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatsBand>
           {tiles.map(([label, note]) => (
-            <div key={label} className="card min-w-0 rounded-[28px] px-5 py-5">
-              <div className="text-[36px] leading-[40px]"><Ghost>00 of 00</Ghost></div>
-              <div className="mt-3 text-[14px] font-medium leading-5"><Ghost>{label}</Ghost></div>
-              <div className="mt-1 text-xs leading-snug"><Ghost>{note}</Ghost></div>
+            <div key={label} className="min-w-0">
+              <div className="text-[40px] leading-[44px]"><Ghost>00 of 00</Ghost></div>
+              <div className="mt-3 text-[16px] font-medium leading-6"><Ghost>{label}</Ghost></div>
+              <div className="mt-1 text-[14px] leading-5"><Ghost>{note}</Ghost></div>
             </div>
           ))}
-        </div>
-        <div className="max-w-[78ch] space-y-2">
-          <h3 className="text-[15px] font-semibold"><Ghost>Limits</Ghost></h3>
-          <ul className="text-[14px] leading-relaxed">
+        </StatsBand>
+        <div className="card space-y-4 p-6 sm:p-8">
+          <h3 className="text-[20px] font-medium"><Ghost>Limits</Ghost></h3>
+          <ul className="text-[16px] leading-6 [counter-reset:limit]">
             {[
               "The uncertainty check passes in only 0 of 0 materials, and leans on steps where airflow was switched off. Without them, at most 00 flame-went-out results remain per material.",
               "Gravity is not modelled. All ISS tests ran in free fall; the Moon and Mars differ. This site judges the air only.",
@@ -102,13 +110,13 @@ export function TrustSection({
   const label = (id: string) => materialFullName(id, groups?.find((g) => g.group_id === id)?.label ?? id);
   return (
     <section id="trust" aria-labelledby="trust-h" className="scroll-mt-[calc(var(--header-h)+16px)]">
-      <h2 id="trust-h" className="text-[20px] font-semibold tracking-[-0.015em]">
+      <h2 id="trust-h" className="text-[28px] font-medium leading-[34px] tracking-[-0.02em]">
         Can you trust it?
       </h2>
-      <p className="mt-2 max-w-[68ch] text-[13px] leading-relaxed text-muted">
+      <p className="mt-2 max-w-[68ch] text-[16px] leading-6 text-muted">
         Scored on ISS tests the model did not see. Details in section 4 below.
       </p>
-      <div className="mt-5">
+      <div className="mt-6">
         {validation.isPending ? <TrustSkeleton /> : (
         <QueryBoundary query={validation} rows={4}>
           {(v) => {
@@ -140,10 +148,10 @@ export function TrustSection({
             const leftVals = supportedFacts.map((x) => x.left).filter((x): x is number => typeof x === "number");
             return (
               <div className="space-y-6">
-                <p className="max-w-[68ch] text-[16px] leading-relaxed" data-testid="trust-lead">
+                <p className="max-w-[56ch] text-[20px] font-medium leading-7 tracking-[-0.01em]" data-testid="trust-lead">
                   Short answer: partly. On ISS tests it had not seen, the model beats a simple guess in {better.length} of {gs.length} materials. Where ISS tests give no evidence, it says so.
                 </p>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <StatsBand>
                   <Tile
                     value={`${better.length} of ${gs.length}`}
                     label="materials beat a simple guess"
@@ -168,11 +176,11 @@ export function TrustSection({
                       note={`Known for ${fmtCount(nSteps - nAssumed)} of ${fmtCount(nSteps)} results; the rest assumed at normal cabin pressure.`}
                     />
                   ) : null}
-                </div>
+                </StatsBand>
 
-                <div className="max-w-[78ch] space-y-2">
-                  <h3 className="text-[15px] font-semibold">Limits</h3>
-                  <ul className="text-[14px] leading-relaxed text-fg/90">
+                <div className="card space-y-4 p-6 sm:p-8">
+                  <h3 className="text-[20px] font-medium">Limits</h3>
+                  <ul className="max-w-[78ch] text-[16px] leading-6 [counter-reset:limit]">
                     {bsSupported.length ? (
                       <Limit>
                         The uncertainty check passes in only {bsSupported.length} of {gs.length} materials

@@ -55,8 +55,8 @@ export function MaterialPicker({ groups, nearby, selectedId, onChange, part = "b
     <div data-testid={part === "list" ? "material-list" : "material-picker"}>
       {showSelect ? (
       <>
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-        <label htmlFor={selectId} className="text-ui font-semibold text-fg">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+        <label htmlFor={selectId} className="text-ui font-medium text-muted">
           Material
         </label>
         <div className="relative w-full sm:max-w-xl">
@@ -64,7 +64,7 @@ export function MaterialPicker({ groups, nearby, selectedId, onChange, part = "b
             id={selectId}
             value={selectedId}
             onChange={(e) => onChange(e.target.value)}
-            className="h-11 w-full min-w-0 appearance-none truncate rounded-full border border-border-strong bg-subtle pr-11 pl-4 text-prose text-fg shadow-[inset_0_1px_0_rgb(255_255_255/.05)] transition-colors hover:border-fg/60 hover:bg-[#26262B]"
+            className="h-12 w-full min-w-0 cursor-pointer appearance-none truncate rounded-[12px] border border-border-strong bg-surface pr-11 pl-4 text-prose text-fg transition-colors hover:border-fg"
           >
             {modelled.map((g) => (
               <option key={g.group_id} value={g.group_id}>
@@ -73,11 +73,11 @@ export function MaterialPicker({ groups, nearby, selectedId, onChange, part = "b
               </option>
             ))}
           </select>
-          <ChevronDown aria-hidden className="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 text-accent" />
+          <ChevronDown aria-hidden className="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 text-fg" />
         </div>
       </div>
       {nearby && modelled.length > 0 && modelled.every((g) => (nearby.get(g.group_id) ?? 0) === 0) ? (
-        <p className="mt-1.5 text-ui text-muted sm:pl-[4.25rem]" data-testid="no-material-nearby">
+        <p className="mt-1.5 text-ui text-muted sm:pl-[4.75rem]" data-testid="no-material-nearby">
           No material has nearby ISS tests here.
         </p>
       ) : null}
@@ -96,7 +96,7 @@ export function MaterialPicker({ groups, nearby, selectedId, onChange, part = "b
           contentClassName="pl-0 sm:pl-5"
         >
           <p className="mb-2 text-ui text-muted">Pick a row to switch material. Grey rows have too few ISS tests for the model.</p>
-          <ul className="divide-y divide-border overflow-hidden rounded-[var(--radius-lg)] border border-border bg-bg/40">
+          <ul className="divide-y divide-border overflow-hidden rounded-[var(--radius-md)] border border-border bg-surface">
             {all.map((g) => {
               const n = nearby?.get(g.group_id) ?? 0;
               const canPick = g.model_status === "modeled";
@@ -107,7 +107,7 @@ export function MaterialPicker({ groups, nearby, selectedId, onChange, part = "b
                     <span className={cn("block truncate text-ui", canPick ? "text-fg" : "text-muted")}>{full(g)}</span>
                   </span>
                   <span className={cn("shrink-0 text-xs tabular", n > 0 ? "text-fg" : "text-muted")}>{countText(n)}{!canPick && n > 0 ? ", too few for the model" : ""}{!canPick && n === 0 ? <span className="sr-only">, too few for the model</span> : null}</span>
-                  {canPick ? <Check aria-hidden className={cn("size-4 shrink-0", isSel ? "text-accent" : "text-transparent")} /> : <span className="w-4 shrink-0" aria-hidden />}
+                  {canPick ? <Check aria-hidden className={cn("size-4 shrink-0", isSel ? "text-fg" : "text-transparent")} /> : <span className="w-4 shrink-0" aria-hidden />}
                 </>
               );
               return (
@@ -117,12 +117,12 @@ export function MaterialPicker({ groups, nearby, selectedId, onChange, part = "b
                       type="button"
                       onClick={() => onChange(g.group_id)}
                       aria-pressed={isSel}
-                      className={cn("flex min-h-10 w-full items-center gap-3 px-3 text-left transition-colors hover:bg-subtle focus-inset", isSel && "bg-accent-tint")}
+                      className={cn("flex min-h-10 w-full items-center gap-3 px-3 text-left transition-colors hover:bg-subtle focus-inset", isSel && "bg-subtle")}
                     >
                       {body}
                     </button>
                   ) : (
-                    <div className="flex min-h-10 items-center gap-3 bg-subtle/60 px-3" title="Too few ISS tests for the model">
+                    <div className="flex min-h-10 items-center gap-3 bg-subtle px-3" title="Too few ISS tests for the model">
                       {body}
                     </div>
                   )}

@@ -53,7 +53,7 @@ export function ErrorState({ code, title, description, onRetry, action, compact,
   return (
     <div role="alert" data-error-code={code} className={cn("flex flex-col gap-1", align === "center" ? "items-center text-center" : "items-start text-left", compact ? "py-3" : "py-8", className)}>
       <Icon className="mb-1 size-5 text-muted" aria-hidden />
-      <p className="text-ui font-medium text-fg">{copy.title}</p>
+      <p className="text-prose font-medium text-fg">{copy.title}</p>
       <p className="max-w-[56ch] text-ui text-muted">{copy.description}</p>
       {onRetry || action ? (
         <div className="mt-2 flex items-center gap-2">

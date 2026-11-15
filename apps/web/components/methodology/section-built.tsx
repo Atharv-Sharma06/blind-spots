@@ -8,8 +8,8 @@ import { Bullets, P, Section } from "./primitives";
  */
 export function SiNote() {
   return (
-    <section id="si" aria-labelledby="si-h" className="card scroll-mt-[calc(var(--header-h)+16px)] rounded-[var(--radius-2xl)] bg-surface p-5 sm:p-7" data-testid="si-note">
-      <h2 id="si-h" className="text-[20px] font-semibold tracking-[-0.015em]">
+    <section id="si" aria-labelledby="si-h" className="card scroll-mt-[calc(var(--header-h)+16px)] p-6 sm:p-8" data-testid="si-note">
+      <h2 id="si-h" className="text-[20px] font-medium tracking-[-0.015em]">
         How we used SI
       </h2>
       <p className="mt-2 max-w-[68ch] text-[15px] leading-relaxed">
@@ -27,7 +27,7 @@ export function SiNote() {
 export function BuiltSection() {
   return (
     <Section id="built" number={8} title="How this was built" intro="What SI helped with, and what the app does.">
-      <div className="card max-w-[78ch] space-y-3 rounded-[var(--radius-xl)] bg-surface p-4 sm:p-5">
+      <div className="card max-w-[78ch] space-y-3 p-5 sm:p-7">
       <P>We used Claude (Anthropic) as an SI assistant for:</P>
       <Bullets>
         <li>

@@ -1,66 +1,74 @@
 @import "tailwindcss";
 
 /* ------------------------------------------------------------------ */
-/* Design tokens (CONTRACTS section 9). Light theme only.              */
-/* One meaning per hue: observed = blue, gap = amber, candidate/focus  */
-/* = teal-green, uncertainty = plum, verdict warning = red.            */
+/* Design tokens (CONTRACTS section 9) + redesign v2 (.work/style2/STYLE2.md): light, calm, BizLink-style. */
+/* One meaning per hue: observed = blue, gap = amber, candidate/focus = green, uncertainty = plum,  */
+/* verdict warning = orange-red. Class names are unchanged; only the values moved.                  */
 /* ------------------------------------------------------------------ */
-/* Dark restyle (.work/style/STYLE.md): near-black page, charcoal squircles, one signal-yellow accent.
-   Class names are unchanged; only the values moved. Light values come back for print (bottom of file). */
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
-  --bg: #08080a;
-  --surface: #161618;
-  --subtle: #1f1f23;
-  --border: #2a2a2f;
-  --border-strong: #3a3a41;
-  --fg: #f4f4f5;
-  --muted: #a1a1aa;
+  --bg: #f7f6f3;
+  --band: #ece9e0;
+  --surface: #ffffff;
+  --subtle: #f3f2ef;
+  --border: #e4e2dc;
+  --border-strong: #cfccc4;
+  --fg: #161616;
+  /* STYLE2 names #6F6D68; darkened a hair so captions stay AA (4.5:1) on the beige band too. */
+  --muted: #65635e;
+  --ink-card: #1c1c1c;
+  --on-ink: #ffffff;
 
-  --observed: #8e9bff; /* periwinkle: ISS test results */
-  --observed-tint: #1a1d3a;
-  --gap: #ffb547; /* amber: partial / caveats */
-  --gap-tint: #2a2010;
-  --gap-fg: #ffc978;
-  --accent: #f2d21b; /* signal yellow: candidates, focus, CTAs */
-  --accent-tint: #2a2507;
-  --on-accent: #0b0b0c;
-  --target: #ffffff;
-  --warn: #ff7a7a;
-  --warn-tint: #2a1414;
+  /* STYLE2 names #1F9D55; that is 3.5:1 on white, so text/links/focus use this AA-safe green (5:1). */
+  --accent: #107a3b;
+  --accent-tint: #e7f6ec;
+  --on-accent: #ffffff;
+  --cta: #2fd067;
+  --on-cta: #0b2414;
 
-  /* Plum scale for uncertainty / blind spot: dark to bright. */
-  --plum-1: #1e1522;
-  --plum-2: #2e1a36;
-  --plum-3: #4a2357;
-  --plum-4: #6e2a8c;
-  --plum-5: #9b3fb5;
-  --plum-6: #c46bd8;
-  --plum-7: #ebb2f5;
+  --observed: #2f4fd8; /* blue: ISS test results */
+  --observed-tint: #ebeffd;
+  --gap: #c98410; /* amber: partial / caveats */
+  --gap-tint: #fbf1de;
+  --gap-fg: #8a5a00;
+  --warn: #c2410c;
+  --warn-tint: #fdede6;
+  --target: #161616;
 
-  --magenta-from: #a851c3;
-  --magenta-mid: #8f3dae;
-  --magenta-to: #5e2381;
-  --indigo-core: #07071a;
-  --indigo-edge: #5c59c4;
-  --periwinkle: #9aa4ff;
+  /* Plum scale for uncertainty / blind spot: light to dark. */
+  --plum-1: #f5f0f7;
+  --plum-2: #e7dcec;
+  --plum-3: #d2bfdb;
+  --plum-4: #b596c4;
+  --plum-5: #8f6aa3;
+  --plum-6: #6e4a84;
+  --plum-7: #4f2f63;
 
-  /* Film grain: white fractal noise, alpha taken from the noise, faint. */
-  --grain-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1.2 0 0 0 -.25'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.07'/%3E%3C/svg%3E");
+  /* Legacy names kept so old usages still resolve to calm light values. */
+  --periwinkle: #2f4fd8;
+  --magenta-from: #1c1c1c;
+  --magenta-mid: #1c1c1c;
+  --magenta-to: #1c1c1c;
+  --indigo-core: #1c1c1c;
+  --indigo-edge: #1c1c1c;
+  --grain-img: none;
 
-  --shadow-popover: 0 0 0 1px #2a2a2f, 0 18px 40px -12px rgb(0 0 0 / 0.7);
+  --shadow-popover: 0 0 0 1px #e4e2dc, 0 14px 32px -14px rgb(22 22 22 / 0.22);
   --header-h: 52px;
 }
 
 @theme inline {
   --color-bg: var(--bg);
+  --color-band: var(--band);
   --color-surface: var(--surface);
   --color-subtle: var(--subtle);
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
   --color-fg: var(--fg);
   --color-muted: var(--muted);
+  --color-ink-card: var(--ink-card);
+  --color-on-ink: var(--on-ink);
   --color-observed: var(--observed);
   --color-observed-tint: var(--observed-tint);
   --color-gap: var(--gap);
@@ -68,6 +76,8 @@
   --color-gap-fg: var(--gap-fg);
   --color-accent: var(--accent);
   --color-accent-tint: var(--accent-tint);
+  --color-cta: var(--cta);
+  --color-on-cta: var(--on-cta);
   --color-target: var(--target);
   --color-warn: var(--warn);
   --color-warn-tint: var(--warn-tint);
@@ -86,36 +96,47 @@
   --color-indigo-core: var(--indigo-core);
   --color-indigo-edge: var(--indigo-edge);
 
-  /* Type scale: six sizes only. Outfit runs small, so each step is a touch larger than before.
-     text-label 12/16 · text-ui 14/20 · text-prose 15/24 · text-title 17/24 · text-heading 22/28 · text-display 34/40 */
+  /* Type scale: label 12/16 · ui 14/20 · prose 16/24 · title 20/28 · heading 28/34 · display 40/44.
+     Hero and banner sizes are fluid (clamp) for the landing page: text-hero, text-banner. */
   --text-label: 12px;
   --text-label--line-height: 16px;
   --text-ui: 14px;
   --text-ui--line-height: 20px;
-  --text-prose: 15px;
+  --text-prose: 16px;
   --text-prose--line-height: 24px;
-  --text-title: 17px;
-  --text-title--line-height: 24px;
-  --text-title--letter-spacing: -0.005em;
-  --text-heading: 22px;
-  --text-heading--line-height: 28px;
-  --text-heading--letter-spacing: -0.01em;
-  --text-display: 34px;
-  --text-display--line-height: 40px;
-  --text-display--letter-spacing: -0.02em;
+  --text-title: 20px;
+  --text-title--line-height: 28px;
+  --text-title--letter-spacing: -0.01em;
+  --text-title--font-weight: 500;
+  --text-heading: 28px;
+  --text-heading--line-height: 34px;
+  --text-heading--letter-spacing: -0.02em;
+  --text-heading--font-weight: 500;
+  --text-display: 40px;
+  --text-display--line-height: 44px;
+  --text-display--letter-spacing: -0.03em;
+  --text-display--font-weight: 500;
+  --text-hero: clamp(3.25rem, 9.6vw, 10rem);
+  --text-hero--line-height: 0.92;
+  --text-hero--letter-spacing: -0.045em;
+  --text-hero--font-weight: 800;
+  --text-banner: clamp(2.25rem, 4.4vw, 3.5rem);
+  --text-banner--line-height: 1.05;
+  --text-banner--letter-spacing: -0.035em;
+  --text-banner--font-weight: 700;
 
-  --font-sans: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
-  --font-dot: var(--font-doto), var(--font-geist-mono), ui-monospace, monospace;
+  --font-sans: var(--font-inter-tight), "Inter Tight", ui-sans-serif, system-ui, sans-serif;
+  --font-dot: var(--font-inter-tight), "Inter Tight", ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
 
-  /* Soft squircle radii; rounded-full stays the pill. */
+  /* Radii: xs 6, sm 8, md 12, lg 16, xl 20, 2xl 24, 3xl 32; rounded-full stays the pill. */
   --radius-xs: 6px;
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
-  --radius-xl: 28px;
-  --radius-2xl: 34px;
-  --radius-3xl: 44px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-3xl: 32px;
 
   --shadow-popover: var(--shadow-popover);
 
@@ -142,7 +163,7 @@
 }
 
 /* Numbers: Geist Mono with tabular figures. Put it on the LEAF value element only (<dd>, a value <span>,
-   a numeric table cell), never on dl/p/ul/li/div wrappers: labels and sentences stay in Geist Sans. */
+   a numeric table cell), never on dl/p/ul/li/div wrappers: labels and sentences stay in the sans face. */
 @utility num {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums slashed-zero;
@@ -158,69 +179,151 @@
   &:focus-visible { outline-offset: -2px; }
 }
 
-/* ---------------- Restyle utilities (exact names from .work/style/STYLE.md) ---------------- */
-/* Page dot grid. */
-@utility bg-dots {
-  background-color: var(--bg);
-  background-image: radial-gradient(rgb(255 255 255 / 0.07) 1px, transparent 1.2px);
-  background-size: 22px 22px;
-}
-/* Film grain as an extra background layer over the element's background colour (never clips popovers). */
-@utility grain {
-  background-image: var(--grain-img);
-  background-size: 180px 180px;
-}
-/* Charcoal squircle card with a light top edge. */
+/* ---------------- v2 utilities (exact names from .work/style2/STYLE2.md) ---------------- */
+/* White card: 1 px border, radius lg, no shadow. */
 @utility card {
-  background-color: #18181b;
-  background-image: var(--grain-img), linear-gradient(160deg, #242428 0%, #18181b 55%, #131315 100%);
-  background-size: 180px 180px, 100% 100%;
-  border-radius: var(--radius-2xl);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06), inset 0 0 0 1px rgb(255 255 255 / 0.03), 0 24px 48px -24px rgb(0 0 0 / 0.8);
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
   color: var(--fg);
 }
-/* Magenta / purple gradient pill card (blind spot). */
-@utility card-magenta {
-  background-color: var(--magenta-mid);
-  background-image: var(--grain-img), radial-gradient(120% 140% at 0% 0%, var(--magenta-from) 0%, var(--magenta-mid) 40%, var(--magenta-to) 100%);
-  background-size: 180px 180px, 100% 100%;
-  border-radius: var(--radius-3xl);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.18), 0 24px 48px -24px rgb(0 0 0 / 0.8);
+/* Near-black highlight card with white text. Re-points the colour tokens so inner text-fg / text-muted stay readable. */
+@utility card-ink {
+  --fg: #ffffff;
+  --muted: rgb(255 255 255 / 0.72);
+  --border: rgb(255 255 255 / 0.16);
+  --border-strong: rgb(255 255 255 / 0.28);
+  --subtle: rgb(255 255 255 / 0.08);
+  --accent: #5fe08e;
+  background-color: var(--ink-card);
+  border: 1px solid var(--ink-card);
+  border-radius: var(--radius-lg);
   color: #ffffff;
 }
-/* Deep indigo card whose edges glow periwinkle (covered). */
-@utility card-indigo {
-  background-color: var(--indigo-core);
-  background-image: var(--grain-img), radial-gradient(120% 130% at 50% 45%, var(--indigo-core) 40%, #22216a 78%, var(--indigo-edge) 100%);
-  background-size: 180px 180px, 100% 100%;
-  border-radius: var(--radius-3xl);
-  box-shadow: inset 0 0 48px rgb(140 135 255 / 0.35), 0 24px 48px -24px rgb(0 0 0 / 0.8);
-  color: #ffffff;
+/* Warm beige band behind the stats row. */
+@utility band {
+  background-color: var(--band);
 }
-/* Signal-yellow pill with a dot-matrix texture: the one primary action. */
-@utility pill-yellow {
-  background-color: #f2d21b;
-  background-image: radial-gradient(rgb(0 0 0 / 0.16) 1.2px, transparent 1.4px);
-  background-size: 9px 9px;
-  background-position: 3px 3px;
-  color: var(--on-accent);
+/* Green call to action: the one primary action on the landing page. */
+@utility pill-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding-inline: 1.75rem;
+  background-color: var(--cta);
+  color: var(--on-cta);
   border-radius: calc(infinity * 1px);
+  font-size: 12px;
+  line-height: 16px;
   font-weight: 600;
-  &:hover { filter: brightness(1.05); }
-  &:focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; }
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: filter 120ms ease-out;
+  &:hover { filter: brightness(0.94); }
+  &:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
 }
-/* Dot-matrix (LED) display numbers, 28 px and up only. Small numbers keep `num`. */
-@utility dotnum {
-  font-family: var(--font-dot);
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-  font-variation-settings: "ROND" 100; /* round LED dots, like the reference */
+/* Black button: the primary action inside the app. */
+@utility pill-ink {
+  background-color: var(--fg);
+  color: #ffffff;
+  border: 1px solid var(--fg);
+  border-radius: 14px;
+  font-weight: 500;
+  transition: background-color 120ms ease-out;
+  &:hover { background-color: #333333; border-color: #333333; }
 }
-/* Yellow glow for the cabin marker / active ring. */
+/* Outlined pill: the secondary action. */
+@utility pill-outline {
+  background-color: transparent;
+  color: var(--fg);
+  border: 1px solid rgb(22 22 22 / 0.22);
+  border-radius: calc(infinity * 1px);
+  font-weight: 500;
+  transition: background-color 120ms ease-out, border-color 120ms ease-out;
+  &:hover { background-color: rgb(22 22 22 / 0.05); border-color: rgb(22 22 22 / 0.4); }
+}
+/* Circular outlined icon button (40 px). */
+@utility btn-round {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  background-color: transparent;
+  color: var(--fg);
+  border: 1px solid rgb(22 22 22 / 0.22);
+  border-radius: 9999px;
+  transition: background-color 120ms ease-out, border-color 120ms ease-out;
+  &:hover { background-color: rgb(22 22 22 / 0.05); border-color: rgb(22 22 22 / 0.4); }
+}
+/* Small uppercase label. */
+@utility eyebrow {
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+/* Diagonal stripes for "comparison / not covered" bars. */
+@utility hatch {
+  background-image: repeating-linear-gradient(135deg, #cfccc4 0 2px, transparent 2px 6px);
+}
+/* 1 px ink hairline. */
+@utility hairline {
+  border: 1px solid rgb(22 22 22 / 0.1);
+}
+
+/* ---------------- Dark-era utilities, neutralised so old usages still look right ---------------- */
+@utility bg-dots {
+  background-image: none;
+}
+@utility grain {
+  background-image: none;
+}
+/* Former magenta / indigo gradient cards become the near-black highlight card. */
+@utility card-magenta {
+  --fg: #ffffff;
+  --muted: rgb(255 255 255 / 0.72);
+  --border: rgb(255 255 255 / 0.16);
+  --subtle: rgb(255 255 255 / 0.08);
+  background-color: var(--ink-card);
+  border: 1px solid var(--ink-card);
+  border-radius: var(--radius-lg);
+  color: #ffffff;
+}
+@utility card-indigo {
+  --fg: #ffffff;
+  --muted: rgb(255 255 255 / 0.72);
+  --border: rgb(255 255 255 / 0.16);
+  --subtle: rgb(255 255 255 / 0.08);
+  background-color: var(--ink-card);
+  border: 1px solid var(--ink-card);
+  border-radius: var(--radius-lg);
+  color: #ffffff;
+}
+/* Former yellow dotted pill becomes the black pill. */
+@utility pill-yellow {
+  background-color: var(--fg);
+  color: #ffffff;
+  border: 1px solid var(--fg);
+  border-radius: 14px;
+  font-weight: 500;
+  &:hover { background-color: #333333; border-color: #333333; }
+}
 @utility glow-yellow {
-  filter: drop-shadow(0 0 24px rgb(242 210 27 / 0.45));
+  filter: none;
+}
+/* Former dot-matrix numbers: big medium sans, tight tracking, tabular figures. Size comes from the caller. */
+@utility dotnum {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
 }
 
 @layer base {
@@ -253,7 +356,7 @@
   }
   :focus:not(:focus-visible) { outline: none; }
 
-  ::selection { background: #f2d21b; color: var(--on-accent); }
+  ::selection { background: var(--cta); color: var(--on-cta); }
 
   button, [role="button"], summary { cursor: pointer; }
 
@@ -288,51 +391,35 @@
   }
 }
 
-/* Print (/brief "Print / Save as PDF"): back to a light palette, no grain, dots or gradients. */
+/* Print (/brief "Print / Save as PDF"): light, flat, no ink-heavy fills. */
 @media print {
   :root {
-    color-scheme: light;
     --bg: #ffffff;
+    --band: #ffffff;
     --surface: #ffffff;
     --subtle: #f3f2ee;
     --border: #d9d7d0;
     --border-strong: #b9b6ad;
     --fg: #000000;
     --muted: #4a4945;
-    --observed: #2f64d6;
-    --observed-tint: #eef3fd;
-    --gap: #c97a06;
-    --gap-tint: #fcf4e6;
-    --gap-fg: #8a5200;
-    --accent: #6b5a00;
-    --accent-tint: #faf3c8;
-    --on-accent: #000000;
-    --target: #000000;
-    --warn: #b42318;
-    --warn-tint: #fdf1ef;
-    --plum-1: #f5eef6;
-    --plum-2: #e6d3ea;
-    --plum-3: #d0afd7;
-    --plum-4: #b386bd;
-    --plum-5: #8f5c9f;
-    --plum-6: #744383;
-    --plum-7: #5b2a6e;
-    --periwinkle: #2f3fbf;
-    --grain-img: none;
+    --accent: #0b5f2c;
+    --on-accent: #ffffff;
     --shadow-popover: none;
   }
   html, body {
     background: #ffffff !important;
     color: #000000 !important;
   }
-  .bg-dots, .grain, .card, .card-magenta, .card-indigo, .pill-yellow {
+  .card, .card-ink, .card-magenta, .card-indigo, .band, .pill-yellow, .pill-ink {
+    --fg: #000000;
+    --muted: #4a4945;
+    --border: #d9d7d0;
     background: #ffffff !important;
     background-image: none !important;
     color: #000000 !important;
     box-shadow: none !important;
     filter: none !important;
   }
-  .card, .card-magenta, .card-indigo { border: 1px solid #d9d7d0 !important; }
-  .pill-yellow { border: 1px solid #000000 !important; }
-  .glow-yellow { filter: none !important; box-shadow: none !important; }
+  .card, .card-ink, .card-magenta, .card-indigo { border: 1px solid #d9d7d0 !important; }
+  .pill-yellow, .pill-ink { border: 1px solid #000000 !important; }
 }

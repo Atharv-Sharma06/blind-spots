@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import type { CoverageResponse, SurfaceResponse } from "@/lib/types";
 import { verdictLabel } from "@/lib/format";
 import MapLegend from "./map-legend";
-import { ACCENT, GAP, GAP_HEX, INK, INK_RGB, MUTED, OBSERVED, ON_ACCENT, TARGET, UNC_ALPHA, fmtTick, gridGeom, maskRuns, plumRgb, yTicks, type GridGeom } from "./map-scales";
+import { ACCENT, GAP, GAP_HEX, GUIDE, INK, INK_RGB, MUTED, OBSERVED, OBSERVED_TINT, ON_ACCENT, PAPER, TARGET, UNC_ALPHA, fmtTick, gridGeom, maskRuns, plumRgb, yTicks, type GridGeom } from "./map-scales";
 
 export interface MapObservation {
   id: string;
@@ -162,7 +162,7 @@ function buildRasters(surface: SurfaceResponse, hypo: ParameterMapProps["hypothe
           pc[1].data[o] = INK_RGB[0];
           pc[1].data[o + 1] = INK_RGB[1];
           pc[1].data[o + 2] = INK_RGB[2];
-          pc[1].data[o + 3] = Math.round(255 * (0.05 + 0.16 * Math.min(1, Math.max(0, v))));
+          pc[1].data[o + 3] = Math.round(255 * (0.05 + 0.2 * Math.min(1, Math.max(0, v))));
         }
       }
     }
@@ -518,8 +518,8 @@ export default function ParameterMap(props: ParameterMapProps) {
     ctx.imageSmoothingQuality = "high";
     if (rasters) {
       const [rx, ry, rw, rh] = geomRect(rasters.geom);
-      // The plum scale runs dark to bright on the dark plot; a partial alpha keeps the brightest (most uncertain)
-      // cells from washing out the marks and labels drawn on top. The legend ramp uses the same alpha.
+      // The plum scale runs light to dark on the white plot; a partial alpha keeps the darkest (most uncertain)
+      // cells from swallowing the marks and labels drawn on top. The legend ramp uses the same alpha.
       if (layers.uncertainty && rasters.unc) {
         ctx.save();
         ctx.globalAlpha = UNC_ALPHA;
@@ -534,9 +534,9 @@ export default function ParameterMap(props: ParameterMapProps) {
       const covered = sparse.runs.reduce((a, r) => a + (r[2] - r[1]), 0);
       const whole = cells > 0 && covered / cells >= 0.9;
       if (whole) {
-        // The whole slice is a gap: one flat pale-amber wash and a single label instead of dense hatching.
+        // The whole slice is a gap: one flat pale-grey wash and a single label instead of dense hatching.
         ctx.save();
-        ctx.globalAlpha = 0.09;
+        ctx.globalAlpha = 0.1;
         ctx.fillStyle = GAP_HEX;
         ctx.fillRect(0, 0, iw, ih);
         ctx.restore();
@@ -546,7 +546,7 @@ export default function ParameterMap(props: ParameterMapProps) {
         ctx.save();
         runsPath(sparse.geom, sparse.runs);
         ctx.clip();
-        ctx.globalAlpha = 0.7;
+        ctx.globalAlpha = 0.85;
         ctx.fillStyle = pat;
         ctx.fillRect(0, 0, iw, ih);
         ctx.restore();
@@ -1061,7 +1061,7 @@ export default function ParameterMap(props: ParameterMapProps) {
       ) : (
         <div
           ref={wrapRef}
-          className={`relative w-full select-none bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${heightProp === undefined ? plotClassName ?? "h-[520px]" : ""}`}
+          className={`relative w-full select-none bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${heightProp === undefined ? plotClassName ?? "h-[520px]" : ""}`}
           style={heightProp === undefined ? undefined : { height: heightProp }}
           tabIndex={0}
           role="group"
@@ -1086,19 +1086,19 @@ export default function ParameterMap(props: ParameterMapProps) {
             <g transform={`translate(${M.l},${M.t})`} aria-hidden>
               {xT.map((t) => (
                 <g key={`x${t}`}>
-                  <line x1={xs(t)} x2={xs(t)} y1={0} y2={ih} stroke="var(--border)" strokeWidth={1} opacity={0.55} />
-                  <line x1={xs(t)} x2={xs(t)} y1={ih} y2={ih + 4} stroke="var(--border-strong)" />
+                  <line x1={xs(t)} x2={xs(t)} y1={0} y2={ih} stroke={GUIDE} strokeWidth={1} strokeOpacity={0.08} />
+                  <line x1={xs(t)} x2={xs(t)} y1={ih} y2={ih + 4} stroke={GUIDE} strokeOpacity={0.3} />
                   <text x={xs(t)} y={ih + 17} textAnchor="middle" fontSize={12} fill={MUTED} style={{ fontVariantNumeric: "tabular-nums" }}>{fmtTick(t)}</text>
                 </g>
               ))}
               {yT.map((t) => (
                 <g key={`y${t}`}>
-                  <line y1={ys(t)} y2={ys(t)} x1={0} x2={iw} stroke="var(--border)" strokeWidth={1} opacity={0.55} />
-                  <line y1={ys(t)} y2={ys(t)} x1={-4} x2={0} stroke="var(--border-strong)" />
+                  <line y1={ys(t)} y2={ys(t)} x1={0} x2={iw} stroke={GUIDE} strokeWidth={1} strokeOpacity={0.08} />
+                  <line y1={ys(t)} y2={ys(t)} x1={-4} x2={0} stroke={GUIDE} strokeOpacity={0.3} />
                   <text x={-8} y={ys(t) + 4} textAnchor="end" fontSize={12} fill={MUTED} style={{ fontVariantNumeric: "tabular-nums" }}>{fmtTick(t)}</text>
                 </g>
               ))}
-              <rect x={0} y={0} width={iw} height={ih} fill="none" stroke="var(--border-strong)" />
+              <rect x={0} y={0} width={iw} height={ih} fill="none" stroke={GUIDE} strokeOpacity={0.22} />
               <text x={iw / 2} y={ih + (M.b - 8)} textAnchor="middle" fontSize={12} fontWeight={500} fill={INK}>{xLabel}</text>
               <text transform={`translate(${-(M.l - 14)},${ih / 2}) rotate(-90)`} textAnchor="middle" fontSize={12} fontWeight={500} fill={INK}>{yLabel}</text>
             </g>
@@ -1107,7 +1107,7 @@ export default function ParameterMap(props: ParameterMapProps) {
             <g ref={zoomRef} transform={`translate(${M.l},${M.t})`} style={{ cursor: "grab" }}>
               <rect x={0} y={0} width={iw} height={ih} fill="transparent" onPointerMove={onPlotMove} onPointerLeave={() => setHover(null)} onClick={() => { onSelectObservation?.(null); onSelectCandidate?.(null); }} />
               <g clipPath={`url(#${uid}-plot)`}>
-                {layers.coverage && sparsePath && <path d={sparsePath} fill="none" stroke={GAP} strokeWidth={1} pointerEvents="none" />}
+                {layers.coverage && sparsePath && <path d={sparsePath} fill="none" stroke={GAP} strokeWidth={1} strokeOpacity={0.9} pointerEvents="none" />}
 
                 {layers.prediction && predPaths.length > 0 && (
                   <g clipPath={supportedClip ? `url(#${uid}-sup)` : undefined} pointerEvents="none">
@@ -1121,16 +1121,16 @@ export default function ParameterMap(props: ParameterMapProps) {
                   <g key={b.id} pointerEvents="none">
                     <rect x={b.x} y={b.y} width={b.w} height={b.h} fill="none" stroke={MUTED} strokeOpacity={0.3} strokeWidth={1} strokeDasharray="2 4" />
                     {b.lab && (
-                      <text x={b.lab.x} y={b.lab.y} fontSize={10} fill={MUTED} fillOpacity={0.85} stroke="var(--surface)" strokeWidth={3} paintOrder="stroke" strokeLinejoin="round">{b.badge}<title>{`${b.label}: related NASA tests, not used by the model`}</title></text>
+                      <text x={b.lab.x} y={b.lab.y} fontSize={10} fill={MUTED} fillOpacity={0.9} stroke={PAPER} strokeWidth={3} paintOrder="stroke" strokeLinejoin="round">{b.badge}<title>{`${b.label}: related NASA tests, not used by the model`}</title></text>
                     )}
                   </g>
                 ))}
 
                 {layers.target && tgt && (
                   <g>
-                    <rect pointerEvents="none" x={tgt.rx} y={tgt.ry} width={tgt.rw} height={tgt.rh} fill={TARGET} fillOpacity={0.06} stroke={TARGET} strokeOpacity={0.9} strokeWidth={1.5} strokeDasharray="6 3" />
-                    {/* same marker as the Cabins chart: a white dot with a yellow glow (drawn before the candidate diamonds, which may sit on it) */}
-                    <circle pointerEvents="none" cx={tgt.nx} cy={tgt.ny} r={5.5} fill={TARGET} stroke="var(--surface)" strokeWidth={2} style={{ filter: "drop-shadow(0 0 5px rgb(242 210 27 / 0.75))" }} />
+                    <rect pointerEvents="none" x={tgt.rx} y={tgt.ry} width={tgt.rw} height={tgt.rh} fill={TARGET} fillOpacity={0.05} stroke={TARGET} strokeOpacity={0.9} strokeWidth={1.5} strokeDasharray="6 3" />
+                    {/* same marker as the Cabins chart: a solid black dot with a white ring (drawn before the candidate diamonds, which may sit on it) */}
+                    <circle pointerEvents="none" cx={tgt.nx} cy={tgt.ny} r={5.5} fill={TARGET} stroke={PAPER} strokeWidth={2} />
                     <circle
                       cx={tgt.nx}
                       cy={tgt.ny}
@@ -1172,9 +1172,9 @@ export default function ParameterMap(props: ParameterMapProps) {
                       onFocus={() => { setCtxActive(c.id); setFocusKey(`x:${c.id}`); setHover({ kind: "ctx", id: c.id, x: X + M.l, y: Y + M.t }); }}
                       onBlur={() => { setFocusKey(null); setHover(null); }}
                     >
-                      {focusKey === `x:${c.id}` && <circle cx={X} cy={Y} r={9} fill="none" stroke={ACCENT} strokeWidth={2} />}
+                      {focusKey === `x:${c.id}` && <circle cx={X} cy={Y} r={9} fill="none" stroke={INK} strokeWidth={2} />}
                       <circle cx={X} cy={Y} r={coarse ? 20 : 9} fill="transparent" />
-                      <path d={`M${X},${Y - 4}L${X + 3.5},${Y + 2.5}H${X - 3.5}Z`} fill="var(--surface)" stroke={MUTED} strokeOpacity={0.75} strokeWidth={1} />
+                      <path d={`M${X},${Y - 4}L${X + 3.5},${Y + 2.5}H${X - 3.5}Z`} fill={PAPER} stroke={MUTED} strokeOpacity={0.85} strokeWidth={1} />
                     </g>
                   );
                 })}
@@ -1185,7 +1185,7 @@ export default function ParameterMap(props: ParameterMapProps) {
                   const Y = ys(o.y);
                   const sel = o.id === selectedObservationId;
                   const hl = highlight.has(o.id);
-                  const fill = o.label === 1 ? OBSERVED : o.label === 0 ? "var(--surface)" : "var(--observed-tint)";
+                  const fill = o.label === 1 ? OBSERVED : o.label === 0 ? PAPER : OBSERVED_TINT;
                   return (
                     <g
                       key={key}
@@ -1204,9 +1204,9 @@ export default function ParameterMap(props: ParameterMapProps) {
                     >
                       <circle cx={X} cy={Y} r={coarse ? 20 : 10} fill="transparent" />
                       {o.pressureAssumed && <circle cx={X} cy={Y} r={7} fill="none" stroke={OBSERVED} strokeWidth={0.75} strokeOpacity={0.6} strokeDasharray="2 2" />}
-                      <circle cx={X} cy={Y} r={4.5} fill={fill} fillOpacity={o.label === 1 ? 0.85 : 1} stroke={o.label === 1 ? "var(--surface)" : OBSERVED} strokeWidth={o.label === 1 ? 1 : 1.5} />
-                      {hl && <circle cx={X} cy={Y} r={9.5} fill="none" stroke={ACCENT} strokeWidth={1.5} />}
-                      {(sel || focusKey === key) && <circle cx={X} cy={Y} r={12} fill="none" stroke={ACCENT} strokeWidth={2.5} />}
+                      <circle cx={X} cy={Y} r={4.5} fill={fill} fillOpacity={1} stroke={o.label === 1 ? PAPER : OBSERVED} strokeWidth={o.label === 1 ? 1.25 : 1.5} />
+                      {hl && <circle cx={X} cy={Y} r={9.5} fill="none" stroke={INK} strokeWidth={1.5} />}
+                      {(sel || focusKey === key) && <circle cx={X} cy={Y} r={12} fill="none" stroke={INK} strokeWidth={2.5} />}
                     </g>
                   );
                 })}
@@ -1238,8 +1238,8 @@ export default function ParameterMap(props: ParameterMapProps) {
                     >
                       <path
                         d={shape(half, 0)}
-                        fill={g.anyOn ? ACCENT : "var(--surface)"}
-                        stroke={g.anyOn ? "var(--surface)" : ACCENT}
+                        fill={g.anyOn ? ACCENT : PAPER}
+                        stroke={g.anyOn ? PAPER : ACCENT}
                         strokeWidth={allOff ? 1.75 : 1.5}
                       />
                       <text aria-hidden="true" x={X} y={Y + 3.5} textAnchor="middle" fontSize={11} fontWeight={700} fill={g.anyOn ? ON_ACCENT : ACCENT} pointerEvents="none" style={{ fontVariantNumeric: "tabular-nums" }}>{g.label}</text>
@@ -1253,16 +1253,16 @@ export default function ParameterMap(props: ParameterMapProps) {
             {/* labels that must sit above everything */}
             <g transform={`translate(${M.l},${M.t})`} pointerEvents="none" clipPath={`url(#${uid}-plot)`}>
               {layers.target && tgt?.lab && (
-                <text x={tgt.lab.x} y={tgt.lab.y} fontSize={12} fontWeight={700} fill={TARGET} stroke="var(--surface)" strokeWidth={3} paintOrder="stroke" strokeLinejoin="round">{tgt.lab.text}</text>
+                <text x={tgt.lab.x} y={tgt.lab.y} fontSize={12} fontWeight={700} fill={TARGET} stroke={PAPER} strokeWidth={3} paintOrder="stroke" strokeLinejoin="round">{tgt.lab.text}</text>
               )}
               {contourLabel && (
-                <text x={contourLabel.x} y={contourLabel.y} fontSize={11} fontWeight={500} fill={INK} stroke="var(--surface)" strokeWidth={3.5} paintOrder="stroke" strokeLinejoin="round">{CONTOUR_LABEL}</text>
+                <text x={contourLabel.x} y={contourLabel.y} fontSize={11} fontWeight={500} fill={INK} stroke={PAPER} strokeWidth={3.5} paintOrder="stroke" strokeLinejoin="round">{CONTOUR_LABEL}</text>
               )}
               {notes.map((t, k) => (
-                <text key={t} x={iw / 2} y={ih - 12 - k * 16} textAnchor="middle" fontSize={12} fill={MUTED} stroke="var(--surface)" strokeWidth={4} paintOrder="stroke" strokeLinejoin="round">{t}</text>
+                <text key={t} x={iw / 2} y={ih - 12 - k * 16} textAnchor="middle" fontSize={12} fill={MUTED} stroke={PAPER} strokeWidth={4} paintOrder="stroke" strokeLinejoin="round">{t}</text>
               ))}
               {modelMissing && (
-                <text x={iw / 2} y={ih / 2} textAnchor="middle" fontSize={13} fill={MUTED} stroke="var(--surface)" strokeWidth={4} paintOrder="stroke" strokeLinejoin="round">No model for this material.</text>
+                <text x={iw / 2} y={ih / 2} textAnchor="middle" fontSize={13} fill={MUTED} stroke={PAPER} strokeWidth={4} paintOrder="stroke" strokeLinejoin="round">No model for this material.</text>
               )}
             </g>
           </svg>
@@ -1270,7 +1270,7 @@ export default function ParameterMap(props: ParameterMapProps) {
             <div
               ref={tipRef}
               role="tooltip"
-              className="pointer-events-none absolute left-0 top-0 z-10 w-[min(260px,calc(100%-8px))] rounded-md bg-surface px-2.5 py-2 text-[12px] shadow-popover"
+              className="pointer-events-none absolute left-0 top-0 z-10 w-[min(260px,calc(100%-8px))] rounded-md border border-border bg-white px-2.5 py-2 text-[12px] text-fg shadow-popover"
               style={{ transform: tipTransform(hover.x, hover.y) }}
             >
               {tip}

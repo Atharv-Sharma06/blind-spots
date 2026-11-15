@@ -39,18 +39,17 @@ function airflowText(r: Range): string {
   return isNum(r.nominal) ? `${fmtFixed(r.nominal, 1)} cm/s` : "not stated";
 }
 
-/** The cabin and its air on two quiet lines. */
+/** The cabin and its air: a title and three outlined chips. */
 function CabinLine({ t }: { t: ResolvedTarget }) {
   const kpa = t.total_pressure_kpa.nominal ?? t.total_pressure_kpa.max ?? t.total_pressure_kpa.min;
+  const chip = "inline-flex min-h-8 items-center whitespace-nowrap rounded-lg border border-border bg-surface px-2.5 text-xs text-fg";
   return (
     <div className="px-1">
-      <p className="text-[15px] font-semibold text-fg">{t.label}</p>
-      <p className="mt-0.5 flex flex-wrap gap-x-2 text-xs text-muted">
-        <span className="whitespace-nowrap">{o2Text(t.oxygen_percent)}</span>
-        <span aria-hidden>·</span>
-        <span className="whitespace-nowrap">{isNum(kpa) ? `${fmtKpa(kpa)} (${fmtPsia(kpaToPsia(kpa))})` : "pressure not stated"}</span>
-        <span aria-hidden>·</span>
-        <span className="whitespace-nowrap">airflow {airflowText(t.airflow_cm_s)}</span>
+      <p className="text-xl leading-7 font-medium text-fg">{t.label}</p>
+      <p className="mt-2 flex flex-wrap gap-2">
+        <span className={chip}>{o2Text(t.oxygen_percent)}</span>
+        <span className={chip}>{isNum(kpa) ? `${fmtKpa(kpa)} (${fmtPsia(kpaToPsia(kpa))})` : "pressure not stated"}</span>
+        <span className={chip}>airflow {airflowText(t.airflow_cm_s)}</span>
       </p>
     </div>
   );
@@ -71,27 +70,30 @@ const PLAIN_REASON: Record<string, string> = {
 };
 
 const TONE = {
-  blind: { box: "card-magenta text-white", icon: "text-white", sub: "text-white/85", Icon: CircleSlash },
-  partly: { box: "card ring-1 ring-accent/35 text-fg", icon: "text-accent", sub: "text-muted", Icon: TriangleAlert },
-  covered: { box: "card-indigo text-white", icon: "text-periwinkle", sub: "text-white/80", Icon: CircleCheck },
+  blind: { dot: "bg-white", Icon: CircleSlash },
+  partly: { dot: "bg-[#E8A33B]", Icon: TriangleAlert },
+  covered: { dot: "bg-[#2FD067]", Icon: CircleCheck },
 } as const;
 
 /**
- * The verdict in plain words, same wording and gradient as the Cabins answer card (magenta blind spot,
- * indigo covered, charcoal + yellow partly covered). Icon and words, never colour alone.
+ * The verdict in plain words as the near-black highlight card, same wording as the Cabins answer card.
+ * A status dot, an icon and the words, never colour alone.
  */
 function PlainVerdict({ verdict, headline, children }: { verdict: AssessResponse["verdict"]; headline: string; children?: React.ReactNode }) {
   const v = PLAIN_VERDICT[verdict];
   const tone = TONE[v.tone];
   return (
-    <div className={cn("relative overflow-hidden px-5 py-5 sm:px-6", v.tone === "partly" && "rounded-[var(--radius-3xl)]", tone.box)}>
+    <div className="card-ink relative overflow-hidden p-6 text-white sm:p-7">
       <div role="status" className="flex items-start gap-3" data-testid="plain-verdict">
-        <span aria-hidden className={cn("mt-0.5 grid size-9 shrink-0 place-items-center rounded-full bg-black/25", tone.icon)}>
+        <span aria-hidden className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-full border border-white/25 text-white">
           <tone.Icon className="size-5" />
         </span>
-        <p className="text-xl leading-snug font-semibold tracking-[-0.01em] sm:text-[22px]">{headline}</p>
+        <p className="min-w-0 text-xl leading-snug font-medium tracking-[-0.01em] sm:text-[22px]">
+          <span aria-hidden className={cn("mr-2 inline-block size-2.5 rounded-full align-middle", tone.dot)} />
+          {headline}
+        </p>
       </div>
-      {children ? <div className={cn("mt-3 space-y-1.5 pl-12", tone.sub)}>{children}</div> : null}
+      {children ? <div className="mt-3 space-y-1.5 pl-12 text-white/75">{children}</div> : null}
     </div>
   );
 }
@@ -107,8 +109,8 @@ function plainSentence(a: AssessResponse): string {
 }
 
 /**
- * One key number as a charcoal tile: plain label (and optional short help) above the value.
- * Whole numbers use the dot font; words ("of 9") stay in regular type and decimals use mono, because dotted words and periods misread.
+ * One key number as a white bordered card: plain label (and optional short help) above a big medium number.
+ * Decimals and units use the mono face so periods stay readable.
  */
 function Fact({
   label,
@@ -120,15 +122,15 @@ function Fact({
   ...rest
 }: { label: string; help?: string; value: string; suffix?: string; mono?: boolean; note?: string } & React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className="card flex min-h-[124px] min-w-0 flex-col gap-0 rounded-[var(--radius-xl)] p-4" {...rest}>
-      <dt className="text-[13px] leading-snug text-fg">{label}</dt>
+    <div className="card flex min-h-[132px] min-w-0 flex-col gap-0 p-5" {...rest}>
+      <dt className="text-[14px] leading-snug text-fg">{label}</dt>
       {help ? <dd className="mt-0.5 text-xs text-muted">{help}</dd> : null}
       <dd className="mt-auto min-w-0 pt-3">
         {mono ? (
-          <span className="num block text-[28px] leading-none font-semibold break-words text-fg">{value}</span>
+          <span className="num block text-[32px] leading-none font-medium break-words text-fg">{value}</span>
         ) : (
           <span className="flex flex-wrap items-baseline gap-x-1.5">
-            <DotNumber className="text-[32px] leading-none break-words text-fg sm:text-[36px]">{value}</DotNumber>
+            <DotNumber className="text-[36px] leading-none font-medium break-words text-fg sm:text-[40px]">{value}</DotNumber>
             {suffix ? <span className="text-ui text-muted">{suffix}</span> : null}
           </span>
         )}
@@ -207,7 +209,7 @@ export function TargetAnalysis({ query, group, pending }: TargetAnalysisProps) {
 
         <CabinLine t={a.target} />
 
-        <dl className="grid grid-cols-2 gap-2.5">
+        <dl className="grid grid-cols-2 gap-3">
           <Fact label="Nearby ISS test results" value={fmtCount(cov.comparable_observations)} />
           <Fact label="Cabin conditions with a nearby test" value={fmtCount(cov.points_with_comparable)} suffix={`of ${fmtCount(cov.n_target_points)}`} />
           {sup !== null ? (

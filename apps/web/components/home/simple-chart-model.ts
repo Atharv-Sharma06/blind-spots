@@ -82,7 +82,7 @@ interface Rect {
 
 const overlaps = (a: Rect, b: Rect) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.y1 > b.y0;
 
-/** Rough text width, kept on the safe side: Outfit runs about 0.42–0.47 em per character. */
+/** Rough text width, kept on the safe side: Inter Tight runs about 0.45–0.5 em per character. */
 export const textWidth = (text: string, fontSize: number, bold = false) => text.length * fontSize * (bold ? 0.54 : 0.5);
 
 /**

@@ -30,7 +30,7 @@ export function Histogram({ edges, counts, xLabel, ariaLabel, className }: Histo
           const bw = x(e1) - x(e0);
           return (
             <g key={i}>
-              <rect x={x(e0) + 1} width={Math.max(1, bw - 2)} y={y(c)} height={H - m.bottom - y(c)} fill={CHART.observed} fillOpacity={0.3} stroke={CHART.observed} strokeOpacity={0.8} rx={2}>
+              <rect x={x(e0) + 2} width={Math.max(1, bw - 4)} y={y(c)} height={H - m.bottom - y(c)} fill={CHART.ink} rx={3}>
                 <title>{`|error| ${e0.toFixed(2)} to ${e1.toFixed(2)}: ${c}`}</title>
               </rect>
               {c > 0 && bw >= 22 ? (

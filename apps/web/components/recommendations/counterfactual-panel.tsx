@@ -3,7 +3,6 @@
 import { useEffect, useRef } from "react";
 import { DotNumber } from "@/components/ui/dot-number";
 import { X } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { PanelSkeleton } from "@/components/explore/query-state";
@@ -53,15 +52,15 @@ export function CounterfactualPanel({ groupId, target, candidate, plane, slice, 
   const targetP = d?.target_p_supported === true;
 
   return (
-    <section id="counterfactual-preview" aria-label="What-if preview" className="card-indigo space-y-4 p-5 text-white sm:p-6" data-testid="counterfactual-panel">
+    <section id="counterfactual-preview" aria-label="What-if preview" className="card space-y-4 p-6 sm:p-7" data-testid="counterfactual-panel">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <h3 ref={headingRef} tabIndex={-1} className="text-[17px] font-semibold outline-none">If test {candidate.rank} were done</h3>
-          <p className="num mt-0.5 text-xs text-white/75">
+          <h3 ref={headingRef} tabIndex={-1} className="text-xl leading-7 font-medium outline-none">If test {candidate.rank} were done</h3>
+          <p className="num mt-0.5 text-xs text-muted">
             {fmtOxygen(candidate.oxygen_percent)}, {fmtPressure(candidate.pressure_kpa)}, {fmtCmS(candidate.airflow_cm_s)}
           </p>
         </div>
-        <Button variant="ghost" size="icon" aria-label="Close what-if preview" onClick={close} className="-mt-1 -mr-1.5 size-10 rounded-full bg-black/30 text-white hover:bg-black/50">
+        <Button variant="ghost" size="icon" aria-label="Close what-if preview" onClick={close} className="btn-round -mt-1 -mr-1.5 size-10 rounded-full border border-border bg-surface text-fg hover:bg-subtle">
           <X aria-hidden />
         </Button>
       </div>
@@ -72,16 +71,16 @@ export function CounterfactualPanel({ groupId, target, candidate, plane, slice, 
         <>
           <ul className="space-y-2">
             {d.scenarios.map((s) => (
-              <li key={s.outcome} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-[var(--radius-lg)] bg-black/30 px-4 py-3 ring-1 ring-white/10" data-testid={`scenario-${s.outcome}`}>
-                <span className="min-w-[10rem] flex-1 text-[14px] font-medium text-white">
+              <li key={s.outcome} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-2xl border border-border bg-subtle px-5 py-4" data-testid={`scenario-${s.outcome}`}>
+                <span className="min-w-[10rem] flex-1 text-[15px] font-medium text-fg">
                   {s.outcome === "sustained" ? "If the flame keeps burning" : "If it goes out"}
-                  {candP ? <span className="block text-xs text-white/70">{fmtFractionPercent(s.probability)} likely</span> : null}
+                  {candP ? <span className="block text-xs text-muted">{fmtFractionPercent(s.probability)} likely</span> : null}
                 </span>
                 <span className="ml-auto shrink-0 text-right">
-                  <span className="block text-xs text-white/70">uncertainty </span>
-                  <DotNumber className="mt-1 block text-[28px] text-white">{pctSigned(-s.variance_reduction_fraction)}</DotNumber>
+                  <span className="block text-xs text-muted">uncertainty </span>
+                  <DotNumber className="mt-1 block text-[32px] leading-none font-medium text-fg">{pctSigned(-s.variance_reduction_fraction)}</DotNumber>
                   {targetP ? (
-                    <span className="num mt-1 block text-xs text-white/70">
+                    <span className="num mt-1 block text-xs text-muted">
                       flame chance {pct(s.target_p_mean)} ({pctSigned(s.target_p_mean - d.current.target_p_mean)})
                     </span>
                   ) : null}
@@ -89,14 +88,14 @@ export function CounterfactualPanel({ groupId, target, candidate, plane, slice, 
               </li>
             ))}
           </ul>
-          <p className="text-xs leading-relaxed text-white/75">
-            On average, uncertainty about this cabin drops by <span className="num font-semibold text-periwinkle">{pct(d.expected_variance_reduction_fraction)}</span>.
+          <p className="text-sm leading-relaxed text-muted">
+            On average, uncertainty about this cabin drops by <span className="num font-medium text-fg">{pct(d.expected_variance_reduction_fraction)}</span>.
             {candP ? null : " No flame estimate there: too little evidence."}
-            {targetP ? <> Flame chance now: <span className="num text-white">{pct(d.current.target_p_mean)}</span>.</> : null}
+            {targetP ? <> Flame chance now: <span className="num text-fg">{pct(d.current.target_p_mean)}</span>.</> : null}
           </p>
-          <Badge tone="neutral" data-testid="hypothetical-label" className="h-auto max-w-full whitespace-normal py-1 leading-snug">{HYPOTHETICAL_LABEL}</Badge>
+          <span data-testid="hypothetical-label" className="inline-flex max-w-full items-center rounded-lg border border-border bg-surface px-2.5 py-1 text-xs leading-snug font-medium text-fg">{HYPOTHETICAL_LABEL}</span>
           <div>
-            <p className="mb-1 text-xs font-medium">Show on the chart</p>
+            <p className="mb-1.5 text-xs font-medium text-fg">Show on the chart</p>
             <SegmentedControl
               size="sm"
               aria-label="Show on the chart"
@@ -109,7 +108,7 @@ export function CounterfactualPanel({ groupId, target, candidate, plane, slice, 
               ]}
             />
             {outcome ? (
-              <p className="mt-1.5 text-xs text-white/75" data-testid="hypothetical-map-note">
+              <p className="mt-1.5 text-xs text-muted" data-testid="hypothetical-map-note">
                 The chart shows the model after this made-up result.
               </p>
             ) : null}

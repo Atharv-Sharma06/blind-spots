@@ -9,22 +9,25 @@ import { Disclosure as UiDisclosure } from "@/components/ui/disclosure";
 import { QueryError } from "@/components/explore/query-state";
 import type { Verdict } from "@/lib/types";
 
+/** Status dot colours (light theme): covered = green, barely covered = amber, not covered = black. */
+export const STATUS_DOT = {
+  covered: "bg-[#2FD067]",
+  partly: "bg-[#E8A33B]",
+  blind: "bg-[#161616]",
+} as const;
+
 /**
- * Verdict chip: supported = periwinkle (covered), extrapolation = yellow (partly covered),
- * insufficient evidence = magenta/plum (blind spot). The words always carry the meaning too.
+ * Verdict chip: an outlined chip with a status dot. Supported = green dot (covered), extrapolation = amber dot
+ * (barely covered), insufficient evidence = black dot (not covered). The words always carry the meaning too.
  */
 export function VerdictBadge({ verdict, className, ...props }: { verdict: Verdict } & React.HTMLAttributes<HTMLSpanElement>) {
-  const tone =
-    verdict === "supported"
-      ? "border-observed/30 bg-observed-tint text-periwinkle px-2.5"
-      : verdict === "extrapolation"
-        ? "border-accent/30 bg-accent-tint text-accent px-2.5"
-        : "border-plum-3 bg-plum-2 text-plum-7 px-2.5";
+  const dot = verdict === "supported" ? STATUS_DOT.covered : verdict === "extrapolation" ? STATUS_DOT.partly : STATUS_DOT.blind;
   return (
     <span
-      className={cn("inline-flex h-6 shrink-0 items-center whitespace-nowrap rounded-full border text-xs font-medium leading-none", tone, className)}
+      className={cn("inline-flex h-7 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg border border-border bg-surface px-2.5 text-xs font-medium leading-none text-fg", className)}
       {...props}
     >
+      <span aria-hidden className={cn("size-2 shrink-0 rounded-full", dot)} />
       {verdictLabel(verdict)}
     </span>
   );
@@ -47,7 +50,7 @@ export function Updating({ active, children }: { active: boolean; children: Reac
   return (
     <div className="relative" aria-busy={active || undefined}>
       {active ? (
-        <p role="status" className="absolute top-2 right-2 z-10 rounded-full border border-border-strong bg-subtle px-2.5 py-0.5 text-xs text-fg">
+        <p role="status" className="absolute top-2 right-2 z-10 rounded-full border border-border bg-surface px-3 py-1 text-xs font-medium text-fg">
           Updating…
         </p>
       ) : null}

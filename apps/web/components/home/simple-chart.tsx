@@ -65,10 +65,11 @@ export function SimpleChart(props: SimpleChartProps) {
   );
 }
 
+// Light, monochrome chart: blue only for ISS results, black for "This cabin", greys for everything else.
 const INK = "var(--fg)";
 const MUTED = "var(--muted)";
 const BLUE = "var(--observed)";
-const YELLOW = "var(--accent)";
+const HAIR = "var(--border-strong)";
 const HALO = { paintOrder: "stroke", stroke: "var(--surface)", strokeWidth: 4, strokeLinejoin: "round" } as const;
 const NUM = { fontVariantNumeric: "tabular-nums" } as const;
 
@@ -175,82 +176,57 @@ function ChartSvg({ dots, cabin, others, ariaLabel, width, height }: SimpleChart
   const cabinLabel =
     labels.get("cabin") ?? ({ x: Math.min(Math.max(cx, 40), iw - 40), y: Math.max(cy - 20, 8), anchor: "middle", text: "This cabin" } as const);
 
-  const ids = { grid: `${uid}-grid`, clip: `${uid}-clip`, soft: `${uid}-soft`, glow: `${uid}-glow` };
-  const grid = narrow ? 14 : 16;
+  const ids = { hatch: `${uid}-hatch`, clip: `${uid}-clip` };
 
   return (
     <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="img" aria-label={ariaLabel} className="block select-none" onClick={() => setHover(null)}>
       <defs>
-        {/* faint dot grid, echoing the page background */}
-        <pattern id={ids.grid} width={grid} height={grid} patternUnits="userSpaceOnUse">
-          <circle cx={grid / 2} cy={grid / 2} r={0.9} fill={INK} fillOpacity={0.11} />
+        {/* diagonal hatch for "where ISS tests ran" */}
+        <pattern id={ids.hatch} width={6} height={6} patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <line x1={0} y1={0} x2={0} y2={6} stroke={INK} strokeOpacity={0.2} strokeWidth={1.5} />
         </pattern>
         <clipPath id={ids.clip}>
-          <rect x={-2} y={-m.t} width={iw + 4} height={ih + m.t + 2} rx={10} />
+          <rect x={-2} y={-m.t} width={iw + 4} height={ih + m.t + 2} />
         </clipPath>
-        {/* soft glow for the ISS-tests region */}
-        <filter id={ids.soft} filterUnits="userSpaceOnUse" x={-40} y={-40} width={iw + 80} height={ih + 80}>
-          <feGaussianBlur stdDeviation={narrow ? 8 : 12} />
-        </filter>
-        {/* this cabin's yellow glow */}
-        <radialGradient id={ids.glow}>
-          <stop offset="0%" stopColor={YELLOW} stopOpacity={0.6} />
-          <stop offset="40%" stopColor={YELLOW} stopOpacity={0.24} />
-          <stop offset="100%" stopColor={YELLOW} stopOpacity={0} />
-        </radialGradient>
       </defs>
       <g transform={`translate(${m.l},${m.t})`}>
-        <rect x={0} y={0} width={iw} height={ih} fill={`url(#${ids.grid})`} />
-        {/* very faint dotted guides at the y ticks */}
+        {/* hairline guides at the y ticks */}
         {yTicks.map((t) => (
-          <line key={`gy${t}`} x1={0} x2={iw} y1={y(t)} y2={y(t)} stroke={INK} strokeOpacity={0.14} strokeWidth={1} strokeDasharray="1 5" strokeLinecap="round" />
+          <line key={`gy${t}`} x1={0} x2={iw} y1={y(t)} y2={y(t)} stroke="var(--border)" strokeWidth={1} />
         ))}
 
+        {/* where ISS tests ran: hatched region with a hairline edge */}
         <g clipPath={`url(#${ids.clip})`}>
-          {/* where ISS tests ran: a soft periwinkle glow under a crisp light outline */}
           {hullPath ? (
             <>
-              <path d={hullPath} fill={BLUE} fillOpacity={0.28} stroke={BLUE} strokeOpacity={0.28} strokeWidth={14} strokeLinejoin="round" filter={`url(#${ids.soft})`} />
-              <path d={hullPath} fill={BLUE} fillOpacity={0.08} stroke={BLUE} strokeOpacity={0.5} strokeWidth={1} strokeLinejoin="round" />
+              <path d={hullPath} fill="var(--subtle)" />
+              <path d={hullPath} fill={`url(#${ids.hatch})`} stroke={INK} strokeOpacity={0.35} strokeWidth={1} strokeLinejoin="round" />
             </>
           ) : null}
           {band ? (
             <>
-              <rect x={band.x - 4} y={band.y - 4} width={band.w + 8} height={band.h + 8} rx={(band.h + 8) / 2} fill={BLUE} fillOpacity={0.32} filter={`url(#${ids.soft})`} />
-              <rect x={band.x} y={band.y} width={band.w} height={band.h} rx={Math.min(band.h / 2, 8)} fill={BLUE} fillOpacity={0.08} stroke={BLUE} strokeOpacity={0.5} strokeWidth={1} />
+              <rect x={band.x} y={band.y} width={band.w} height={band.h} rx={Math.min(band.h / 2, 6)} fill="var(--subtle)" />
+              <rect x={band.x} y={band.y} width={band.w} height={band.h} rx={Math.min(band.h / 2, 6)} fill={`url(#${ids.hatch})`} stroke={HAIR} strokeWidth={1} />
             </>
           ) : null}
         </g>
         {regionPos ? (
-          <text x={regionPos.x} y={regionPos.y} fontSize={regionFont} fontWeight={600} fill={BLUE} style={{ ...HALO, letterSpacing: "0.01em" }}>
+          <text x={regionPos.x} y={regionPos.y} fontSize={regionFont} fontWeight={500} fill={MUTED} style={{ ...HALO, letterSpacing: "0.02em" }}>
             {REGION_TEXT}
           </text>
         ) : null}
 
-        {/* this cabin's range, when it has one */}
+        {/* this cabin's range, when it has one: a thin dashed black box */}
         {showBox ? (
-          <rect
-            x={boxX0}
-            y={boxY0}
-            width={Math.max(boxX1 - boxX0, 1)}
-            height={Math.max(boxY1 - boxY0, 1)}
-            rx={4}
-            fill={YELLOW}
-            fillOpacity={0.07}
-            stroke={YELLOW}
-            strokeOpacity={0.75}
-            strokeWidth={1.25}
-            strokeDasharray="1.5 4"
-            strokeLinecap="round"
-          />
+          <rect x={boxX0} y={boxY0} width={Math.max(boxX1 - boxX0, 1)} height={Math.max(boxY1 - boxY0, 1)} rx={4} fill="none" stroke={INK} strokeOpacity={0.7} strokeWidth={1} strokeDasharray="3 3" />
         ) : null}
 
         {/* test results: filled = kept burning, hollow = went out */}
         {dots.map((d) =>
           d.burned ? (
-            <circle key={d.id} cx={x(d.x)} cy={y(d.y)} r={3.4} fill={BLUE} fillOpacity={0.92} stroke="var(--surface)" strokeOpacity={0.6} strokeWidth={0.75} />
+            <circle key={d.id} cx={x(d.x)} cy={y(d.y)} r={3.6} fill={BLUE} fillOpacity={0.9} stroke="var(--surface)" strokeWidth={1} />
           ) : (
-            <circle key={d.id} cx={x(d.x)} cy={y(d.y)} r={3.1} fill="var(--surface)" fillOpacity={0.55} stroke={BLUE} strokeWidth={1.4} />
+            <circle key={d.id} cx={x(d.x)} cy={y(d.y)} r={3.3} fill="var(--surface)" stroke={BLUE} strokeWidth={1.4} />
           ),
         )}
 
@@ -276,30 +252,30 @@ function ChartSvg({ dots, cabin, others, ariaLabel, width, height }: SimpleChart
           </g>
         ))}
 
-        {/* this cabin: signal-yellow marker with a soft glow */}
+        {/* this cabin: a solid black marker with a thin ring */}
         <g pointerEvents="none">
-          <circle cx={cx} cy={cy} r={narrow ? 24 : 30} fill={`url(#${ids.glow})`} />
-          <circle cx={cx} cy={cy} r={11} fill="none" stroke={YELLOW} strokeOpacity={0.45} strokeWidth={1} />
-          <circle cx={cx} cy={cy} r={6.5} fill={YELLOW} stroke="var(--surface)" strokeWidth={2} />
-          <text x={cabinLabel.x} y={cabinLabel.y} textAnchor={cabinLabel.anchor} dominantBaseline="central" fontSize={cabinFont} fontWeight={600} fill={YELLOW} style={{ ...HALO, letterSpacing: "0.01em" }}>
+          <circle cx={cx} cy={cy} r={11} fill="var(--surface)" fillOpacity={0.7} stroke={INK} strokeOpacity={0.35} strokeWidth={1} />
+          <circle cx={cx} cy={cy} r={6} fill={INK} stroke="var(--surface)" strokeWidth={2} />
+          <text x={cabinLabel.x} y={cabinLabel.y} textAnchor={cabinLabel.anchor} dominantBaseline="central" fontSize={cabinFont} fontWeight={600} fill={INK} style={HALO}>
             {cabinLabel.text}
           </text>
         </g>
 
         {hot ? (
           <g pointerEvents="none">
-            <rect x={hotX} y={hotY} width={hotW} height={22} rx={11} fill="var(--subtle)" stroke="var(--border-strong)" />
+            <rect x={hotX} y={hotY} width={hotW} height={22} rx={8} fill="var(--surface)" stroke={HAIR} />
             <text ref={hotRef} x={hotX + hotW / 2} y={hotY + 11} textAnchor="middle" dominantBaseline="central" fontSize={labelFont} fontWeight={500} fill={INK}>
               {hotText}
             </text>
           </g>
         ) : null}
 
-        {/* axes: a faint baseline, muted numbers */}
-        <line x1={0} x2={iw} y1={ih} y2={ih} stroke="var(--border-strong)" strokeOpacity={0.8} />
+        {/* axes: hairline baseline and left edge, small muted numbers */}
+        <line x1={0} x2={iw} y1={ih} y2={ih} stroke={INK} strokeOpacity={0.3} />
+        <line x1={0} x2={0} y1={0} y2={ih} stroke={INK} strokeOpacity={0.3} />
         {xTicks.map((t) => (
           <g key={`tx${t}`}>
-            <line x1={x(t)} x2={x(t)} y1={ih} y2={ih + 4} stroke="var(--border-strong)" />
+            <line x1={x(t)} x2={x(t)} y1={ih} y2={ih + 4} stroke={INK} strokeOpacity={0.3} />
             <text x={x(t)} y={ih + 18} textAnchor="middle" fontSize={12} fill={MUTED} style={NUM}>
               {trim(t)}
             </text>

@@ -8,7 +8,7 @@ export interface TableProps extends React.TableHTMLAttributes<HTMLTableElement> 
 
 /** Compact data table. The header sticks to the top of the scroll container. */
 export const Table = React.forwardRef<HTMLTableElement, TableProps>(({ className, containerClassName, ...props }, ref) => (
-  <div tabIndex={0} role="region" aria-label={props["aria-label"] ? `${props["aria-label"]} (scrollable)` : "Scrollable table"} className={cn("relative w-full overflow-auto rounded-lg border border-white/[0.06] bg-[#141416] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent", containerClassName)}>
+  <div tabIndex={0} role="region" aria-label={props["aria-label"] ? `${props["aria-label"]} (scrollable)` : "Scrollable table"} className={cn("relative w-full overflow-auto rounded-lg border border-border bg-surface focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent", containerClassName)}>
     <table ref={ref} className={cn("w-full caption-bottom border-separate border-spacing-0 text-ui", className)} {...props} />
   </div>
 ));
@@ -27,7 +27,7 @@ TableBody.displayName = "TableBody";
 export const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTMLTableRowElement>>(({ className, ...props }, ref) => (
   <tr
     ref={ref}
-    className={cn("transition-colors hover:bg-white/[0.04] data-[state=selected]:bg-accent-tint [&:last-child>td]:border-b-0", className)}
+    className={cn("transition-colors hover:bg-subtle data-[state=selected]:bg-accent-tint [&:last-child>td]:border-b-0", className)}
     {...props}
   />
 ));
@@ -44,7 +44,7 @@ export const TableHead = React.forwardRef<HTMLTableCellElement, React.ThHTMLAttr
       ref={ref}
       scope={scope}
       className={cn(
-        "sticky top-0 z-10 h-10 whitespace-nowrap border-b border-border bg-[#1a1a1d] px-3.5 text-left text-xs font-medium text-muted",
+        "sticky top-0 z-10 h-10 whitespace-nowrap border-b border-border bg-surface px-3.5 text-left text-xs font-medium text-muted",
         numeric && "text-right",
         className,
       )}

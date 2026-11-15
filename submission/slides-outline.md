@@ -8,7 +8,7 @@ Space Apps limit: 7 slides including the title, English, public no-login link. G
 
 **On the slide:** Blind Spots: where NASA's microgravity fire evidence ends, and what to learn next. Full-width still of the Cabins page (`docs/img/cabins-pick.png`) or the chart (`docs/img/cabins-answer.png`): every ISS flame test near 1 atm, the exploration cabin far away.
 
-**Speaker notes:** Fire safety in a crew cabin depends on oxygen and pressure. NASA Space Apps 2026, "Flame in Freefall". A research-planning tool; not endorsed by NASA.
+**Speaker notes:** We built this for NASA Space Apps 2026, "Flame in Freefall". How a fire behaves in a crew cabin depends a lot on the oxygen level and the pressure, and future cabins won't use the same air as the ISS. Blind Spots is a research-planning tool. It is not endorsed by NASA.
 
 ---
 
@@ -16,7 +16,7 @@ Space Apps limit: 7 slides including the title, English, public no-login link. G
 
 **On the slide:** Do NASA's space-station fire tests cover this cabin's air? Exploration cabins: 8.2 psia, 34 % O2. ISS: 14.7 psia, 21 %.
 
-**Speaker notes:** NASA adopted 8.2 psia / 34 % O2 "for future spacecraft that will be used for high-frequency EVAs" (NTRS 20140000417). Artemis habitat parameters "have not been finalized" (NTRS 20220011152).
+**Speaker notes:** NASA adopted 8.2 psia / 34 % O2 "for future spacecraft that will be used for high-frequency EVAs" (NTRS 20140000417). The Artemis habitat numbers are still open, and NASA says the parameters "have not been finalized" (NTRS 20220011152).
 
 ---
 
@@ -24,7 +24,7 @@ Space Apps limit: 7 slides including the title, English, public no-login link. G
 
 **On the slide:** ISS cabin: 241 nearby ISS test results. Exploration Atmosphere: 0, "Not covered", in all 20 material setups. Every test ran near 1 atm.
 
-**Speaker notes:** The tests span 13.5 to 22.7 % O2 and 98.3 to 102.2 kPa (BASS pressure measured; BASS-II pressure not recorded, so an assumed 101.353 kPa, flagged). 8 of 11 documented NASA cabins have no nearby test, including all below 1 atm. All ISS tests ran in microgravity, so "covered" is about the air only. Say "not represented in the integrated records", never "NASA has not studied this": SoFIE-GEL, Saffire-V/VI and the Glenn drop-tower tests exist but have no public per-test table.
+**Speaker notes:** The tests we have span 13.5 to 22.7 % O2 and 98.3 to 102.2 kPa. BASS measured pressure. BASS-II didn't record it, so we assume 101.353 kPa and flag that value. 8 of 11 documented NASA cabins have no nearby test, and that includes every cabin below 1 atm. All the ISS tests ran in microgravity, so "covered" only talks about the air. Be careful with wording here. Say "not represented in the integrated records" and never "NASA has not studied this", because SoFIE-GEL, Saffire-V/VI and the Glenn drop-tower tests do exist. They just don't have a public per-test table we could use.
 
 ---
 
@@ -32,7 +32,7 @@ Space Apps limit: 7 slides including the title, English, public no-login link. G
 
 **On the slide:** 250 ISS tests (BASS, BASS-II; NASA PSI, CC0). 749 test steps, each traced to its source cell. 0 failures.
 
-**Speaker notes:** An AI assistant transcribed the free-text matrix cells twice; the two versions were adjudicated and machine-checked against the NASA workbooks. BASS-II outcomes were cross-checked against NASA/TM-20210011385 Appendix A. Screenshot: an Experiments row showing the quoted source cell.
+**Speaker notes:** The NASA test matrices describe flows and outcomes in free text, so this was the slow part. An AI assistant transcribed those cells twice, we settled the differences between the two versions, and the code checks every value against the original NASA workbooks. We also cross-checked the BASS-II outcomes against NASA/TM-20210011385 Appendix A. Screenshot: an Experiments row showing the quoted source cell.
 
 ---
 
@@ -40,7 +40,7 @@ Space Apps limit: 7 slides including the title, English, public no-login link. G
 
 **On the slide:** A model that says when it does not know: "Insufficient experimental evidence for a reliable estimate."
 
-**Speaker notes:** One Gaussian-process model per material setup (9 modelled). It separates lack of data from outcome variability and gives a probability only where tests support it. Pressure barely varies in the data, so anything else rests on an assumption the app states. Screenshot: the answer card for the Exploration Atmosphere (`docs/img/cabins-answer.png`).
+**Speaker notes:** We fit one Gaussian-process model per material setup (9 modelled). It keeps two things apart, missing data and outcomes that genuinely vary, and it only gives a probability where the tests back it up. Pressure barely changes across the data, so any answer away from 1 atm rests on an assumption, and the app says so. Screenshot: the answer card for the Exploration Atmosphere (`docs/img/cabins-answer.png`).
 
 ---
 
@@ -48,7 +48,7 @@ Space Apps limit: 7 slides including the title, English, public no-login link. G
 
 **On the slide:** What to test next: 34.0 % O2, 56.5 kPa, 1.71 cm/s would cut the model's uncertainty about this cabin by 19.3%. Hypothetical model updates, not experimental results.
 
-**Speaker notes:** Active learning ranks candidates by expected uncertainty cut for the chosen cabin. Same model, other strategies: random 0.0%, uncertainty sampling 0.0%, nearest gap 15.8%. The top-ranked candidate sits at the target conditions themselves; this follows from the model's distance-based (stationary) correlation assumption, because no integrated observation constrains that region. Honest validation: the model beats a majority-class guess in 6 of 9 material setups; the ranking beat random in 11 of 18 retrospective scenarios (worse in 2). A computational research candidate requiring qualified scientific review, not a test order.
+**Speaker notes:** For the chosen cabin, active learning ranks candidates by how much they are expected to cut the model's uncertainty. With the same model, other strategies get random 0.0%, uncertainty sampling 0.0% and nearest gap 15.8%. The top-ranked candidate sits at the target conditions themselves; this follows from the model's distance-based (stationary) correlation assumption, because no integrated observation constrains that region. We want to be straight about validation. The model beats a majority-class guess in 6 of 9 material setups, and the ranking beat random in 11 of 18 retrospective scenarios (it was worse in 2). Each pick is a computational research candidate requiring qualified scientific review, established safety procedures and formal feasibility assessment. It is not a test order.
 
 ---
 
@@ -56,4 +56,4 @@ Space Apps limit: 7 slides including the title, English, public no-login link. G
 
 **On the slide:** https://blind-spots-kappa.vercel.app · https://github.com/Atharv-Sharma06/blind-spots. For combustion scientists and cabin designers. Built with SI (super intelligence) assistance (Claude, by Anthropic); the app itself uses no generative AI. Not endorsed by NASA.
 
-**Speaker notes:** Press the 30-second tour on the Cabins page. Next steps (not built): integrate SoFIE-GEL and Saffire-V/VI when per-test tables exist, add partial-gravity data, validate with qualified reviewers. Credits: NASA PSI and NTRS; open-source libraries are listed on the project page.
+**Speaker notes:** Open the Cabins page and press the 30-second tour. There's a lot we haven't built yet. We'd like to bring in SoFIE-GEL and Saffire-V/VI once per-test tables exist, add partial-gravity data, and have qualified reviewers check the method. Claude, by Anthropic, wrote much of the code and text. We directed the work, made the decisions and checked it, and the numbers come from NASA data through the code. Credits go to NASA PSI and NTRS, and the open-source libraries are listed on the project page.

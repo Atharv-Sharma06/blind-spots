@@ -27,7 +27,7 @@ export function Tooltip({ content, children, side = "top", align = "center", cla
           sideOffset={6}
           collisionPadding={8}
           className={cn(
-            "z-50 max-w-xs rounded-md border border-white/[0.08] bg-[#232327] px-2.5 py-1.5 text-xs leading-snug text-fg shadow-popover",
+            "z-50 max-w-xs rounded-md border border-ink-card bg-ink-card px-2.5 py-1.5 text-xs leading-snug text-on-ink shadow-popover",
             "data-[state=delayed-open]:animate-fade-in data-[state=instant-open]:animate-fade-in",
             className,
           )}

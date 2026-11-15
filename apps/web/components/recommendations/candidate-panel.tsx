@@ -33,20 +33,24 @@ const isAssumptionDependent = (c: Candidate) => c.reasons.some((r) => r.code ===
 export const AT_TARGET_TEXT =
   "The best test is at the cabin's own conditions. That follows from the model's assumption that nearby air behaves alike.";
 
-function Conditions({ c }: { c: Candidate }) {
+/** Oxygen, pressure and airflow as three label/value rows with big medium numbers (white on the ink card, ink on white). */
+function Conditions({ c, ink }: { c: Candidate; ink?: boolean }) {
+  const val = cn("num text-[22px] leading-none font-medium whitespace-nowrap", ink ? "text-white" : "text-fg");
+  const row = cn("flex items-baseline justify-between gap-3 py-2.5 first:pt-0 last:pb-0", ink ? "border-white/15" : "border-border");
+  const lab = cn("text-sm", ink ? "text-white/70" : "text-muted");
   return (
-    <dl className="grid grid-cols-3 gap-2 text-xs">
-      <div className="min-w-0">
-        <dt className="text-muted">Oxygen</dt>
-        <dd className="num text-[13px] text-fg">{fmtOxygen(c.oxygen_percent)}</dd>
+    <dl className={cn("divide-y", ink ? "divide-white/15" : "divide-border")}>
+      <div className={row}>
+        <dt className={lab}>Oxygen</dt>
+        <dd className={val}>{fmtOxygen(c.oxygen_percent)}</dd>
       </div>
-      <div className="min-w-0">
-        <dt className="text-muted">Pressure</dt>
-        <dd className="num text-[13px] whitespace-nowrap text-fg">{fmtKpa(c.pressure_kpa)}</dd>
+      <div className={row}>
+        <dt className={lab}>Pressure</dt>
+        <dd className={val}>{fmtKpa(c.pressure_kpa)}</dd>
       </div>
-      <div className="min-w-0">
-        <dt className="text-muted">Airflow</dt>
-        <dd className="num text-[13px] whitespace-nowrap text-fg">{fmtCmS(c.airflow_cm_s)}</dd>
+      <div className={row}>
+        <dt className={lab}>Airflow</dt>
+        <dd className={val}>{fmtCmS(c.airflow_cm_s)}</dd>
       </div>
     </dl>
   );
@@ -63,24 +67,33 @@ function RowCompareToggle({ id, rank, ids, onToggle }: { id: string; rank: numbe
   );
 }
 
+/** Compare toggle on the ink card: a white pill when added, an outlined white pill otherwise. */
 function CompareToggle({ id, ids, onToggle }: { id: string; ids: [string | null, string | null]; onToggle: (id: string) => void }) {
   const on = ids.includes(id);
   return (
-    <Button variant={on ? "primary" : "secondary"} size="sm" aria-pressed={on} onClick={() => onToggle(id)}>
-      <GitCompareArrows aria-hidden />
+    <button
+      type="button"
+      aria-pressed={on}
+      onClick={() => onToggle(id)}
+      className={cn(
+        "inline-flex min-h-11 items-center gap-2 rounded-[14px] border px-4 text-[15px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white",
+        on ? "border-white bg-white text-[#161616]" : "border-white/30 text-white hover:bg-white/10",
+      )}
+    >
+      <GitCompareArrows aria-hidden className="size-4" />
       {on ? "Added" : "Compare"}
-    </Button>
+    </button>
   );
 }
 
-/** Yellow rank badge (decorative: the rank is also in the text next to it). */
+/** Rank number in a round badge (decorative: the rank is also in the text next to it). */
 function RankBadge({ rank, active }: { rank: number; active?: boolean }) {
   return (
     <span
       aria-hidden
       className={cn(
-        "num grid size-10 shrink-0 place-items-center rounded-full text-[15px] font-semibold",
-        active ? "bg-accent text-on-accent shadow-[0_0_18px_rgb(242_210_27/.35)]" : "border border-border bg-subtle text-fg",
+        "num grid size-10 shrink-0 place-items-center rounded-full text-[15px] font-medium",
+        active ? "bg-white text-[#161616]" : "border border-border bg-surface text-fg",
       )}
     >
       {rank}
@@ -88,14 +101,11 @@ function RankBadge({ rank, active }: { rank: number; active?: boolean }) {
   );
 }
 
-/** Headline percent: digits in the dot font, the % sign in the sans font (Doto draws % as a dotted X). */
+/** Headline percent as a big medium number. */
 function EvrValue({ text }: { text: string }) {
-  const hasPct = text.endsWith("%");
-  const digits = hasPct ? text.slice(0, -1) : text;
   return (
-    <span className="inline-block align-[-0.12em] whitespace-nowrap text-accent" data-testid="evr-value">
-      <span className="dotnum text-[34px]">{digits}</span>
-      {hasPct ? <span className="ml-0.5 font-sans text-[22px] font-semibold">%</span> : null}
+    <span className="inline-block align-[-0.08em] text-[40px] leading-none font-medium tracking-[-0.02em] whitespace-nowrap text-white" data-testid="evr-value">
+      {text}
     </span>
   );
 }
@@ -152,35 +162,40 @@ export function CandidatePanel(p: CandidatePanelProps) {
         <article
           aria-label="Top candidate"
           data-testid="top-candidate"
-          className={cn("card space-y-4 p-5 sm:p-6", selectedId === top.candidate_id && "ring-2 ring-accent/70")}
+          className={cn("card-ink space-y-5 p-6 text-white sm:p-7", selectedId === top.candidate_id && "ring-2 ring-[#2FD067]")}
         >
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-3">
             <RankBadge rank={top.rank} active />
-            <h3 className="text-[15px] font-semibold">Test {top.rank}: most informative</h3>
+            <h3 className="text-xl leading-7 font-medium">Test {top.rank}: most informative</h3>
           </div>
-          <Conditions c={top} />
+          <Conditions c={top} ink />
 
           <div>
-            <p className="text-[15px] leading-snug text-fg">
+            <p className="text-[16px] leading-snug text-white">
               Would cut the model&apos;s uncertainty about this cabin by{" "}
               <EvrValue text={fmtFractionPercent(top.evr_fraction)} />.
             </p>
-            <p className="mt-0.5 text-xs text-muted">
+            <p className="mt-1 text-xs text-white/70">
               A model estimate{isAssumptionDependent(top) ? ", based on an assumed pressure link" : ""}.
             </p>
           </div>
 
-          {atTarget ? <p className="text-xs text-fg">{AT_TARGET_TEXT}</p> : null}
-          <p className="text-xs text-muted">
+          {atTarget ? <p className="text-xs text-white">{AT_TARGET_TEXT}</p> : null}
+          <p className="text-xs text-white/70">
             Nearest ISS test: {fmtFixed(top.nn_distance, 1)} steps away{far ? "" : " (nearby)"}.
-            {showP ? <> Flame chance: <span className="num text-fg">{pct(top.p_sustained)}</span>.</> : " No flame estimate: too little evidence."}
+            {showP ? <> Flame chance: <span className="num text-white">{pct(top.p_sustained)}</span>.</> : " No flame estimate: too little evidence."}
           </p>
 
           <div className="flex flex-wrap gap-2">
-            <Button variant="primary" size="sm" onClick={() => onExplore(top)} data-testid="explore-candidate">
-              <Crosshair aria-hidden />
+            <button
+              type="button"
+              onClick={() => onExplore(top)}
+              data-testid="explore-candidate"
+              className="inline-flex min-h-11 items-center gap-2 rounded-[14px] bg-white px-4 text-[15px] font-medium text-[#161616] transition-colors hover:bg-white/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              <Crosshair aria-hidden className="size-4" />
               What would we learn?
-            </Button>
+            </button>
             <CompareToggle id={top.candidate_id} ids={compareIds} onToggle={onToggleCompare} />
           </div>
         </article>
@@ -188,12 +203,12 @@ export function CandidatePanel(p: CandidatePanelProps) {
         {rest.length > 0 ? (
           <ul className="space-y-2" aria-label="Other ranked candidates">
             {rest.map((c) => (
-              <li key={c.candidate_id} className={cn("card flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-xl)] p-3.5", selectedId === c.candidate_id && "ring-2 ring-accent/70")}>
+              <li key={c.candidate_id} className={cn("card flex flex-wrap items-center justify-between gap-3 p-4", selectedId === c.candidate_id && "ring-2 ring-fg")}>
                 <RankBadge rank={c.rank} />
-                <p className="min-w-[10rem] flex-1 text-[13px]">
+                <p className="min-w-[10rem] flex-1 text-[15px]">
                   <span className="font-medium">Test {c.rank}</span>{" "}
                   <span className="text-muted">cuts <span className="num text-fg">{fmtFractionPercent(c.evr_fraction)}</span></span>
-                  <span className="num block text-xs text-muted">{shortCond(c)}</span>
+                  <span className="num mt-0.5 block text-xs text-muted">{shortCond(c)}</span>
                 </p>
                 <div className="ml-auto flex shrink-0 gap-1.5">
                   <Button size="sm" variant="ghost" onClick={() => onExplore(c)} aria-label={`What if? Test ${c.rank}`}>
@@ -294,7 +309,7 @@ export function CandidatePanel(p: CandidatePanelProps) {
           ) : null}
         </Disclosure>
 
-        <p className="border-t border-border/70 pt-3 text-xs leading-relaxed text-muted">{CANDIDATE_FRAMING}</p>
+        <p className="border-t border-border pt-3 text-xs leading-relaxed text-muted">{CANDIDATE_FRAMING}</p>
       </div>
     </Updating>
   );

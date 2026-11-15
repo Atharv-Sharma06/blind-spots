@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { DotNumber } from "@/components/ui/dot-number";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAssessTarget, useGroups, useObservations, useRankCandidates, useTargets } from "@/hooks/api";
 import { CANDIDATE_FRAMING } from "@/lib/copy";
@@ -57,7 +56,7 @@ function JumpLink({ href, children }: { href: string; children: React.ReactNode 
 function Calm({ children }: { children: React.ReactNode }) {
   return (
     <div className="card p-5 md:p-7" role="status">
-      <p className="text-prose">{children}</p>
+      <p className="text-prose text-fg">{children}</p>
     </div>
   );
 }
@@ -67,18 +66,18 @@ function Calm({ children }: { children: React.ReactNode }) {
  * (measured on a typical cabin) so the page below does not jump. No numbers, only empty shapes.
  */
 const SKELETON_SIZES = [
-  "h-[5.25rem] md:h-[2.75rem]",
-  "h-[14rem] md:h-[8.5rem]",
-  "h-[11.5rem] md:h-[7.75rem]",
-  "h-[13.75rem] md:h-[10rem]",
-  "h-[20.875rem] md:h-[15.375rem]",
+  "h-[5.25rem] md:h-[2.875rem]",
+  "h-[20.875rem] md:h-[12.125rem]",
+  "h-[16.375rem] md:h-[10.125rem]",
+  "h-[16.375rem] md:h-[10.125rem]",
+  "h-[27.5rem] md:h-[19.375rem]",
 ] as const;
 
 function ListSkeleton() {
   return (
     <div className="space-y-4" role="status" aria-label="Ranking the next tests">
       {SKELETON_SIZES.map((size, i) => (
-        <Skeleton key={`${i}-${size}`} className={cn(i === 0 ? "rounded-xl" : i === 4 ? "rounded-[var(--radius-3xl)]" : "rounded-[var(--radius-2xl)]", size)} />
+        <Skeleton key={`${i}-${size}`} className={cn("bg-subtle", i === 0 ? "rounded-xl" : "rounded-2xl", size)} />
       ))}
     </div>
   );
@@ -86,9 +85,28 @@ function ListSkeleton() {
 
 type Differing = ReturnType<typeof differingFields>;
 
-/** A value that is the same in all three cards is quiet; the one that changes is bold, so the cards scan at a glance. */
-function Val({ differs, children }: { differs: boolean; children: React.ReactNode }) {
-  return <span className={differs ? "font-semibold text-fg" : "font-normal text-fg/70"}>{children}</span>;
+/**
+ * One condition as an outlined chip (radius 8, 1 px border). A value that is the same in all three cards is quiet; the one
+ * that changes is medium weight with a stronger border, so the cards scan at a glance. The sr-only comma keeps the heading
+ * reading as one sentence ("Test cotton: 21 % oxygen, 101 kPa, 20 cm/s airflow").
+ */
+function Chip({ differs, ink, last, children }: { differs: boolean; ink: boolean; last?: boolean; children: React.ReactNode }) {
+  // Plain template strings, not cn(): tailwind-merge reads the custom size "text-ui" as a text colour and would drop it.
+  const tone = ink
+    ? differs
+      ? "border-white/60 font-medium text-white"
+      : "border-white/25 text-white/75"
+    : differs
+      ? "border-border-strong font-medium text-fg"
+      : "border-border text-muted";
+  return (
+    <>
+      <span className={`inline-flex min-h-8 items-center whitespace-nowrap rounded-lg border px-3 text-ui ${tone}`}>
+        {children}
+      </span>
+      {last ? null : <span className="sr-only">, </span>}
+    </>
+  );
 }
 
 function CandidateCard({
@@ -107,50 +125,49 @@ function CandidateCard({
   diff: Differing;
 }) {
   const reduction = reductionParts(c);
+  const note = `text-ui ${first ? "text-white/70" : "text-muted"}`; // template, not cn(): see Chip
   return (
     <li
-      className={cn(
-        "card relative p-5 md:p-7",
-        first && "shadow-[inset_0_1px_0_rgb(255_255_255/0.06),0_0_0_2px_var(--accent),0_0_32px_-6px_rgb(242_210_27/0.5),0_24px_48px_-24px_rgb(0_0_0/0.8)]!",
-      )}
+      className={cn("relative p-5 md:p-7", first ? "card-ink text-white" : "card")}
       data-testid={`next-test-${c.rank}`}
     >
       <div className="flex items-start gap-4 md:gap-5">
         <span
           aria-hidden
-          className={cn(
-            "num mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-full text-prose font-semibold md:size-10 md:text-title",
-            first ? "bg-accent text-on-accent" : "border border-border-strong bg-subtle text-fg",
-          )}
+          className={`num mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-full border text-prose font-medium ${
+            first ? "border-white bg-white text-[#161616]" : "border-border-strong bg-surface text-fg"
+          }`}
         >
           {c.rank}
         </span>
-        <div className="min-w-0 flex-1 md:flex md:items-center md:gap-6">
+        <div className="min-w-0 flex-1 md:flex md:items-end md:justify-between md:gap-8">
           <div className="min-w-0 flex-1">
-            <h3 className="text-title font-medium leading-snug tracking-[-0.01em]">
-              Test {lowerFirst(material)}: <Val differs={diff.oxygen}>{oxygenText(c)} oxygen</Val>, <Val differs={diff.pressure}>{pressureText(c)}</Val>,{" "}
-              <Val differs={diff.airflow}>{airflowText(c)} airflow</Val>
+            <h3 className="text-title font-medium leading-snug tracking-[-0.01em] md:text-[1.25rem] md:leading-7">
+              Test {lowerFirst(material)}
+              <span className="sr-only">: </span>
+              <span className="mt-3 flex flex-wrap gap-2 font-normal">
+                <Chip differs={diff.oxygen} ink={first}>
+                  {oxygenText(c)} oxygen
+                </Chip>
+                <Chip differs={diff.pressure} ink={first}>
+                  {pressureText(c)}
+                </Chip>
+                <Chip differs={diff.airflow} ink={first} last>
+                  {airflowText(c)} airflow
+                </Chip>
+              </span>
             </h3>
-            {atTarget && first ? <p className="mt-2 text-ui text-muted">{atTargetSentence(c, target)}</p> : null}
+            {atTarget && first ? <p className={`mt-3 ${note}`}>{atTargetSentence(c, target)}</p> : null}
             {c.feasibility_status === "outside_demonstrated_envelope" ? (
-              <p className="mt-2 text-ui text-muted" data-testid="beyond-iss-note">
+              <p className={`mt-3 ${note}`} data-testid="beyond-iss-note">
                 Beyond what ISS tests have shown.
               </p>
             ) : null}
           </div>
           {reduction ? (
-            <p className="mt-4 flex items-end justify-between gap-3 border-t border-border pt-3 md:mt-0 md:block md:shrink-0 md:border-0 md:pt-0 md:text-right">
-              <span className="text-ui text-muted md:block">{reduction.lead}</span>{" "}
-              <span className={cn("block whitespace-nowrap text-[2.25rem] leading-none md:mt-1 md:text-[2.75rem]", first ? "text-accent" : "text-fg")}>
-                {reduction.value.endsWith(" %") ? (
-                  <>
-                    <DotNumber>{reduction.value.slice(0, -2)}</DotNumber>
-                    <span className="ml-0.5 align-baseline font-sans text-[0.55em] font-semibold"> %</span>
-                  </>
-                ) : (
-                  <DotNumber>{reduction.value}</DotNumber>
-                )}
-              </span>
+            <p className={cn("mt-5 flex items-end justify-between gap-3 border-t pt-4 md:mt-0 md:block md:shrink-0 md:border-0 md:pt-0 md:text-right", first ? "border-white/15" : "border-border")}>
+              <span className={`${note} md:block`}>{reduction.lead}</span>{" "}
+              <span className="block whitespace-nowrap text-display font-medium leading-none tracking-[-0.02em] tabular-nums md:mt-2">{reduction.value}</span>
             </p>
           ) : null}
         </div>
@@ -174,7 +191,7 @@ function Ranked({ r, material, cabin, groupId }: { r: RankResponse; material: st
   return (
     <>
       {closestText ? (
-        <p className="rounded-[var(--radius-xl)] bg-subtle/60 px-4 py-3 text-ui text-fg/80" data-testid="closest-iss-test">
+        <p className="rounded-xl border border-border bg-subtle px-4 py-3 text-ui text-muted" data-testid="closest-iss-test">
           {closestText}
         </p>
       ) : null}
@@ -281,12 +298,12 @@ export function NextTests({ cabin, material }: NextTestsProps) {
             : `Three tests that would teach the model the most about ${cabinName}.`
         }
       />
-      <p className="mt-2 pl-0 text-ui text-muted" data-testid="candidate-framing">
+      <p className="mt-3 text-prose text-muted" data-testid="candidate-framing">
         {CANDIDATE_FRAMING}
       </p>
       <div className="mt-5 space-y-4 md:mt-6">{body}</div>
       <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-3 md:mt-8">
-        <Link href={explorerHref} className="pill-yellow inline-flex h-12 items-center justify-center gap-2 whitespace-nowrap px-6 text-prose" data-testid="open-explorer">
+        <Link href={explorerHref} className="pill-ink inline-flex h-[52px] items-center justify-center gap-2 whitespace-nowrap px-6 text-prose" data-testid="open-explorer">
           Open this cabin in the Explorer <span aria-hidden>→</span>
         </Link>
         {briefLink ? (

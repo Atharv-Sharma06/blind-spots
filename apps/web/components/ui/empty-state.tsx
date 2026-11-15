@@ -16,7 +16,7 @@ export function EmptyState({ icon, title, description, action, compact, align = 
   return (
     <div className={cn("flex flex-col gap-1", align === "center" ? "items-center text-center" : "items-start text-left", compact ? "py-3" : "py-8", className)}>
       {icon ? <div className="mb-1 text-muted [&_svg]:size-5">{icon}</div> : null}
-      <p className="text-ui font-medium text-fg">{title}</p>
+      <p className="text-prose font-medium text-fg">{title}</p>
       {description ? <p className="max-w-[56ch] text-ui text-muted">{description}</p> : null}
       {action ? <div className="mt-2">{action}</div> : null}
     </div>

@@ -2,7 +2,7 @@ import * as React from "react";
 import { cn } from "@/lib/cn";
 import type { ResultKind } from "./model";
 
-/** Filled periwinkle dot = flame kept burning, hollow white ring = went out (shape carries the meaning, not only colour). */
+/** Filled blue dot = flame kept burning, hollow ring = went out (shape carries the meaning, not only colour). */
 export function FlameDot({ kind, className }: { kind: ResultKind; className?: string }) {
   if (kind === "burned") return <span aria-hidden className={cn("inline-block size-2.5 shrink-0 rounded-full bg-observed", className)} />;
   if (kind === "out") return <span aria-hidden className={cn("inline-block size-2.5 shrink-0 rounded-full border-2 border-fg bg-transparent", className)} />;
@@ -16,11 +16,12 @@ export function ResultChip({ kind, label, detail, large }: { kind: ResultKind; l
       <span
         data-result={kind}
         className={cn(
-          "inline-flex w-fit max-w-full items-center gap-2 rounded-full border px-2.5 py-0.5 font-medium",
-          large ? "text-prose px-3 py-1" : "text-ui",
-          kind === "burned" && "border-transparent bg-observed-tint text-observed",
-          kind === "out" && "border-border-strong bg-transparent text-fg",
-          kind === "other" && "border-transparent px-0 text-muted",
+          "inline-flex w-fit max-w-full items-center gap-2 rounded-full border px-3 py-0.5 font-medium",
+          large ? "text-prose px-3.5 py-1" : "text-ui",
+          // Outlined chips with a status dot; the words carry the meaning too.
+          kind === "burned" && "border-border-strong bg-surface text-fg",
+          kind === "out" && "border-border-strong bg-surface text-fg",
+          kind === "other" && "border-border bg-transparent text-muted",
         )}
       >
         <FlameDot kind={kind} />

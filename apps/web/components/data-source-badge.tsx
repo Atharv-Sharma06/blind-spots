@@ -18,7 +18,7 @@ const dateOnly = (iso: string) => (/^\d{4}-\d{2}-\d{2}/.test(iso) ? iso.slice(0,
 type View = { kind: "live" | "snapshot" | "unavailable" | "connecting"; modelVersion: string | null; generatedAt: string | null };
 
 /**
- * Tiny header chip: "Precomputed data" / "Live analysis" / "Analysis unavailable". One sentence of detail shows on
+ * Tiny chip (sidebar footer / phone footer): "Precomputed data" / "Live analysis" / "Analysis unavailable". One sentence of detail shows on
  * hover and keyboard focus and is read by screen readers. `data-source` carries the state for tests.
  */
 export function DataSourceBadge({ meta, className }: DataSourceBadgeProps) {
@@ -69,7 +69,7 @@ export function DataSourceBadge({ meta, className }: DataSourceBadgeProps) {
         data-source={view.kind}
         data-version={view.modelVersion ?? undefined}
         className={cn(
-          "h-8 gap-1.5 rounded-full text-[length:var(--text-label)] border-white/[0.08] bg-white/[0.04] px-2.5 font-normal text-muted transition-colors hover:border-white/[0.16] hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent md:h-7",
+          "h-8 gap-1.5 rounded-full border-border bg-surface px-2.5 text-[length:var(--text-label)] font-normal text-muted transition-colors hover:border-border-strong hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent md:h-7",
           className,
         )}
       >
@@ -77,7 +77,7 @@ export function DataSourceBadge({ meta, className }: DataSourceBadgeProps) {
           aria-hidden
           className={cn(
             "size-1.5 shrink-0 rounded-full",
-            view.kind === "live" || view.kind === "snapshot" ? "bg-fg/80" : "border border-muted",
+            view.kind === "live" || view.kind === "snapshot" ? "bg-fg" : "border border-muted",
             view.kind === "connecting" && "motion-safe:animate-pulse",
           )}
         />

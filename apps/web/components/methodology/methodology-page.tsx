@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useContextEvidence, useGroups, useHeadline, useMethodology, useModelMetadata, useSources, useValidation, type ApiQuery } from "@/hooks/api";
 import { PageContainer } from "@/components/layout/page-container";
-import { SectionHeader } from "@/components/ui/section-header";
 import { ActiveLearningSection } from "./section-active";
 import { DataSection } from "./section-data";
 import { LimitationsSection } from "./section-limitations";
@@ -55,13 +54,14 @@ export function MethodologyPage() {
 
   return (
     <PageContainer className="flex flex-1 flex-col gap-14">
-      <div className="mx-auto w-full max-w-[1100px] space-y-10">
-        <SectionHeader
-          as="h1"
-          title="How it works"
-          description="From NASA's ISS flame tests to the next test to run."
-        />
-        <FourSteps headline={headline} validation={validation} methodology={methodology} />
+      <div className="mx-auto w-full max-w-[1180px] space-y-12">
+        <div className="band rounded-[24px] p-5 sm:p-8">
+          <h1 className="text-[32px] font-medium leading-[1.1] tracking-[-0.025em] md:text-[40px] md:leading-[44px]">How it works</h1>
+          <p className="mt-2 max-w-[62ch] text-[16px] leading-6 text-muted">From NASA&apos;s ISS flame tests to the next test to run.</p>
+          <div className="mt-7">
+            <FourSteps headline={headline} validation={validation} methodology={methodology} />
+          </div>
+        </div>
         <TrustSection
           validation={validation}
           groups={groups.data?.data}
@@ -75,26 +75,26 @@ export function MethodologyPage() {
         <SiNote />
       </div>
 
-      <section id="technical" aria-labelledby="technical-h" className="mx-auto w-full max-w-[1100px] scroll-mt-[calc(var(--header-h)+16px)] border-t border-border-strong pt-10">
+      <section id="technical" aria-labelledby="technical-h" className="mx-auto w-full max-w-[1180px] scroll-mt-[calc(var(--header-h)+16px)] border-t border-border-strong pt-10">
         <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
           <div className="min-w-0">
-            <h2 id="technical-h" className="text-[24px] font-semibold tracking-[-0.02em]">
+            <h2 id="technical-h" className="text-[28px] font-medium leading-[34px] tracking-[-0.02em]">
               Technical details
             </h2>
-            <p className="mt-2 max-w-[68ch] text-[14px] leading-relaxed text-muted">For reviewers. You do not need these to use the site.</p>
+            <p className="mt-2 max-w-[68ch] text-[16px] leading-6 text-muted">For reviewers. You do not need these to use the site.</p>
           </div>
           <div className="flex gap-2">
-            <button type="button" onClick={() => setSectionOpen("*", true)} className="inline-flex min-h-10 items-center rounded-full bg-surface px-4 text-[13px] font-medium ring-1 ring-border hover:bg-subtle focus-visible:outline-2 focus-visible:outline-accent">
+            <button type="button" onClick={() => setSectionOpen("*", true)} className="pill-outline inline-flex min-h-10 items-center px-4 text-[14px] font-medium hover:bg-surface focus-visible:outline-2 focus-visible:outline-accent">
               Open all sections
             </button>
-            <button type="button" onClick={() => setSectionOpen("*", false)} className="inline-flex min-h-10 items-center rounded-full bg-surface px-4 text-[13px] font-medium ring-1 ring-border hover:bg-subtle focus-visible:outline-2 focus-visible:outline-accent">
+            <button type="button" onClick={() => setSectionOpen("*", false)} className="pill-outline inline-flex min-h-10 items-center px-4 text-[14px] font-medium hover:bg-surface focus-visible:outline-2 focus-visible:outline-accent">
               Close all
             </button>
           </div>
         </div>
-        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[210px_minmax(0,1fr)] lg:gap-10">
+        <div className="mt-6 space-y-5">
           <Toc items={TOC} />
-          <div className="card min-w-0 rounded-[32px] px-4 py-2 sm:px-7">
+          <div className="card min-w-0 px-5 py-2 sm:px-8">
             <DataSection methodology={methodology} sources={sources} groups={groups} />
             <ModellingSection methodology={methodology} metadata={metadata} groupLabel={groupLabel} />
             <ActiveLearningSection methodology={methodology} />

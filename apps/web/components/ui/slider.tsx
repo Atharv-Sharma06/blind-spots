@@ -11,8 +11,8 @@ export interface SliderProps extends Omit<React.ComponentPropsWithoutRef<typeof 
   thumbLabels?: string[];
 }
 
-/** Single- or range-slider. The number of thumbs follows the length of value/defaultValue. Yellow filled line, dotted
- *  remainder, and a yellow triangular marker inside a 40 px round target. */
+/** Single- or range-slider. The number of thumbs follows the length of value/defaultValue. Black filled line, light grey
+ *  remainder, and a round black knob inside a 40 px target. */
 export const Slider = React.forwardRef<React.ElementRef<typeof SliderPrimitive.Root>, SliderProps>(
   ({ className, value, defaultValue, thumbLabels, ...props }, ref) => {
     const count = (value ?? defaultValue ?? [0]).length;
@@ -24,14 +24,14 @@ export const Slider = React.forwardRef<React.ElementRef<typeof SliderPrimitive.R
         className={cn("relative flex h-7 w-full touch-none max-md:h-10 select-none items-center data-[disabled]:opacity-50", className)}
         {...props}
       >
-        <SliderPrimitive.Track className="relative h-[3px] grow rounded-full bg-[radial-gradient(circle,rgb(255_255_255/0.42)_1px,transparent_1.6px)] bg-[length:8px_3px] bg-repeat-x">
-          <SliderPrimitive.Range className="absolute h-full rounded-full bg-accent" />
+        <SliderPrimitive.Track className="relative h-[3px] grow rounded-full bg-border-strong">
+          <SliderPrimitive.Range className="absolute h-full rounded-full bg-fg" />
         </SliderPrimitive.Track>
         {Array.from({ length: count }, (_, i) => (
           <SliderPrimitive.Thumb
             key={i}
             aria-label={thumbLabels?.[i]}
-            className="relative block size-10 rounded-full outline-offset-0 before:absolute before:bottom-[calc(50%-4px)] before:left-1/2 before:h-[13px] before:w-[15px] before:-translate-x-1/2 before:bg-accent before:transition-colors before:content-[''] before:[clip-path:polygon(0_0,100%_0,50%_100%)] hover:before:bg-[#ffe24a] focus-visible:bg-accent/15"
+            className="relative block size-10 rounded-full outline-offset-0 before:absolute before:top-1/2 before:left-1/2 before:size-[18px] before:-translate-x-1/2 before:-translate-y-1/2 before:rounded-full before:border-2 before:border-white before:bg-fg before:shadow-[0_0_0_1px_rgb(22_22_22/0.25)] before:transition-colors before:content-[''] hover:before:bg-[#333333] focus-visible:bg-accent/15"
           />
         ))}
       </SliderPrimitive.Root>

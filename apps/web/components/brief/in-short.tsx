@@ -1,8 +1,6 @@
 "use client";
 
-import { CircleAlert, CircleCheck, EyeOff, type LucideIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/cn";
 import type { Verdict } from "@/lib/types";
 import { useAssessTarget, useGroups, useHeadline, useRankCandidates } from "@/hooks/api";
 import { materialName } from "@/components/home/cabins";
@@ -10,11 +8,11 @@ import { verdictTitle } from "@/components/home/answer-copy";
 import { CANDIDATE_FRAMING } from "@/lib/copy";
 import { airflowText, atTargetSentence, isAtTarget, lowerFirst, oxygenText, pressurePsiaText, pressureText, reductionSentence } from "@/components/home/next-logic";
 
-/** Same hue per meaning as the Cabins answer: blind spot = magenta, partly = yellow, covered = periwinkle. Icon + words carry it too. */
-const TONE: Record<Verdict, { Icon: LucideIcon; card: string; icon: string; title?: string }> = {
-  insufficient_evidence: { Icon: EyeOff, card: "card-magenta", icon: "text-white" },
-  extrapolation: { Icon: CircleAlert, card: "card ring-1 ring-accent/40", icon: "text-accent", title: "text-accent" },
-  supported: { Icon: CircleCheck, card: "card-indigo", icon: "text-periwinkle" },
+/** One status dot per verdict, always next to the words in the title: blind spot = white dot on the black card, partly = amber, covered = green. */
+const DOT: Record<Verdict, string> = {
+  insufficient_evidence: "#FFFFFF",
+  extrapolation: "#E8A33B",
+  supported: "#2FD067",
 };
 
 /**
@@ -40,10 +38,10 @@ export function InShort({ profileId, groupId }: { profileId: string | null; grou
 
   if (!settled || !group) {
     return (
-      <div role="status" aria-label="Loading the short answer" className="brief-ui brief-card card my-5 min-h-[120px] p-5 sm:p-7">
-        <Skeleton className="h-4 w-16" />
-        <Skeleton className="mt-3 h-6 w-4/5" />
-        <Skeleton className="mt-3 h-4 w-full" />
+      <div role="status" aria-label="Loading the short answer" className="brief-ui brief-card brief-verdict my-5 min-h-[120px]">
+        <Skeleton className="h-4 w-16 bg-black/[0.08]" />
+        <Skeleton className="mt-3 h-6 w-4/5 bg-black/[0.08]" />
+        <Skeleton className="mt-3 h-4 w-full bg-black/[0.08]" />
       </div>
     );
   }
@@ -55,25 +53,25 @@ export function InShort({ profileId, groupId }: { profileId: string | null; grou
   const material = lowerFirst(materialName(group.group_id, group.label));
   const reduction = c ? reductionSentence(c) : null;
 
-  const tone = TONE[assess.verdict] ?? TONE.extrapolation;
-
   return (
-    <section aria-labelledby="brief-in-short-h" className={cn("brief-ui brief-card brief-in-short my-5 p-5 sm:p-7", tone.card)} data-testid="brief-in-short" data-verdict={assess.verdict}>
-      <h2 id="brief-in-short-h" className="brief-ink-muted inline-block rounded-full bg-black/35 px-2.5 py-0.5 text-xs font-medium uppercase tracking-[0.12em] text-white print:bg-transparent print:px-0">
-        In short
-      </h2>
-      <p className="mt-3 flex items-start gap-3 text-[22px] leading-[28px] font-semibold tracking-[-0.01em] text-balance sm:text-[26px] sm:leading-[32px]" data-testid="brief-in-short-verdict">
-        <tone.Icon aria-hidden className={cn("mt-0.5 size-6 shrink-0 sm:mt-1 sm:size-7", tone.icon)} />
-        <span className={tone.title}>{title}</span>
+    <section aria-labelledby="brief-in-short-h" className="brief-ui brief-card brief-verdict brief-in-short my-5" data-testid="brief-in-short" data-verdict={assess.verdict}>
+      <div className="flex items-center gap-2.5">
+        <span aria-hidden className="brief-dot" style={{ background: DOT[assess.verdict] ?? DOT.extrapolation }} />
+        <h2 id="brief-in-short-h" className="brief-ink-muted text-xs font-medium uppercase tracking-[0.08em] text-muted">
+          In short
+        </h2>
+      </div>
+      <p className="mt-3 text-[24px] leading-[30px] font-medium tracking-[-0.02em] text-balance sm:text-[28px] sm:leading-[34px]" data-testid="brief-in-short-verdict">
+        {title}
       </p>
       {c && rank ? (
-        <p className="mt-4 text-[15px] leading-relaxed" data-testid="brief-in-short-next">
-          <span className="font-semibold">Best next test:</span> {material}, {oxygenText(c)} oxygen, {pressureText(c)} ({pressurePsiaText(c)}), {airflowText(c)} airflow.
+        <p className="brief-rule mt-5 border-t border-border pt-5 text-[16px] leading-6" data-testid="brief-in-short-next">
+          <span className="font-medium">Best next test:</span> {material}, {oxygenText(c)} oxygen, {pressureText(c)} ({pressurePsiaText(c)}), {airflowText(c)} airflow.
           {reduction ? ` ${reduction}` : ""}
           {isAtTarget(c, rank.target) ? ` ${atTargetSentence(c, rank.target)}` : ""}
         </p>
       ) : null}
-      {c && rank ? <p className="brief-ink-muted mt-3 text-xs leading-relaxed">{CANDIDATE_FRAMING}</p> : null}
+      {c && rank ? <p className="brief-ink-muted mt-3 text-xs leading-relaxed text-muted">{CANDIDATE_FRAMING}</p> : null}
     </section>
   );
 }

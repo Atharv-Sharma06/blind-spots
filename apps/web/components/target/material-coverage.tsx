@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useQueries } from "@tanstack/react-query";
-import { Ban, Check, CircleDot } from "lucide-react";
 import { api } from "@/lib/api";
 import { queryKeys } from "@/hooks/api";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -14,11 +13,11 @@ import { pointsSupported } from "./evidence";
 import { PLAIN_VERDICT } from "@/components/explore/plain";
 import { materialFlowNote, materialName } from "@/components/home/cabins";
 
-/** Status chip per verdict: colour plus icon plus word (STYLE.md status mapping). */
-const CHIP = {
-  blind: { cls: "bg-plum-2 text-plum-7", Icon: Ban },
-  partly: { cls: "bg-accent-tint text-accent", Icon: CircleDot },
-  covered: { cls: "bg-observed-tint text-observed", Icon: Check },
+/** Status per verdict: an outlined chip with a status dot plus the word (never colour alone). */
+const DOT = {
+  blind: "bg-[#161616]",
+  partly: "bg-[#E8A33B]",
+  covered: "bg-[#2FD067]",
 } as const;
 
 /** Starts the per-group assessments only once the table is near the viewport (keeps them out of the critical path). */
@@ -111,15 +110,12 @@ export function MaterialCoverage({
                 <TableCell className="py-1.5">
                   {a ? (
                     <>
-                      <span className={cn("inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[12px] font-medium", CHIP[PLAIN_VERDICT[a.verdict].tone].cls)}>
-                        {(() => {
-                          const Icon = CHIP[PLAIN_VERDICT[a.verdict].tone].Icon;
-                          return <Icon aria-hidden="true" className="size-3 shrink-0" />;
-                        })()}
+                      <span className="inline-flex min-h-7 items-center gap-1.5 rounded-lg border border-border bg-surface px-2.5 py-0.5 text-[12px] font-medium whitespace-nowrap text-fg">
+                        <span aria-hidden className={cn("size-2 shrink-0 rounded-full", DOT[PLAIN_VERDICT[a.verdict].tone])} />
                         {PLAIN_VERDICT[a.verdict].headline.split(":")[0]}
                       </span>
                       {sup !== null ? (
-                        <span className="block text-xs whitespace-nowrap text-muted">
+                        <span className="mt-1 block text-xs whitespace-nowrap text-muted">
                           <span className="num">{sup}</span> of <span className="num">{a.coverage.n_target_points}</span> points
                         </span>
                       ) : null}

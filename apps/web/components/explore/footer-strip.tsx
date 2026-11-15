@@ -4,7 +4,7 @@ import Link from "next/link";
 import { briefHref } from "@/components/brief/link";
 import { useExploreStore } from "@/lib/explore-store";
 
-const LINK = "inline-flex min-h-10 items-center text-fg underline decoration-white/30 underline-offset-4 hover:decoration-accent";
+const LINK = "inline-flex min-h-10 items-center text-fg underline decoration-fg/30 underline-offset-4 hover:decoration-accent";
 
 /** `candidate`: the candidate being explored, so the brief describes what is on screen. */
 export function FooterStrip({ candidate = null }: { candidate?: { oxygen_percent: number; airflow_cm_s: number; pressure_kpa: number } | null }) {

@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { CircleAlert, CircleCheck, EyeOff, type LucideIcon } from "lucide-react";
 import { Disclosure } from "@/components/ui/disclosure";
 import { DotNumber } from "@/components/ui/dot-number";
 import { ProgressRing } from "@/components/ui/progress-ring";
@@ -41,17 +40,11 @@ export interface AnswerCardProps {
   onMaterialChange: (id: string | null) => void;
 }
 
-/** Verdict banner look: magenta = blind spot, charcoal with a yellow edge = barely/partly, indigo glow = covered. */
-const TONE: Record<VerdictTone, { Icon: LucideIcon; box: string; icon: string; sub: string; link: string }> = {
-  blind: { Icon: EyeOff, box: "card-magenta", icon: "text-white", sub: "text-white/90", link: "text-white decoration-white/60" },
-  partly: {
-    Icon: CircleAlert,
-    box: "rounded-[var(--radius-3xl)] bg-[#161618] bg-[image:var(--grain-img),radial-gradient(120%_140%_at_0%_0%,#4A3A0C_0%,#2A2208_45%,#161618_100%)] bg-[size:180px_180px,100%_100%] shadow-[inset_0_0_0_1px_rgb(242_210_27/.5),inset_0_0_48px_rgb(242_210_27/.12),inset_0_1px_0_rgb(255_255_255/.08),0_24px_48px_-24px_rgb(0_0_0/.8)]",
-    icon: "text-accent",
-    sub: "text-white/85",
-    link: "text-accent decoration-accent/60",
-  },
-  covered: { Icon: CircleCheck, box: "card-indigo", icon: "text-periwinkle", sub: "text-white/85", link: "text-white decoration-white/60" },
+/** Status words and dots (words plus dots, never colour alone): black = not covered, amber = barely or partly, green = covered. */
+const TONE: Record<VerdictTone, { word: string; dot: string }> = {
+  blind: { word: "Not covered", dot: "bg-fg" },
+  partly: { word: "Barely covered", dot: "bg-[#E8A33B]" },
+  covered: { word: "Covered", dot: "bg-[#2FD067]" },
 };
 
 /** Step 2: the verdict for the chosen cabin and material, in plain sentences, with the simple chart. */
@@ -106,12 +99,12 @@ export function AnswerCard({ cabin, material, onMaterialChange }: AnswerCardProp
               assess={assess}
               comparableAnyMaterial={headlineProfile ? headlineProfile.comparable_observations : null}
               picker={
-                <div className="px-4 pt-1 pb-3 sm:px-6">
+                <div className="border-t border-border px-5 py-4 sm:px-8">
                   <MaterialPicker part="select" groups={groups} nearby={nearby} selectedId={group.group_id} onChange={(id) => onMaterialChange(id)} />
                 </div>
               }
             />
-            <div id="chart" data-tour="chart" className="scroll-mt-20 border-t border-border px-4 pt-5 pb-4 sm:px-6">
+            <div id="chart" data-tour="chart" className="scroll-mt-20 border-t border-border px-5 pt-6 pb-5 sm:px-8">
               {results ? (
                 <ChartBlock profile={profile} cabinId={cabin} profiles={profiles} results={results} notUsedReason={notUsedReason} materialLabel={lcFirst(materialName(group.group_id, group.label))} />
               ) : (
@@ -120,7 +113,7 @@ export function AnswerCard({ cabin, material, onMaterialChange }: AnswerCardProp
                 </div>
               )}
             </div>
-            <div className="border-t border-border px-4 py-2 sm:px-6">
+            <div className="border-t border-border px-5 py-2 sm:px-8">
               <MaterialPicker part="list" groups={groups} nearby={nearby} selectedId={group.group_id} onChange={(id) => onMaterialChange(id)} />
             </div>
           </>
@@ -175,20 +168,20 @@ function Notice({ children }: { children: React.ReactNode }) {
 function AnswerSkeleton() {
   return (
     <div aria-busy="true" aria-label="Loading the answer">
-      <div className="m-2 h-[354px] space-y-3 rounded-[var(--radius-3xl)] bg-subtle px-5 py-5 sm:m-3 sm:h-[204px] sm:px-8 sm:py-7">
+      <div className="h-[330px] space-y-4 px-5 py-6 sm:h-[220px] sm:px-8 sm:py-8">
         <Skeleton className="h-4 w-56" />
         <Skeleton className="h-8 w-full max-w-xl" />
       </div>
-      <div className="h-[290px] space-y-3 px-4 py-4 sm:h-[190px] sm:px-6">
+      <div className="h-[84px] border-t border-border px-5 py-4 sm:h-[81px] sm:px-8" />
+      <div className="h-[150px] space-y-3 px-5 py-4 sm:h-[110px] sm:px-8">
         <Skeleton className="h-4 w-full max-w-3xl" />
         <Skeleton className="h-4 w-full max-w-2xl" />
-        <Skeleton className="h-4 w-full max-w-xl" />
       </div>
-      <div className="border-t border-border px-4 pt-5 pb-4 sm:px-6">
+      <div className="border-t border-border px-5 pt-6 pb-5 sm:px-8">
         <Skeleton className={cn("w-full", CHART_HEIGHT_CLASS)} />
         <div className="h-[151px] sm:h-[109px]" />
       </div>
-      <div className="h-[77px] border-t border-border px-4 py-2 sm:h-[65px] sm:px-6" />
+      <div className="h-[77px] border-t border-border px-5 py-2 sm:h-[65px] sm:px-8" />
     </div>
   );
 }
@@ -223,7 +216,7 @@ function Verdict({ profile, cabinId, group, assess, assessError, onRetry, compar
 
   const line = (sub: string, strong: string, link: string) => (
     <p className={cn("flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-ui", sub)}>
-      <span className={cn("text-prose font-semibold", strong)} title={profile.name}>
+      <span className={cn("text-title font-medium", strong)} title={profile.name}>
         {name}
       </span>
       {air ? (
@@ -242,12 +235,12 @@ function Verdict({ profile, cabinId, group, assess, assessError, onRetry, compar
       ) : null}
     </p>
   );
-  const cabinLine = line("text-muted", "text-fg", "text-accent decoration-accent/60");
+  const cabinLine = line("text-muted", "text-fg", "text-fg decoration-fg/40");
 
   if (assessError) {
     const unavailable = isApiError(assessError) && assessError.snapshotUnavailable;
     return (
-      <div className="px-4 py-5 sm:px-6" data-testid="answer-verdict" data-verdict="error">
+      <div className="px-5 py-6 sm:px-8" data-testid="answer-verdict" data-verdict="error">
         {cabinLine}
         <p className="mt-3 text-prose text-fg">
           {unavailable ? "This cabin and material are not in the precomputed version. Try another material." : "We could not work out this answer."}
@@ -257,7 +250,7 @@ function Verdict({ profile, cabinId, group, assess, assessError, onRetry, compar
             Try again
           </button>
         )}
-        <div className="-mx-4 mt-4 border-t border-border sm:-mx-6">{picker}</div>
+        <div className="-mx-5 mt-5 sm:-mx-8">{picker}</div>
       </div>
     );
   }
@@ -265,12 +258,12 @@ function Verdict({ profile, cabinId, group, assess, assessError, onRetry, compar
   if (!assess || !tone) {
     return (
       <div aria-busy="true" aria-label="Loading the answer" data-testid="answer-verdict" data-verdict="loading">
-        <div className="m-2 rounded-[var(--radius-3xl)] bg-subtle px-5 py-5 sm:m-3 sm:px-8 sm:py-7">
+        <div className="px-5 py-6 sm:px-8 sm:py-8">
           {cabinLine}
-          <Skeleton className="mt-3 h-[250px] w-full sm:h-[104px] sm:max-w-xl" />
+          <Skeleton className="mt-4 h-[250px] w-full sm:h-[104px] sm:max-w-xl" />
         </div>
         {picker}
-        <div className="space-y-2 px-4 py-4 sm:px-6">
+        <div className="space-y-2 px-5 py-5 sm:px-8">
           <Skeleton className="h-5 w-full max-w-lg" />
           <Skeleton className="h-5 w-full max-w-md" />
           <div className="h-[132px] sm:h-[36px]" />
@@ -295,6 +288,8 @@ function Verdict({ profile, cabinId, group, assess, assessError, onRetry, compar
     materialLc: material,
     air,
   });
+  // "Blind spot" is shown as "Not covered" (the word the cabin cards use); "Barely/Partly covered" come from the title itself.
+  const statusWord = assess.verdict === "extrapolation" ? (title.split(":")[0] ?? tone.word) : tone.word;
   const explorer = `/explore?target=${encodeURIComponent(cabinId)}&group=${encodeURIComponent(group.group_id)}`;
   // Two short sentences: what the ISS tests covered (first sentence only; the pressure caveat sits under the chart) and the gravity limit.
   const rangeSentence = sentences[0]?.startsWith("For ") ? sentences[0].replace(/\.\s+[A-Z].*$/, ".") : null;
@@ -306,27 +301,26 @@ function Verdict({ profile, cabinId, group, assess, assessError, onRetry, compar
 
   return (
     <div data-testid="answer-verdict" data-verdict={assess.verdict}>
-      <div className={cn("relative isolate m-2 flex flex-col gap-4 px-5 py-5 sm:m-3 sm:flex-row sm:items-center sm:gap-6 sm:px-8 sm:py-7", tone.box)}>
-        {tone === TONE.blind ? (
-          // Deepens the light pink corner under the white text so it keeps AA contrast.
-          <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 rounded-[inherit] print:hidden bg-[linear-gradient(100deg,rgb(40_0_60/.4)_0%,rgb(40_0_60/.22)_55%,transparent_85%)]" />
-        ) : null}
+      <div className="flex flex-col gap-6 px-5 py-6 sm:flex-row sm:items-center sm:justify-between sm:gap-10 sm:px-8 sm:py-8">
         <div className="min-w-0 flex-1">
-          {line(tone.sub, tone === TONE.partly ? "text-fg" : "text-white", tone.link)}
-          <p className="mt-3 flex items-start gap-3 text-2xl leading-8 font-semibold tracking-tight text-balance text-white sm:text-[32px] sm:leading-10 print:text-fg" role="status">
-            <tone.Icon aria-hidden className={cn("mt-0.5 size-7 shrink-0 sm:mt-1.5", tone.icon)} />
+          {cabinLine}
+          <p className="mt-5 inline-flex items-center gap-2 text-ui font-medium text-fg" data-testid="verdict-status">
+            <span aria-hidden className={cn("size-2.5 shrink-0 rounded-full print:border print:border-fg", tone.dot)} />
+            {statusWord}
+          </p>
+          <p className="mt-2 text-[28px] leading-[34px] font-medium tracking-[-0.025em] text-balance text-fg sm:text-[36px] sm:leading-[42px]" role="status">
             <span data-testid="verdict-title">{title}</span>
           </p>
         </div>
         {hasPts ? (
           <ProgressRing
-            className="shrink-0 self-center text-white"
+            className="shrink-0 self-start text-fg sm:self-center"
             value={pts / nPts}
-            size={148}
+            size={144}
             stroke={6}
-            label={<DotNumber className="text-[48px] text-white">{pts}</DotNumber>}
+            label={<DotNumber className="text-[40px] leading-none font-medium text-fg">{pts}</DotNumber>}
             sublabel={
-              <span className={cn("block text-xs leading-4 whitespace-nowrap", tone.sub)}>
+              <span className="block text-xs leading-4 whitespace-nowrap text-muted">
                 of {nPts} points
                 <br />
                 with ISS tests
@@ -337,7 +331,7 @@ function Verdict({ profile, cabinId, group, assess, assessError, onRetry, compar
         ) : null}
       </div>
       {picker}
-      <div className="space-y-2 px-4 py-4 sm:px-6">
+      <div className="space-y-2 px-5 py-5 sm:px-8">
         {rangeSentence ? <p className="max-w-3xl text-title leading-7 text-fg">{noBreakNumbers(rangeSentence)}</p> : null}
         <p className="max-w-3xl text-title leading-7 text-fg">These tests ran in microgravity, not Moon or Mars gravity.</p>
         {related && related.n > 0 ? (
@@ -408,23 +402,23 @@ function ChartBlock({
   return (
     <div>
       <SimpleChart dots={dots} cabin={cabin} others={others} regionLabel="Where ISS tests ran" ariaLabel={aria} />
-      <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-ui text-muted">
+      <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-ui text-muted">
         <span className="inline-flex items-center gap-1.5">
           <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>
-            <circle cx="6" cy="6" r="4.6" fill="var(--observed)" fillOpacity="0.8" />
+            <circle cx="6" cy="6" r="4.6" fill="var(--observed)" />
           </svg>
           Flame kept burning
         </span>
         <span className="inline-flex items-center gap-1.5">
           <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>
-            <circle cx="6" cy="6" r="4.2" fill="var(--surface)" stroke="var(--observed)" strokeWidth="1.5" />
+            <circle cx="6" cy="6" r="4.1" fill="var(--surface)" stroke="var(--observed)" strokeWidth="1.5" />
           </svg>
           Flame went out
         </span>
         {others.length > 0 ? (
           <span className="inline-flex items-center gap-1.5">
             <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>
-              <circle cx="6" cy="6" r="3.5" fill="var(--muted)" fillOpacity="0.6" />
+              <circle cx="6" cy="6" r="3.2" fill="var(--muted)" fillOpacity="0.55" />
             </svg>
             Other cabins
           </span>
@@ -432,7 +426,7 @@ function ChartBlock({
         {cabin.xHi - cabin.xLo > 0 || cabin.yHi - cabin.yLo > 0 ? (
           <span className="inline-flex items-center gap-1.5" data-testid="legend-range">
             <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>
-              <rect x="1" y="1" width="10" height="10" rx="2" fill="var(--accent)" fillOpacity="0.1" stroke="var(--accent)" strokeWidth="1.25" strokeDasharray="1.5 2.5" strokeLinecap="round" />
+              <rect x="1" y="1" width="10" height="10" rx="2" fill="none" stroke="var(--fg)" strokeWidth="1.25" strokeDasharray="2 2.5" />
             </svg>
             Dashed box: this cabin&apos;s air range
           </span>

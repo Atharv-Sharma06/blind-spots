@@ -23,7 +23,7 @@ function Card({ meta, label }: { meta: ModelMetadata; label: string | null }) {
         <span className="num">{fmtCount(meta.training.label_counts.not_sustained)}</span> went out). Version <Mono>{meta.model_version}</Mono>, seed <span className="num">{meta.seed}</span>. {meta.algorithm}.
       </P>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <Table containerClassName="rounded-[var(--radius-lg)] border-border/70">
+        <Table containerClassName="rounded-[var(--radius-md)] border-border">
           <caption className="sr-only">Fitted settings</caption>
           <TableHeader>
             <TableRow>
@@ -42,7 +42,7 @@ function Card({ meta, label }: { meta: ModelMetadata; label: string | null }) {
             ))}
           </TableBody>
         </Table>
-        <Table containerClassName="rounded-[var(--radius-lg)] border-border/70">
+        <Table containerClassName="rounded-[var(--radius-md)] border-border">
           <caption className="sr-only">Starting guesses (priors), on a log scale</caption>
           <TableHeader>
             <TableRow>
@@ -93,7 +93,7 @@ export function ModellingSection({
         Few experiments per material, and mostly &quot;kept burning&quot; results, make the numbers shaky. Some materials cannot be told apart from the majority guess (section 4). The model has no physics inside: it fits ISS test results and flags where they stop.
       </Callout>
 
-      <Disclosure summary="Technical details" tone="strong" className="card rounded-[var(--radius-xl)] bg-surface px-4 sm:px-5" summaryClassName="flex w-full min-h-12 text-[14px] hover:text-accent" contentClassName="pb-4">
+      <Disclosure summary="Technical details" tone="strong" className="card px-5 sm:px-6" summaryClassName="flex w-full min-h-14 text-[17px] font-medium tracking-[-0.01em] hover:text-accent" contentClassName="pb-4">
         <div className="space-y-6 pt-2">
           <Sub title="What it predicts">
             <P>
@@ -175,7 +175,7 @@ epistemic = total - aleatoric   knowledge uncertainty (mutual information)`}</Fo
 
           <Sub title="Coverage rules">
             <P>Each point gets a verdict from the ISS tests for that material. The thresholds are fixed constants in the analysis code, not tuned.</P>
-            <Table containerClassName="rounded-[var(--radius-lg)] border-border/70">
+            <Table containerClassName="rounded-[var(--radius-md)] border-border">
               <caption className="sr-only">Coverage rules for one point</caption>
               <TableHeader>
                 <TableRow>

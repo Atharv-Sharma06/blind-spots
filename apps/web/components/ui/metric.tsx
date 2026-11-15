@@ -16,9 +16,9 @@ export function Metric({ label, value, unit, n, size = "md", className, ...props
   const missing = value === null || value === undefined || value === "";
   return (
     <div className={cn("min-w-0", className)} {...props}>
-      <div className="text-xs text-muted">{label}</div>
+      <div className="text-ui text-muted">{label}</div>
       <div className="mt-0.5 flex items-baseline gap-1">
-        <span className={cn("num text-fg", size === "lg" ? "text-heading font-semibold" : "text-ui")}>
+        <span className={cn("text-fg", size === "lg" ? "text-heading font-medium tracking-tight tabular-nums" : "num text-ui")}>
           {missing ? (
             <>
               <span aria-hidden>&ndash;</span>

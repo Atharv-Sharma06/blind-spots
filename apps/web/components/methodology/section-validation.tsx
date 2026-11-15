@@ -30,9 +30,9 @@ const METRICS = [
 type MetricKey = (typeof METRICS)[number]["value"];
 
 const STRATEGY_STYLE: Record<string, { label: string; stroke: string; dash?: string }> = {
-  evr: { label: STRATEGY_LABEL.evr ?? "evr", stroke: "var(--accent)" },
-  uncertainty_sampling: { label: STRATEGY_LABEL.uncertainty_sampling ?? "uncertainty_sampling", stroke: "var(--fg)", dash: "6 3" },
-  nearest_gap: { label: STRATEGY_LABEL.nearest_gap ?? "nearest_gap", stroke: "var(--fg)", dash: "1.5 3" },
+  evr: { label: STRATEGY_LABEL.evr ?? "evr", stroke: "var(--fg)" },
+  uncertainty_sampling: { label: STRATEGY_LABEL.uncertainty_sampling ?? "uncertainty_sampling", stroke: "var(--observed)", dash: "6 3" },
+  nearest_gap: { label: STRATEGY_LABEL.nearest_gap ?? "nearest_gap", stroke: "var(--observed)", dash: "1.5 3" },
   random: { label: STRATEGY_LABEL.random ?? "random", stroke: "var(--muted)", dash: "10 3 2 3" },
 };
 /** AUCs computed on fewer than this many not-sustained rows are not interpretable. */
@@ -40,8 +40,8 @@ const MIN_NEG_FOR_AUC = 3;
 
 function Fig({ title, children, note }: { title: string; children: React.ReactNode; note?: React.ReactNode }) {
   return (
-    <figure className="min-w-0 rounded-[var(--radius-lg)] border border-white/5 bg-bg/55 p-3 sm:p-4">
-      <figcaption className="mb-2 text-[13px] font-medium text-fg">{title}</figcaption>
+    <figure className="min-w-0 rounded-[var(--radius-lg)] border border-border bg-surface p-4 sm:p-5">
+      <figcaption className="mb-3 text-[16px] font-medium tracking-[-0.01em] text-fg">{title}</figcaption>
       {children}
       {note ? <p className="mt-2 max-w-[62ch] text-xs text-muted">{note}</p> : null}
     </figure>
@@ -73,7 +73,7 @@ function ModelComparison({ g }: { g: ExtGroupValidation }) {
           reference={refVal !== null ? { value: refVal, label: "majority-class guess" } : null}
           ariaLabel={`${info.label} with 95 percent intervals for each model; majority-class value ${f(refVal)} marked`}
         />
-        <Table containerClassName="rounded-[var(--radius-lg)] border-border/70">
+        <Table containerClassName="rounded-[var(--radius-md)] border-border">
           <caption className="sr-only">Cross-validated metrics by model (value and 95 percent interval)</caption>
           <TableHeader>
             <TableRow>
@@ -86,7 +86,7 @@ function ModelComparison({ g }: { g: ExtGroupValidation }) {
           </TableHeader>
           <TableBody>
             {g.cv.models.map((m) => (
-              <TableRow key={m.name} className={m.name === "gp" ? "bg-accent-tint/60" : undefined}>
+              <TableRow key={m.name} className={m.name === "gp" ? "bg-subtle" : undefined}>
                 <TableCell className={m.name === "gp" ? "font-medium" : undefined}>{modelLabel(m.name)}</TableCell>
                 {(["brier", "log_loss", "auc", "ece"] as const).map((k) => (
                   <TableCell key={k} numeric className="h-auto whitespace-nowrap py-1 leading-tight">
@@ -150,7 +150,7 @@ function Blindspot({ g }: { g: ExtGroupValidation }) {
           <P className="text-muted">No experiment-level pairs are available for this test set.</P>
         )}
         <div className="space-y-3">
-          <Table containerClassName="rounded-[var(--radius-lg)] border-border/70">
+          <Table containerClassName="rounded-[var(--radius-md)] border-border">
             <caption className="sr-only">Blind-spot test statistics</caption>
             <TableHeader>
               <TableRow>
@@ -229,7 +229,7 @@ function Retrospective({ scenarios }: { scenarios: ExtScenario[] }) {
         ariaLabel={`${sc.metric} against experiments acquired for four selection strategies, scenario ${scenarioLabel(sc.name)}, with 95 percent intervals across seeds`}
       />
       <div className="grid grid-cols-1 gap-4">
-        <Table containerClassName="rounded-[var(--radius-lg)] border-border/70">
+        <Table containerClassName="rounded-[var(--radius-md)] border-border">
           <caption className="sr-only">Area under the target log-loss curve by strategy</caption>
           <TableHeader>
             <TableRow>
@@ -247,7 +247,7 @@ function Retrospective({ scenarios }: { scenarios: ExtScenario[] }) {
           </TableBody>
         </Table>
         {paired.length ? (
-          <Table containerClassName="rounded-[var(--radius-lg)] border-border/70">
+          <Table containerClassName="rounded-[var(--radius-md)] border-border">
             <caption className="sr-only">Paired differences in area under the curve</caption>
             <TableHeader>
               <TableRow>
@@ -280,9 +280,9 @@ function Retrospective({ scenarios }: { scenarios: ExtScenario[] }) {
 
 function Tile({ label, value, meaning }: { label: string; value: string | null; meaning: string }) {
   return (
-    <div className="card min-w-0 rounded-[var(--radius-xl)] bg-surface p-4 sm:p-5">
-      <div className="text-xs text-muted">{label}</div>
-      <div className={cn("dotnum mt-2 break-words leading-none text-fg", (value?.length ?? 0) > 8 ? "text-[26px]" : "text-[28px] sm:text-[32px]")}>
+    <div className="card min-w-0 p-5 sm:p-6">
+      <div className="text-[14px] font-medium text-fg">{label}</div>
+      <div className={cn("mt-3 break-words font-medium leading-none tracking-[-0.03em] text-fg", (value?.length ?? 0) > 8 ? "text-[28px]" : "text-[36px] sm:text-[40px]")}>
         {value === null || value === "" ? (
           <>
             <span aria-hidden>&ndash;</span>
@@ -292,7 +292,7 @@ function Tile({ label, value, meaning }: { label: string; value: string | null; 
           value
         )}
       </div>
-      <p className="mt-2 text-xs leading-snug text-muted">{meaning}</p>
+      <p className="mt-3 text-[14px] leading-snug text-muted">{meaning}</p>
     </div>
   );
 }
@@ -300,7 +300,7 @@ function Tile({ label, value, meaning }: { label: string; value: string | null; 
 /** One collapsed detail: a plain-words title, the technical content behind it. */
 function Detail({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <Disclosure tone="strong" className="card rounded-[var(--radius-xl)] bg-surface px-4 sm:px-5" summaryClassName="flex w-full min-h-12 text-[14px] hover:text-accent" contentClassName="mt-1 space-y-3 pb-4 pl-0 text-fg sm:pl-5" summary={title}>
+    <Disclosure tone="strong" className="card px-5 sm:px-6" summaryClassName="flex w-full min-h-14 text-[17px] font-medium tracking-[-0.01em] hover:text-accent" contentClassName="mt-1 space-y-3 pb-4 pl-0 text-fg sm:pl-5" summary={title}>
       {children}
     </Disclosure>
   );
@@ -366,7 +366,7 @@ function GroupValidationView({ g, summary, retro }: { g: ExtGroupValidation; sum
         <Detail title="Leaving out a whole campaign">
           {g.logo.applicable && g.logo.folds.length ? (
             <>
-              <Table containerClassName="rounded-[var(--radius-lg)] border-border/70">
+              <Table containerClassName="rounded-[var(--radius-md)] border-border">
                 <caption className="sr-only">Leave-one-campaign-out results</caption>
                 <TableHeader>
                   <TableRow>
@@ -401,7 +401,7 @@ function GroupValidationView({ g, summary, retro }: { g: ExtGroupValidation; sum
         </Detail>
 
         <Detail title="Results by subgroup">
-          <Table containerClassName="rounded-[var(--radius-lg)] border-border/70">
+          <Table containerClassName="rounded-[var(--radius-md)] border-border">
             <caption className="sr-only">Out-of-fold performance by subgroup</caption>
             <TableHeader>
               <TableRow>
@@ -428,7 +428,7 @@ function GroupValidationView({ g, summary, retro }: { g: ExtGroupValidation; sum
         </Detail>
 
         <Detail title="If we change an assumption">
-          <Table containerClassName="rounded-[var(--radius-lg)] border-border/70">
+          <Table containerClassName="rounded-[var(--radius-md)] border-border">
             <caption className="sr-only">Sensitivity of cross-validated performance to analysis choices</caption>
             <TableHeader>
               <TableRow>
@@ -522,7 +522,7 @@ function ReadThisFirst({ v, labels }: { v: ExtValidation; labels: Map<string, Gr
         {summary ? <Tile label="Practice runs" value={String(summary.n_scenarios)} meaning="Choosing next tests: modest evidence, no sure edge over a simple rule." /> : null}
         {ranges.length ? <Tile label="Pressure tested (kPa)" value={`${f(Math.min(...ranges), 1)} to ${f(Math.max(...ranges), 1)}`} meaning="All ISS tests in our data ran near 1 atm. Low pressure is untested." /> : null}
       </div>
-      <Disclosure tone="strong" summary="What limits these results" data-testid="read-this-first-details" className="card rounded-[var(--radius-xl)] bg-surface px-4 sm:px-5" summaryClassName="flex w-full min-h-12 text-[14px] hover:text-accent" contentClassName="mt-1 pb-4 pl-0 text-fg sm:pl-5">
+      <Disclosure tone="strong" summary="What limits these results" data-testid="read-this-first-details" className="card px-5 sm:px-6" summaryClassName="flex w-full min-h-14 text-[17px] font-medium tracking-[-0.01em] hover:text-accent" contentClassName="mt-1 pb-4 pl-0 text-fg sm:pl-5">
         <ul className="list-disc space-y-1.5 pl-4 text-xs text-muted">
           <li>
             <strong className="font-medium text-fg">Against the majority-class baseline</strong>, the model is clearly better (log-loss interval excludes 0) in {beats.length} of {gs.length} test sets
@@ -612,7 +612,7 @@ export function ValidationSection({
               {notModelled.length ? (
                 <Detail title="Test sets we did not model">
                   <P className="text-muted">Too few tests or outcomes to check the model fairly, so we show coverage only.</P>
-                  <Table containerClassName="max-h-[320px] rounded-[var(--radius-lg)] border-border/70">
+                  <Table containerClassName="max-h-[320px] rounded-[var(--radius-md)] border-border">
                     <caption className="sr-only">Groups without a model and the reason</caption>
                     <TableHeader>
                       <TableRow>

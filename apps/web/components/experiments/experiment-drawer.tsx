@@ -5,7 +5,6 @@ import { ExternalLink, SearchX } from "lucide-react";
 import { useExperiment } from "@/hooks/api";
 import { MISSING } from "@/lib/format";
 import { cn } from "@/lib/cn";
-import { Button } from "@/components/ui/button";
 import { Disclosure } from "@/components/ui/disclosure";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
@@ -65,7 +64,7 @@ export function ExperimentDrawer(props: {
       <SheetContent
         title={exp ? materialLabel(exp.material_family) : notFound ? "Experiment not found" : "Experiment"}
         description={exp ? sourceLabel(exp) : undefined}
-        className="inset-y-2 right-2 left-2 w-auto overflow-hidden rounded-2xl border border-white/[0.07] bg-[linear-gradient(160deg,#242428_0%,#18181B_55%,#131315_100%)] shadow-[inset_0_1px_0_rgb(255_255_255/0.06),0_24px_48px_-24px_rgb(0_0_0/0.8)] sm:inset-y-3 sm:right-3 sm:left-auto sm:w-full sm:max-w-[640px]"
+        className="inset-y-2 right-2 left-2 w-auto overflow-hidden rounded-2xl border border-border bg-surface text-fg shadow-[0_24px_60px_-24px_rgb(22_22_22/0.45)] sm:inset-y-3 sm:right-3 sm:left-auto sm:w-full sm:max-w-[640px] [&_button[aria-label='Close']]:border-border-strong [&_button[aria-label='Close']]:bg-transparent [&_button[aria-label='Close']]:bg-none [&_button[aria-label='Close']]:text-fg [&_button[aria-label='Close']:hover]:bg-subtle"
         aria-describedby={undefined}
         onCloseAutoFocus={onCloseAutoFocus}
       >
@@ -81,7 +80,12 @@ export function ExperimentDrawer(props: {
               }
               action={
                 <SheetClose asChild>
-                  <Button>Back to the list</Button>
+                  <button
+                    type="button"
+                    className="inline-flex h-11 items-center justify-center rounded-full border border-border-strong px-5 text-ui font-medium text-fg hover:border-fg hover:bg-subtle"
+                  >
+                    Back to the list
+                  </button>
                 </SheetClose>
               }
             />
@@ -104,8 +108,8 @@ export function ExperimentDrawer(props: {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="border-b border-white/[0.06] py-5 first:pt-0 last:border-b-0">
-      <h3 className="mb-3 text-prose font-semibold text-fg">{title}</h3>
+    <section className="border-b border-border py-5 first:pt-0 last:border-b-0">
+      <h3 className="mb-3 text-prose font-medium text-fg">{title}</h3>
       {children}
     </section>
   );
@@ -126,14 +130,14 @@ function Fields({ items }: { items: [string, React.ReactNode][] }) {
 
 function Fact({ label, value, unit, note, className }: { label: string; value: string; unit: string; note?: React.ReactNode; className?: string }) {
   return (
-    <div className={cn("rounded-xl border border-white/[0.06] bg-white/[0.04] px-4 py-3", className)}>
+    <div className={cn("rounded-2xl border border-border bg-subtle px-4 py-3", className)}>
       <p className="text-xs text-muted">{label}</p>
       <p className="mt-0.5">
         {value === MISSING ? (
           <span className="text-heading text-muted">{MISSING}</span>
         ) : (
           <>
-            <span className="num text-heading font-semibold">{value}</span> <span className="text-ui text-muted">{unit}</span>
+            <span className="text-heading font-medium tabular-nums">{value}</span> <span className="text-ui text-muted">{unit}</span>
           </>
         )}
       </p>
@@ -187,7 +191,7 @@ function Details({ e, obs, groups, inv }: { e: ApiExperiment; obs: ApiObservatio
           large
         />
         {described ? (
-          <blockquote className="mt-3 rounded-xl border border-white/[0.06] bg-white/[0.04] p-3.5 text-ui">
+          <blockquote className="mt-3 rounded-xl border border-border bg-subtle p-3.5 text-ui">
             <span className="mb-1 block text-xs text-muted">NASA&apos;s words</span>
             {described}
           </blockquote>
@@ -237,11 +241,14 @@ function Details({ e, obs, groups, inv }: { e: ApiExperiment; obs: ApiObservatio
           <p className="min-w-0 text-ui">
             <span className="num">{sourceLabel(e)}</span>
           </p>
-          <Button asChild className="h-10 rounded-full px-4">
-            <a href={e.source_url} target="_blank" rel="noreferrer">
-              Open the NASA record <ExternalLink aria-hidden />
-            </a>
-          </Button>
+          <a
+            href={e.source_url}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-[14px] bg-fg px-5 text-ui font-medium text-bg transition-opacity hover:opacity-90 md:h-10"
+          >
+            Open the NASA record <ExternalLink className="size-4" aria-hidden />
+          </a>
         </div>
       </Section>
 
@@ -332,7 +339,7 @@ function StepItem({ o }: { o: ApiObservation }) {
   return (
     <li
       data-used={used ? "true" : "false"}
-      className={used ? "rounded-xl border border-white/[0.06] bg-white/[0.04] p-3.5" : "rounded-xl border border-dashed border-border bg-transparent p-3.5 text-muted"}
+      className={used ? "rounded-xl border border-border bg-subtle p-3.5" : "rounded-xl border border-dashed border-border bg-transparent p-3.5 text-muted"}
     >
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
         <span className="text-ui font-medium text-fg">Step {o.step_index + 1}</span>

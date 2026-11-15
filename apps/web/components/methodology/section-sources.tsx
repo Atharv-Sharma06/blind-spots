@@ -17,8 +17,8 @@ const ROLE_LABEL = { integrated_model: "model", integrated_context: "context", c
 /** Collapsed block with a plain summary line (>= 40 px tap target). */
 function More({ summary, children }: { summary: string; children: ReactNode }) {
   return (
-    <details className="card group/disclosure max-w-[78ch] rounded-[var(--radius-xl)] bg-surface px-4 sm:px-5">
-      <summary data-disclosure="" className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 rounded-[var(--radius-sm)] text-[14px] font-medium text-fg hover:text-accent focus-visible:outline-2 focus-visible:outline-accent [&::-webkit-details-marker]:hidden">
+    <details className="card group/disclosure max-w-[78ch] px-5 sm:px-6">
+      <summary data-disclosure="" className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 rounded-[var(--radius-sm)] text-[17px] font-medium tracking-[-0.01em] text-fg hover:text-accent focus-visible:outline-2 focus-visible:outline-accent [&::-webkit-details-marker]:hidden">
         <span>{summary}</span>
         <span aria-hidden className="grid size-8 shrink-0 place-items-center rounded-full bg-subtle">
           <DisclosureChevron />
@@ -74,7 +74,7 @@ export function SourcesSection({ sources, context }: { sources: ApiQuery<Sources
             const catalogued = s.investigations.length - integrated.length;
             return (
               <>
-                <Table containerClassName="max-h-[420px] rounded-[var(--radius-lg)] border-border/70">
+                <Table containerClassName="max-h-[420px] rounded-[var(--radius-md)] border-border">
                   <caption className="sr-only">NASA investigations used as model data or context</caption>
                   <TableHeader>
                     <TableRow>
@@ -117,7 +117,7 @@ export function SourcesSection({ sources, context }: { sources: ApiQuery<Sources
             s.publications.length === 0 ? (
               <P className="text-muted">None listed.</P>
             ) : (
-              <ul className="max-h-[360px] max-w-[78ch] space-y-1.5 overflow-y-auto rounded-[var(--radius-lg)] border border-white/5 bg-bg/55 p-4 text-[13px]" tabIndex={0} aria-label="Papers and documents">
+              <ul className="max-h-[360px] max-w-[78ch] space-y-1.5 overflow-y-auto rounded-[var(--radius-lg)] border border-border bg-subtle p-4 text-[13px]" tabIndex={0} aria-label="Papers and documents">
                 {s.publications.map((p, i) => (
                   <li key={`${p.url}-${p.title}-${i}`}>
                     {safeUrl(p.url) ? <ExtLink href={safeUrl(p.url)}>{p.title}</ExtLink> : <span>{p.title}</span>}
@@ -162,7 +162,7 @@ export function SourcesSection({ sources, context }: { sources: ApiQuery<Sources
             c.not_integrated.length === 0 ? (
               <P className="text-muted">None listed.</P>
             ) : (
-              <Table containerClassName="max-h-[560px] rounded-[var(--radius-lg)] border-border/70">
+              <Table containerClassName="max-h-[560px] rounded-[var(--radius-md)] border-border">
                 <caption className="sr-only">Documented investigations not used, with data availability</caption>
                 <TableHeader>
                   <TableRow>

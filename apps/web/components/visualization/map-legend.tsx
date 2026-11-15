@@ -1,6 +1,6 @@
 "use client";
 import { cn } from "@/lib/cn";
-import { ACCENT, GAP, INK, MUTED, OBSERVED, ON_ACCENT, TARGET, UNC_ALPHA, PLUM_STOPS, KPA_PER_PSI, plumColor } from "./map-scales";
+import { ACCENT, GAP, GAP_HEX, GUIDE, INK, MUTED, OBSERVED, OBSERVED_TINT, ON_ACCENT, PAPER, TARGET, UNC_ALPHA, PLUM_STOPS, KPA_PER_PSI, plumColor } from "./map-scales";
 
 export interface MapLegendProps {
   layers: {
@@ -54,8 +54,8 @@ export default function MapLegend(p: MapLegendProps) {
       <ul className="flex flex-wrap gap-x-4 gap-y-2">
         {l.observations && (
           <>
-            <Item swatch={<circle cx="11" cy="8" r="4.5" fill={OBSERVED} stroke="var(--surface)" strokeWidth="1" />} label="Flame kept burning" />
-            <Item swatch={<circle cx="11" cy="8" r="4.5" fill="var(--surface)" stroke={OBSERVED} strokeWidth="1.5" />} label="Flame went out" />
+            <Item swatch={<circle cx="11" cy="8" r="4.5" fill={OBSERVED} stroke={PAPER} strokeWidth="1.25" />} label="Flame kept burning" />
+            <Item swatch={<circle cx="11" cy="8" r="4.5" fill={PAPER} stroke={OBSERVED} strokeWidth="1.5" />} label="Flame went out" />
             {p.hasAssumed && (
               <Item
                 swatch={
@@ -69,7 +69,7 @@ export default function MapLegend(p: MapLegendProps) {
               />
             )}
             {p.hasUnlabelled && (
-              <Item swatch={<circle cx="11" cy="8" r="4.5" fill="var(--observed-tint)" stroke={OBSERVED} strokeWidth="1" />} label="Outcome unknown" />
+              <Item swatch={<circle cx="11" cy="8" r="4.5" fill={OBSERVED_TINT} stroke={OBSERVED} strokeWidth="1" />} label="Outcome unknown" />
             )}
           </>
         )}
@@ -77,8 +77,8 @@ export default function MapLegend(p: MapLegendProps) {
           <Item
             swatch={
               <>
-                <rect x="2" y="2" width="18" height="12" fill={TARGET} fillOpacity="0.06" stroke={TARGET} strokeOpacity="0.9" strokeWidth="1.4" strokeDasharray="4 2" />
-                <circle cx="11" cy="8" r="3" fill={TARGET} stroke="var(--surface)" strokeWidth="1" style={{ filter: "drop-shadow(0 0 3px rgb(242 210 27 / 0.75))" }} />
+                <rect x="2" y="2" width="18" height="12" fill={TARGET} fillOpacity="0.05" stroke={TARGET} strokeOpacity="0.9" strokeWidth="1.4" strokeDasharray="4 2" />
+                <circle cx="11" cy="8" r="3" fill={TARGET} stroke={PAPER} strokeWidth="1.25" />
               </>
             }
             label="This cabin"
@@ -89,7 +89,7 @@ export default function MapLegend(p: MapLegendProps) {
             <Item
               swatch={
                 <>
-                  <path d="M11 1 L18 8 L11 15 L4 8 Z" fill={ACCENT} stroke="var(--surface)" />
+                  <path d="M11 1 L18 8 L11 15 L4 8 Z" fill={ACCENT} stroke={PAPER} strokeWidth="1.25" />
                   <text x="11" y="11.2" fontSize="8" fill={ON_ACCENT} textAnchor="middle" fontWeight="700">
                     1
                   </text>
@@ -99,7 +99,7 @@ export default function MapLegend(p: MapLegendProps) {
             />
             {p.hasOffSlice && (
               <Item
-                swatch={<path d="M11 1 L18 8 L11 15 L4 8 Z" fill="var(--surface)" stroke={ACCENT} strokeWidth="1.5" />}
+                swatch={<path d="M11 1 L18 8 L11 15 L4 8 Z" fill={PAPER} stroke={ACCENT} strokeWidth="1.5" />}
                 label={`Candidate at other ${sliceWord}`}
                 title={`This research candidate is at a different ${sliceWord} than this map shows.`}
               />
@@ -110,8 +110,8 @@ export default function MapLegend(p: MapLegendProps) {
           <Item
             swatch={
               <>
-                <rect x="1.5" y="1.5" width="19" height="13" fill="none" stroke={MUTED} strokeOpacity="0.45" strokeWidth="1" strokeDasharray="2 3" />
-                <path d="M11 4.5 L14.5 11 H7.5 Z" fill="var(--surface)" stroke={MUTED} strokeOpacity="0.8" strokeWidth="1" />
+                <rect x="1.5" y="1.5" width="19" height="13" fill="none" stroke={MUTED} strokeOpacity="0.5" strokeWidth="1" strokeDasharray="2 3" />
+                <path d="M11 4.5 L14.5 11 H7.5 Z" fill={PAPER} stroke={MUTED} strokeOpacity="0.85" strokeWidth="1" />
               </>
             }
             label="Related NASA work"
@@ -122,8 +122,8 @@ export default function MapLegend(p: MapLegendProps) {
           <Item
             swatch={
               <>
-                <rect x="1" y="1" width="20" height="14" fill="none" stroke={GAP} strokeWidth="1" />
-                <path d="M1 15 L15 1 M7 15 L21 1 M1 9 L9 1 M13 15 L21 7" stroke={GAP} strokeWidth="1" />
+                <rect x="1" y="1" width="20" height="14" fill={PAPER} stroke={GAP} strokeWidth="1" />
+                <path d="M1 15 L15 1 M7 15 L21 1 M1 9 L9 1 M13 15 L21 7" stroke={GAP_HEX} strokeWidth="1.25" />
               </>
             }
             label="Few nearby tests"
@@ -148,13 +148,13 @@ export default function MapLegend(p: MapLegendProps) {
             swatch={
               <>
                 <rect x="1" y="1" width="6.67" height="14" fill={INK} fillOpacity="0.05" />
-                <rect x="7.67" y="1" width="6.67" height="14" fill={INK} fillOpacity="0.13" />
-                <rect x="14.33" y="1" width="6.67" height="14" fill={INK} fillOpacity="0.21" />
-                <rect x="1" y="1" width="20" height="14" fill="none" stroke={MUTED} strokeOpacity="0.4" strokeWidth="1" />
+                <rect x="7.67" y="1" width="6.67" height="14" fill={INK} fillOpacity="0.15" />
+                <rect x="14.33" y="1" width="6.67" height="14" fill={INK} fillOpacity="0.25" />
+                <rect x="1" y="1" width="20" height="14" fill="none" stroke={GUIDE} strokeOpacity="0.22" strokeWidth="1" />
               </>
             }
             label="Grey: chance it burns"
-            hint="(lighter = higher; no grey = no estimate)"
+            hint="(darker = higher; no grey = no estimate)"
             title="Grey shading is the model's estimated chance that a flame keeps burning. Darker means a higher chance. Where the model has no estimate, the map is not shaded."
           />
         )}
@@ -162,7 +162,7 @@ export default function MapLegend(p: MapLegendProps) {
           <li className="flex basis-full items-center gap-1.5">
             <span className="text-fg">Uncertainty</span>
             <span className="text-muted">low</span>
-            <span className="flex w-20" style={{ opacity: UNC_ALPHA }} role="img" aria-label="Colour scale from low uncertainty (dark) to high uncertainty (bright purple)">
+            <span className="flex w-20" style={{ opacity: UNC_ALPHA }} role="img" aria-label="Colour scale from low uncertainty (light) to high uncertainty (dark purple)">
               {Array.from({ length: PLUM_STOPS.length * 2 - 1 }, (_, i) => (
                 <span key={i} className="h-3 flex-1 border-y border-border" style={{ background: plumColor(i / (PLUM_STOPS.length * 2 - 2)) }} />
               ))}

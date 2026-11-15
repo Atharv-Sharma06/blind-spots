@@ -7,10 +7,11 @@ import { fmtCount } from "@/lib/format";
 import type { AssessResponse } from "@/lib/types";
 import { relevanceRows, type RelevanceRole } from "./evidence";
 
-const ROLE: Record<RelevanceRole, { label: string; cls: string }> = {
-  integrated: { label: "In the model", cls: "border-observed/30 bg-observed-tint text-periwinkle" },
-  context: { label: "Context only", cls: "border-border-strong bg-subtle text-fg" },
-  not_integrated: { label: "Not in the model", cls: "border-border bg-bg text-muted" },
+/** Outlined chip with a status dot: filled blue = in the model, filled grey = context only, hollow = not in the model. */
+const ROLE: Record<RelevanceRole, { label: string; dot: string }> = {
+  integrated: { label: "In the model", dot: "bg-observed" },
+  context: { label: "Context only", dot: "bg-border-strong" },
+  not_integrated: { label: "Not in the model", dot: "border border-muted bg-transparent" },
 };
 
 const TOP = 3;
@@ -41,19 +42,19 @@ export function InvestigationRelevance({ a }: { a: AssessResponse }) {
   if (rows.length === 0) return null;
   const shown = all ? rows : rows.slice(0, TOP);
   return (
-    <section id="related-work" aria-labelledby="inv-rel-heading" className="card scroll-mt-20 p-5" data-testid="investigation-relevance">
-      <h3 id="inv-rel-heading" className="text-[15px] font-semibold text-fg">Related NASA work</h3>
-      <p className="mt-0.5 text-xs text-muted">
+    <section id="related-work" aria-labelledby="inv-rel-heading" className="card scroll-mt-20 p-6 sm:p-7" data-testid="investigation-relevance">
+      <h3 id="inv-rel-heading" className="text-xl leading-7 font-medium text-fg">Related NASA work</h3>
+      <p className="mt-1 text-sm text-muted">
         {fromBackend ? "Closest first. Only some feed the model." : "None of it feeds the model."}
       </p>
-      <ol className="mt-3 divide-y divide-border">
+      <ol className="mt-4 divide-y divide-border">
         {shown.map((r) => {
           const role = ROLE[r.role];
           const reason = reasonOf(r);
           return (
-            <li key={r.id} className="py-2 first:pt-0 last:pb-0">
+            <li key={r.id} className="py-3 first:pt-0 last:pb-0">
               <div className="flex items-center justify-between gap-2">
-                <p className="min-w-0 text-[13px] leading-snug font-medium text-fg" title={r.name && r.name !== r.acronym ? r.name : undefined}>
+                <p className="min-w-0 text-[15px] leading-snug font-medium text-fg" title={r.name && r.name !== r.acronym ? r.name : undefined}>
                   {r.url ? (
                     <a href={r.url} target="_blank" rel="noreferrer noopener" className="flex min-h-10 min-w-0 items-center gap-1 hover:underline sm:min-h-0">
                       <span className="truncate">{r.acronym}</span>
@@ -64,9 +65,12 @@ export function InvestigationRelevance({ a }: { a: AssessResponse }) {
                     <span className="block truncate">{r.acronym}</span>
                   )}
                 </p>
-                <span className={cn("inline-flex h-6 shrink-0 items-center rounded-full border px-2.5 text-xs font-medium leading-none", role.cls)}>{role.label}</span>
+                <span className="inline-flex h-7 shrink-0 items-center gap-1.5 rounded-lg border border-border bg-surface px-2.5 text-xs font-medium leading-none whitespace-nowrap text-fg">
+                  <span aria-hidden className={cn("size-2 shrink-0 rounded-full", role.dot)} />
+                  {role.label}
+                </span>
               </div>
-              {reason ? <p className="mt-0.5 line-clamp-1 text-xs text-muted">{reason}</p> : null}
+              {reason ? <p className="mt-1 line-clamp-1 text-sm text-muted">{reason}</p> : null}
             </li>
           );
         })}

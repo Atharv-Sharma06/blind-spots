@@ -4,7 +4,7 @@ import type { ApiQuery } from "@/hooks/api";
 import type { MethodologyResponse } from "@/lib/types";
 import { DISCLAIMER } from "@/lib/copy";
 import { Callout } from "@/components/ui/callout";
-import { Bullets, QueryBoundary, Section } from "./primitives";
+import { QueryBoundary, Section } from "./primitives";
 
 /** Fixed caveats that describe how the records and model are built (no data-dependent numbers). */
 const STATIC_LIMITATIONS = [
@@ -24,14 +24,14 @@ export function LimitationsSection({ methodology }: { methodology: ApiQuery<Meth
       <QueryBoundary query={methodology} rows={4}>
         {(m) => (
           <>
-            <Bullets>
-              {m.limitations.map((l) => (
-                <li key={l}>{l}</li>
+            <ol className="max-w-[72ch] text-[16px] leading-6 [counter-reset:limit]">
+              {[...m.limitations, ...STATIC_LIMITATIONS].map((l) => (
+                <li key={l} className="flex gap-4 border-t border-border py-4 first:border-t-0 first:pt-0 [counter-increment:limit]">
+                  <span aria-hidden className="num w-6 shrink-0 pt-[3px] text-[13px] text-muted before:content-[counter(limit,decimal-leading-zero)]" />
+                  <span className="min-w-0">{l}</span>
+                </li>
               ))}
-              {STATIC_LIMITATIONS.map((l) => (
-                <li key={l}>{l}</li>
-              ))}
-            </Bullets>
+            </ol>
             <Callout variant="info" title="Status of the output">
               {DISCLAIMER} Candidates are research candidates: they need expert review and safety checks.
             </Callout>

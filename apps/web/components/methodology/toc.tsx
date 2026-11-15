@@ -9,7 +9,7 @@ export interface TocItem {
   label: string;
 }
 
-/** Sticky table of contents; highlights the section nearest the top of the viewport. */
+/** Table of contents as a row of outlined pills; highlights the section nearest the top of the viewport. */
 export function Toc({ items }: { items: TocItem[] }) {
   const [active, setActive] = useState(items[0]?.id ?? "");
 
@@ -28,8 +28,8 @@ export function Toc({ items }: { items: TocItem[] }) {
   }, [items]);
 
   return (
-    <nav aria-label="Technical details sections" className="hidden lg:sticky lg:top-[calc(var(--header-h)+24px)] lg:block">
-      <ol className="flex gap-1.5 overflow-x-auto pb-2 lg:flex-col lg:gap-1.5 lg:overflow-visible lg:pb-0">
+    <nav aria-label="Technical details sections" className="min-w-0">
+      <ol className="-mx-4 flex flex-nowrap gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
         {items.map((it, i) => (
           <li key={it.id} className="shrink-0">
             <a
@@ -40,18 +40,11 @@ export function Toc({ items }: { items: TocItem[] }) {
                 setSectionOpen(it.id, true);
               }}
               className={cn(
-                "flex min-h-10 items-center gap-2.5 whitespace-nowrap rounded-full py-2 pl-2 pr-4 text-[13px] ring-1 transition-colors lg:whitespace-normal",
-                active === it.id ? "bg-subtle font-medium text-fg ring-accent/60" : "bg-surface text-muted ring-border hover:bg-subtle hover:text-fg",
+                "inline-flex min-h-10 items-center gap-2 whitespace-nowrap rounded-full border px-4 text-[14px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-accent",
+                active === it.id ? "border-fg bg-surface text-fg" : "border-border-strong bg-transparent text-muted hover:border-fg hover:text-fg",
               )}
             >
-              <span
-                className={cn(
-                  "num inline-flex size-6 shrink-0 items-center justify-center rounded-full text-[11px]",
-                  active === it.id ? "bg-accent font-semibold text-[#0B0B0C]" : "bg-black/30 text-muted",
-                )}
-              >
-                {i + 1}
-              </span>
+              <span className="text-[12px] opacity-70">{i + 1}</span>
               {it.label}
             </a>
           </li>

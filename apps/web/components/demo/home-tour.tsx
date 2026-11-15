@@ -9,9 +9,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, Pause, Play, RotateCcw, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Kbd } from "@/components/ui/kbd";
-import { DotNumber } from "@/components/ui/dot-number";
 import { COVERAGE_STATUS_LABEL, coverageStatus, materialName, shortCabinName } from "@/components/home/cabins";
 import { useHomeSelection } from "@/components/home/use-home-selection";
 import { useAssessTarget, useCounterfactual, useDataMode, useGroups, useHeadline, useRankCandidates } from "@/hooks/api";
@@ -40,11 +37,27 @@ import {
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "").trim();
 const siteLabel = SITE_URL.replace(/^https?:\/\//, "").replace(/\/$/, "");
 
-/** Highlight ring: a signal-yellow edge with a soft glow (the second value is the breathing peak). */
-const RING_GLOW_A = "0 0 0 2px #F2D21B, 0 0 0 6px rgb(242 210 27 / .16), 0 0 28px 4px rgb(242 210 27 / .38)";
-const RING_GLOW_B = "0 0 0 2px #F2D21B, 0 0 0 10px rgb(242 210 27 / .08), 0 0 40px 8px rgb(242 210 27 / .5)";
+/** Highlight ring: a near-black edge with a faint halo (the second value is the breathing peak). */
+const RING_GLOW_A = "0 0 0 2px #161616, 0 0 0 6px rgb(22 22 22 / .10)";
+const RING_GLOW_B = "0 0 0 2px #161616, 0 0 0 10px rgb(22 22 22 / .06)";
 
-/** A fact value that is a plain number (count, percent, range): shown large in the dot-matrix face. */
+/** Button looks (explicit values so the tour never depends on another file's button styles). */
+const BTN_BASE =
+  "inline-flex shrink-0 items-center justify-center gap-2 text-center text-[14px] font-medium leading-tight transition-colors disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0";
+/** The one forward action: black pill (radius 14, white text). */
+const PILL_INK = `${BTN_BASE} h-11 rounded-[14px] bg-[#161616] px-5 text-white hover:bg-black max-md:min-h-11`;
+/** Secondary actions: outlined pill, hairline border. */
+const PILL_OUTLINE = `${BTN_BASE} h-11 rounded-full border border-[#161616]/20 bg-white px-4 text-[#161616] hover:bg-[#161616]/[.05] max-md:min-h-11`;
+/** Green call-to-action pill (title and end cards). */
+const PILL_CTA =
+  "inline-flex h-11 min-w-[140px] shrink-0 items-center justify-center gap-2 rounded-full bg-[#2FD067] px-6 text-[12px] font-semibold uppercase tracking-[.06em] text-[#0B2414] transition-colors hover:bg-[#27BF5C] [&_svg]:size-4 [&_svg]:shrink-0";
+/** Small tracked uppercase label (the eyebrow look). */
+const EYEBROW = "text-[11px] font-medium uppercase tracking-[.08em] sm:text-[12px]";
+
+/** Keyboard hint chip. */
+const KBD = "inline-flex h-5 min-w-5 items-center justify-center rounded-[6px] border border-[#E4E2DC] bg-[#F3F2EF] px-1.5 font-mono text-[11px] font-medium text-[#5F5D58]";
+
+/** A fact value that is a plain number (count, percent, range): shown large in the plain sans face. */
 const NUMERIC_FACT = /^[\d.,\s–−%]+$|^\d+ of \d+$/;
 
 /** How long a scene waits for its data before moving on anyway (an unreachable service must not freeze the tour). */
@@ -427,33 +440,30 @@ export function HomeTour({ className }: { className?: string }) {
   }, [active, scene, go, exit, togglePause]);
 
   const launcher = (
-    <Button
+    <button
       ref={launcherRef}
-      variant="secondary"
+      type="button"
       data-testid="home-tour-start"
       aria-pressed={active}
       onClick={start}
-      className={className}
+      className={cn(PILL_OUTLINE, className)}
     >
-      <span aria-hidden className="text-[11px] text-accent">▶</span>
+      <span aria-hidden className="text-[11px] text-[#1F9D55]">▶</span>
       30-second tour
-    </Button>
+    </button>
   );
   if (!active || !mounted) return launcher;
 
   const isEnd = scene >= END_SCENE;
   const isTitle = scene === 0;
   const running = !paused && !reduced && !blocked;
-  const pill = "h-10 rounded-full px-4";
-  /** The one forward action: signal-yellow dot-texture pill (forced over the Button variant colours). */
-  const yellow = "pill-yellow !border-transparent !bg-accent !text-[#0B0B0C] font-semibold";
   const pauseButton = reduced ? (
-    <span className="text-xs text-muted">Autoplay is off. Use Next.</span>
+    <span className="text-xs text-[#5F5D58]">Autoplay is off. Use Next.</span>
   ) : (
-    <Button size="sm" variant="secondary" onClick={togglePause} aria-pressed={paused} aria-keyshortcuts="Space" className={pill}>
+    <button type="button" onClick={togglePause} aria-pressed={paused} aria-keyshortcuts="Space" className={PILL_OUTLINE}>
       {paused ? <Play aria-hidden /> : <Pause aria-hidden />}
       {paused ? "Play" : "Pause"}
-    </Button>
+    </button>
   );
 
   const style = (
@@ -465,7 +475,17 @@ export function HomeTour({ className }: { className?: string }) {
   );
 
   // ---- title and end cards: full screen, large type (readable in a 1080p recording)
+  // Title: warm cream page, huge bold tight headline, green pill + label with a round icon button (the landing look).
+  // End: pure black section, white bold name, outlined pills.
   if (isTitle || isEnd) {
+    const roundX = (dark: boolean) => (
+      <span
+        aria-hidden
+        className={cn("inline-flex size-10 items-center justify-center rounded-full border", dark ? "border-white/25 text-white" : "border-[#161616]/20 text-[#161616]")}
+      >
+        <X className="size-4" />
+      </span>
+    );
     return (
       <>
         {launcher}
@@ -477,68 +497,76 @@ export function HomeTour({ className }: { className?: string }) {
             aria-label="Tour"
             data-testid="home-tour-card"
             data-tour-state={isTitle ? "title" : "end"}
-            className="bg-dots fixed inset-0 z-50 flex flex-col items-center justify-center overflow-y-auto px-5 py-10 text-white outline-none"
-            style={{ backgroundColor: "#08080A" }}
+            className={cn(
+              "fixed inset-0 z-50 flex flex-col items-center justify-center overflow-y-auto px-5 py-10 outline-none",
+              isTitle ? "text-[#161616]" : "text-white",
+            )}
+            style={{
+              background: isTitle ? "linear-gradient(to bottom, #EDE7DC 0%, #F2EFE8 22%, #F2EFE8 78%, #EDE7DC 100%)" : "#000000",
+            }}
           >
             {style}
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-0"
-              style={{ background: "radial-gradient(60% 50% at 50% 42%, rgb(92 89 196 / .22) 0%, rgb(8 8 10 / 0) 70%)" }}
-            />
-            <div className={cn("relative w-full max-w-[880px]", isEnd && "text-center")} aria-live="polite">
+            <div className={cn("relative w-full text-center", isTitle ? "max-w-[1180px]" : "max-w-[1000px]")} aria-live="polite">
               {isTitle ? (
                 <>
-                  <p className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3.5 py-1.5 text-sm font-medium text-fg">
-                    <span aria-hidden className="size-2 rounded-full bg-accent shadow-[0_0_10px_rgb(242_210_27/.7)]" />
-                    {TITLE_SUBLINE}
-                  </p>
-                  <h2 className="mt-5 text-balance text-[34px] font-semibold leading-[1.1] tracking-[-0.02em] text-white sm:text-[56px]">{TITLE_LINE}</h2>
+                  <p className={cn(EYEBROW, "inline-flex h-9 items-center rounded-full border border-[#161616]/15 px-4")}>{TITLE_SUBLINE}</p>
+                  <h2 className="mx-auto mt-6 text-balance text-[38px] font-extrabold leading-[0.96] tracking-[-0.045em] sm:text-[clamp(48px,6.6vw,96px)]">
+                    {TITLE_LINE}
+                  </h2>
                 </>
               ) : (
                 <>
-                  <h2 className="text-[52px] font-semibold leading-none tracking-[-0.035em] text-white sm:text-[88px]">{END_NAME}</h2>
-                  <p className="mx-auto mt-5 max-w-[720px] text-balance text-[20px] leading-snug text-white/90 sm:text-[28px]">{END_LINE}</p>
+                  <h2 className="text-[56px] font-extrabold leading-[0.92] tracking-[-0.045em] sm:text-[clamp(88px,11vw,168px)]">{END_NAME}</h2>
+                  <p className="mx-auto mt-6 max-w-[720px] text-balance text-[20px] font-medium leading-snug text-white sm:text-[28px]">{END_LINE}</p>
                   {siteLabel ? (
                     <p className="mt-7" data-testid="home-tour-site-url">
                       <a
                         href={SITE_URL}
-                        className="num inline-flex min-h-11 items-center rounded-full border border-border-strong bg-surface px-5 text-[17px] text-accent underline-offset-4 hover:underline sm:text-[22px]"
+                        className="num inline-flex min-h-11 items-center rounded-full border border-white/30 px-5 text-[17px] text-white underline-offset-4 hover:underline sm:text-[22px]"
                       >
                         {siteLabel}
                       </a>
                     </p>
                   ) : null}
-                  <p className="mx-auto mt-7 max-w-[640px] text-[13px] leading-relaxed text-muted sm:text-[14px]">{DISCLAIMER}</p>
+                  <p className="mx-auto mt-7 max-w-[640px] text-[13px] leading-relaxed text-[#B3B1AB] sm:text-[14px]">{DISCLAIMER}</p>
                 </>
               )}
             </div>
-            <div className={cn("relative mt-10 flex w-full max-w-[880px] flex-wrap items-center gap-2.5", isEnd && "justify-center")}>
+            <div className="relative mt-10 flex w-full max-w-[880px] flex-wrap items-center justify-center gap-x-5 gap-y-3">
               {isTitle ? (
                 <>
-                  <Button size="sm" variant="primary" onClick={() => go(1)} aria-keyshortcuts="ArrowRight" className={cn(pill, yellow)}>
+                  <button type="button" onClick={() => go(1)} aria-keyshortcuts="ArrowRight" className={PILL_CTA}>
                     Start<ChevronRight aria-hidden />
-                  </Button>
-                  <Button size="sm" variant="secondary" onClick={exit} aria-keyshortcuts="Escape" className={cn(pill, "ml-auto")}>
-                    <X aria-hidden />Exit
-                  </Button>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={exit}
+                    aria-keyshortcuts="Escape"
+                    className="inline-flex min-h-11 items-center gap-3 rounded-full text-[12px] font-medium uppercase tracking-[.08em]"
+                  >
+                    Exit{roundX(false)}
+                  </button>
                 </>
               ) : (
                 <>
-                  <Button size="sm" variant="primary" onClick={exit} aria-keyshortcuts="Escape" className={cn(pill, yellow)}>
-                    <X aria-hidden />Close the tour
-                  </Button>
-                  <Button size="sm" variant="secondary" onClick={replay} className={pill}>
+                  <button type="button" onClick={exit} aria-keyshortcuts="Escape" className={PILL_CTA}>
+                    Close the tour
+                  </button>
+                  <button
+                    type="button"
+                    onClick={replay}
+                    className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-white/30 px-5 text-[12px] font-medium uppercase tracking-[.08em] text-white transition-colors hover:bg-white/10 [&_svg]:size-4"
+                  >
                     <RotateCcw aria-hidden />Replay
-                  </Button>
+                  </button>
                 </>
               )}
             </div>
             {isTitle && running ? (
-              <div className="absolute inset-x-0 bottom-0 h-1.5 bg-white/10" aria-hidden>
+              <div className="absolute inset-x-0 bottom-0 h-1.5 bg-[#161616]/10" aria-hidden>
                 <div
                   key={runId}
-                  className="h-full rounded-r-full bg-accent shadow-[0_0_12px_rgb(242_210_27/.6)]"
+                  className="h-full rounded-r-full bg-[#161616]"
                   style={{ ["--from" as string]: "0%", ["--to" as string]: "100%", animation: `tour-fill ${TITLE_SECONDS}s linear forwards` }}
                 />
               </div>
@@ -587,11 +615,8 @@ export function HomeTour({ className }: { className?: string }) {
             aria-label="Tour"
             data-testid="home-tour-card"
             data-tour-state={`scene-${scene}`}
-            className="fixed inset-x-0 bottom-0 z-50 mx-auto max-h-[56vh] w-full max-w-[780px] overflow-y-auto rounded-t-[28px] text-white outline-none backdrop-blur-xl sm:bottom-5 sm:w-[calc(100%-2rem)] sm:rounded-[34px]"
-            style={{
-              background: "linear-gradient(160deg, rgb(40 40 46 / .9) 0%, rgb(24 24 27 / .93) 55%, rgb(17 17 19 / .96) 100%)",
-              boxShadow: "inset 0 1px 0 rgb(255 255 255 / .09), inset 0 0 0 1px rgb(255 255 255 / .07), 0 30px 60px -18px rgb(0 0 0 / .85)",
-            }}
+            className="fixed inset-x-0 bottom-0 z-50 mx-auto max-h-[56vh] w-full max-w-[780px] overflow-y-auto rounded-t-[24px] border border-[#E4E2DC] bg-white text-[#161616] outline-none sm:bottom-5 sm:w-[calc(100%-2rem)] sm:rounded-[24px]"
+            style={{ boxShadow: "0 28px 56px -22px rgb(22 22 22 / .30), 0 2px 8px rgb(22 22 22 / .06)" }}
           >
             <div className="flex gap-1.5 px-5 pt-4 sm:px-7 sm:pt-5" aria-hidden>
               {SCENES.map((s, k) => {
@@ -599,11 +624,11 @@ export function HomeTour({ className }: { className?: string }) {
                 const done = scene > n;
                 const cur = scene === n;
                 return (
-                  <div key={s.id} className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
+                  <div key={s.id} className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#161616]/10">
                     {cur ? (
                       <div
                         key={`${runId}-${beat}`}
-                        className="h-full rounded-full bg-accent shadow-[0_0_10px_rgb(242_210_27/.6)]"
+                        className="h-full rounded-full bg-[#161616]"
                         style={{
                           ["--from" as string]: `${from}%`,
                           ["--to" as string]: `${to}%`,
@@ -613,58 +638,62 @@ export function HomeTour({ className }: { className?: string }) {
                         }}
                       />
                     ) : (
-                      <div className={cn("h-full rounded-full bg-accent", done ? "w-full" : "w-0")} />
+                      <div className={cn("h-full rounded-full bg-[#161616]", done ? "w-full" : "w-0")} />
                     )}
                   </div>
                 );
               })}
             </div>
             <div className="px-5 pb-3 pt-3 sm:px-7 sm:pb-4 sm:pt-4" aria-live="polite" aria-atomic="true">
-              <p className="num text-[12px] text-muted sm:text-[13px]">
+              <p className={cn(EYEBROW, "text-[#5F5D58]")}>
                 {`${scene} of ${SCENE_COUNT} · ${cap?.title ?? ""}`}
                 {paused ? " · paused" : ""}
               </p>
-              <h2 className="mt-1.5 text-balance text-[21px] font-semibold leading-[1.2] tracking-[-0.015em] text-white sm:text-[30px]" data-testid="home-tour-caption">
+              <h2 className="mt-1.5 text-balance text-[21px] font-medium leading-[1.2] tracking-[-0.02em] text-[#161616] sm:text-[30px]" data-testid="home-tour-caption">
                 {cap?.caption}
               </h2>
               {cap && cap.facts.length > 0 ? (
                 <dl className="mt-3 flex flex-wrap items-end gap-x-6 gap-y-2 sm:mt-4 sm:gap-x-9">
                   {cap.facts.map((f) => (
                     <div key={f.label} className="min-w-0">
-                      <dt className="text-[11px] leading-tight text-muted sm:text-[13px]">{f.label}</dt>
+                      <dt className="text-[12px] leading-tight text-[#5F5D58] sm:text-[13px]">{f.label}</dt>
                       {NUMERIC_FACT.test(f.value) ? (
-                        <DotNumber as="dd" className="mt-1.5 text-[32px] !font-black text-white sm:text-[40px]">
-                          {f.value}
-                        </DotNumber>
+                        <dd className="tabular mt-1.5 text-[32px] font-medium leading-none tracking-[-0.02em] text-[#161616] sm:text-[40px]">{f.value}</dd>
                       ) : (
-                        <dd className="tabular mt-1 text-[15px] font-medium text-white sm:text-[18px]">{f.value}</dd>
+                        <dd className="tabular mt-1 text-[15px] font-medium text-[#161616] sm:text-[18px]">{f.value}</dd>
                       )}
                     </div>
                   ))}
                 </dl>
               ) : null}
               {cap && cap.notes.length > 0 ? (
-                <p className="mt-2.5 text-[11px] leading-snug text-muted sm:text-[12px]">
+                <p className="mt-2.5 text-[12px] leading-snug text-[#5F5D58]">
                   {cap.notes.includes("hypothetical") ? `${HYPOTHETICAL_NOTE} ` : ""}
                   {cap.notes.includes("candidate_framing") ? CANDIDATE_FRAMING : ""}
                 </p>
               ) : null}
             </div>
-            <div className="flex flex-wrap items-center gap-2 border-t border-white/[.07] px-5 py-3 sm:px-7">
-              <Button size="sm" variant="secondary" onClick={() => go(scene - 1)} aria-keyshortcuts="ArrowLeft" className={pill}>
+            <div className="flex flex-wrap items-center gap-2 border-t border-[#161616]/10 px-5 py-3 sm:px-7">
+              <button type="button" onClick={() => go(scene - 1)} aria-keyshortcuts="ArrowLeft" className={PILL_OUTLINE}>
                 <ChevronLeft aria-hidden />Back
-              </Button>
-              <Button size="sm" variant="primary" onClick={() => go(scene + 1)} aria-keyshortcuts="ArrowRight" className={cn(pill, yellow)}>
+              </button>
+              <button type="button" onClick={() => go(scene + 1)} aria-keyshortcuts="ArrowRight" className={PILL_INK}>
                 Next<ChevronRight aria-hidden />
-              </Button>
+              </button>
               {pauseButton}
-              <p className="ml-auto hidden text-xs text-muted sm:block" aria-hidden>
-                <Kbd>←</Kbd> <Kbd>→</Kbd> to step
+              <p className="ml-auto hidden items-center gap-1 text-xs text-[#5F5D58] sm:flex" aria-hidden>
+                <kbd className={KBD}>←</kbd> <kbd className={KBD}>→</kbd> to step
               </p>
-              <Button size="sm" variant="secondary" onClick={exit} aria-keyshortcuts="Escape" aria-label="Exit the tour" className={cn(pill, "ml-auto w-10 max-md:px-0 sm:ml-0 sm:w-auto")}>
+              <button
+                type="button"
+                onClick={exit}
+                aria-keyshortcuts="Escape"
+                aria-label="Exit the tour"
+                className={cn(PILL_OUTLINE, "ml-auto w-11 px-0 sm:ml-0 sm:w-auto sm:px-4")}
+              >
                 <X aria-hidden />
                 <span className="max-sm:sr-only">Exit</span>
-              </Button>
+              </button>
             </div>
           </section>
         </>,

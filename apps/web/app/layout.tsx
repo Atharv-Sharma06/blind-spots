@@ -1,16 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import { preload } from "react-dom";
-import { Outfit, Doto } from "next/font/google";
+import { Inter_Tight } from "next/font/google";
 import { GeistMono } from "geist/font/mono";
 import "@/styles/globals.css";
 import { Providers } from "./providers";
-import { SiteHeader } from "@/components/layout/site-header";
-import { SiteFooter } from "@/components/layout/site-footer";
+import { SiteChrome } from "@/components/layout/site-chrome";
 import { SITE_QUESTION } from "@/lib/copy";
 
-// Outfit (rounded geometric sans) for words, Doto (dot-matrix) for big display numbers; Geist Mono stays for small numbers.
-const outfit = Outfit({ subsets: ["latin"], weight: "variable", variable: "--font-outfit", display: "swap" });
-const doto = Doto({ subsets: ["latin"], weight: "variable", axes: ["ROND"], variable: "--font-doto", display: "swap" });
+// Inter Tight for everything (400-800); Geist Mono stays for small numbers.
+const interTight = Inter_Tight({ subsets: ["latin"], weight: "variable", variable: "--font-inter-tight", display: "swap" });
 
 // Short title and description: the product question, then one line.
 const TITLE = "Blind Spots";
@@ -21,7 +19,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL;
 const ICON =
   "data:image/svg+xml," +
   encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><rect width="16" height="16" rx="4" fill="#08080a"/><path d="M8 1.6 14.4 8 8 14.4 1.6 8Z" fill="none" stroke="#f4f4f5" stroke-width="1.4"/><path d="M8 5.4 10.6 8 8 10.6 5.4 8Z" fill="#f2d21b"/></svg>',
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><rect width="16" height="16" rx="8" fill="#161616"/><path d="M8 2.6 13.4 8 8 13.4 2.6 8Z" fill="none" stroke="#ffffff" stroke-width="1.3"/><path d="M8 5.6 10.4 8 8 10.4 5.6 8Z" fill="#2fd067"/></svg>',
   );
 
 export const metadata: Metadata = {
@@ -40,8 +38,8 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#08080a",
-  colorScheme: "dark",
+  themeColor: "#F7F6F3",
+  colorScheme: "light",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -49,20 +47,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   // React); lib/api.ts reuses it because the manifest request is a plain GET without custom headers.
   if (process.env.NEXT_PUBLIC_DATA_MODE === "snapshot") preload("/snapshot/manifest.json", { as: "fetch", crossOrigin: "anonymous" });
   return (
-    <html lang="en" className={`${outfit.variable} ${doto.variable} ${GeistMono.variable}`}>
-      <body className="bg-dots flex min-h-dvh flex-col">
+    <html lang="en" className={`${interTight.variable} ${GeistMono.variable}`}>
+      <body className="flex min-h-dvh flex-col bg-bg text-fg">
         <a
           href="#main"
-          className="sr-only z-50 rounded-full bg-accent text-ui font-semibold text-on-accent focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:px-3 focus:py-2"
+          className="sr-only z-[60] rounded-full bg-fg text-ui font-medium text-white focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:px-4 focus:py-2.5"
         >
           Skip to content
         </a>
         <Providers>
-          <SiteHeader />
-          <main id="main" tabIndex={-1} className="flex flex-1 flex-col outline-none">
-            {children}
-          </main>
-          <SiteFooter />
+          {/* "/" gets the landing header, <main> and footer here; app pages wrap themselves in <AppShell>; 404 and the error
+              boundary bring their own chrome. */}
+          <SiteChrome>{children}</SiteChrome>
         </Providers>
       </body>
     </html>

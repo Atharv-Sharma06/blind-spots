@@ -17,14 +17,15 @@ export function isNavActive(pathname: string, href: string): boolean {
 }
 
 /**
- * Four links in a dark pill track. Phones: a 4-column grid that fills the row (40 px tall, no sideways scroll down
- * to 320 px). From md up: an inline pill group. The active page is a light pill with dark text.
+ * Landing-header nav (Reference A): four tiny uppercase links, 11 px, tracking .08em, medium weight, generous gaps.
+ * Wraps onto a second line on very narrow phones instead of scrolling sideways. The app pages use the sidebar nav
+ * in app-shell.tsx instead.
  */
 export function NavLinks({ className }: { className?: string }) {
   const pathname = usePathname() ?? "/";
   return (
     <nav aria-label="Primary" className={className}>
-      <ul className="grid grid-cols-[repeat(4,auto)] justify-between gap-0 rounded-full border border-white/[0.06] bg-white/[0.04] p-0.5 min-[360px]:gap-0.5 min-[360px]:p-1 md:flex md:items-center md:gap-0.5">
+      <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-0 md:gap-x-9">
         {NAV_ITEMS.map((item) => {
           const active = isNavActive(pathname, item.href);
           return (
@@ -33,8 +34,8 @@ export function NavLinks({ className }: { className?: string }) {
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "inline-flex h-10 w-full items-center justify-center whitespace-nowrap rounded-full px-[5px] text-[length:var(--text-label)] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent min-[360px]:px-2 min-[360px]:text-[length:var(--text-ui)] min-[400px]:px-3 md:h-8 md:px-3.5",
-                  active ? "bg-fg text-bg" : "text-muted hover:bg-white/[0.07] hover:text-fg",
+                  "inline-flex min-h-10 items-center whitespace-nowrap rounded-full text-[11px] font-medium uppercase tracking-[0.08em] transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
+                  active ? "text-fg underline decoration-1 underline-offset-8" : "text-fg/70 hover:text-fg",
                 )}
               >
                 {item.label}

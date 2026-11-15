@@ -2,7 +2,6 @@
 
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { DotNumber } from "@/components/ui/dot-number";
-import { Badge } from "@/components/ui/badge";
 import { Callout } from "@/components/ui/callout";
 import { PanelSkeleton } from "@/components/explore/query-state";
 import { PanelError } from "@/components/target/panel-bits";
@@ -60,28 +59,32 @@ export function CompareSheet({
         {d ? (
           <div className="space-y-4" data-testid="compare-sheet">
             <div className="flex items-center gap-2">
-              <Badge tone={d.preferred === "indistinguishable" ? "neutral" : "accent"} data-testid="compare-verdict">{verdict}</Badge>
+              <span data-testid="compare-verdict" className="inline-flex h-7 items-center gap-1.5 rounded-lg border border-border bg-surface px-2.5 text-xs font-medium whitespace-nowrap text-fg">
+                <span aria-hidden className={`size-2 rounded-full ${d.preferred === "indistinguishable" ? "bg-border-strong" : "bg-[#2FD067]"}`} />
+                {verdict}
+              </span>
               <span className="text-xs text-muted">Both together cut uncertainty by <span className="num text-fg">{fmtFractionPercent(d.both_evr_fraction)}</span></span>
             </div>
             <div className="grid grid-cols-2 gap-2 sm:gap-3">
               {([["a", d.a], ["b", d.b]] as const).map(([k, c]) => {
+                const win = d.preferred === k;
                 return (
-                  <article key={k} className={`card min-w-0 rounded-[var(--radius-xl)] p-3.5 sm:p-4 ${d.preferred === k ? "ring-2 ring-accent/70" : ""}`}>
+                  <article key={k} className={`min-w-0 p-4 sm:p-5 ${win ? "card-ink text-white" : "card"}`}>
                     <div className="flex items-center gap-2">
-                      <span aria-hidden className="num grid size-7 shrink-0 place-items-center rounded-full bg-accent text-xs font-bold text-on-accent">{k === "a" ? a?.rank : b?.rank}</span>
-                      <h3 className="text-[14px] font-semibold">Test {k === "a" ? a?.rank : b?.rank}</h3>
+                      <span aria-hidden className={`num grid size-8 shrink-0 place-items-center rounded-full text-xs font-medium ${win ? "bg-white text-[#161616]" : "border border-border bg-surface text-fg"}`}>{k === "a" ? a?.rank : b?.rank}</span>
+                      <h3 className="text-[16px] font-medium">Test {k === "a" ? a?.rank : b?.rank}</h3>
                     </div>
-                    <p className="num mt-1.5 text-xs text-muted">{fmtOxygen(c.oxygen_percent)}, {fmtPressure(c.pressure_kpa)}, {fmtCmS(c.airflow_cm_s)}</p>
-                    <dl className="mt-2 space-y-1.5 text-xs">
-                      <div><dt className="text-muted">Cuts uncertainty by</dt><DotNumber as="dd" className="mt-1 block text-[28px] text-accent">{fmtFractionPercent(c.evr_fraction)}</DotNumber></div>
-                      <div><dt className="text-muted">Flame chance</dt><dd>{showEstimate && candidatePAllowed(c) ? <span className="num">{fmtProbability(c.p_sustained)}</span> : "No estimate: too little evidence"}</dd></div>
+                    <p className={`num mt-2 text-xs ${win ? "text-white/70" : "text-muted"}`}>{fmtOxygen(c.oxygen_percent)}, {fmtPressure(c.pressure_kpa)}, {fmtCmS(c.airflow_cm_s)}</p>
+                    <dl className="mt-3 space-y-2 text-xs">
+                      <div><dt className={win ? "text-white/70" : "text-muted"}>Cuts uncertainty by</dt><DotNumber as="dd" className={`mt-1 block text-[32px] leading-none font-medium ${win ? "text-white" : "text-fg"}`}>{fmtFractionPercent(c.evr_fraction)}</DotNumber></div>
+                      <div><dt className={win ? "text-white/70" : "text-muted"}>Flame chance</dt><dd>{showEstimate && candidatePAllowed(c) ? <span className="num">{fmtProbability(c.p_sustained)}</span> : "No estimate: too little evidence"}</dd></div>
                     </dl>
                   </article>
                 );
               })}
             </div>
-            <details className="card rounded-[var(--radius-lg)] px-4 py-3 text-xs">
-              <summary className="cursor-pointer text-[13px] font-medium">Technical details</summary>
+            <details className="card px-5 py-4 text-xs">
+              <summary className="cursor-pointer text-[14px] font-medium">Technical details</summary>
               <ul className="mt-2 list-disc space-y-1 pl-4 text-muted">
                 {d.reasons.filter((r) => showEstimate || r.code !== "near_decision_boundary").map((r, i) => (
                   <li key={`${r.code}-${i}`}>

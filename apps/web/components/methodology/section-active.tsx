@@ -28,7 +28,7 @@ export function ActiveLearningSection({ methodology }: { methodology: ApiQuery<M
 
       <Callout variant="info">{CANDIDATE_DISCLAIMER}</Callout>
 
-      <Disclosure summary="Technical details" tone="strong" className="card rounded-[var(--radius-xl)] bg-surface px-4 sm:px-5" summaryClassName="flex w-full min-h-12 text-[14px] hover:text-accent" contentClassName="pb-4">
+      <Disclosure summary="Technical details" tone="strong" className="card px-5 sm:px-6" summaryClassName="flex w-full min-h-14 text-[17px] font-medium tracking-[-0.01em] hover:text-accent" contentClassName="pb-4">
         <div className="space-y-6 pt-2">
           <Sub title="Which tests are considered">
             <P>
@@ -90,7 +90,7 @@ expected uncertainty reduction(c) = EVR(c) / ( sum_t  w_t * S(t, t) )`}</Formula
           </Sub>
 
           <Sub title="Simple rules it is compared with">
-            <Table containerClassName="rounded-[var(--radius-lg)] border-border/70">
+            <Table containerClassName="rounded-[var(--radius-md)] border-border">
               <caption className="sr-only">Selection baselines</caption>
               <TableHeader>
                 <TableRow>

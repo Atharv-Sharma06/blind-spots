@@ -3,10 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { flushSync } from "react-dom";
 import { useSearchParams } from "next/navigation";
-import { Download, Printer, ArrowLeft } from "lucide-react";
+import { Download, Printer, ArrowLeft, ChevronDown, Info } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Callout } from "@/components/ui/callout";
 import { Skeleton } from "@/components/ui/skeleton";
 import { QueryError } from "@/components/explore/query-state";
 import { useBrief, useGroups, useTargets } from "@/hooks/api";
@@ -104,29 +102,60 @@ export function BriefView() {
   const plainTitle = profile && group ? `${materialName(group.group_id, group.label)} in ${shortCabinName(profile.profile_id, profile.name)}` : null;
 
   return (
-    <article className="brief-root mx-auto w-full max-w-[760px] px-4 py-8 md:py-12" data-testid="brief">
+    <article className="brief-root mx-auto w-full max-w-[880px] px-4 py-6 md:px-6 md:py-10" data-testid="brief">
       <style>{`
+        /* v2: a white document card on the canvas. Tokens are re-declared on the card so the page reads light on any canvas. */
+        .brief-doc{--fg:#161616;--muted:#6F6D68;--border:#E4E2DC;--border-strong:#CFCCC4;--surface:#FFFFFF;--subtle:#F3F2EF;--accent:#1F9D55;
+          background:#FFFFFF;color:#161616;border:1px solid #E4E2DC;border-radius:24px;padding:24px 20px 28px}
+        @media (min-width:640px){.brief-doc{padding:44px 48px 40px}}
+        .brief-pill{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border:1px solid var(--border-strong,#CFCCC4);border-radius:9999px;background:transparent;color:var(--fg,#161616);font-size:14px;line-height:20px;font-weight:500;white-space:nowrap;text-decoration:none;transition:background-color .15s,border-color .15s}
+        .brief-pill:hover{background:rgba(22,22,22,.05);border-color:var(--fg,#161616)}
+        .brief-pill svg{width:18px;height:18px;flex-shrink:0}
+        .brief-pill-ink{background:#161616;border-color:#161616;color:#FFFFFF;border-radius:14px;padding:0 22px;font-weight:500}
+        .brief-pill-ink:hover{background:#2B2B2B;border-color:#2B2B2B}
+        .brief-pill:disabled{opacity:.45;pointer-events:none}
+        .brief-pill:focus-visible,.brief-sec>summary:focus-visible{outline:2px solid #1F9D55;outline-offset:2px}
+        .brief-sec>summary:focus-visible{border-radius:8px}
+        .brief-sec>summary{list-style:none}
+        .brief-sec>summary::-webkit-details-marker{display:none}
+        .brief-sec>summary::before{display:none!important}
+        .brief-sec{border-top:1px solid #E4E2DC}
+        .brief-secs{border-bottom:1px solid #E4E2DC}
+        .brief-sec[open] .brief-chev{transform:rotate(180deg)}
+        .brief-note{display:flex;gap:12px;border:1px solid #E4E2DC;border-radius:12px;padding:14px 16px;font-size:14px;line-height:20px;color:#161616}
+        .brief-verdict{border-radius:16px;padding:22px 20px;background:#F3F2EF;border:1px solid #E4E2DC;color:#161616}
+        .brief-verdict[data-verdict=insufficient_evidence]{background:#1C1C1C;border-color:#1C1C1C;color:#FFFFFF}
+        @media (min-width:640px){.brief-verdict{padding:28px}}
+        .brief-verdict[data-verdict=insufficient_evidence] .brief-ink-muted{color:#B9B7B1}
+        .brief-verdict[data-verdict=insufficient_evidence] .brief-rule{border-color:rgba(255,255,255,.16)}
+        .brief-dot{display:inline-block;width:12px;height:12px;border-radius:9999px;flex-shrink:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
         .brief-prose,.brief-prose *{overflow-wrap:anywhere;min-width:0}
         .brief-prose pre{overflow-x:auto}
         .brief-print-only{display:none}
-        .brief-sec>summary:focus-visible{outline:2px solid var(--fg);outline-offset:2px;border-radius:4px}
-        .brief-prose{font-size:15px;line-height:1.65;color:var(--fg)}
+        .brief-prose .brief-body{font-size:16px;line-height:1.6;color:#161616}
         .brief-prose p,.brief-prose li{max-width:72ch}
+        .brief-prose a{text-decoration-color:#CFCCC4}
+        .brief-prose a:hover{color:#1F9D55}
         @media print{
           body>header,body>footer,body>a,.no-print{display:none!important}
           .brief-print-only{display:block!important}
-          .brief-sec>summary::before{display:none}
+          .brief-chev{display:none!important}
           html,body{background:#fff!important;background-image:none!important;color:#111!important}
           body::before,body::after{display:none!important}
+          .brief-root .brief-doc{background:none!important;border:0!important;border-radius:0!important;padding:0!important;box-shadow:none!important}
           .brief-root .brief-card{background:none!important;box-shadow:none!important;border:1px solid #d4d4d8!important;border-radius:8px!important;color:#111!important;filter:none!important}
           .brief-root .brief-card::before,.brief-root .brief-card::after{display:none!important}
           .brief-root .brief-card *{color:#111!important}
           .brief-root .brief-card .brief-ink-muted{color:#52525b!important}
+          .brief-root .brief-card .brief-rule{border-color:#d4d4d8!important}
+          .brief-root .brief-verdict[data-verdict=insufficient_evidence] .brief-dot{background:#111!important}
+          .brief-secs{border-bottom:0!important}
+          .brief-sec{margin-bottom:8px}
           .brief-sec>summary{min-height:0!important;padding:6px 10px!important}
           .brief-sec>div{padding:8px 10px!important;border-color:#d4d4d8!important}
           @page{size:A4;margin:18mm 16mm}
           .brief-root{max-width:none!important;padding:0!important}
-          .brief-prose{font-size:10pt;line-height:1.45}
+          .brief-prose .brief-body{font-size:10pt;line-height:1.45}
           .brief-prose h1,.brief-prose h2{break-after:avoid;page-break-after:avoid}
           .brief-prose li:not(:has(ul,ol)){break-inside:avoid}
           .brief-prose p,.brief-prose li{orphans:3;widows:3}
@@ -134,71 +163,69 @@ export function BriefView() {
         }
       `}</style>
 
-      <div className="no-print brief-ui mb-6 flex flex-wrap items-center gap-2 sm:mb-8">
-        <Button asChild variant="secondary" size="sm" className="min-h-10 rounded-full max-md:px-3">
-          <Link href={exploreHref} aria-label="Back to Explorer"><ArrowLeft aria-hidden />Explorer</Link>
-        </Button>
+      <div className="no-print brief-ui mb-4 flex flex-wrap items-center gap-2 sm:mb-6">
+        <Link href={exploreHref} aria-label="Back to Explorer" className="brief-pill max-md:px-3.5"><ArrowLeft aria-hidden />Explorer</Link>
         {cabinsHref ? (
-          <Button asChild variant="secondary" size="sm" className="min-h-10 rounded-full max-md:px-3">
-            <Link href={cabinsHref}><ArrowLeft aria-hidden />Cabins</Link>
-          </Button>
+          <Link href={cabinsHref} className="brief-pill max-md:px-3.5"><ArrowLeft aria-hidden />Cabins</Link>
         ) : null}
         <div className="ml-auto flex gap-2 max-[359px]:ml-0">
-          <Button variant="secondary" aria-label="Download .md" title="Save as a Markdown file" className="min-h-10 rounded-full max-md:px-3 max-sm:min-w-10 max-sm:px-0" disabled={!brief} onClick={() => brief && download(`blind-spots-brief-${slug(groupId ?? "group")}.md`, cleanBriefText(brief.markdown))}>
+          <button type="button" aria-label="Download .md" title="Save as a Markdown file" className="brief-pill max-sm:min-w-11 max-sm:px-0" disabled={!brief} onClick={() => brief && download(`blind-spots-brief-${slug(groupId ?? "group")}.md`, cleanBriefText(brief.markdown))}>
             <Download aria-hidden /><span className="max-sm:sr-only">Download</span>
-          </Button>
-          <Button variant="primary" aria-label="Print / Save as PDF" title="Print or save as PDF" className="pill-yellow min-h-10 rounded-full border-transparent bg-[#F2D21B] font-semibold text-[#0B0B0C] hover:bg-[#F2D21B] hover:brightness-105 max-md:px-3" disabled={!brief} onClick={() => { flushSync(() => setPrinting(true)); window.print(); setPrinting(false); }}>
+          </button>
+          <button type="button" aria-label="Print / Save as PDF" title="Print or save as PDF" className="brief-pill brief-pill-ink max-sm:px-4" disabled={!brief} onClick={() => { flushSync(() => setPrinting(true)); window.print(); setPrinting(false); }}>
             <Printer aria-hidden />Print
-          </Button>
+          </button>
         </div>
       </div>
 
+      <div className="brief-doc">
       {(groupsQ.isError && !groups) || (targetsQ.isError && !profiles) ? (
         <QueryError error={groupsQ.error ?? targetsQ.error} onRetry={() => { void groupsQ.refetch(); void targetsQ.refetch(); }} />
       ) : briefQ.isError && !brief ? (
         <QueryError error={briefQ.error} onRetry={() => void briefQ.refetch()} />
       ) : !brief ? (
-        <div role="status" aria-label="Generating research brief" className="min-h-[100svh] space-y-3">
-          <Skeleton className="h-8 w-3/4" />
-          <Skeleton className="h-4 w-1/2" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-5/6" />
-          <Skeleton className="h-4 w-full" />
+        <div role="status" aria-label="Generating research brief" className="min-h-[70svh] space-y-3">
+          <Skeleton className="h-8 w-3/4 bg-black/[0.06]" />
+          <Skeleton className="h-4 w-1/2 bg-black/[0.06]" />
+          <Skeleton className="h-4 w-full bg-black/[0.06]" />
+          <Skeleton className="h-4 w-5/6 bg-black/[0.06]" />
+          <Skeleton className="h-4 w-full bg-black/[0.06]" />
         </div>
       ) : (
         <div className="brief-prose">
           <header className="pb-1">
-            <p className="brief-ui text-xs font-medium uppercase tracking-[0.12em] text-muted">Research brief</p>
-            <h1 className="mt-2 text-[28px] font-semibold leading-tight tracking-[-0.02em] text-balance sm:text-[34px] sm:leading-[40px]">{plainTitle ?? brief.title.replace(/^Research brief:\s*/, "")}</h1>
+            <p className="brief-ui text-xs font-medium uppercase tracking-[0.08em] text-muted">Research brief</p>
+            <h1 className="mt-3 text-[30px] font-medium leading-[1.1] tracking-[-0.03em] text-balance sm:text-[40px] sm:leading-[44px]">{plainTitle ?? brief.title.replace(/^Research brief:\s*/, "")}</h1>
           </header>
 
           <InShort profileId={profileId} groupId={groupId} />
 
-          <Callout variant="info" title="Computational research-planning output" className="brief-ui brief-card my-5">
-            Not a certified fire-safety assessment. Not endorsed by NASA. This brief contains no test procedures.
-          </Callout>
+          <div role="note" className="brief-ui brief-card brief-note my-5">
+            <Info aria-hidden className="mt-0.5 size-4 shrink-0 text-muted" />
+            <div className="min-w-0">
+              <p className="font-medium">Computational research-planning output</p>
+              <div className="mt-0.5 text-muted">Not a certified fire-safety assessment. Not endorsed by NASA. This brief contains no test procedures.</div>
+            </div>
+          </div>
 
-          <div className="mt-6 space-y-3">
+          <div className="brief-secs mt-8">
             {SECTIONS.map(({ key, title }) => {
               const text = brief.sections[key];
               if (!text || text.trim() === "") return null;
               const open = printing || (openMap[key] ?? (!hasShort && (key === "coverage" || key === "candidate")));
               return (
-                <details
-                  key={key}
-                  className="brief-sec brief-card card overflow-hidden"
-                  open={open}
-                >
+                <details key={key} className="brief-sec" open={open}>
                   <summary
-                    className="flex min-h-14 cursor-pointer items-center gap-3 px-5 py-3 sm:px-6"
+                    className="flex min-h-16 cursor-pointer items-center gap-3 py-3"
                     onClick={(e) => {
                       e.preventDefault();
                       setOpenMap((m) => ({ ...m, [key]: !open }));
                     }}
                   >
-                    <h2 id={`brief-${key}`} className="text-[17px] font-semibold tracking-[-0.01em]">{title}</h2>
+                    <h2 id={`brief-${key}`} className="text-[20px] font-medium leading-7 tracking-[-0.015em]">{title}</h2>
+                    <ChevronDown aria-hidden className="brief-chev ml-auto size-5 shrink-0 text-muted transition-transform motion-reduce:transition-none" />
                   </summary>
-                  <div className="border-t border-border px-5 py-4 sm:px-6">
+                  <div className="brief-body border-t border-border py-4 pb-6">
                     <MarkdownLite markdown={text} />
                   </div>
                 </details>
@@ -206,7 +233,7 @@ export function BriefView() {
             })}
           </div>
 
-          <footer className="brief-ui mt-8 space-y-1 border-t border-border-strong pt-4 text-xs text-muted">
+          <footer className="brief-ui mt-8 space-y-1 text-xs text-muted">
             <dl className="num flex flex-wrap gap-x-5 gap-y-1">
               <div className="flex gap-1.5"><dt>Generated</dt><dd className="text-fg">{fmtGenerated(brief.generated_at)}</dd></div>
               <div className="flex gap-1.5"><dt>Dataset</dt><dd className="text-fg">{shortVersion(brief.dataset_version)}</dd></div>
@@ -217,6 +244,7 @@ export function BriefView() {
           </footer>
         </div>
       )}
+      </div>
     </article>
   );
 }

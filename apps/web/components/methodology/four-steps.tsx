@@ -2,12 +2,11 @@
 
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { ArrowRight, ChevronRight, Database, ListOrdered, Map as MapIcon, Brain } from "lucide-react";
+import { ArrowRight, Database, ListOrdered, Map as MapIcon, Brain } from "lucide-react";
 import type { ApiQuery } from "@/hooks/api";
 import type { HeadlineResponse, MethodologyResponse } from "@/lib/types";
 import { fmtCount, fmtFixed } from "@/lib/format";
 import { Skeleton } from "@/components/ui/skeleton";
-import { DotNumber } from "@/components/ui/dot-number";
 import { cn } from "@/lib/cn";
 import { coverageStatus } from "@/components/home/cabins";
 import type { ExtValidation } from "./types";
@@ -80,85 +79,57 @@ function rankSlot(validation: ApiQuery<ExtValidation>): Slot {
   };
 }
 
-/** Colour family of one step card (bento: charcoal, magenta, indigo, charcoal with the yellow accent). */
-type Tone = "charcoal" | "magenta" | "indigo" | "yellow";
+/** Reference C board: white cards, one near-black highlight card ("ink"). */
+type Tone = "white" | "ink";
 
-const TONE_CARD: Record<Tone, string> = {
-  charcoal: "card",
-  // Gradient starts at magenta-mid (not the light corner) so white text keeps AA contrast under the title.
-  magenta: "card-magenta text-white [background-image:var(--grain-img),radial-gradient(120%_140%_at_0%_0%,#B25AD0_0%,var(--magenta-mid)_30%,var(--magenta-to)_100%)]!",
-  indigo: "card-indigo text-white",
-  yellow: "card border border-accent/30",
-};
+const TONE_CARD: Record<Tone, string> = { white: "card", ink: "card-ink" };
 /** Secondary text per tone (AA on each background). */
-const TONE_MUTED: Record<Tone, string> = {
-  charcoal: "text-muted",
-  magenta: "text-white",
-  indigo: "text-white/75",
-  yellow: "text-muted",
-};
-const TONE_RULE: Record<Tone, string> = {
-  charcoal: "border-white/10",
-  magenta: "border-white/25",
-  indigo: "border-white/15",
-  yellow: "border-white/10",
-};
+const TONE_MUTED: Record<Tone, string> = { white: "text-muted", ink: "text-white/70" };
+const TONE_RULE: Record<Tone, string> = { white: "border-border", ink: "border-white/15" };
+const TONE_CHIP: Record<Tone, string> = { white: "border-border text-muted", ink: "border-white/25 text-white/80" };
 
 function Figure({ slot, tone }: { slot: Slot; tone: Tone }) {
   const muted = TONE_MUTED[tone];
   if (slot.state === "loading") {
     return (
       <div role="status" aria-label="Loading" className="space-y-2">
-        <Skeleton className="h-11 w-24 bg-white/10" />
-        <Skeleton className="h-4 w-full bg-white/10" />
-        <Skeleton className="h-4 w-4/5 bg-white/10" />
+        <Skeleton className={cn("h-11 w-24", tone === "ink" ? "bg-white/10" : "bg-black/[0.06]")} />
+        <Skeleton className={cn("h-4 w-full", tone === "ink" ? "bg-white/10" : "bg-black/[0.06]")} />
+        <Skeleton className={cn("h-4 w-4/5", tone === "ink" ? "bg-white/10" : "bg-black/[0.06]")} />
       </div>
     );
   }
-  if (slot.state === "unavailable") return <p className={cn("text-[13px]", muted)}>This number is unavailable right now.</p>;
+  if (slot.state === "unavailable") return <p className={cn("text-[14px]", muted)}>This number is unavailable right now.</p>;
   const { big, of, caption, note } = slot.value;
   return (
     <>
       <p className="flex items-baseline gap-2">
-        <DotNumber className={cn("text-[44px] leading-[48px]", tone === "yellow" ? "text-accent" : "text-white")}>{big}</DotNumber>
-        {of ? <span className={cn("num text-[15px]", muted)}>{of}</span> : null}
+        <span className="text-[40px] font-medium leading-[44px] tracking-[-0.02em] tabular-nums">{big}</span>
+        {of ? <span className={cn("text-[16px]", muted)}>{of}</span> : null}
       </p>
-      <p className="mt-2 text-[14px] leading-5">{caption}</p>
-      {note ? <p className={cn("mt-1 text-[13px] leading-[18px]", muted)}>{note}</p> : null}
+      <p className="mt-2 text-[16px] leading-6">{caption}</p>
+      {note ? <p className={cn("mt-1 text-[14px] leading-5", muted)}>{note}</p> : null}
     </>
   );
 }
 
-function Step({ n, icon, title, children, slot, tone, last }: { n: number; icon: ReactNode; title: string; children: ReactNode; slot: Slot; tone: Tone; last?: boolean }) {
+function Step({ n, icon, title, children, slot, tone }: { n: number; icon: ReactNode; title: string; children: ReactNode; slot: Slot; tone: Tone }) {
   return (
-    <li className={cn("relative flex min-w-0 flex-col rounded-[32px] p-6", TONE_CARD[tone])}>
+    <li className={cn("relative flex min-w-0 flex-col p-6 sm:p-7", TONE_CARD[tone])}>
       <div className="flex items-center justify-between gap-2.5">
-        <span
-          className={cn(
-            "num inline-flex size-8 items-center justify-center rounded-full text-[13px] font-semibold",
-            tone === "yellow" ? "bg-accent text-[#0B0B0C]" : "bg-white/12 text-white ring-1 ring-white/15",
-          )}
-          aria-hidden
-        >
-          {n}
-        </span>
-        <span className={cn("inline-flex size-10 items-center justify-center rounded-full bg-black/25", TONE_MUTED[tone])} aria-hidden>
+        <span className={cn("inline-flex h-8 items-center gap-1.5 rounded-[8px] border px-2.5 text-[13px]", TONE_CHIP[tone])} aria-hidden>
           {icon}
+          <span>Step {n}</span>
         </span>
       </div>
-      <h3 className="mt-5 text-[18px] font-semibold leading-6 tracking-[-0.01em]">
+      <h3 className="mt-6 text-[20px] font-medium leading-7 tracking-[-0.01em]">
         <span className="sr-only">Step {n}: </span>
         {title}
       </h3>
-      <p className={cn("mt-1.5 mb-5 min-h-[44px] text-[14px] leading-[22px]", TONE_MUTED[tone])}>{children}</p>
-      <div className={cn("border-t pt-4", TONE_RULE[tone])}>
+      <p className={cn("mt-2 mb-7 text-[16px] leading-6", TONE_MUTED[tone])}>{children}</p>
+      <div className={cn("mt-auto border-t pt-5 sm:min-h-[200px]", TONE_RULE[tone])}>
         <Figure slot={slot} tone={tone} />
       </div>
-      {last ? null : (
-        <span className="absolute -right-[19px] top-[22px] z-10 hidden size-[22px] items-center justify-center rounded-full border border-border bg-bg text-muted lg:flex" aria-hidden>
-          <ChevronRight className="size-3.5" />
-        </span>
-      )}
     </li>
   );
 }
@@ -192,34 +163,34 @@ export function FourSteps({ headline, validation, methodology }: { headline: Api
       <h2 id="steps-h" className="sr-only">
         The four steps
       </h2>
-      <ol className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-4">
-        <Step n={1} icon={<Database className="size-5" />} title="Collect ISS tests" slot={gatherSlot(headline, methodology)} tone="charcoal">
+      <ol className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <Step n={1} icon={<Database className="size-4" />} title="Collect ISS tests" slot={gatherSlot(headline, methodology)} tone="white">
           NASA burned materials aboard the ISS.
         </Step>
-        <Step n={2} icon={<MapIcon className="size-5" />} title="Check each cabin" slot={mapSlot(headline)} tone="magenta">
+        <Step n={2} icon={<MapIcon className="size-4" />} title="Check each cabin" slot={mapSlot(headline)} tone="white">
           Did those tests match the cabin&apos;s air?
         </Step>
-        <Step n={3} icon={<Brain className="size-5" />} title="Train the model" slot={modelSlot(validation, headline)} tone="indigo">
+        <Step n={3} icon={<Brain className="size-4" />} title="Train the model" slot={modelSlot(validation, headline)} tone="white">
           It learns when flames burn, and says when it does not know.
         </Step>
-        <Step n={4} icon={<ListOrdered className="size-5" />} title="Pick the next test" slot={rankSlot(validation)} tone="yellow" last>
+        <Step n={4} icon={<ListOrdered className="size-4" />} title="Pick the next test" slot={rankSlot(validation)} tone="ink">
           We rank the test that would teach the model most.
         </Step>
       </ol>
-      <p id="test-results" className="mt-3 max-w-[78ch] scroll-mt-[calc(var(--header-h)+16px)] text-[13px] leading-relaxed text-muted">
+      <p id="test-results" className="mt-5 max-w-[78ch] scroll-mt-[calc(var(--header-h)+16px)] text-[14px] leading-relaxed text-muted">
         <strong className="font-medium text-fg">A test result</strong> is one airflow step of an experiment.
         {methodology.isPending ? (
-          <span aria-hidden className="rounded-sm bg-subtle text-transparent motion-safe:animate-pulse">
+          <span aria-hidden className="rounded-sm bg-black/[0.06] text-transparent motion-safe:animate-pulse">
             {" "}00 more experiments are left out: no flame lit, or unclear airflow or outcome.
           </span>
         ) : (
           leftOutNote(methodology)
         )}
       </p>
-      <p id="nearby" className="mt-2 max-w-[78ch] scroll-mt-[calc(var(--header-h)+16px)] text-[13px] leading-relaxed text-muted">
+      <p id="nearby" className="mt-2 max-w-[78ch] scroll-mt-[calc(var(--header-h)+16px)] text-[14px] leading-relaxed text-muted">
         <strong className="font-medium text-fg">Nearby</strong> means within one step in oxygen, pressure and airflow combined.
         {methodology.isPending ? (
-          <span aria-hidden className="rounded-sm bg-subtle text-transparent motion-safe:animate-pulse">
+          <span aria-hidden className="rounded-sm bg-black/[0.06] text-transparent motion-safe:animate-pulse">
             {" "}One step: 00 points of oxygen, about 00&nbsp;% in pressure, or 0.0 in log airflow.
           </span>
         ) : (
@@ -227,12 +198,12 @@ export function FourSteps({ headline, validation, methodology }: { headline: Api
         )}{" "}
         All numbers come from the analysis outputs.
       </p>
-      <div className="mt-5 flex flex-wrap items-center gap-3 text-[14px]">
-        <Link href="/cabins#cabins" className="pill-yellow inline-flex min-h-11 items-center gap-1.5 rounded-full px-5 font-semibold">
+      <div className="mt-6 flex flex-wrap items-center gap-3">
+        <Link href="/cabins#cabins" className="pill-ink inline-flex min-h-[52px] items-center gap-2 px-6 text-[16px] font-medium">
           See it for a cabin
           <ArrowRight className="size-4" aria-hidden />
         </Link>
-        <a href="#technical" className="inline-flex min-h-11 items-center rounded-full bg-surface px-5 text-muted ring-1 ring-border hover:bg-subtle hover:text-fg">
+        <a href="#technical" className="pill-outline inline-flex min-h-11 items-center px-5 text-[14px] font-medium hover:bg-surface">
           Technical details
         </a>
       </div>

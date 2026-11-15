@@ -1,22 +1,28 @@
 /** Shared colour constants, grid geometry and tick helpers for the parameter map. */
 
-/* SVG marks use the theme tokens directly; canvas layers need literal colours, so the *_HEX values mirror the dark
- * tokens in styles/globals.css (keep them in sync). */
-export const INK = "var(--fg)";
-export const OBSERVED = "var(--observed)";
-export const GAP = "var(--gap)";
-export const ACCENT = "var(--accent)";
-export const MUTED = "var(--muted)";
-export const TARGET = "var(--target)";
-export const ON_ACCENT = "var(--on-accent)";
-/** Canvas copies of the tokens (canvas cannot resolve CSS variables). */
-export const GAP_HEX = "#FFB547";
-/** Light ink for the prediction shading on the dark plot (--fg). */
-export const INK_RGB: readonly [number, number, number] = [244, 244, 245];
-/** --plum-1 … --plum-7, dark to bright: low uncertainty recedes into the dark plot, high uncertainty glows. */
+/* Redesign v2 (light): the plot is white with hairline guides. The map owns literal copies of the light tokens so the
+ * SVG marks and the canvas layers always agree (canvas cannot resolve CSS variables). Keep in sync with globals.css:
+ * --fg #161616, --muted #6F6D68, --observed #2F4FD8, --observed-tint #EBEFFD, --surface #FFFFFF. */
+export const INK = "#161616";
+export const OBSERVED = "#2F4FD8";
+export const OBSERVED_TINT = "#EBEFFD";
+export const GAP = "#8F8C84";
+export const ACCENT = "#161616";
+export const MUTED = "#6F6D68";
+export const TARGET = "#161616";
+export const ON_ACCENT = "#FFFFFF";
+/** Plot background and the halo colour behind marks and labels. */
+export const PAPER = "#FFFFFF";
+/** Hairline guides: ink at low alpha (gridlines, ticks, frame). */
+export const GUIDE = "#161616";
+/** Canvas copy of the coverage-gap hatch colour (grey stripes, like the `hatch` utility but a little darker). */
+export const GAP_HEX = "#A5A29A";
+/** Dark ink for the prediction shading on the light plot (--fg). */
+export const INK_RGB: readonly [number, number, number] = [22, 22, 22];
 /** Opacity of the uncertainty wash on the plot (and of the legend ramp, so they match). */
 export const UNC_ALPHA = 0.5;
-export const PLUM_STOPS = ["#1E1522", "#2E1A36", "#4A2357", "#6E2A8C", "#9B3FB5", "#C46BD8", "#EBB2F5"] as const;
+/** --plum-1 … --plum-7, light to dark: low uncertainty recedes into the white plot, high uncertainty is deep plum. */
+export const PLUM_STOPS = ["#F5F0F7", "#E7DCEC", "#D2BFDB", "#B596C4", "#8F6AA3", "#6E4A84", "#4F2F63"] as const;
 
 function hexToRgb(h: string): [number, number, number] {
   const n = parseInt(h.slice(1), 16);
