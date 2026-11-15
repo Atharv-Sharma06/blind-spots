@@ -1,5 +1,61 @@
 [
  {
+  "investigation_id": "NTRS-20030111833",
+  "acronym": "DARTFire",
+  "title": "Sounding Rocket Microgravity Experiments Elucidating Diffusive and Radiative Transport Effects on Flame Spread over Thermally-Thick Solids",
+  "doi": null,
+  "landing_url": "https://ntrs.nasa.gov/citations/20030111833",
+  "license": "NASA Technical Reports Server document; see source",
+  "platform": "Sounding rocket",
+  "gravity_environment": "microgravity (sounding rocket, ~6 min)",
+  "role": "integrated_context",
+  "role_reason": "Published test table from another apparatus or duration: context only, never training data.",
+  "n_experiments": 8,
+  "n_observations": 0
+ },
+ {
+  "investigation_id": "NTRS-20080034883",
+  "acronym": "Glenn 5.18 s drop tower flammability limits",
+  "title": "Microgravity Flame Spread in Exploration Atmospheres: Pressure, Oxygen, and Velocity Effects on Opposed and Concurrent Flame Spread",
+  "doi": null,
+  "landing_url": "https://ntrs.nasa.gov/citations/20080034883",
+  "license": "NASA Technical Reports Server document; see source",
+  "platform": "NASA Glenn Zero Gravity Research Facility drop rig with low-speed flow tunnel",
+  "gravity_environment": "microgravity (5.18 s drop tower)",
+  "role": "integrated_context",
+  "role_reason": "Published test table from another apparatus or duration: context only, never training data.",
+  "n_experiments": 6,
+  "n_observations": 0
+ },
+ {
+  "investigation_id": "NTRS-20210011521",
+  "acronym": "Saffire-IV, Saffire-V",
+  "title": "Fire Safety Implications of Preliminary Results from Saffire IV and V Experiments on Large Scale Spacecraft Fires (ICES-2021-266)",
+  "doi": null,
+  "landing_url": "https://ntrs.nasa.gov/citations/20210011521",
+  "license": "NASA Technical Reports Server document; see source",
+  "platform": "Cygnus spacecraft, Saffire Flow Unit (30 cm x 45 cm x 109 cm duct)",
+  "gravity_environment": "microgravity (Cygnus, long duration)",
+  "role": "integrated_context",
+  "role_reason": "Published test table from another apparatus or duration: context only, never training data.",
+  "n_experiments": 5,
+  "n_observations": 0
+ },
+ {
+  "investigation_id": "NTRS-20240002981",
+  "acronym": "Saffire-VI",
+  "title": "Preliminary Results from the Saffire VI Experiment (ICES-2024-365)",
+  "doi": null,
+  "landing_url": "https://ntrs.nasa.gov/citations/20240002981",
+  "license": "NASA Technical Reports Server document; see source",
+  "platform": "Cygnus spacecraft, Saffire Flow Unit (30 cm x 45 cm x 109 cm duct)",
+  "gravity_environment": "microgravity (Cygnus, long duration)",
+  "role": "integrated_context",
+  "role_reason": "Published test table from another apparatus or duration: context only, never training data.",
+  "n_experiments": 3,
+  "n_observations": 0
+ },
+ {
   "investigation_id": "PSI-10",
   "acronym": "ACME/Flame Design",
   "title": "Advanced Combustion via Microgravity Experiments / Flame Design",
@@ -81,7 +137,7 @@
   "role": "integrated_model",
   "role_reason": "Solid-fuel flammability in ISS Microgravity Science Glovebox with per-test calibrated O2 (% vol), flow schedule (air-speed / fan display) and flame outcomes for PMMA rods, films, slabs, SIBAL and Nomex; cabin pressure is not recorded per test.",
   "n_experiments": 129,
-  "n_observations": 366
+  "n_observations": 431
  },
  {
   "investigation_id": "PSI-26",

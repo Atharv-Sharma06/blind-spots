@@ -1,0 +1,5751 @@
+{
+  "acquisition_retrospective": null,
+  "dataset_version": "8783ff5aa6a2",
+  "generated_at": "2026-11-15T17:38:49+00:00",
+  "groups": [
+    {
+      "blindspot_test": {
+        "diagnostics": {
+          "partial_rho_epistemic_given_aleatoric": 0.14289307183753616,
+          "rho_aleatoric_point": 0.6907123191098155,
+          "share_misclassified_flow_off_transient": 0.047619047619047616
+        },
+        "group_level": {
+          "hyperparameters_refit_per_experiment": true,
+          "n_groups": 24,
+          "p_value": 0.02798600699650175,
+          "p_value_note": "one-sided permutation test (rho > 0) across held-out experiments",
+          "pairs": [
+            {
+              "error": 0.894592619786804,
+              "experiment_id": "PSI-25:P1",
+              "n_points": 3,
+              "pre_reveal_uncertainty": 0.014330165823835247
+            },
+            {
+              "error": 0.4357658698682361,
+              "experiment_id": "PSI-25:P10",
+              "n_points": 6,
+              "pre_reveal_uncertainty": 0.02403874611275837
+            },
+            {
+              "error": 0.3524894916913229,
+              "experiment_id": "PSI-25:P12",
+              "n_points": 8,
+              "pre_reveal_uncertainty": 0.021924901381687352
+            },
+            {
+              "error": 0.46594024257053257,
+              "experiment_id": "PSI-25:P13a",
+              "n_points": 8,
+              "pre_reveal_uncertainty": 0.03475135887233515
+            },
+            {
+              "error": 0.48986247309395997,
+              "experiment_id": "PSI-25:P13b",
+              "n_points": 4,
+              "pre_reveal_uncertainty": 0.03105571362015995
+            },
+            {
+              "error": 0.9615924492193951,
+              "experiment_id": "PSI-25:P14",
+              "n_points": 3,
+              "pre_reveal_uncertainty": 0.013835573483545601
+            },
+            {
+              "error": 0.11802469026199021,
+              "experiment_id": "PSI-25:P15",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.020503493264391603
+            },
+            {
+              "error": 0.5274554640698437,
+              "experiment_id": "PSI-25:P17",
+              "n_points": 7,
+              "pre_reveal_uncertainty": 0.05004268777850172
+            },
+            {
+              "error": 1.2659185215487951,
+              "experiment_id": "PSI-25:P18",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.021246042749562988
+            },
+            {
+              "error": 0.14679839809807174,
+              "experiment_id": "PSI-25:P2",
+              "n_points": 4,
+              "pre_reveal_uncertainty": 0.014612597167142291
+            },
+            {
+              "error": 1.3303236332332558,
+              "experiment_id": "PSI-25:P20",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.017766347660368997
+            },
+            {
+              "error": 1.4822382835816195,
+              "experiment_id": "PSI-25:P21a",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.04182589590430785
+            },
+            {
+              "error": 0.6231916425763636,
+              "experiment_id": "PSI-25:P22a",
+              "n_points": 3,
+              "pre_reveal_uncertainty": 0.03561000822587398
+            },
+            {
+              "error": 0.4197971591712791,
+              "experiment_id": "PSI-25:P22b",
+              "n_points": 6,
+              "pre_reveal_uncertainty": 0.021071562222317774
+            },
+            {
+              "error": 1.4063249126207062,
+              "experiment_id": "PSI-25:P23",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.01694277770524777
+            },
+            {
+              "error": 1.2846602960540743,
+              "experiment_id": "PSI-25:P24",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.018879008174453538
+            },
+            {
+              "error": 0.44394620875165886,
+              "experiment_id": "PSI-25:P25",
+              "n_points": 6,
+              "pre_reveal_uncertainty": 0.03336008800114546
+            },
+            {
+              "error": 0.3754711888080722,
+              "experiment_id": "PSI-25:P3a",
+              "n_points": 8,
+              "pre_reveal_uncertainty": 0.0127665956120694
+            },
+            {
+              "error": 0.1709329447803286,
+              "experiment_id": "PSI-25:P3b",
+              "n_points": 5,
+              "pre_reveal_uncertainty": 0.016049828867807613
+            },
+            {
+              "error": 0.14122870646194316,
+              "experiment_id": "PSI-25:P4",
+              "n_points": 6,
+              "pre_reveal_uncertainty": 0.013324760817030878
+            },
+            {
+              "error": 0.4148521116265984,
+              "experiment_id": "PSI-25:P5",
+              "n_points": 10,
+              "pre_reveal_uncertainty": 0.028819543918392376
+            },
+            {
+              "error": 0.11192724998101981,
+              "experiment_id": "PSI-25:P6",
+              "n_points": 5,
+              "pre_reveal_uncertainty": 0.015487399006065317
+            },
+            {
+              "error": 2.0631328388837527,
+              "experiment_id": "PSI-25:P8",
+              "n_points": 3,
+              "pre_reveal_uncertainty": 0.05322843133638474
+            },
+            {
+              "error": 0.41358115400413137,
+              "experiment_id": "PSI-25:P9",
+              "n_points": 7,
+              "pre_reveal_uncertainty": 0.024296970538728892
+            }
+          ],
+          "runtime_s": 1.6,
+          "spearman_rho": 0.3765217391304348
+        },
+        "interpretation": "Point level (n=108): Spearman rho=0.42 (one-sided p=<0.001) between pre-reveal epistemic uncertainty and log loss; AUROC for flagging 21 misclassified points = 0.62. Experiment level (n=24 held-out experiments): rho=0.38 (p=0.028). Withheld experiments with higher pre-reveal epistemic uncertainty tended to be predicted worse at both levels; this is an association in a small, imbalanced sample, not a guarantee. Caveat: aleatoric (predictive-entropy) uncertainty tracks log loss at least as strongly (rho=0.69), and the epistemic-loss association controlling for it is 0.14; so this does not show that epistemic uncertainty adds information beyond the model's overall predictive uncertainty.",
+        "point_level": {
+          "auroc_error_detection": 0.6239737274220033,
+          "n": 108,
+          "n_misclassified": 21,
+          "p_value": 0.0004997501249375312,
+          "p_value_note": "one-sided permutation test (rho > 0); points treated as exchangeable",
+          "spearman_rho": 0.4246953804529042
+        },
+        "verdict": "supported"
+      },
+      "campaigns": [
+        "BASS-II/Fernandez-Pello"
+      ],
+      "cv": {
+        "ci_method": "percentile, group bootstrap over experiments (B=1000)",
+        "gp_mean_function": "constant",
+        "gp_vs_majority": {
+          "brier": {
+            "ci95": [
+              -0.012113048427166822,
+              0.011365905647740735
+            ],
+            "value": -0.00033897542636374123
+          },
+          "comparison": "gp minus majority_class (negative favours gp)",
+          "log_loss": {
+            "ci95": [
+              -0.04121690341592123,
+              0.03349747695799412
+            ],
+            "value": -0.005172859030219135
+          }
+        },
+        "k": 5,
+        "models": [
+          {
+            "auc": {
+              "ci95": [
+                0.5224570993031359,
+                0.7314835213032581
+              ],
+              "value": 0.6118883415435139
+            },
+            "brier": {
+              "ci95": [
+                0.11790185645999522,
+                0.21187584010267962
+              ],
+              "value": 0.15763623123351025
+            },
+            "ece": {
+              "ci95": [
+                0.04671962486639292,
+                0.17062781475419458
+              ],
+              "value": 0.07685541107807332
+            },
+            "log_loss": {
+              "ci95": [
+                0.3926831257119822,
+                0.6291086414537511
+              ],
+              "value": 0.49164917821775567
+            },
+            "name": "gp"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.41054743513567044,
+                0.7107940472634339
+              ],
+              "value": 0.5538697318007663
+            },
+            "brier": {
+              "ci95": [
+                0.11720883234053206,
+                0.2307035464300419
+              ],
+              "value": 0.16356025782929698
+            },
+            "ece": {
+              "ci95": [
+                0.02980286019216064,
+                0.1573927971904782
+              ],
+              "value": 0.061845446822905936
+            },
+            "log_loss": {
+              "ci95": [
+                0.3937835931278408,
+                0.7987052583303526
+              ],
+              "value": 0.5463342726096999
+            },
+            "name": "logistic_o2_flow"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.3095839368998628,
+                0.5086099804953794
+              ],
+              "value": 0.40662287903667216
+            },
+            "brier": {
+              "ci95": [
+                0.12183168832896087,
+                0.2168685692940072
+              ],
+              "value": 0.1608708633497333
+            },
+            "ece": {
+              "ci95": [
+                0.020783193000868373,
+                0.151318397763359
+              ],
+              "value": 0.07216569154390413
+            },
+            "log_loss": {
+              "ci95": [
+                0.41493463769041883,
+                0.6412488484279916
+              ],
+              "value": 0.5068724170585293
+            },
+            "name": "logistic_o2"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.5,
+                0.5
+              ],
+              "value": 0.5
+            },
+            "brier": {
+              "ci95": [
+                0.12047387781434722,
+                0.21168921549652597
+              ],
+              "value": 0.157975206659874
+            },
+            "ece": {
+              "ci95": [
+                0.010889486062818246,
+                0.11133339403031661
+              ],
+              "value": 0.04750312109862545
+            },
+            "log_loss": {
+              "ci95": [
+                0.4098300673762882,
+                0.621910304354775
+              ],
+              "value": 0.4968220372479748
+            },
+            "name": "majority_class"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.4204815320910973,
+                0.7308065774804905
+              ],
+              "value": 0.5700054734537493
+            },
+            "brier": {
+              "ci95": [
+                0.1153377911834934,
+                0.2239715973719179
+              ],
+              "value": 0.15961685333217715
+            },
+            "ece": {
+              "ci95": [
+                0.04551834767143222,
+                0.17231864106091724
+              ],
+              "value": 0.08507502002858872
+            },
+            "log_loss": {
+              "ci95": [
+                0.3874622757847265,
+                0.7352462523465845
+              ],
+              "value": 0.5199955257615978
+            },
+            "name": "bootstrap_logistic_ensemble"
+          }
+        ],
+        "n_pooled_predictions": 540,
+        "repeats": 5,
+        "scheme": "grouped 5-fold by experiment x 5 repeats",
+        "seeds": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "error_distribution": {
+        "bins": [
+          0.0,
+          0.1,
+          0.2,
+          0.30000000000000004,
+          0.4,
+          0.5,
+          0.6000000000000001,
+          0.7000000000000001,
+          0.8,
+          0.9,
+          1.0
+        ],
+        "counts": [
+          67,
+          200,
+          61,
+          87,
+          18,
+          5,
+          26,
+          37,
+          30,
+          9
+        ],
+        "note": "bins are the ERROR_BINS+1 bin edges; counts pool all repeats",
+        "variable": "absolute error |y - p| of out-of-fold GP predictions"
+      },
+      "group_id": "pmma_rod__opposed",
+      "label": "PMMA rods · opposed flow",
+      "label_counts": {
+        "not_sustained": 21,
+        "sustained": 87
+      },
+      "logo": {
+        "applicable": false,
+        "folds": [],
+        "reason": "group spans a single campaign"
+      },
+      "majority_class_fraction": 0.8055555555555556,
+      "n_experiments": 24,
+      "n_observations": 108,
+      "reliability": {
+        "bins": [
+          {
+            "count": 0,
+            "hi": 0.1,
+            "lo": 0.0,
+            "mean_predicted": null,
+            "observed_frequency": null
+          },
+          {
+            "count": 0,
+            "hi": 0.2,
+            "lo": 0.1,
+            "mean_predicted": null,
+            "observed_frequency": null
+          },
+          {
+            "count": 1,
+            "hi": 0.30000000000000004,
+            "lo": 0.2,
+            "mean_predicted": 0.29900608659594885,
+            "observed_frequency": 1.0
+          },
+          {
+            "count": 4,
+            "hi": 0.4,
+            "lo": 0.30000000000000004,
+            "mean_predicted": 0.3227760605143407,
+            "observed_frequency": 1.0
+          },
+          {
+            "count": 3,
+            "hi": 0.5,
+            "lo": 0.4,
+            "mean_predicted": 0.46965925829298233,
+            "observed_frequency": 0.0
+          },
+          {
+            "count": 20,
+            "hi": 0.6000000000000001,
+            "lo": 0.5,
+            "mean_predicted": 0.5733708197805104,
+            "observed_frequency": 0.75
+          },
+          {
+            "count": 109,
+            "hi": 0.7000000000000001,
+            "lo": 0.6000000000000001,
+            "mean_predicted": 0.6547772432994904,
+            "observed_frequency": 0.7981651376146789
+          },
+          {
+            "count": 97,
+            "hi": 0.8,
+            "lo": 0.7000000000000001,
+            "mean_predicted": 0.7508562184207234,
+            "observed_frequency": 0.6288659793814433
+          },
+          {
+            "count": 230,
+            "hi": 0.9,
+            "lo": 0.8,
+            "mean_predicted": 0.8578339667697171,
+            "observed_frequency": 0.8695652173913043
+          },
+          {
+            "count": 76,
+            "hi": 1.0,
+            "lo": 0.9,
+            "mean_predicted": 0.9209203897554393,
+            "observed_frequency": 0.881578947368421
+          }
+        ],
+        "model": "GP",
+        "n_pooled_predictions": 540
+      },
+      "runtime_s": 14.7,
+      "sensitivity": [
+        {
+          "auc": 0.6118883415435139,
+          "brier": 0.15763623123351025,
+          "delta_auc": 0.0,
+          "delta_brier": 0.0,
+          "delta_log_loss": 0.0,
+          "delta_vs_primary": 0.0,
+          "log_loss": 0.49164917821775567,
+          "majority_log_loss": 0.4968220372479748,
+          "n_experiments": 24,
+          "n_not_sustained": 21,
+          "n_training": 108,
+          "note": "evaluated on its own 108 rows (primary: 108); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "add low-confidence rows"
+        },
+        {
+          "auc": 0.6064148877941982,
+          "brier": 0.16153665269565395,
+          "delta_auc": -0.005473453749315738,
+          "delta_brier": 0.0039004214621436994,
+          "delta_log_loss": 0.009111274913247258,
+          "delta_vs_primary": 0.009111274913247258,
+          "log_loss": 0.5007604531310029,
+          "majority_log_loss": 0.4968220372479748,
+          "n_experiments": 24,
+          "n_not_sustained": 21,
+          "n_training": 108,
+          "note": "evaluated on its own 108 rows (primary: 108); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "O2 initial value only"
+        },
+        {
+          "auc": 0.6578125,
+          "brier": 0.10675285254963085,
+          "delta_auc": 0.04592415845648612,
+          "delta_brier": -0.050883378683879404,
+          "delta_log_loss": -0.1283271959847772,
+          "delta_vs_primary": -0.1283271959847772,
+          "log_loss": 0.36332198223297846,
+          "majority_log_loss": 0.4447053328590141,
+          "n_experiments": 20,
+          "n_not_sustained": 4,
+          "n_training": 36,
+          "note": "evaluated on its own 36 rows (primary: 108); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "drop below_calibration_range rows"
+        },
+        {
+          "auc": 0.5503448275862068,
+          "brier": 0.1534029110331794,
+          "delta_auc": -0.06154351395730706,
+          "delta_brier": -0.004233320200330848,
+          "delta_log_loss": -0.007280839134214068,
+          "delta_vs_primary": -0.007280839134214068,
+          "log_loss": 0.4843683390835416,
+          "majority_log_loss": 0.4739970474677047,
+          "n_experiments": 24,
+          "n_not_sustained": 19,
+          "n_training": 106,
+          "note": "evaluated on its own 106 rows (primary: 108); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "drop flow_off_transient rows"
+        },
+        {
+          "auc": 0.6600766283524904,
+          "brier": 0.13445777134510822,
+          "delta_auc": 0.048188286808976466,
+          "delta_brier": -0.02317845988840203,
+          "delta_log_loss": -0.05685500367779717,
+          "delta_vs_primary": -0.05685500367779717,
+          "log_loss": 0.4347941745399585,
+          "majority_log_loss": 0.46071804514254056,
+          "n_experiments": 23,
+          "n_not_sustained": 18,
+          "n_training": 105,
+          "note": "evaluated on its own 105 rows (primary: 108); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "drop no_sustained_propagation rows"
+        },
+        {
+          "auc": 0.6118883415435139,
+          "brier": 0.15763623123351025,
+          "delta_auc": 0.0,
+          "delta_brier": 0.0,
+          "delta_log_loss": 0.0,
+          "delta_vs_primary": 0.0,
+          "log_loss": 0.49164917821775567,
+          "majority_log_loss": 0.4968220372479748,
+          "n_experiments": 24,
+          "n_not_sustained": 21,
+          "n_training": 108,
+          "note": "evaluated on its own 108 rows (primary: 108); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "pressure length scale 0.15 (ln units)"
+        },
+        {
+          "auc": 0.6118883415435139,
+          "brier": 0.15763623123351025,
+          "delta_auc": 0.0,
+          "delta_brier": 0.0,
+          "delta_log_loss": 0.0,
+          "delta_vs_primary": 0.0,
+          "log_loss": 0.49164917821775567,
+          "majority_log_loss": 0.4968220372479748,
+          "n_experiments": 24,
+          "n_not_sustained": 21,
+          "n_training": 108,
+          "note": "evaluated on its own 108 rows (primary: 108); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "pressure length scale 0.6 (ln units)"
+        }
+      ],
+      "small_sample_warning": "Small sample: 24 experiments. Intervals are wide and metrics are unstable.",
+      "subgroups": [
+        {
+          "brier": 0.2687413145203059,
+          "log_loss": 0.7594568766114103,
+          "n": 20,
+          "n_not_sustained": 7,
+          "name": "O2 < 17 %"
+        },
+        {
+          "brier": 0.12697902152297416,
+          "log_loss": 0.41944607787078964,
+          "n": 71,
+          "n_not_sustained": 11,
+          "name": "O2 17-20 %"
+        },
+        {
+          "brier": 0.15496330321657797,
+          "log_loss": 0.4781354227331378,
+          "n": 17,
+          "n_not_sustained": 3,
+          "name": "O2 > 20 %"
+        },
+        {
+          "brier": 0.16499639528653748,
+          "log_loss": 0.5142565846795852,
+          "n": 81,
+          "n_not_sustained": 17,
+          "name": "airflow < 3 cm/s"
+        },
+        {
+          "brier": 0.07378211898554606,
+          "log_loss": 0.2739124819317001,
+          "n": 24,
+          "n_not_sustained": 2,
+          "name": "airflow 3-10 cm/s"
+        },
+        {
+          "brier": 0.6297446997854893,
+          "log_loss": 1.623142774036801,
+          "n": 3,
+          "n_not_sustained": 2,
+          "name": "airflow > 10 cm/s"
+        },
+        {
+          "brier": 0.27223647594532435,
+          "log_loss": 0.7585698739907974,
+          "n": 49,
+          "n_not_sustained": 20,
+          "name": "confidence high"
+        },
+        {
+          "brier": 0.06245975681183413,
+          "log_loss": 0.26996927833844986,
+          "n": 59,
+          "n_not_sustained": 1,
+          "name": "confidence medium"
+        }
+      ]
+    },
+    {
+      "blindspot_test": {
+        "diagnostics": {
+          "partial_rho_epistemic_given_aleatoric": 0.1476396216100488,
+          "rho_aleatoric_point": 0.6446108622620381,
+          "share_misclassified_flow_off_transient": 0.06666666666666667
+        },
+        "group_level": {
+          "hyperparameters_refit_per_experiment": true,
+          "n_groups": 22,
+          "p_value": 0.6871564217891054,
+          "p_value_note": "one-sided permutation test (rho > 0) across held-out experiments",
+          "pairs": [
+            {
+              "error": 0.20783156808006165,
+              "experiment_id": "PSI-25:M1",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.03237750999400091
+            },
+            {
+              "error": 0.5415000937259185,
+              "experiment_id": "PSI-25:M10",
+              "n_points": 5,
+              "pre_reveal_uncertainty": 0.014387662457989414
+            },
+            {
+              "error": 0.4461979911892706,
+              "experiment_id": "PSI-25:M11",
+              "n_points": 6,
+              "pre_reveal_uncertainty": 0.01621354299848322
+            },
+            {
+              "error": 0.15073836346958736,
+              "experiment_id": "PSI-25:M12",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.046877847144589424
+            },
+            {
+              "error": 0.12554584706170865,
+              "experiment_id": "PSI-25:M13",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.013269072319736785
+            },
+            {
+              "error": 1.1667463536482081,
+              "experiment_id": "PSI-25:M14",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.023174934418106252
+            },
+            {
+              "error": 0.36682308336446073,
+              "experiment_id": "PSI-25:M15",
+              "n_points": 9,
+              "pre_reveal_uncertainty": 0.022280436679818636
+            },
+            {
+              "error": 0.1865245694256623,
+              "experiment_id": "PSI-25:M16",
+              "n_points": 7,
+              "pre_reveal_uncertainty": 0.017692151335114766
+            },
+            {
+              "error": 0.37349300533209573,
+              "experiment_id": "PSI-25:M17",
+              "n_points": 8,
+              "pre_reveal_uncertainty": 0.05187253468033399
+            },
+            {
+              "error": 0.5265029720383965,
+              "experiment_id": "PSI-25:M18",
+              "n_points": 4,
+              "pre_reveal_uncertainty": 0.034731224107496295
+            },
+            {
+              "error": 0.38791949240260803,
+              "experiment_id": "PSI-25:M19",
+              "n_points": 11,
+              "pre_reveal_uncertainty": 0.026305658029702205
+            },
+            {
+              "error": 0.6252474390514444,
+              "experiment_id": "PSI-25:M2",
+              "n_points": 4,
+              "pre_reveal_uncertainty": 0.03378193811559331
+            },
+            {
+              "error": 0.8845750753659671,
+              "experiment_id": "PSI-25:M20",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.0192672035857622
+            },
+            {
+              "error": 0.4625786158567226,
+              "experiment_id": "PSI-25:M3",
+              "n_points": 6,
+              "pre_reveal_uncertainty": 0.02104753608308942
+            },
+            {
+              "error": 0.12832240038507514,
+              "experiment_id": "PSI-25:M4",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.021977825287947644
+            },
+            {
+              "error": 0.6939707869293876,
+              "experiment_id": "PSI-25:M5",
+              "n_points": 5,
+              "pre_reveal_uncertainty": 0.02829456194858613
+            },
+            {
+              "error": 0.16726285794430523,
+              "experiment_id": "PSI-25:M6",
+              "n_points": 5,
+              "pre_reveal_uncertainty": 0.031976611414583266
+            },
+            {
+              "error": 0.18988507218109266,
+              "experiment_id": "PSI-25:M7",
+              "n_points": 6,
+              "pre_reveal_uncertainty": 0.01513713802771304
+            },
+            {
+              "error": 0.6392593265704248,
+              "experiment_id": "PSI-25:M8",
+              "n_points": 3,
+              "pre_reveal_uncertainty": 0.024967169568545538
+            },
+            {
+              "error": 0.8851652077969143,
+              "experiment_id": "PSI-25:M9",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.022372766458861548
+            },
+            {
+              "error": 2.2419173396511574,
+              "experiment_id": "PSI-26:96",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.013328073230056026
+            },
+            {
+              "error": 1.9869033177157072,
+              "experiment_id": "PSI-26:97",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.016905945287752244
+            }
+          ],
+          "runtime_s": 1.1,
+          "spearman_rho": -0.09994353472614342
+        },
+        "interpretation": "Point level (n=95): Spearman rho=0.37 (one-sided p=<0.001) between pre-reveal epistemic uncertainty and log loss; AUROC for flagging 15 misclassified points = 0.57. Experiment level (n=22 held-out experiments): rho=-0.10 (p=0.687). The two levels do not agree, or the evidence is below the 0.05 threshold; treat as inconclusive. Possible reasons: aleatoric (outcome-variability) uncertainty tracks log loss more strongly (rho=0.64), so errors concentrate where the model already expects mixed outcomes rather than where data are sparse; 7% of misclassified points are flow-turned-off transient labels, which are not a physical quench boundary.",
+        "point_level": {
+          "auroc_error_detection": 0.5691666666666667,
+          "n": 95,
+          "n_misclassified": 15,
+          "p_value": 0.0004997501249375312,
+          "p_value_note": "one-sided permutation test (rho > 0); points treated as exchangeable",
+          "spearman_rho": 0.37210246360582305
+        },
+        "verdict": "inconclusive"
+      },
+      "campaigns": [
+        "BASS-II/Miller",
+        "BASS/2013"
+      ],
+      "cv": {
+        "ci_method": "percentile, group bootstrap over experiments (B=1000)",
+        "gp_mean_function": "constant",
+        "gp_vs_majority": {
+          "brier": {
+            "ci95": [
+              -0.0074274697918681465,
+              0.008351335908088195
+            ],
+            "value": 0.0008228287567162706
+          },
+          "comparison": "gp minus majority_class (negative favours gp)",
+          "log_loss": {
+            "ci95": [
+              -0.021445629796051347,
+              0.032591944124008426
+            ],
+            "value": 0.006058124525330166
+          }
+        },
+        "k": 5,
+        "models": [
+          {
+            "auc": {
+              "ci95": [
+                0.3317514677103718,
+                0.6518441558441559
+              ],
+              "value": 0.48096666666666665
+            },
+            "brier": {
+              "ci95": [
+                0.10168335043804559,
+                0.17965421345859015
+              ],
+              "value": 0.13448396880256674
+            },
+            "ece": {
+              "ci95": [
+                0.022688682958315873,
+                0.10954042704522383
+              ],
+              "value": 0.039825680290459485
+            },
+            "log_loss": {
+              "ci95": [
+                0.36452170166881187,
+                0.555395244631162
+              ],
+              "value": 0.444781228333147
+            },
+            "name": "gp"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.4285113797528196,
+                0.7037684303056494
+              ],
+              "value": 0.5575333333333333
+            },
+            "brier": {
+              "ci95": [
+                0.09872684739067913,
+                0.1782314886196977
+              ],
+              "value": 0.1322270372313986
+            },
+            "ece": {
+              "ci95": [
+                0.024695754253411008,
+                0.11708621146870911
+              ],
+              "value": 0.05004136853861354
+            },
+            "log_loss": {
+              "ci95": [
+                0.3518253422241739,
+                0.5618083089445517
+              ],
+              "value": 0.43836679534052814
+            },
+            "name": "logistic_o2_flow"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.45655173160173157,
+                0.727949059042809
+              ],
+              "value": 0.5818166666666666
+            },
+            "brier": {
+              "ci95": [
+                0.09816276294652541,
+                0.17844055076174747
+              ],
+              "value": 0.13103508483555476
+            },
+            "ece": {
+              "ci95": [
+                0.030786632516732724,
+                0.12179046130729233
+              ],
+              "value": 0.0635333923287187
+            },
+            "log_loss": {
+              "ci95": [
+                0.34977278331432216,
+                0.558421469001438
+              ],
+              "value": 0.4342070178491579
+            },
+            "name": "logistic_o2"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.5,
+                0.5
+              ],
+              "value": 0.5
+            },
+            "brier": {
+              "ci95": [
+                0.10182456746422823,
+                0.17934265048931688
+              ],
+              "value": 0.13366114004585047
+            },
+            "ece": {
+              "ci95": [
+                0.0011721650795021854,
+                0.06527668727863593
+              ],
+              "value": 0.008827880979782043
+            },
+            "log_loss": {
+              "ci95": [
+                0.36185655896904445,
+                0.548913786343364
+              ],
+              "value": 0.4387231038078168
+            },
+            "name": "majority_class"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.41717690378476974,
+                0.6964673450927182
+              ],
+              "value": 0.5485
+            },
+            "brier": {
+              "ci95": [
+                0.09979659529770891,
+                0.17716789602731783
+              ],
+              "value": 0.13229889469499911
+            },
+            "ece": {
+              "ci95": [
+                0.01896290981237812,
+                0.10642852804107199
+              ],
+              "value": 0.04652932609631974
+            },
+            "log_loss": {
+              "ci95": [
+                0.3548717294728493,
+                0.5572582910794401
+              ],
+              "value": 0.4381929596080101
+            },
+            "name": "bootstrap_logistic_ensemble"
+          }
+        ],
+        "n_pooled_predictions": 475,
+        "repeats": 5,
+        "scheme": "grouped 5-fold by experiment x 5 repeats",
+        "seeds": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "error_distribution": {
+        "bins": [
+          0.0,
+          0.1,
+          0.2,
+          0.30000000000000004,
+          0.4,
+          0.5,
+          0.6000000000000001,
+          0.7000000000000001,
+          0.8,
+          0.9,
+          1.0
+        ],
+        "counts": [
+          17,
+          270,
+          100,
+          10,
+          3,
+          5,
+          4,
+          15,
+          46,
+          5
+        ],
+        "note": "bins are the ERROR_BINS+1 bin edges; counts pool all repeats",
+        "variable": "absolute error |y - p| of out-of-fold GP predictions"
+      },
+      "group_id": "pmma_slab__opposed",
+      "label": "PMMA slabs · opposed flow",
+      "label_counts": {
+        "not_sustained": 15,
+        "sustained": 80
+      },
+      "logo": {
+        "applicable": true,
+        "folds": [
+          {
+            "auc": 0.3860576923076923,
+            "brier": 0.6127392204864817,
+            "held_out": "BASS-II/Miller",
+            "log_loss": 1.6127275620294346,
+            "majority_brier": 0.49260752688172044,
+            "majority_log_loss": 1.2327249014135961,
+            "n": 93,
+            "n_experiments": 20,
+            "n_not_sustained": 13
+          },
+          {
+            "auc": null,
+            "brier": 0.8075232743800401,
+            "held_out": "BASS/2013",
+            "log_loss": 2.29641583486376,
+            "majority_brier": 0.7269806094182826,
+            "majority_log_loss": 1.9148195619852821,
+            "n": 2,
+            "n_experiments": 2,
+            "n_not_sustained": 2
+          }
+        ]
+      },
+      "majority_class_fraction": 0.8421052631578947,
+      "n_experiments": 22,
+      "n_observations": 95,
+      "reliability": {
+        "bins": [
+          {
+            "count": 0,
+            "hi": 0.1,
+            "lo": 0.0,
+            "mean_predicted": null,
+            "observed_frequency": null
+          },
+          {
+            "count": 0,
+            "hi": 0.2,
+            "lo": 0.1,
+            "mean_predicted": null,
+            "observed_frequency": null
+          },
+          {
+            "count": 0,
+            "hi": 0.30000000000000004,
+            "lo": 0.2,
+            "mean_predicted": null,
+            "observed_frequency": null
+          },
+          {
+            "count": 0,
+            "hi": 0.4,
+            "lo": 0.30000000000000004,
+            "mean_predicted": null,
+            "observed_frequency": null
+          },
+          {
+            "count": 0,
+            "hi": 0.5,
+            "lo": 0.4,
+            "mean_predicted": null,
+            "observed_frequency": null
+          },
+          {
+            "count": 8,
+            "hi": 0.6000000000000001,
+            "lo": 0.5,
+            "mean_predicted": 0.5688955195796191,
+            "observed_frequency": 0.375
+          },
+          {
+            "count": 14,
+            "hi": 0.7000000000000001,
+            "lo": 0.6000000000000001,
+            "mean_predicted": 0.6596312449154843,
+            "observed_frequency": 0.7142857142857143
+          },
+          {
+            "count": 115,
+            "hi": 0.8,
+            "lo": 0.7000000000000001,
+            "mean_predicted": 0.7661440245624657,
+            "observed_frequency": 0.8695652173913043
+          },
+          {
+            "count": 316,
+            "hi": 0.9,
+            "lo": 0.8,
+            "mean_predicted": 0.8490923529379685,
+            "observed_frequency": 0.8544303797468354
+          },
+          {
+            "count": 22,
+            "hi": 1.0,
+            "lo": 0.9,
+            "mean_predicted": 0.9100280801468034,
+            "observed_frequency": 0.7727272727272727
+          }
+        ],
+        "model": "GP",
+        "n_pooled_predictions": 475
+      },
+      "runtime_s": 13.3,
+      "sensitivity": [
+        {
+          "auc": 0.42884552845528456,
+          "brier": 0.13523755450664918,
+          "delta_auc": -0.05212113821138209,
+          "delta_brier": 0.0007535857040824323,
+          "delta_log_loss": 0.006673574026610785,
+          "delta_vs_primary": 0.006673574026610785,
+          "log_loss": 0.45145480235975777,
+          "majority_log_loss": 0.438007092209289,
+          "n_experiments": 22,
+          "n_not_sustained": 15,
+          "n_training": 97,
+          "note": "evaluated on its own 97 rows (primary: 95); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "add low-confidence rows"
+        },
+        {
+          "auc": 0.426,
+          "brier": 0.13659733641451494,
+          "delta_auc": -0.054966666666666664,
+          "delta_brier": 0.0021133676119481914,
+          "delta_log_loss": 0.007232698236652957,
+          "delta_vs_primary": 0.007232698236652957,
+          "log_loss": 0.45201392656979994,
+          "majority_log_loss": 0.4387231038078168,
+          "n_experiments": 22,
+          "n_not_sustained": 15,
+          "n_training": 95,
+          "note": "evaluated on its own 95 rows (primary: 95); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "O2 initial value only"
+        },
+        {
+          "auc": 0.41320350535540407,
+          "brier": 0.1275029951026691,
+          "delta_auc": -0.06776316131126259,
+          "delta_brier": -0.006980973699897641,
+          "delta_log_loss": -0.014990167139030786,
+          "delta_vs_primary": -0.014990167139030786,
+          "log_loss": 0.4297910611941162,
+          "majority_log_loss": 0.41491661296287824,
+          "n_experiments": 22,
+          "n_not_sustained": 13,
+          "n_training": 92,
+          "note": "evaluated on its own 92 rows (primary: 95); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "drop below_calibration_range rows"
+        },
+        {
+          "auc": 0.4135714285714286,
+          "brier": 0.13125270499462488,
+          "delta_auc": -0.06739523809523806,
+          "delta_brier": -0.0032312638079418643,
+          "delta_log_loss": -0.006881023093484651,
+          "delta_vs_primary": -0.006881023093484651,
+          "log_loss": 0.43790020523966233,
+          "majority_log_loss": 0.42604067685951474,
+          "n_experiments": 22,
+          "n_not_sustained": 14,
+          "n_training": 94,
+          "note": "evaluated on its own 94 rows (primary: 95); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "drop flow_off_transient rows"
+        },
+        {
+          "auc": 0.5714038461538462,
+          "brier": 0.11818005234391386,
+          "delta_auc": 0.09043717948717955,
+          "delta_brier": -0.01630391645865288,
+          "delta_log_loss": -0.043425175746045375,
+          "delta_vs_primary": -0.043425175746045375,
+          "log_loss": 0.4013560525871016,
+          "majority_log_loss": 0.40806955152942825,
+          "n_experiments": 20,
+          "n_not_sustained": 13,
+          "n_training": 93,
+          "note": "evaluated on its own 93 rows (primary: 95); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "drop no_sustained_propagation rows"
+        },
+        {
+          "auc": 0.4903,
+          "brier": 0.13418181082989047,
+          "delta_auc": 0.00933333333333336,
+          "delta_brier": -0.0003021579726762702,
+          "delta_log_loss": -0.0011339417477568836,
+          "delta_vs_primary": -0.0011339417477568836,
+          "log_loss": 0.4436472865853901,
+          "majority_log_loss": 0.4387231038078168,
+          "n_experiments": 22,
+          "n_not_sustained": 15,
+          "n_training": 95,
+          "note": "evaluated on its own 95 rows (primary: 95); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "pressure length scale 0.15 (ln units)"
+        },
+        {
+          "auc": 0.4790333333333333,
+          "brier": 0.1345590542562449,
+          "delta_auc": -0.0019333333333333425,
+          "delta_brier": 7.508545367815311e-05,
+          "delta_log_loss": 0.00028679399232489633,
+          "delta_vs_primary": 0.00028679399232489633,
+          "log_loss": 0.4450680223254719,
+          "majority_log_loss": 0.4387231038078168,
+          "n_experiments": 22,
+          "n_not_sustained": 15,
+          "n_training": 95,
+          "note": "evaluated on its own 95 rows (primary: 95); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "pressure length scale 0.6 (ln units)"
+        }
+      ],
+      "small_sample_warning": "Small sample: 22 experiments; only 15 not-sustained observations. Intervals are wide and metrics are unstable.",
+      "subgroups": [
+        {
+          "brier": 0.4658332514330956,
+          "log_loss": 1.1558857960352646,
+          "n": 1,
+          "n_not_sustained": 1,
+          "name": "O2 < 17 %"
+        },
+        {
+          "brier": 0.14481288926989805,
+          "log_loss": 0.47348569835653853,
+          "n": 59,
+          "n_not_sustained": 10,
+          "name": "O2 17-20 %"
+        },
+        {
+          "brier": 0.1076052376539075,
+          "log_loss": 0.37607641978794065,
+          "n": 35,
+          "n_not_sustained": 4,
+          "name": "O2 > 20 %"
+        },
+        {
+          "brier": 0.12728439310133355,
+          "log_loss": 0.409381228584537,
+          "n": 11,
+          "n_not_sustained": 2,
+          "name": "airflow < 3 cm/s"
+        },
+        {
+          "brier": 0.15769427328454177,
+          "log_loss": 0.5069007754004242,
+          "n": 36,
+          "n_not_sustained": 7,
+          "name": "airflow 3-10 cm/s"
+        },
+        {
+          "brier": 0.11872614320595141,
+          "log_loss": 0.40630406797507895,
+          "n": 48,
+          "n_not_sustained": 6,
+          "name": "airflow > 10 cm/s"
+        },
+        {
+          "brier": 0.2859221390170012,
+          "log_loss": 0.8234703721262542,
+          "n": 38,
+          "n_not_sustained": 15,
+          "name": "confidence high"
+        },
+        {
+          "brier": 0.033525188659610454,
+          "log_loss": 0.19232179913774214,
+          "n": 57,
+          "n_not_sustained": 0,
+          "name": "confidence medium"
+        }
+      ]
+    },
+    {
+      "blindspot_test": {
+        "diagnostics": {
+          "partial_rho_epistemic_given_aleatoric": 0.23765216284752025,
+          "rho_aleatoric_point": 0.7198898555351584,
+          "share_misclassified_flow_off_transient": 0.0
+        },
+        "group_level": {
+          "hyperparameters_refit_per_experiment": true,
+          "n_groups": 15,
+          "p_value": 0.45027486256871563,
+          "p_value_note": "one-sided permutation test (rho > 0) across held-out experiments",
+          "pairs": [
+            {
+              "error": 0.2591102479354603,
+              "experiment_id": "PSI-25:O11",
+              "n_points": 6,
+              "pre_reveal_uncertainty": 0.03764408766107807
+            },
+            {
+              "error": 0.6857561130818932,
+              "experiment_id": "PSI-25:O12",
+              "n_points": 4,
+              "pre_reveal_uncertainty": 0.09510786595695678
+            },
+            {
+              "error": 0.49989762697387985,
+              "experiment_id": "PSI-25:O15a",
+              "n_points": 5,
+              "pre_reveal_uncertainty": 0.057542726676249434
+            },
+            {
+              "error": 0.3738570433672874,
+              "experiment_id": "PSI-25:O15b",
+              "n_points": 11,
+              "pre_reveal_uncertainty": 0.06554314272420639
+            },
+            {
+              "error": 0.9509654461401452,
+              "experiment_id": "PSI-25:O16",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.03836514090972187
+            },
+            {
+              "error": 0.5117512057989739,
+              "experiment_id": "PSI-25:O18",
+              "n_points": 8,
+              "pre_reveal_uncertainty": 0.03578339809753413
+            },
+            {
+              "error": 0.38352295276268916,
+              "experiment_id": "PSI-25:O20",
+              "n_points": 4,
+              "pre_reveal_uncertainty": 0.08753192340791478
+            },
+            {
+              "error": 0.28025850073900593,
+              "experiment_id": "PSI-25:O21",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.034345214216409875
+            },
+            {
+              "error": 0.6531239632638376,
+              "experiment_id": "PSI-25:O22",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.03724833586355425
+            },
+            {
+              "error": 0.570125418852289,
+              "experiment_id": "PSI-25:O4",
+              "n_points": 5,
+              "pre_reveal_uncertainty": 0.08068734361806729
+            },
+            {
+              "error": 0.6382107153856307,
+              "experiment_id": "PSI-25:O6",
+              "n_points": 5,
+              "pre_reveal_uncertainty": 0.019004674585978966
+            },
+            {
+              "error": 0.23172894818444734,
+              "experiment_id": "PSI-25:O7",
+              "n_points": 4,
+              "pre_reveal_uncertainty": 0.03984880010252191
+            },
+            {
+              "error": 0.8757007837982015,
+              "experiment_id": "PSI-25:O8a",
+              "n_points": 3,
+              "pre_reveal_uncertainty": 0.014045258034994576
+            },
+            {
+              "error": 0.25271783435570816,
+              "experiment_id": "PSI-25:O8b",
+              "n_points": 4,
+              "pre_reveal_uncertainty": 0.028320302944469827
+            },
+            {
+              "error": 0.33422445990907135,
+              "experiment_id": "PSI-25:O9",
+              "n_points": 3,
+              "pre_reveal_uncertainty": 0.032002215126549695
+            }
+          ],
+          "runtime_s": 0.7,
+          "spearman_rho": 0.04285714285714286
+        },
+        "interpretation": "Point level (n=67): Spearman rho=0.52 (one-sided p=<0.001) between pre-reveal epistemic uncertainty and log loss; AUROC for flagging 14 misclassified points = 0.62. Experiment level (n=15 held-out experiments): rho=0.04 (p=0.450). The two levels do not agree, or the evidence is below the 0.05 threshold; treat as inconclusive. Possible reasons: aleatoric (outcome-variability) uncertainty tracks log loss more strongly (rho=0.72), so errors concentrate where the model already expects mixed outcomes rather than where data are sparse.",
+        "point_level": {
+          "auroc_error_detection": 0.6172506738544474,
+          "n": 67,
+          "n_misclassified": 14,
+          "p_value": 0.0004997501249375312,
+          "p_value_note": "one-sided permutation test (rho > 0); points treated as exchangeable",
+          "spearman_rho": 0.5158033362598771
+        },
+        "verdict": "inconclusive"
+      },
+      "campaigns": [
+        "BASS-II/Olson"
+      ],
+      "cv": {
+        "ci_method": "percentile, group bootstrap over experiments (B=1000)",
+        "gp_mean_function": "constant",
+        "gp_vs_majority": {
+          "brier": {
+            "ci95": [
+              -0.09581867246216098,
+              0.003972253942032149
+            ],
+            "value": -0.036208800141417696
+          },
+          "comparison": "gp minus majority_class (negative favours gp)",
+          "log_loss": {
+            "ci95": [
+              -0.21866033329392762,
+              0.018021972043967237
+            ],
+            "value": -0.07945289022772689
+          }
+        },
+        "k": 5,
+        "models": [
+          {
+            "auc": {
+              "ci95": [
+                0.5864066520467837,
+                0.8754387700534759
+              ],
+              "value": 0.7472549019607844
+            },
+            "brier": {
+              "ci95": [
+                0.1242981621321,
+                0.1852182660773814
+              ],
+              "value": 0.151102018740224
+            },
+            "ece": {
+              "ci95": [
+                0.08264517687074055,
+                0.19825778058877996
+              ],
+              "value": 0.1136844142240794
+            },
+            "log_loss": {
+              "ci95": [
+                0.41569077907311086,
+                0.5761007031583296
+              ],
+              "value": 0.4856930701473667
+            },
+            "name": "gp"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.6328188957384079,
+                0.8912417517362563
+              ],
+              "value": 0.7734313725490196
+            },
+            "brier": {
+              "ci95": [
+                0.1125527560784528,
+                0.17633423682982394
+              ],
+              "value": 0.14203250146935814
+            },
+            "ece": {
+              "ci95": [
+                0.08384661805021887,
+                0.2026900285913435
+              ],
+              "value": 0.10726765630333189
+            },
+            "log_loss": {
+              "ci95": [
+                0.38591063399078096,
+                0.6087915319702287
+              ],
+              "value": 0.48329493003082075
+            },
+            "name": "logistic_o2_flow"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.6177637909253606,
+                0.8776199490662139
+              ],
+              "value": 0.7413235294117647
+            },
+            "brier": {
+              "ci95": [
+                0.12055064316277048,
+                0.194151926040796
+              ],
+              "value": 0.15433016587129977
+            },
+            "ece": {
+              "ci95": [
+                0.036985536822240817,
+                0.16106271914190642
+              ],
+              "value": 0.05088262174436985
+            },
+            "log_loss": {
+              "ci95": [
+                0.39359181023727846,
+                0.5948836791082052
+              ],
+              "value": 0.4879818792934343
+            },
+            "name": "logistic_o2"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.5,
+                0.5
+              ],
+              "value": 0.5
+            },
+            "brier": {
+              "ci95": [
+                0.13979718880295366,
+                0.2677209848509082
+              ],
+              "value": 0.1873108188816417
+            },
+            "ece": {
+              "ci95": [
+                0.016266534391534915,
+                0.14122310623023773
+              ],
+              "value": 0.07162337662337732
+            },
+            "log_loss": {
+              "ci95": [
+                0.45847329579418544,
+                0.7488081642498005
+              ],
+              "value": 0.5651459603750936
+            },
+            "name": "majority_class"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.6331139063220225,
+                0.8980587634713556
+              ],
+              "value": 0.7758823529411765
+            },
+            "brier": {
+              "ci95": [
+                0.11277105272516645,
+                0.17481561637074056
+              ],
+              "value": 0.1408119549268193
+            },
+            "ece": {
+              "ci95": [
+                0.08859908333253437,
+                0.2043556421339027
+              ],
+              "value": 0.10141215033535426
+            },
+            "log_loss": {
+              "ci95": [
+                0.3823300192408782,
+                0.590285583445392
+              ],
+              "value": 0.47719543535598075
+            },
+            "name": "bootstrap_logistic_ensemble"
+          }
+        ],
+        "n_pooled_predictions": 335,
+        "repeats": 5,
+        "scheme": "grouped 5-fold by experiment x 5 repeats",
+        "seeds": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "error_distribution": {
+        "bins": [
+          0.0,
+          0.1,
+          0.2,
+          0.30000000000000004,
+          0.4,
+          0.5,
+          0.6000000000000001,
+          0.7000000000000001,
+          0.8,
+          0.9,
+          1.0
+        ],
+        "counts": [
+          45,
+          65,
+          96,
+          32,
+          23,
+          33,
+          18,
+          8,
+          7,
+          8
+        ],
+        "note": "bins are the ERROR_BINS+1 bin edges; counts pool all repeats",
+        "variable": "absolute error |y - p| of out-of-fold GP predictions"
+      },
+      "group_id": "pmma_rod__stagnation",
+      "label": "PMMA rods · axial stagnation flow",
+      "label_counts": {
+        "not_sustained": 16,
+        "sustained": 51
+      },
+      "logo": {
+        "applicable": false,
+        "folds": [],
+        "reason": "group spans a single campaign"
+      },
+      "majority_class_fraction": 0.7611940298507462,
+      "n_experiments": 15,
+      "n_observations": 67,
+      "reliability": {
+        "bins": [
+          {
+            "count": 0,
+            "hi": 0.1,
+            "lo": 0.0,
+            "mean_predicted": null,
+            "observed_frequency": null
+          },
+          {
+            "count": 0,
+            "hi": 0.2,
+            "lo": 0.1,
+            "mean_predicted": null,
+            "observed_frequency": null
+          },
+          {
+            "count": 3,
+            "hi": 0.30000000000000004,
+            "lo": 0.2,
+            "mean_predicted": 0.2870392457150622,
+            "observed_frequency": 0.0
+          },
+          {
+            "count": 11,
+            "hi": 0.4,
+            "lo": 0.30000000000000004,
+            "mean_predicted": 0.37565335806545763,
+            "observed_frequency": 0.18181818181818182
+          },
+          {
+            "count": 22,
+            "hi": 0.5,
+            "lo": 0.4,
+            "mean_predicted": 0.4578971357732733,
+            "observed_frequency": 0.5909090909090909
+          },
+          {
+            "count": 34,
+            "hi": 0.6000000000000001,
+            "lo": 0.5,
+            "mean_predicted": 0.5554784561466252,
+            "observed_frequency": 0.4117647058823529
+          },
+          {
+            "count": 39,
+            "hi": 0.7000000000000001,
+            "lo": 0.6000000000000001,
+            "mean_predicted": 0.6508997570154467,
+            "observed_frequency": 0.5897435897435898
+          },
+          {
+            "count": 101,
+            "hi": 0.8,
+            "lo": 0.7000000000000001,
+            "mean_predicted": 0.7559711757653172,
+            "observed_frequency": 0.9207920792079208
+          },
+          {
+            "count": 72,
+            "hi": 0.9,
+            "lo": 0.8,
+            "mean_predicted": 0.8523322511732466,
+            "observed_frequency": 0.9027777777777778
+          },
+          {
+            "count": 53,
+            "hi": 1.0,
+            "lo": 0.9,
+            "mean_predicted": 0.9361200732150285,
+            "observed_frequency": 0.8490566037735849
+          }
+        ],
+        "model": "GP",
+        "n_pooled_predictions": 335
+      },
+      "runtime_s": 10.4,
+      "sensitivity": [
+        {
+          "auc": 0.7854910714285714,
+          "brier": 0.12944131641843876,
+          "delta_auc": 0.03823616946778707,
+          "delta_brier": -0.02166070232178524,
+          "delta_log_loss": -0.05719093223950905,
+          "delta_vs_primary": -0.05719093223950905,
+          "log_loss": 0.4285021379078576,
+          "majority_log_loss": 0.5424859285574818,
+          "n_experiments": 15,
+          "n_not_sustained": 16,
+          "n_training": 72,
+          "note": "evaluated on its own 72 rows (primary: 67); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "add low-confidence rows"
+        },
+        {
+          "auc": 0.7047303921568627,
+          "brier": 0.1624233389126489,
+          "delta_auc": -0.04252450980392164,
+          "delta_brier": 0.011321320172424904,
+          "delta_log_loss": 0.025068686775675586,
+          "delta_vs_primary": 0.025068686775675586,
+          "log_loss": 0.5107617569230423,
+          "majority_log_loss": 0.5651459603750936,
+          "n_experiments": 15,
+          "n_not_sustained": 16,
+          "n_training": 67,
+          "note": "evaluated on its own 67 rows (primary: 67); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "O2 initial value only"
+        },
+        {
+          "auc": 0.8021487603305785,
+          "brier": 0.17268272550877722,
+          "delta_auc": 0.0548938583697941,
+          "delta_brier": 0.021580706768553226,
+          "delta_log_loss": 0.028776733681651734,
+          "delta_vs_primary": 0.028776733681651734,
+          "log_loss": 0.5144698038290184,
+          "majority_log_loss": 0.7348958375426887,
+          "n_experiments": 13,
+          "n_not_sustained": 11,
+          "n_training": 33,
+          "note": "evaluated on its own 33 rows (primary: 67); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "drop below_calibration_range rows"
+        },
+        {
+          "auc": 0.7472549019607844,
+          "brier": 0.151102018740224,
+          "delta_auc": 0.0,
+          "delta_brier": 0.0,
+          "delta_log_loss": 0.0,
+          "delta_vs_primary": 0.0,
+          "log_loss": 0.4856930701473667,
+          "majority_log_loss": 0.5651459603750936,
+          "n_experiments": 15,
+          "n_not_sustained": 16,
+          "n_training": 67,
+          "note": "evaluated on its own 67 rows (primary: 67); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "drop flow_off_transient rows"
+        },
+        {
+          "auc": 0.6096256684491979,
+          "brier": 0.1449230888470841,
+          "delta_auc": -0.1376292335115865,
+          "delta_brier": -0.006178929893139895,
+          "delta_log_loss": -0.018531698949395214,
+          "delta_vs_primary": -0.018531698949395214,
+          "log_loss": 0.46716137119797146,
+          "majority_log_loss": 0.47241898771973084,
+          "n_experiments": 13,
+          "n_not_sustained": 11,
+          "n_training": 62,
+          "note": "evaluated on its own 62 rows (primary: 67); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "drop no_sustained_propagation rows"
+        },
+        {
+          "auc": 0.7472549019607844,
+          "brier": 0.151102018740224,
+          "delta_auc": 0.0,
+          "delta_brier": 0.0,
+          "delta_log_loss": 0.0,
+          "delta_vs_primary": 0.0,
+          "log_loss": 0.4856930701473667,
+          "majority_log_loss": 0.5651459603750936,
+          "n_experiments": 15,
+          "n_not_sustained": 16,
+          "n_training": 67,
+          "note": "evaluated on its own 67 rows (primary: 67); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "pressure length scale 0.15 (ln units)"
+        },
+        {
+          "auc": 0.7472549019607844,
+          "brier": 0.151102018740224,
+          "delta_auc": 0.0,
+          "delta_brier": 0.0,
+          "delta_log_loss": 0.0,
+          "delta_vs_primary": 0.0,
+          "log_loss": 0.4856930701473667,
+          "majority_log_loss": 0.5651459603750936,
+          "n_experiments": 15,
+          "n_not_sustained": 16,
+          "n_training": 67,
+          "note": "evaluated on its own 67 rows (primary: 67); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "pressure length scale 0.6 (ln units)"
+        }
+      ],
+      "small_sample_warning": "Small sample: 15 experiments; only 16 not-sustained observations. Intervals are wide and metrics are unstable.",
+      "subgroups": [
+        {
+          "brier": 0.1553804124693811,
+          "log_loss": 0.49718774789529124,
+          "n": 65,
+          "n_not_sustained": 16,
+          "name": "O2 < 17 %"
+        },
+        {
+          "brier": 0.012054222542618764,
+          "log_loss": 0.11211604333981884,
+          "n": 2,
+          "n_not_sustained": 0,
+          "name": "O2 17-20 %"
+        },
+        {
+          "brier": null,
+          "log_loss": null,
+          "n": 0,
+          "n_not_sustained": 0,
+          "name": "O2 > 20 %"
+        },
+        {
+          "brier": 0.14225031423585333,
+          "log_loss": 0.47577272687746336,
+          "n": 41,
+          "n_not_sustained": 7,
+          "name": "airflow < 3 cm/s"
+        },
+        {
+          "brier": 0.15425770468258165,
+          "log_loss": 0.46970612070011936,
+          "n": 15,
+          "n_not_sustained": 4,
+          "name": "airflow 3-10 cm/s"
+        },
+        {
+          "brier": 0.17979152742602716,
+          "log_loss": 0.5444692806723441,
+          "n": 11,
+          "n_not_sustained": 5,
+          "name": "airflow > 10 cm/s"
+        },
+        {
+          "brier": 0.2196382000147156,
+          "log_loss": 0.6562059711177506,
+          "n": 22,
+          "n_not_sustained": 10,
+          "name": "confidence high"
+        },
+        {
+          "brier": 0.11759544122825039,
+          "log_loss": 0.40233120745073464,
+          "n": 45,
+          "n_not_sustained": 6,
+          "name": "confidence medium"
+        }
+      ]
+    },
+    {
+      "blindspot_test": {
+        "diagnostics": {
+          "partial_rho_epistemic_given_aleatoric": 0.08178297900468808,
+          "rho_aleatoric_point": 0.8142235123367199,
+          "share_misclassified_flow_off_transient": 0.0
+        },
+        "group_level": {
+          "hyperparameters_refit_per_experiment": true,
+          "n_groups": 12,
+          "p_value": 0.7736131934032984,
+          "p_value_note": "one-sided permutation test (rho > 0) across held-out experiments",
+          "pairs": [
+            {
+              "error": 0.12659032595696718,
+              "experiment_id": "PSI-25:O1",
+              "n_points": 4,
+              "pre_reveal_uncertainty": 0.08248274126479123
+            },
+            {
+              "error": 0.23785717777771515,
+              "experiment_id": "PSI-25:O10",
+              "n_points": 5,
+              "pre_reveal_uncertainty": 0.03491929547988073
+            },
+            {
+              "error": 0.4209663408913619,
+              "experiment_id": "PSI-25:O13a",
+              "n_points": 6,
+              "pre_reveal_uncertainty": 0.04479868965759378
+            },
+            {
+              "error": 0.9987789478003042,
+              "experiment_id": "PSI-25:O14",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.02734717040664754
+            },
+            {
+              "error": 0.24869882676524258,
+              "experiment_id": "PSI-25:O17",
+              "n_points": 6,
+              "pre_reveal_uncertainty": 0.055063398458845836
+            },
+            {
+              "error": 0.992751259457068,
+              "experiment_id": "PSI-25:O19",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.03384377870068943
+            },
+            {
+              "error": 0.09328636722159062,
+              "experiment_id": "PSI-25:O2",
+              "n_points": 3,
+              "pre_reveal_uncertainty": 0.062349168550064726
+            },
+            {
+              "error": 0.04485022249318099,
+              "experiment_id": "PSI-25:O3a",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.023498071822166816
+            },
+            {
+              "error": 0.10264078870511165,
+              "experiment_id": "PSI-25:O3b",
+              "n_points": 4,
+              "pre_reveal_uncertainty": 0.034949012940957556
+            },
+            {
+              "error": 0.5500738954948337,
+              "experiment_id": "PSI-25:O5a",
+              "n_points": 6,
+              "pre_reveal_uncertainty": 0.04794352755327955
+            },
+            {
+              "error": 0.3923834771414875,
+              "experiment_id": "PSI-25:P16",
+              "n_points": 6,
+              "pre_reveal_uncertainty": 0.04211522461432995
+            },
+            {
+              "error": 0.36506075466452925,
+              "experiment_id": "PSI-25:P19",
+              "n_points": 7,
+              "pre_reveal_uncertainty": 0.05184004821646427
+            }
+          ],
+          "runtime_s": 0.5,
+          "spearman_rho": -0.2097902097902098
+        },
+        "interpretation": "Point level (n=52): Spearman rho=0.37 (one-sided p=0.003) between pre-reveal epistemic uncertainty and log loss; AUROC for flagging 6 misclassified points = 0.47. Experiment level (n=12 held-out experiments): rho=-0.21 (p=0.774). The two levels do not agree, or the evidence is below the 0.05 threshold; treat as inconclusive. Possible reasons: aleatoric (outcome-variability) uncertainty tracks log loss more strongly (rho=0.81), so errors concentrate where the model already expects mixed outcomes rather than where data are sparse.",
+        "point_level": {
+          "auroc_error_detection": 0.4673913043478261,
+          "n": 52,
+          "n_misclassified": 6,
+          "p_value": 0.0029985007496251873,
+          "p_value_note": "one-sided permutation test (rho > 0); points treated as exchangeable",
+          "spearman_rho": 0.37061384786135065
+        },
+        "verdict": "inconclusive"
+      },
+      "campaigns": [
+        "BASS-II/Fernandez-Pello",
+        "BASS-II/Olson"
+      ],
+      "cv": {
+        "ci_method": "percentile, group bootstrap over experiments (B=1000)",
+        "gp_mean_function": "constant",
+        "gp_vs_majority": {
+          "brier": {
+            "ci95": [
+              -0.005665114217778866,
+              0.01740076739696423
+            ],
+            "value": 0.005850704718876262
+          },
+          "comparison": "gp minus majority_class (negative favours gp)",
+          "log_loss": {
+            "ci95": [
+              -0.032679948928744464,
+              0.048314929091436254
+            ],
+            "value": 0.007263132379387249
+          }
+        },
+        "k": 5,
+        "models": [
+          {
+            "auc": {
+              "ci95": [
+                0.31242212167886024,
+                0.6998557142857142
+              ],
+              "value": 0.49623188405797103
+            },
+            "brier": {
+              "ci95": [
+                0.07009544987232766,
+                0.16503775427188325
+              ],
+              "value": 0.11274119886753206
+            },
+            "ece": {
+              "ci95": [
+                0.037611577593809085,
+                0.17503687484245617
+              ],
+              "value": 0.07937715069814373
+            },
+            "log_loss": {
+              "ci95": [
+                0.270915524511717,
+                0.5373072969228966
+              ],
+              "value": 0.3872453933735736
+            },
+            "name": "gp"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.2935596146126054,
+                0.7907638888888888
+              ],
+              "value": 0.5265217391304348
+            },
+            "brier": {
+              "ci95": [
+                0.0667352429727103,
+                0.1689971220242597
+              ],
+              "value": 0.11399217418643708
+            },
+            "ece": {
+              "ci95": [
+                0.05223744649357234,
+                0.16980437679128008
+              ],
+              "value": 0.09836976481954693
+            },
+            "log_loss": {
+              "ci95": [
+                0.25339359297292036,
+                0.6024242905234172
+              ],
+              "value": 0.4159268694100559
+            },
+            "name": "logistic_o2_flow"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.3980136205092431,
+                0.8063611408199642
+              ],
+              "value": 0.5757246376811594
+            },
+            "brier": {
+              "ci95": [
+                0.063098287823356,
+                0.15778612569464712
+              ],
+              "value": 0.10677073766304392
+            },
+            "ece": {
+              "ci95": [
+                0.02819721097490891,
+                0.14609737634835596
+              ],
+              "value": 0.06000011696961844
+            },
+            "log_loss": {
+              "ci95": [
+                0.23993315845274182,
+                0.5091103412868224
+              ],
+              "value": 0.3666924628382615
+            },
+            "name": "logistic_o2"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.5,
+                0.5
+              ],
+              "value": 0.5
+            },
+            "brier": {
+              "ci95": [
+                0.06119131008969252,
+                0.15966309090360534
+              ],
+              "value": 0.1068904941486558
+            },
+            "ece": {
+              "ci95": [
+                0.03970033228003696,
+                0.1653863235953613
+              ],
+              "value": 0.09310050414701442
+            },
+            "log_loss": {
+              "ci95": [
+                0.2585257512794102,
+                0.5245805637743237
+              ],
+              "value": 0.37998226099418636
+            },
+            "name": "majority_class"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.31847187981510017,
+                0.8073102939288922
+              ],
+              "value": 0.5581159420289855
+            },
+            "brier": {
+              "ci95": [
+                0.06871495566498825,
+                0.17073898913416338
+              ],
+              "value": 0.11563763544188826
+            },
+            "ece": {
+              "ci95": [
+                0.07322248082642284,
+                0.20553638728740486
+              ],
+              "value": 0.1365289831275972
+            },
+            "log_loss": {
+              "ci95": [
+                0.25257180249673744,
+                0.5862785712281521
+              ],
+              "value": 0.40843093316605394
+            },
+            "name": "bootstrap_logistic_ensemble"
+          }
+        ],
+        "n_pooled_predictions": 260,
+        "repeats": 5,
+        "scheme": "grouped 5-fold by experiment x 5 repeats",
+        "seeds": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "error_distribution": {
+        "bins": [
+          0.0,
+          0.1,
+          0.2,
+          0.30000000000000004,
+          0.4,
+          0.5,
+          0.6000000000000001,
+          0.7000000000000001,
+          0.8,
+          0.9,
+          1.0
+        ],
+        "counts": [
+          104,
+          60,
+          47,
+          19,
+          0,
+          0,
+          0,
+          5,
+          10,
+          15
+        ],
+        "note": "bins are the ERROR_BINS+1 bin edges; counts pool all repeats",
+        "variable": "absolute error |y - p| of out-of-fold GP predictions"
+      },
+      "group_id": "pmma_rod__unknown",
+      "label": "PMMA rods · configuration not recorded",
+      "label_counts": {
+        "not_sustained": 6,
+        "sustained": 46
+      },
+      "logo": {
+        "applicable": true,
+        "folds": [
+          {
+            "auc": 0.8181818181818182,
+            "brier": 0.12858264381344978,
+            "held_out": "BASS-II/Fernandez-Pello",
+            "log_loss": 0.41498043946200264,
+            "majority_brier": 0.13119480162906696,
+            "majority_log_loss": 0.43375790148235305,
+            "n": 13,
+            "n_experiments": 2,
+            "n_not_sustained": 2
+          },
+          {
+            "auc": 0.7071428571428572,
+            "brier": 0.09836564736096665,
+            "held_out": "BASS-II/Olson",
+            "log_loss": 0.34840481149240826,
+            "majority_brier": 0.10153846153846155,
+            "majority_log_loss": 0.36532758835214707,
+            "n": 39,
+            "n_experiments": 10,
+            "n_not_sustained": 4
+          }
+        ]
+      },
+      "majority_class_fraction": 0.8846153846153846,
+      "n_experiments": 12,
+      "n_observations": 52,
+      "reliability": {
+        "bins": [
+          {
+            "count": 0,
+            "hi": 0.1,
+            "lo": 0.0,
+            "mean_predicted": null,
+            "observed_frequency": null
+          },
+          {
+            "count": 0,
+            "hi": 0.2,
+            "lo": 0.1,
+            "mean_predicted": null,
+            "observed_frequency": null
+          },
+          {
+            "count": 0,
+            "hi": 0.30000000000000004,
+            "lo": 0.2,
+            "mean_predicted": null,
+            "observed_frequency": null
+          },
+          {
+            "count": 0,
+            "hi": 0.4,
+            "lo": 0.30000000000000004,
+            "mean_predicted": null,
+            "observed_frequency": null
+          },
+          {
+            "count": 0,
+            "hi": 0.5,
+            "lo": 0.4,
+            "mean_predicted": null,
+            "observed_frequency": null
+          },
+          {
+            "count": 0,
+            "hi": 0.6000000000000001,
+            "lo": 0.5,
+            "mean_predicted": null,
+            "observed_frequency": null
+          },
+          {
+            "count": 19,
+            "hi": 0.7000000000000001,
+            "lo": 0.6000000000000001,
+            "mean_predicted": 0.6760371278736973,
+            "observed_frequency": 1.0
+          },
+          {
+            "count": 52,
+            "hi": 0.8,
+            "lo": 0.7000000000000001,
+            "mean_predicted": 0.7584013879982664,
+            "observed_frequency": 0.9038461538461539
+          },
+          {
+            "count": 70,
+            "hi": 0.9,
+            "lo": 0.8,
+            "mean_predicted": 0.8513706286776357,
+            "observed_frequency": 0.8571428571428571
+          },
+          {
+            "count": 119,
+            "hi": 1.0,
+            "lo": 0.9,
+            "mean_predicted": 0.9287023596173275,
+            "observed_frequency": 0.8739495798319328
+          }
+        ],
+        "model": "GP",
+        "n_pooled_predictions": 260
+      },
+      "runtime_s": 9.9,
+      "sensitivity": [
+        {
+          "auc": 0.5164539007092198,
+          "brier": 0.11037576785942448,
+          "delta_auc": 0.020222016651248786,
+          "delta_brier": -0.0023654310081075852,
+          "delta_log_loss": -0.006848002412119469,
+          "delta_vs_primary": -0.006848002412119469,
+          "log_loss": 0.38039739096145414,
+          "majority_log_loss": 0.37529244377179366,
+          "n_experiments": 13,
+          "n_not_sustained": 6,
+          "n_training": 53,
+          "note": "evaluated on its own 53 rows (primary: 52); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "add low-confidence rows"
+        },
+        {
+          "auc": 0.47956521739130437,
+          "brier": 0.11168437789458989,
+          "delta_auc": -0.016666666666666663,
+          "delta_brier": -0.0010568209729421713,
+          "delta_log_loss": 0.001095631904038663,
+          "delta_vs_primary": 0.001095631904038663,
+          "log_loss": 0.3883410252776123,
+          "majority_log_loss": 0.37998226099418636,
+          "n_experiments": 12,
+          "n_not_sustained": 6,
+          "n_training": 52,
+          "note": "evaluated on its own 52 rows (primary: 52); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "O2 initial value only"
+        },
+        {
+          "auc": 0.19647058823529412,
+          "brier": 0.03170023356513269,
+          "delta_auc": -0.2997612958226769,
+          "delta_brier": -0.08104096530239938,
+          "delta_log_loss": -0.2307052739607757,
+          "delta_vs_primary": -0.2307052739607757,
+          "log_loss": 0.1565401194127979,
+          "majority_log_loss": 0.15818305981002528,
+          "n_experiments": 12,
+          "n_not_sustained": 1,
+          "n_training": 35,
+          "note": "evaluated on its own 35 rows (primary: 52); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "drop below_calibration_range rows"
+        },
+        {
+          "auc": 0.49623188405797103,
+          "brier": 0.11274119886753206,
+          "delta_auc": 0.0,
+          "delta_brier": 0.0,
+          "delta_log_loss": 0.0,
+          "delta_vs_primary": 0.0,
+          "log_loss": 0.3872453933735736,
+          "majority_log_loss": 0.37998226099418636,
+          "n_experiments": 12,
+          "n_not_sustained": 6,
+          "n_training": 52,
+          "note": "evaluated on its own 52 rows (primary: 52); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "drop flow_off_transient rows"
+        },
+        {
+          "auc": 0.49623188405797103,
+          "brier": 0.11274119886753206,
+          "delta_auc": 0.0,
+          "delta_brier": 0.0,
+          "delta_log_loss": 0.0,
+          "delta_vs_primary": 0.0,
+          "log_loss": 0.3872453933735736,
+          "majority_log_loss": 0.37998226099418636,
+          "n_experiments": 12,
+          "n_not_sustained": 6,
+          "n_training": 52,
+          "note": "evaluated on its own 52 rows (primary: 52); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "drop no_sustained_propagation rows"
+        },
+        {
+          "auc": 0.49623188405797103,
+          "brier": 0.11274119886753206,
+          "delta_auc": 0.0,
+          "delta_brier": 0.0,
+          "delta_log_loss": 0.0,
+          "delta_vs_primary": 0.0,
+          "log_loss": 0.3872453933735736,
+          "majority_log_loss": 0.37998226099418636,
+          "n_experiments": 12,
+          "n_not_sustained": 6,
+          "n_training": 52,
+          "note": "evaluated on its own 52 rows (primary: 52); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "pressure length scale 0.15 (ln units)"
+        },
+        {
+          "auc": 0.49623188405797103,
+          "brier": 0.11274119886753206,
+          "delta_auc": 0.0,
+          "delta_brier": 0.0,
+          "delta_log_loss": 0.0,
+          "delta_vs_primary": 0.0,
+          "log_loss": 0.3872453933735736,
+          "majority_log_loss": 0.37998226099418636,
+          "n_experiments": 12,
+          "n_not_sustained": 6,
+          "n_training": 52,
+          "note": "evaluated on its own 52 rows (primary: 52); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "pressure length scale 0.6 (ln units)"
+        }
+      ],
+      "small_sample_warning": "Small sample: 12 experiments; only 6 not-sustained observations. Intervals are wide and metrics are unstable.",
+      "subgroups": [
+        {
+          "brier": 0.16408273912573695,
+          "log_loss": 0.537803077052445,
+          "n": 30,
+          "n_not_sustained": 5,
+          "name": "O2 < 17 %"
+        },
+        {
+          "brier": 0.05702468380504402,
+          "log_loss": 0.2144512221996799,
+          "n": 15,
+          "n_not_sustained": 1,
+          "name": "O2 17-20 %"
+        },
+        {
+          "brier": 0.012098558609128219,
+          "log_loss": 0.11227140155103904,
+          "n": 7,
+          "n_not_sustained": 0,
+          "name": "O2 > 20 %"
+        },
+        {
+          "brier": 0.16418757074141013,
+          "log_loss": 0.5314603671585326,
+          "n": 29,
+          "n_not_sustained": 5,
+          "name": "airflow < 3 cm/s"
+        },
+        {
+          "brier": 0.005682294878779802,
+          "log_loss": 0.07505620583815122,
+          "n": 17,
+          "n_not_sustained": 0,
+          "name": "airflow 3-10 cm/s"
+        },
+        {
+          "brier": 0.1674172961119195,
+          "log_loss": 0.5747423847633019,
+          "n": 6,
+          "n_not_sustained": 1,
+          "name": "airflow > 10 cm/s"
+        },
+        {
+          "brier": 0.3839256622710472,
+          "log_loss": 1.1024217446734466,
+          "n": 12,
+          "n_not_sustained": 6,
+          "name": "confidence high"
+        },
+        {
+          "brier": 0.03138585984647751,
+          "log_loss": 0.1726924879836117,
+          "n": 40,
+          "n_not_sustained": 0,
+          "name": "confidence medium"
+        }
+      ]
+    },
+    {
+      "blindspot_test": {
+        "diagnostics": {
+          "partial_rho_epistemic_given_aleatoric": 0.46381837985023644,
+          "rho_aleatoric_point": 0.9380156317846288,
+          "share_misclassified_flow_off_transient": 0.0
+        },
+        "group_level": {
+          "hyperparameters_refit_per_experiment": true,
+          "n_groups": 16,
+          "p_value": 0.12293853073463268,
+          "p_value_note": "one-sided permutation test (rho > 0) across held-out experiments",
+          "pairs": [
+            {
+              "error": 0.02049111389818123,
+              "experiment_id": "PSI-25:B1",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.024445272675036295
+            },
+            {
+              "error": 0.2882041736749105,
+              "experiment_id": "PSI-25:B10",
+              "n_points": 6,
+              "pre_reveal_uncertainty": 0.040716545016305374
+            },
+            {
+              "error": 0.27160356626224375,
+              "experiment_id": "PSI-25:B11",
+              "n_points": 5,
+              "pre_reveal_uncertainty": 0.03979699729334306
+            },
+            {
+              "error": 0.2650510897299715,
+              "experiment_id": "PSI-25:B13",
+              "n_points": 7,
+              "pre_reveal_uncertainty": 0.04233733647110864
+            },
+            {
+              "error": 1.1638003814403683,
+              "experiment_id": "PSI-25:B14",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.1706547346704257
+            },
+            {
+              "error": 0.15878276915150769,
+              "experiment_id": "PSI-25:B15",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.10232910098768758
+            },
+            {
+              "error": 0.47069293686844277,
+              "experiment_id": "PSI-25:B16",
+              "n_points": 3,
+              "pre_reveal_uncertainty": 0.08766001012932849
+            },
+            {
+              "error": 0.35915836260880546,
+              "experiment_id": "PSI-25:B17",
+              "n_points": 3,
+              "pre_reveal_uncertainty": 0.06775181048256135
+            },
+            {
+              "error": 0.36607541175674185,
+              "experiment_id": "PSI-25:B18",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.14065946764815174
+            },
+            {
+              "error": 0.3593808810160517,
+              "experiment_id": "PSI-25:B19",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.14494912385376138
+            },
+            {
+              "error": 0.3879459445625988,
+              "experiment_id": "PSI-25:B20",
+              "n_points": 3,
+              "pre_reveal_uncertainty": 0.06768059413412149
+            },
+            {
+              "error": 0.784670586012016,
+              "experiment_id": "PSI-25:B21",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.03154528862660633
+            },
+            {
+              "error": 0.37342157661560615,
+              "experiment_id": "PSI-25:B22",
+              "n_points": 4,
+              "pre_reveal_uncertainty": 0.038374714267496446
+            },
+            {
+              "error": 0.032528685067656056,
+              "experiment_id": "PSI-25:B6",
+              "n_points": 3,
+              "pre_reveal_uncertainty": 0.028111109794446084
+            },
+            {
+              "error": 0.19377452284909186,
+              "experiment_id": "PSI-25:B8",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.11041395385858564
+            },
+            {
+              "error": 0.4106572092656336,
+              "experiment_id": "PSI-25:B9",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.04667756972682127
+            }
+          ],
+          "runtime_s": 0.6,
+          "spearman_rho": 0.3235294117647059
+        },
+        "interpretation": "Point level (n=48): Spearman rho=0.69 (one-sided p=<0.001) between pre-reveal epistemic uncertainty and log loss; AUROC for flagging 7 misclassified points = 0.63. Experiment level (n=16 held-out experiments): rho=0.32 (p=0.123). The two levels do not agree, or the evidence is below the 0.05 threshold; treat as inconclusive. Possible reasons: aleatoric (outcome-variability) uncertainty tracks log loss more strongly (rho=0.94), so errors concentrate where the model already expects mixed outcomes rather than where data are sparse.",
+        "point_level": {
+          "auroc_error_detection": 0.6306620209059234,
+          "n": 48,
+          "n_misclassified": 7,
+          "p_value": 0.0004997501249375312,
+          "p_value_note": "one-sided permutation test (rho > 0); points treated as exchangeable",
+          "spearman_rho": 0.6948545375597047
+        },
+        "verdict": "inconclusive"
+      },
+      "campaigns": [
+        "BASS-II/Bhattacharjee"
+      ],
+      "cv": {
+        "ci_method": "percentile, group bootstrap over experiments (B=1000)",
+        "gp_mean_function": "linear_o2",
+        "gp_vs_majority": {
+          "brier": {
+            "ci95": [
+              -0.1049438033284705,
+              -0.04904954236426361
+            ],
+            "value": -0.07495129049643796
+          },
+          "comparison": "gp minus majority_class (negative favours gp)",
+          "log_loss": {
+            "ci95": [
+              -0.2718986338383117,
+              -0.156098779112511
+            ],
+            "value": -0.21322267539682938
+          }
+        },
+        "k": 5,
+        "models": [
+          {
+            "auc": {
+              "ci95": [
+                0.8737067632850242,
+                0.9723101604278075
+              ],
+              "value": 0.9203931203931204
+            },
+            "brier": {
+              "ci95": [
+                0.07755716053921465,
+                0.13569855437767062
+              ],
+              "value": 0.10483672011232668
+            },
+            "ece": {
+              "ci95": [
+                0.06269481106892831,
+                0.17065610901517136
+              ],
+              "value": 0.08931778712148646
+            },
+            "log_loss": {
+              "ci95": [
+                0.264102681404767,
+                0.41225952177461944
+              ],
+              "value": 0.3334261319409989
+            },
+            "name": "gp"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.5721650935189212,
+                0.8784693435596661
+              ],
+              "value": 0.7306142506142506
+            },
+            "brier": {
+              "ci95": [
+                0.11730348897633887,
+                0.2194901842594243
+              ],
+              "value": 0.16203637237257137
+            },
+            "ece": {
+              "ci95": [
+                0.04737899686914518,
+                0.17689413960304418
+              ],
+              "value": 0.058400831206244105
+            },
+            "log_loss": {
+              "ci95": [
+                0.37718117842296794,
+                0.6357269156062371
+              ],
+              "value": 0.49064810264889575
+            },
+            "name": "logistic_o2_flow"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.4377744438315867,
+                0.719616278166278
+              ],
+              "value": 0.5937100737100737
+            },
+            "brier": {
+              "ci95": [
+                0.13255742503561474,
+                0.2164569151928846
+              ],
+              "value": 0.17094006114977206
+            },
+            "ece": {
+              "ci95": [
+                0.02055303843648803,
+                0.12443690298517072
+              ],
+              "value": 0.029698797075342717
+            },
+            "log_loss": {
+              "ci95": [
+                0.4316779073390066,
+                0.6334789339893313
+              ],
+              "value": 0.5239381784913102
+            },
+            "name": "logistic_o2"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.5,
+                0.5
+              ],
+              "value": 0.5
+            },
+            "brier": {
+              "ci95": [
+                0.14102356602444524,
+                0.22545205602334278
+              ],
+              "value": 0.17978801060876465
+            },
+            "ece": {
+              "ci95": [
+                0.0012761698545050522,
+                0.104626051384362
+              ],
+              "value": 0.013211382113820891
+            },
+            "log_loss": {
+              "ci95": [
+                0.46117900173846993,
+                0.6482453255017542
+              ],
+              "value": 0.5466488073378283
+            },
+            "name": "majority_class"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.614902356902357,
+                0.8934814292659212
+              ],
+              "value": 0.7636363636363637
+            },
+            "brier": {
+              "ci95": [
+                0.1134724344774899,
+                0.21319570046800704
+              ],
+              "value": 0.1564656257312061
+            },
+            "ece": {
+              "ci95": [
+                0.0602092407922734,
+                0.1685038582157487
+              ],
+              "value": 0.0897970061884101
+            },
+            "log_loss": {
+              "ci95": [
+                0.366466147421894,
+                0.6065064762420612
+              ],
+              "value": 0.4706449025357245
+            },
+            "name": "bootstrap_logistic_ensemble"
+          }
+        ],
+        "n_pooled_predictions": 240,
+        "repeats": 5,
+        "scheme": "grouped 5-fold by experiment x 5 repeats",
+        "seeds": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "error_distribution": {
+        "bins": [
+          0.0,
+          0.1,
+          0.2,
+          0.30000000000000004,
+          0.4,
+          0.5,
+          0.6000000000000001,
+          0.7000000000000001,
+          0.8,
+          0.9,
+          1.0
+        ],
+        "counts": [
+          86,
+          30,
+          42,
+          19,
+          23,
+          23,
+          10,
+          7,
+          0,
+          0
+        ],
+        "note": "bins are the ERROR_BINS+1 bin edges; counts pool all repeats",
+        "variable": "absolute error |y - p| of out-of-fold GP predictions"
+      },
+      "group_id": "pmma_thin_film__opposed",
+      "label": "Thin PMMA films · opposed flow",
+      "label_counts": {
+        "not_sustained": 11,
+        "sustained": 37
+      },
+      "logo": {
+        "applicable": false,
+        "folds": [],
+        "reason": "group spans a single campaign"
+      },
+      "majority_class_fraction": 0.7708333333333334,
+      "n_experiments": 16,
+      "n_observations": 48,
+      "reliability": {
+        "bins": [
+          {
+            "count": 0,
+            "hi": 0.1,
+            "lo": 0.0,
+            "mean_predicted": null,
+            "observed_frequency": null
+          },
+          {
+            "count": 0,
+            "hi": 0.2,
+            "lo": 0.1,
+            "mean_predicted": null,
+            "observed_frequency": null
+          },
+          {
+            "count": 1,
+            "hi": 0.30000000000000004,
+            "lo": 0.2,
+            "mean_predicted": 0.2422352270645275,
+            "observed_frequency": 0.0
+          },
+          {
+            "count": 20,
+            "hi": 0.4,
+            "lo": 0.30000000000000004,
+            "mean_predicted": 0.3493849289955216,
+            "observed_frequency": 0.25
+          },
+          {
+            "count": 18,
+            "hi": 0.5,
+            "lo": 0.4,
+            "mean_predicted": 0.44485893980472885,
+            "observed_frequency": 0.3888888888888889
+          },
+          {
+            "count": 28,
+            "hi": 0.6000000000000001,
+            "lo": 0.5,
+            "mean_predicted": 0.5516800513175034,
+            "observed_frequency": 0.42857142857142855
+          },
+          {
+            "count": 9,
+            "hi": 0.7000000000000001,
+            "lo": 0.6000000000000001,
+            "mean_predicted": 0.6453174561597296,
+            "observed_frequency": 0.4444444444444444
+          },
+          {
+            "count": 48,
+            "hi": 0.8,
+            "lo": 0.7000000000000001,
+            "mean_predicted": 0.747267689350075,
+            "observed_frequency": 0.8541666666666666
+          },
+          {
+            "count": 30,
+            "hi": 0.9,
+            "lo": 0.8,
+            "mean_predicted": 0.8514954424728118,
+            "observed_frequency": 1.0
+          },
+          {
+            "count": 86,
+            "hi": 1.0,
+            "lo": 0.9,
+            "mean_predicted": 0.9609571162051516,
+            "observed_frequency": 1.0
+          }
+        ],
+        "model": "GP",
+        "n_pooled_predictions": 240
+      },
+      "runtime_s": 10.9,
+      "sensitivity": [
+        {
+          "auc": 0.9203931203931204,
+          "brier": 0.10483672011232668,
+          "delta_auc": 0.0,
+          "delta_brier": 0.0,
+          "delta_log_loss": 0.0,
+          "delta_vs_primary": 0.0,
+          "log_loss": 0.3334261319409989,
+          "majority_log_loss": 0.5466488073378283,
+          "n_experiments": 16,
+          "n_not_sustained": 11,
+          "n_training": 48,
+          "note": "evaluated on its own 48 rows (primary: 48); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "add low-confidence rows"
+        },
+        {
+          "auc": 0.9194103194103194,
+          "brier": 0.10437798575658146,
+          "delta_auc": -0.0009828009828010131,
+          "delta_brier": -0.00045873435574522725,
+          "delta_log_loss": -0.0006145101127617569,
+          "delta_vs_primary": -0.0006145101127617569,
+          "log_loss": 0.33281162182823715,
+          "majority_log_loss": 0.5466488073378283,
+          "n_experiments": 16,
+          "n_not_sustained": 11,
+          "n_training": 48,
+          "note": "evaluated on its own 48 rows (primary: 48); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "O2 initial value only"
+        },
+        {
+          "auc": 0.996078431372549,
+          "brier": 0.03804116995449339,
+          "delta_auc": 0.07568531097942865,
+          "delta_brier": -0.0667955501578333,
+          "delta_log_loss": -0.1868897818016861,
+          "delta_vs_primary": -0.1868897818016861,
+          "log_loss": 0.1465363501393128,
+          "majority_log_loss": 0.3065419017819984,
+          "n_experiments": 16,
+          "n_not_sustained": 3,
+          "n_training": 37,
+          "note": "evaluated on its own 37 rows (primary: 48); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "drop below_calibration_range rows"
+        },
+        {
+          "auc": 0.9203931203931204,
+          "brier": 0.10483672011232668,
+          "delta_auc": 0.0,
+          "delta_brier": 0.0,
+          "delta_log_loss": 0.0,
+          "delta_vs_primary": 0.0,
+          "log_loss": 0.3334261319409989,
+          "majority_log_loss": 0.5466488073378283,
+          "n_experiments": 16,
+          "n_not_sustained": 11,
+          "n_training": 48,
+          "note": "evaluated on its own 48 rows (primary: 48); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "drop flow_off_transient rows"
+        },
+        {
+          "auc": 0.910054054054054,
+          "brier": 0.10460868504063163,
+          "delta_auc": -0.010339066339066338,
+          "delta_brier": -0.0002280350716950541,
+          "delta_log_loss": -0.003113240223023006,
+          "delta_vs_primary": -0.003113240223023006,
+          "log_loss": 0.3303128917179759,
+          "majority_log_loss": 0.5270636526929142,
+          "n_experiments": 15,
+          "n_not_sustained": 10,
+          "n_training": 47,
+          "note": "evaluated on its own 47 rows (primary: 48); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "drop no_sustained_propagation rows"
+        },
+        {
+          "auc": 0.9203931203931204,
+          "brier": 0.10483672011232668,
+          "delta_auc": 0.0,
+          "delta_brier": 0.0,
+          "delta_log_loss": 0.0,
+          "delta_vs_primary": 0.0,
+          "log_loss": 0.3334261319409989,
+          "majority_log_loss": 0.5466488073378283,
+          "n_experiments": 16,
+          "n_not_sustained": 11,
+          "n_training": 48,
+          "note": "evaluated on its own 48 rows (primary: 48); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "pressure length scale 0.15 (ln units)"
+        },
+        {
+          "auc": 0.9203931203931204,
+          "brier": 0.10483672011232668,
+          "delta_auc": 0.0,
+          "delta_brier": 0.0,
+          "delta_log_loss": 0.0,
+          "delta_vs_primary": 0.0,
+          "log_loss": 0.3334261319409989,
+          "majority_log_loss": 0.5466488073378283,
+          "n_experiments": 16,
+          "n_not_sustained": 11,
+          "n_training": 48,
+          "note": "evaluated on its own 48 rows (primary: 48); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "pressure length scale 0.6 (ln units)"
+        }
+      ],
+      "small_sample_warning": "Small sample: 16 experiments; only 11 not-sustained observations. Intervals are wide and metrics are unstable.",
+      "subgroups": [
+        {
+          "brier": 0.41566054343190084,
+          "log_loss": 1.0441306114465319,
+          "n": 1,
+          "n_not_sustained": 1,
+          "name": "O2 < 17 %"
+        },
+        {
+          "brier": 0.11973993743203647,
+          "log_loss": 0.4062286375506632,
+          "n": 13,
+          "n_not_sustained": 4,
+          "name": "O2 17-20 %"
+        },
+        {
+          "brier": 0.08999655398068546,
+          "log_loss": 0.28468680686949394,
+          "n": 34,
+          "n_not_sustained": 6,
+          "name": "O2 > 20 %"
+        },
+        {
+          "brier": 0.20177520278813463,
+          "log_loss": 0.5820684195831909,
+          "n": 19,
+          "n_not_sustained": 8,
+          "name": "airflow < 3 cm/s"
+        },
+        {
+          "brier": 0.0333300373149144,
+          "log_loss": 0.1329054500541876,
+          "n": 20,
+          "n_not_sustained": 1,
+          "name": "airflow 3-10 cm/s"
+        },
+        {
+          "brier": 0.05909255179098159,
+          "log_loss": 0.254116151111508,
+          "n": 9,
+          "n_not_sustained": 2,
+          "name": "airflow > 10 cm/s"
+        },
+        {
+          "brier": 0.1327617489171314,
+          "log_loss": 0.41680876285462853,
+          "n": 20,
+          "n_not_sustained": 9,
+          "name": "confidence high"
+        },
+        {
+          "brier": 0.08489027096603759,
+          "log_loss": 0.273867109859835,
+          "n": 28,
+          "n_not_sustained": 2,
+          "name": "confidence medium"
+        }
+      ]
+    },
+    {
+      "blindspot_test": {
+        "diagnostics": {
+          "partial_rho_epistemic_given_aleatoric": 0.8019607235864891,
+          "rho_aleatoric_point": 0.95024714366745,
+          "share_misclassified_flow_off_transient": 0.0
+        },
+        "group_level": {
+          "hyperparameters_refit_per_experiment": true,
+          "n_groups": 24,
+          "p_value": 0.0004997501249375312,
+          "p_value_note": "one-sided permutation test (rho > 0) across held-out experiments",
+          "pairs": [
+            {
+              "error": 0.04854400467473843,
+              "experiment_id": "PSI-26:15",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.046794022371664995
+            },
+            {
+              "error": 0.07977584008578341,
+              "experiment_id": "PSI-26:16",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.041524137505275796
+            },
+            {
+              "error": 0.06817522905274397,
+              "experiment_id": "PSI-26:17",
+              "n_points": 3,
+              "pre_reveal_uncertainty": 0.041293076810297896
+            },
+            {
+              "error": 0.029620103323122336,
+              "experiment_id": "PSI-26:18",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.028557417291066284
+            },
+            {
+              "error": 0.11304508426359038,
+              "experiment_id": "PSI-26:19",
+              "n_points": 3,
+              "pre_reveal_uncertainty": 0.08022882186556911
+            },
+            {
+              "error": 0.02921518501125716,
+              "experiment_id": "PSI-26:20",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.028225556727347917
+            },
+            {
+              "error": 0.07349560174515753,
+              "experiment_id": "PSI-26:21",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.05347202616988357
+            },
+            {
+              "error": 0.03014330945166695,
+              "experiment_id": "PSI-26:22",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.029244246885894803
+            },
+            {
+              "error": 0.03014330945166695,
+              "experiment_id": "PSI-26:23",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.029244246885894803
+            },
+            {
+              "error": 0.033840819446335574,
+              "experiment_id": "PSI-26:33",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.032944042203761764
+            },
+            {
+              "error": 0.0401409448795221,
+              "experiment_id": "PSI-26:34",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.03871176348944999
+            },
+            {
+              "error": 0.09696378422661055,
+              "experiment_id": "PSI-26:35",
+              "n_points": 3,
+              "pre_reveal_uncertainty": 0.056173098887225076
+            },
+            {
+              "error": 0.09691228572228845,
+              "experiment_id": "PSI-26:36",
+              "n_points": 3,
+              "pre_reveal_uncertainty": 0.056139400246278094
+            },
+            {
+              "error": 0.1272520918447756,
+              "experiment_id": "PSI-26:41",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.05537583644191363
+            },
+            {
+              "error": 0.09810927680945171,
+              "experiment_id": "PSI-26:51",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.06428038905132259
+            },
+            {
+              "error": 0.09810927680945171,
+              "experiment_id": "PSI-26:52",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.06428038905132259
+            },
+            {
+              "error": 0.055730246478072336,
+              "experiment_id": "PSI-26:53",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.05711266338261925
+            },
+            {
+              "error": 0.032159342620156635,
+              "experiment_id": "PSI-26:82",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.030437995636024034
+            },
+            {
+              "error": 0.032159342620156635,
+              "experiment_id": "PSI-26:83",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.030437995636024034
+            },
+            {
+              "error": 0.10680260666451245,
+              "experiment_id": "PSI-26:84",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.058900935220564145
+            },
+            {
+              "error": 0.03387592505475932,
+              "experiment_id": "PSI-26:85/117",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.03200857178545116
+            },
+            {
+              "error": 0.22059858876414706,
+              "experiment_id": "PSI-26:85/117a",
+              "n_points": 4,
+              "pre_reveal_uncertainty": 0.09705272359293464
+            },
+            {
+              "error": 1.782628113591544,
+              "experiment_id": "PSI-26:93",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.19301712057929865
+            },
+            {
+              "error": 0.7657479366281641,
+              "experiment_id": "PSI-26:95",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.2388319831245045
+            }
+          ],
+          "runtime_s": 0.9,
+          "spearman_rho": 0.9494993469743144
+        },
+        "interpretation": "Point level (n=42): Spearman rho=0.96 (one-sided p=<0.001) between pre-reveal epistemic uncertainty and log loss; AUROC for flagging 1 misclassified points = 0.98. Experiment level (n=24 held-out experiments): rho=0.95 (p=<0.001). Withheld experiments with higher pre-reveal epistemic uncertainty tended to be predicted worse at both levels; this is an association in a small, imbalanced sample, not a guarantee.",
+        "point_level": {
+          "auroc_error_detection": 0.975609756097561,
+          "n": 42,
+          "n_misclassified": 1,
+          "p_value": 0.0004997501249375312,
+          "p_value_note": "one-sided permutation test (rho > 0); points treated as exchangeable",
+          "spearman_rho": 0.9630499959484645
+        },
+        "verdict": "supported"
+      },
+      "campaigns": [
+        "BASS/2012",
+        "BASS/2013"
+      ],
+      "cv": {
+        "ci_method": "percentile, group bootstrap over experiments (B=1000)",
+        "gp_mean_function": "constant",
+        "gp_vs_majority": {
+          "brier": {
+            "ci95": [
+              -0.20515114623937594,
+              -0.0967181211120227
+            ],
+            "value": -0.15324973100535566
+          },
+          "comparison": "gp minus majority_class (negative favours gp)",
+          "log_loss": {
+            "ci95": [
+              -0.5306766848658143,
+              -0.29606937993618304
+            ],
+            "value": -0.4179790087714704
+          }
+        },
+        "k": 5,
+        "models": [
+          {
+            "auc": {
+              "ci95": [
+                0.9715850132625995,
+                1.0
+              ],
+              "value": 0.993875
+            },
+            "brier": {
+              "ci95": [
+                0.00857213825661554,
+                0.06840304729771331
+              ],
+              "value": 0.03268394546346821
+            },
+            "ece": {
+              "ci95": [
+                0.07047913210273465,
+                0.12207383948589655
+              ],
+              "value": 0.08796142843809254
+            },
+            "log_loss": {
+              "ci95": [
+                0.08260481985477429,
+                0.23361848756799472
+              ],
+              "value": 0.14286652137779193
+            },
+            "name": "gp"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.675695340501792,
+                1.0
+              ],
+              "value": 0.90125
+            },
+            "brier": {
+              "ci95": [
+                0.01881343062867643,
+                0.10822441563490955
+              ],
+              "value": 0.05431133788594346
+            },
+            "ece": {
+              "ci95": [
+                0.065513319807311,
+                0.15053023299053514
+              ],
+              "value": 0.08550797182206764
+            },
+            "log_loss": {
+              "ci95": [
+                0.09953177162968332,
+                0.8644775813404147
+              ],
+              "value": 0.3536655963204676
+            },
+            "name": "logistic_o2_flow"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.22859282594086022,
+                0.4358220669036845
+              ],
+              "value": 0.3436875
+            },
+            "brier": {
+              "ci95": [
+                0.13886652580595468,
+                0.26509426386403895
+              ],
+              "value": 0.19773852160826605
+            },
+            "ece": {
+              "ci95": [
+                0.03900564865916951,
+                0.17691447786781694
+              ],
+              "value": 0.08271857508610236
+            },
+            "log_loss": {
+              "ci95": [
+                0.4594377795818586,
+                1.1317584319217873
+              ],
+              "value": 0.711045738420538
+            },
+            "name": "logistic_o2"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.5,
+                0.5
+              ],
+              "value": 0.5
+            },
+            "brier": {
+              "ci95": [
+                0.13568151736405376,
+                0.23706597096324838
+              ],
+              "value": 0.18593367646882386
+            },
+            "ece": {
+              "ci95": [
+                0.0017895976572452066,
+                0.12711552848529656
+              ],
+              "value": 0.014965986394557707
+            },
+            "log_loss": {
+              "ci95": [
+                0.4503686623439674,
+                0.6730556650455095
+              ],
+              "value": 0.5608455301492623
+            },
+            "name": "majority_class"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.6865987654320987,
+                1.0
+              ],
+              "value": 0.905625
+            },
+            "brier": {
+              "ci95": [
+                0.018166361866505762,
+                0.10497635184690711
+              ],
+              "value": 0.051471220217267
+            },
+            "ece": {
+              "ci95": [
+                0.07207104752397213,
+                0.15152575157569695
+              ],
+              "value": 0.09352546984302076
+            },
+            "log_loss": {
+              "ci95": [
+                0.09893017736889687,
+                0.6585798898218901
+              ],
+              "value": 0.2888555204258946
+            },
+            "name": "bootstrap_logistic_ensemble"
+          }
+        ],
+        "n_pooled_predictions": 210,
+        "repeats": 5,
+        "scheme": "grouped 5-fold by experiment x 5 repeats",
+        "seeds": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "error_distribution": {
+        "bins": [
+          0.0,
+          0.1,
+          0.2,
+          0.30000000000000004,
+          0.4,
+          0.5,
+          0.6000000000000001,
+          0.7000000000000001,
+          0.8,
+          0.9,
+          1.0
+        ],
+        "counts": [
+          125,
+          71,
+          1,
+          0,
+          5,
+          3,
+          0,
+          2,
+          3,
+          0
+        ],
+        "note": "bins are the ERROR_BINS+1 bin edges; counts pool all repeats",
+        "variable": "absolute error |y - p| of out-of-fold GP predictions"
+      },
+      "group_id": "pmma_sphere__wake",
+      "label": "PMMA spheres · wake ignition",
+      "label_counts": {
+        "not_sustained": 10,
+        "sustained": 32
+      },
+      "logo": {
+        "applicable": true,
+        "folds": [
+          {
+            "auc": 1.0,
+            "brier": 0.08032717771565237,
+            "held_out": "BASS/2012",
+            "log_loss": 0.28832035107548437,
+            "majority_brier": 0.19221225424699367,
+            "majority_log_loss": 0.5730669236483777,
+            "n": 31,
+            "n_experiments": 17,
+            "n_not_sustained": 8
+          },
+          {
+            "auc": 0.9444444444444444,
+            "brier": 0.07532647179730897,
+            "held_out": "BASS/2013",
+            "log_loss": 0.2470435356380121,
+            "majority_brier": 0.15702479338842973,
+            "majority_log_loss": 0.4967863225752121,
+            "n": 11,
+            "n_experiments": 7,
+            "n_not_sustained": 2
+          }
+        ]
+      },
+      "majority_class_fraction": 0.7619047619047619,
+      "n_experiments": 24,
+      "n_observations": 42,
+      "reliability": {
+        "bins": [
+          {
+            "count": 0,
+            "hi": 0.1,
+            "lo": 0.0,
+            "mean_predicted": null,
+            "observed_frequency": null
+          },
+          {
+            "count": 44,
+            "hi": 0.2,
+            "lo": 0.1,
+            "mean_predicted": 0.1420700862428303,
+            "observed_frequency": 0.0
+          },
+          {
+            "count": 1,
+            "hi": 0.30000000000000004,
+            "lo": 0.2,
+            "mean_predicted": 0.2025309867821424,
+            "observed_frequency": 0.0
+          },
+          {
+            "count": 0,
+            "hi": 0.4,
+            "lo": 0.30000000000000004,
+            "mean_predicted": null,
+            "observed_frequency": null
+          },
+          {
+            "count": 3,
+            "hi": 0.5,
+            "lo": 0.4,
+            "mean_predicted": 0.46331781423712165,
+            "observed_frequency": 1.0
+          },
+          {
+            "count": 5,
+            "hi": 0.6000000000000001,
+            "lo": 0.5,
+            "mean_predicted": 0.5456026745731257,
+            "observed_frequency": 1.0
+          },
+          {
+            "count": 0,
+            "hi": 0.7000000000000001,
+            "lo": 0.6000000000000001,
+            "mean_predicted": null,
+            "observed_frequency": null
+          },
+          {
+            "count": 2,
+            "hi": 0.8,
+            "lo": 0.7000000000000001,
+            "mean_predicted": 0.7650826695789021,
+            "observed_frequency": 0.0
+          },
+          {
+            "count": 30,
+            "hi": 0.9,
+            "lo": 0.8,
+            "mean_predicted": 0.8524939448299764,
+            "observed_frequency": 0.9
+          },
+          {
+            "count": 125,
+            "hi": 1.0,
+            "lo": 0.9,
+            "mean_predicted": 0.9585527599051901,
+            "observed_frequency": 1.0
+          }
+        ],
+        "model": "GP",
+        "n_pooled_predictions": 210
+      },
+      "runtime_s": 10.4,
+      "sensitivity": [
+        {
+          "auc": 0.8672090395480226,
+          "brier": 0.1121956076215867,
+          "delta_auc": -0.1266659604519773,
+          "delta_brier": 0.0795116621581185,
+          "delta_log_loss": 0.21607509466341002,
+          "delta_vs_primary": 0.21607509466341002,
+          "log_loss": 0.35894161604120195,
+          "majority_log_loss": 0.5150386075451934,
+          "n_experiments": 26,
+          "n_not_sustained": 15,
+          "n_training": 74,
+          "note": "evaluated on its own 74 rows (primary: 42); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "add low-confidence rows"
+        },
+        {
+          "auc": 0.993875,
+          "brier": 0.03268394546346821,
+          "delta_auc": 0.0,
+          "delta_brier": 0.0,
+          "delta_log_loss": 0.0,
+          "delta_vs_primary": 0.0,
+          "log_loss": 0.14286652137779193,
+          "majority_log_loss": 0.5608455301492623,
+          "n_experiments": 24,
+          "n_not_sustained": 10,
+          "n_training": 42,
+          "note": "evaluated on its own 42 rows (primary: 42); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "O2 initial value only"
+        },
+        {
+          "auc": 0.993875,
+          "brier": 0.03268394546346821,
+          "delta_auc": 0.0,
+          "delta_brier": 0.0,
+          "delta_log_loss": 0.0,
+          "delta_vs_primary": 0.0,
+          "log_loss": 0.14286652137779193,
+          "majority_log_loss": 0.5608455301492623,
+          "n_experiments": 24,
+          "n_not_sustained": 10,
+          "n_training": 42,
+          "note": "evaluated on its own 42 rows (primary: 42); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "drop below_calibration_range rows"
+        },
+        {
+          "auc": 0.81875,
+          "brier": 0.034456696969372626,
+          "delta_auc": -0.17512499999999998,
+          "delta_brier": 0.0017727515059044185,
+          "delta_log_loss": 0.0026687757420604807,
+          "delta_vs_primary": 0.0026687757420604807,
+          "log_loss": 0.1455352971198524,
+          "majority_log_loss": 0.16601112676207638,
+          "n_experiments": 23,
+          "n_not_sustained": 1,
+          "n_training": 33,
+          "note": "evaluated on its own 33 rows (primary: 42); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "drop flow_off_transient rows"
+        },
+        {
+          "auc": 1.0,
+          "brier": 0.013225905811427583,
+          "delta_auc": 0.006125000000000047,
+          "delta_brier": -0.019458039652040626,
+          "delta_log_loss": -0.04836523600703026,
+          "delta_vs_primary": -0.04836523600703026,
+          "log_loss": 0.09450128537076168,
+          "majority_log_loss": 0.5410327408575827,
+          "n_experiments": 23,
+          "n_not_sustained": 9,
+          "n_training": 41,
+          "note": "evaluated on its own 41 rows (primary: 42); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "drop no_sustained_propagation rows"
+        },
+        {
+          "auc": 0.993875,
+          "brier": 0.032710846588575246,
+          "delta_auc": 0.0,
+          "delta_brier": 2.6901125107038626e-05,
+          "delta_log_loss": 0.0001334443581469391,
+          "delta_vs_primary": 0.0001334443581469391,
+          "log_loss": 0.14299996573593887,
+          "majority_log_loss": 0.5608455301492623,
+          "n_experiments": 24,
+          "n_not_sustained": 10,
+          "n_training": 42,
+          "note": "evaluated on its own 42 rows (primary: 42); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "pressure length scale 0.15 (ln units)"
+        },
+        {
+          "auc": 0.993875,
+          "brier": 0.03267721467596301,
+          "delta_auc": 0.0,
+          "delta_brier": -6.7307875051964006e-06,
+          "delta_log_loss": -3.344586202666533e-05,
+          "delta_vs_primary": -3.344586202666533e-05,
+          "log_loss": 0.14283307551576527,
+          "majority_log_loss": 0.5608455301492623,
+          "n_experiments": 24,
+          "n_not_sustained": 10,
+          "n_training": 42,
+          "note": "evaluated on its own 42 rows (primary: 42); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "pressure length scale 0.6 (ln units)"
+        }
+      ],
+      "small_sample_warning": "Small sample: 24 experiments; only 10 not-sustained observations. Intervals are wide and metrics are unstable.",
+      "subgroups": [
+        {
+          "brier": 0.6445250845459585,
+          "log_loss": 1.6324383593439507,
+          "n": 1,
+          "n_not_sustained": 1,
+          "name": "O2 < 17 %"
+        },
+        {
+          "brier": 0.18502228189099382,
+          "log_loss": 0.5383836751364565,
+          "n": 1,
+          "n_not_sustained": 0,
+          "name": "O2 17-20 %"
+        },
+        {
+          "brier": 0.013579458575717806,
+          "log_loss": 0.09573929658467134,
+          "n": 40,
+          "n_not_sustained": 9,
+          "name": "O2 > 20 %"
+        },
+        {
+          "brier": 0.03427598244489249,
+          "log_loss": 0.18598839223585673,
+          "n": 13,
+          "n_not_sustained": 9,
+          "name": "airflow < 3 cm/s"
+        },
+        {
+          "brier": 0.03898525925659411,
+          "log_loss": 0.13320746220387963,
+          "n": 22,
+          "n_not_sustained": 1,
+          "name": "airflow 3-10 cm/s"
+        },
+        {
+          "brier": 0.009923176290998835,
+          "log_loss": 0.09314009004511026,
+          "n": 7,
+          "n_not_sustained": 0,
+          "name": "airflow > 10 cm/s"
+        },
+        {
+          "brier": 0.050577827020047796,
+          "log_loss": 0.2006999048122925,
+          "n": 22,
+          "n_not_sustained": 10,
+          "name": "confidence high"
+        },
+        {
+          "brier": 0.013000675751230666,
+          "log_loss": 0.07924979959984128,
+          "n": 20,
+          "n_not_sustained": 0,
+          "name": "confidence medium"
+        }
+      ]
+    },
+    {
+      "blindspot_test": {
+        "diagnostics": {
+          "partial_rho_epistemic_given_aleatoric": 0.4016682336069218,
+          "rho_aleatoric_point": 0.44246353322528365,
+          "share_misclassified_flow_off_transient": 0.0
+        },
+        "group_level": {
+          "hyperparameters_refit_per_experiment": true,
+          "n_groups": 25,
+          "p_value": 0.1729135432283858,
+          "p_value_note": "one-sided permutation test (rho > 0) across held-out experiments",
+          "pairs": [
+            {
+              "error": 0.5057994220435648,
+              "experiment_id": "PSI-25:T10",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.06657177688477645
+            },
+            {
+              "error": 0.6187546729538298,
+              "experiment_id": "PSI-25:T11",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.03518529916249702
+            },
+            {
+              "error": 0.6886572883130445,
+              "experiment_id": "PSI-25:T12",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.041718448900812666
+            },
+            {
+              "error": 0.5334493860214069,
+              "experiment_id": "PSI-25:T13",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.0652810109682106
+            },
+            {
+              "error": 0.5975520119713131,
+              "experiment_id": "PSI-25:T14",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.04882328506904193
+            },
+            {
+              "error": 0.20520048098527804,
+              "experiment_id": "PSI-25:T15",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.08887578152116862
+            },
+            {
+              "error": 0.509719457187642,
+              "experiment_id": "PSI-25:T16",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.046967067086513936
+            },
+            {
+              "error": 0.8032634225881917,
+              "experiment_id": "PSI-25:T17",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.09443319204536527
+            },
+            {
+              "error": 1.3769314105678834,
+              "experiment_id": "PSI-25:T18",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.03405081581414737
+            },
+            {
+              "error": 0.30165197595168125,
+              "experiment_id": "PSI-25:T19",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.044139386063413166
+            },
+            {
+              "error": 0.12022758929067906,
+              "experiment_id": "PSI-25:T2",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.03580974023591327
+            },
+            {
+              "error": 0.5251270884922951,
+              "experiment_id": "PSI-25:T20",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.04402754254288754
+            },
+            {
+              "error": 0.9790359773595263,
+              "experiment_id": "PSI-25:T21",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.07457868372148349
+            },
+            {
+              "error": 0.5719587413523458,
+              "experiment_id": "PSI-25:T22",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.03969835533595073
+            },
+            {
+              "error": 0.10256086510800914,
+              "experiment_id": "PSI-25:T24",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.032567694233459454
+            },
+            {
+              "error": 0.5350845540911149,
+              "experiment_id": "PSI-25:T25",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.06021419807846762
+            },
+            {
+              "error": 0.5350845540911149,
+              "experiment_id": "PSI-25:T26",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.06021419807846762
+            },
+            {
+              "error": 0.6272350681901866,
+              "experiment_id": "PSI-25:T27",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.07982706428420089
+            },
+            {
+              "error": 1.3470773118080406,
+              "experiment_id": "PSI-25:T28a",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.0551899808524795
+            },
+            {
+              "error": 1.3470773118080406,
+              "experiment_id": "PSI-25:T28b",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.0551899808524795
+            },
+            {
+              "error": 0.8473094446176683,
+              "experiment_id": "PSI-25:T29",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.0669358256395774
+            },
+            {
+              "error": 0.8760453448441288,
+              "experiment_id": "PSI-25:T4",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.052490950374662684
+            },
+            {
+              "error": 0.2913952685428813,
+              "experiment_id": "PSI-25:T5",
+              "n_points": 3,
+              "pre_reveal_uncertainty": 0.05433854481234266
+            },
+            {
+              "error": 0.4585518431256361,
+              "experiment_id": "PSI-25:T6",
+              "n_points": 4,
+              "pre_reveal_uncertainty": 0.0661637947236185
+            },
+            {
+              "error": 1.008361181471606,
+              "experiment_id": "PSI-25:T9",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.09086112580209782
+            }
+          ],
+          "runtime_s": 0.7,
+          "spearman_rho": 0.19322555812163203
+        },
+        "interpretation": "Point level (n=42): Spearman rho=0.39 (one-sided p=0.007) between pre-reveal epistemic uncertainty and log loss; AUROC for flagging 13 misclassified points = 0.60. Experiment level (n=25 held-out experiments): rho=0.19 (p=0.173). The two levels do not agree, or the evidence is below the 0.05 threshold; treat as inconclusive. Possible reasons: aleatoric (outcome-variability) uncertainty tracks log loss more strongly (rho=0.44), so errors concentrate where the model already expects mixed outcomes rather than where data are sparse.",
+        "point_level": {
+          "auroc_error_detection": 0.5994694960212201,
+          "n": 42,
+          "n_misclassified": 13,
+          "p_value": 0.0069965017491254375,
+          "p_value_note": "one-sided permutation test (rho > 0); points treated as exchangeable",
+          "spearman_rho": 0.39286871961102104
+        },
+        "verdict": "inconclusive"
+      },
+      "campaigns": [
+        "BASS-II/T'ien"
+      ],
+      "cv": {
+        "ci_method": "percentile, group bootstrap over experiments (B=1000)",
+        "gp_mean_function": "constant",
+        "gp_vs_majority": {
+          "brier": {
+            "ci95": [
+              -0.04762967467342229,
+              0.019097545705704242
+            ],
+            "value": -0.012651353890898609
+          },
+          "comparison": "gp minus majority_class (negative favours gp)",
+          "log_loss": {
+            "ci95": [
+              -0.11345910806280515,
+              0.032186137962788706
+            ],
+            "value": -0.03593046869027183
+          }
+        },
+        "k": 5,
+        "models": [
+          {
+            "auc": {
+              "ci95": [
+                0.4552574263021461,
+                0.7480083333333333
+              ],
+              "value": 0.596551724137931
+            },
+            "brier": {
+              "ci95": [
+                0.16959451536864736,
+                0.2656742229397885
+              ],
+              "value": 0.214132842680146
+            },
+            "ece": {
+              "ci95": [
+                0.055457804445328794,
+                0.2203158772176492
+              ],
+              "value": 0.09860055013064285
+            },
+            "log_loss": {
+              "ci95": [
+                0.5110828100128229,
+                0.7314826883823963
+              ],
+              "value": 0.6127401962208676
+            },
+            "name": "gp"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.30401835891381346,
+                0.6615592517006802
+              ],
+              "value": 0.46551724137931033
+            },
+            "brier": {
+              "ci95": [
+                0.18892802390811375,
+                0.31056957579253824
+              ],
+              "value": 0.2421149635655988
+            },
+            "ece": {
+              "ci95": [
+                0.10810861338215497,
+                0.28210610883465337
+              ],
+              "value": 0.1796825340544619
+            },
+            "log_loss": {
+              "ci95": [
+                0.5746799221242468,
+                0.9311776981463809
+              ],
+              "value": 0.7323355617330434
+            },
+            "name": "logistic_o2_flow"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.3237918526785714,
+                0.6340310846560846
+              ],
+              "value": 0.4755437665782493
+            },
+            "brier": {
+              "ci95": [
+                0.18234036957236444,
+                0.30260342459085054
+              ],
+              "value": 0.23234257893129914
+            },
+            "ece": {
+              "ci95": [
+                0.07404444676177582,
+                0.25321656670739645
+              ],
+              "value": 0.11883981192384586
+            },
+            "log_loss": {
+              "ci95": [
+                0.5619269321448206,
+                0.8601690443532849
+              ],
+              "value": 0.6817517303131053
+            },
+            "name": "logistic_o2"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.5,
+                0.5
+              ],
+              "value": 0.5
+            },
+            "brier": {
+              "ci95": [
+                0.1840494898796235,
+                0.28224965884038794
+              ],
+              "value": 0.22678419657104462
+            },
+            "ece": {
+              "ci95": [
+                0.06762430555555564,
+                0.2159440943043872
+              ],
+              "value": 0.1259108087679513
+            },
+            "log_loss": {
+              "ci95": [
+                0.5589866083896928,
+                0.7654070063921846
+              ],
+              "value": 0.6486706649111394
+            },
+            "name": "majority_class"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.3267285189557917,
+                0.6983763005202082
+              ],
+              "value": 0.4936339522546419
+            },
+            "brier": {
+              "ci95": [
+                0.18546891706902954,
+                0.29985807190467906
+              ],
+              "value": 0.2365541525899548
+            },
+            "ece": {
+              "ci95": [
+                0.09288063899004649,
+                0.26611723966650375
+              ],
+              "value": 0.1629590714710643
+            },
+            "log_loss": {
+              "ci95": [
+                0.5604699397819641,
+                0.8859543517593566
+              ],
+              "value": 0.7044591027290367
+            },
+            "name": "bootstrap_logistic_ensemble"
+          }
+        ],
+        "n_pooled_predictions": 210,
+        "repeats": 5,
+        "scheme": "grouped 5-fold by experiment x 5 repeats",
+        "seeds": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "error_distribution": {
+        "bins": [
+          0.0,
+          0.1,
+          0.2,
+          0.30000000000000004,
+          0.4,
+          0.5,
+          0.6000000000000001,
+          0.7000000000000001,
+          0.8,
+          0.9,
+          1.0
+        ],
+        "counts": [
+          10,
+          25,
+          33,
+          35,
+          35,
+          25,
+          22,
+          18,
+          7,
+          0
+        ],
+        "note": "bins are the ERROR_BINS+1 bin edges; counts pool all repeats",
+        "variable": "absolute error |y - p| of out-of-fold GP predictions"
+      },
+      "group_id": "sibal_fabric__concurrent",
+      "label": "SIBAL cotton/fiberglass fabric · concurrent flow",
+      "label_counts": {
+        "not_sustained": 13,
+        "sustained": 29
+      },
+      "logo": {
+        "applicable": false,
+        "folds": [],
+        "reason": "group spans a single campaign"
+      },
+      "majority_class_fraction": 0.6904761904761905,
+      "n_experiments": 25,
+      "n_observations": 42,
+      "reliability": {
+        "bins": [
+          {
+            "count": 0,
+            "hi": 0.1,
+            "lo": 0.0,
+            "mean_predicted": null,
+            "observed_frequency": null
+          },
+          {
+            "count": 0,
+            "hi": 0.2,
+            "lo": 0.1,
+            "mean_predicted": null,
+            "observed_frequency": null
+          },
+          {
+            "count": 0,
+            "hi": 0.30000000000000004,
+            "lo": 0.2,
+            "mean_predicted": null,
+            "observed_frequency": null
+          },
+          {
+            "count": 16,
+            "hi": 0.4,
+            "lo": 0.30000000000000004,
+            "mean_predicted": 0.3753230130631572,
+            "observed_frequency": 0.5625
+          },
+          {
+            "count": 15,
+            "hi": 0.5,
+            "lo": 0.4,
+            "mean_predicted": 0.46129561503936956,
+            "observed_frequency": 0.6666666666666666
+          },
+          {
+            "count": 45,
+            "hi": 0.6000000000000001,
+            "lo": 0.5,
+            "mean_predicted": 0.5547618205842995,
+            "observed_frequency": 0.6666666666666666
+          },
+          {
+            "count": 41,
+            "hi": 0.7000000000000001,
+            "lo": 0.6000000000000001,
+            "mean_predicted": 0.6562242712664826,
+            "observed_frequency": 0.6829268292682927
+          },
+          {
+            "count": 51,
+            "hi": 0.8,
+            "lo": 0.7000000000000001,
+            "mean_predicted": 0.7467880179457035,
+            "observed_frequency": 0.6470588235294118
+          },
+          {
+            "count": 32,
+            "hi": 0.9,
+            "lo": 0.8,
+            "mean_predicted": 0.8596273691608627,
+            "observed_frequency": 0.78125
+          },
+          {
+            "count": 10,
+            "hi": 1.0,
+            "lo": 0.9,
+            "mean_predicted": 0.9094069718123163,
+            "observed_frequency": 1.0
+          }
+        ],
+        "model": "GP",
+        "n_pooled_predictions": 210
+      },
+      "runtime_s": 8.7,
+      "sensitivity": [
+        {
+          "auc": 0.596551724137931,
+          "brier": 0.214132842680146,
+          "delta_auc": 0.0,
+          "delta_brier": 0.0,
+          "delta_log_loss": 0.0,
+          "delta_vs_primary": 0.0,
+          "log_loss": 0.6127401962208676,
+          "majority_log_loss": 0.6486706649111394,
+          "n_experiments": 25,
+          "n_not_sustained": 13,
+          "n_training": 42,
+          "note": "evaluated on its own 42 rows (primary: 42); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "add low-confidence rows"
+        },
+        {
+          "auc": 0.6067904509283819,
+          "brier": 0.21227846009594206,
+          "delta_auc": 0.010238726790450903,
+          "delta_brier": -0.0018543825842039507,
+          "delta_log_loss": -0.0039026215179746027,
+          "delta_vs_primary": -0.0039026215179746027,
+          "log_loss": 0.608837574702893,
+          "majority_log_loss": 0.6486706649111394,
+          "n_experiments": 25,
+          "n_not_sustained": 13,
+          "n_training": 42,
+          "note": "evaluated on its own 42 rows (primary: 42); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "O2 initial value only"
+        },
+        {
+          "auc": 0.596551724137931,
+          "brier": 0.214132842680146,
+          "delta_auc": 0.0,
+          "delta_brier": 0.0,
+          "delta_log_loss": 0.0,
+          "delta_vs_primary": 0.0,
+          "log_loss": 0.6127401962208676,
+          "majority_log_loss": 0.6486706649111394,
+          "n_experiments": 25,
+          "n_not_sustained": 13,
+          "n_training": 42,
+          "note": "evaluated on its own 42 rows (primary: 42); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "drop below_calibration_range rows"
+        },
+        {
+          "auc": 0.596551724137931,
+          "brier": 0.214132842680146,
+          "delta_auc": 0.0,
+          "delta_brier": 0.0,
+          "delta_log_loss": 0.0,
+          "delta_vs_primary": 0.0,
+          "log_loss": 0.6127401962208676,
+          "majority_log_loss": 0.6486706649111394,
+          "n_experiments": 25,
+          "n_not_sustained": 13,
+          "n_training": 42,
+          "note": "evaluated on its own 42 rows (primary: 42); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "drop flow_off_transient rows"
+        },
+        {
+          "auc": 0.5974137931034482,
+          "brier": 0.18007996187534553,
+          "delta_auc": 0.0008620689655172153,
+          "delta_brier": -0.034052880804800484,
+          "delta_log_loss": -0.0743159827087948,
+          "delta_vs_primary": -0.0743159827087948,
+          "log_loss": 0.5384242135120728,
+          "majority_log_loss": 0.5476707077164387,
+          "n_experiments": 20,
+          "n_not_sustained": 8,
+          "n_training": 37,
+          "note": "evaluated on its own 37 rows (primary: 42); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "drop no_sustained_propagation rows"
+        },
+        {
+          "auc": 0.596551724137931,
+          "brier": 0.214132842680146,
+          "delta_auc": 0.0,
+          "delta_brier": 0.0,
+          "delta_log_loss": 0.0,
+          "delta_vs_primary": 0.0,
+          "log_loss": 0.6127401962208676,
+          "majority_log_loss": 0.6486706649111394,
+          "n_experiments": 25,
+          "n_not_sustained": 13,
+          "n_training": 42,
+          "note": "evaluated on its own 42 rows (primary: 42); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "pressure length scale 0.15 (ln units)"
+        },
+        {
+          "auc": 0.596551724137931,
+          "brier": 0.214132842680146,
+          "delta_auc": 0.0,
+          "delta_brier": 0.0,
+          "delta_log_loss": 0.0,
+          "delta_vs_primary": 0.0,
+          "log_loss": 0.6127401962208676,
+          "majority_log_loss": 0.6486706649111394,
+          "n_experiments": 25,
+          "n_not_sustained": 13,
+          "n_training": 42,
+          "note": "evaluated on its own 42 rows (primary: 42); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "pressure length scale 0.6 (ln units)"
+        }
+      ],
+      "small_sample_warning": "Small sample: 25 experiments; only 13 not-sustained observations. Intervals are wide and metrics are unstable.",
+      "subgroups": [
+        {
+          "brier": 0.263633630559371,
+          "log_loss": 0.7241167491616272,
+          "n": 7,
+          "n_not_sustained": 4,
+          "name": "O2 < 17 %"
+        },
+        {
+          "brier": 0.1698060504219661,
+          "log_loss": 0.5115238605772888,
+          "n": 27,
+          "n_not_sustained": 6,
+          "name": "O2 17-20 %"
+        },
+        {
+          "brier": 0.32042257715718153,
+          "log_loss": 0.8568908451947816,
+          "n": 8,
+          "n_not_sustained": 3,
+          "name": "O2 > 20 %"
+        },
+        {
+          "brier": 0.27082735684102344,
+          "log_loss": 0.7529551125212998,
+          "n": 9,
+          "n_not_sustained": 3,
+          "name": "airflow < 3 cm/s"
+        },
+        {
+          "brier": 0.2110741794005237,
+          "log_loss": 0.6019326377901183,
+          "n": 23,
+          "n_not_sustained": 8,
+          "name": "airflow 3-10 cm/s"
+        },
+        {
+          "brier": 0.17014270547848778,
+          "log_loss": 0.5114041559412023,
+          "n": 10,
+          "n_not_sustained": 2,
+          "name": "airflow > 10 cm/s"
+        },
+        {
+          "brier": 0.27376728490050634,
+          "log_loss": 0.7475500409404588,
+          "n": 22,
+          "n_not_sustained": 12,
+          "name": "confidence high"
+        },
+        {
+          "brier": 0.14853495623774976,
+          "log_loss": 0.46444936702931744,
+          "n": 20,
+          "n_not_sustained": 1,
+          "name": "confidence medium"
+        }
+      ]
+    },
+    {
+      "blindspot_test": {
+        "diagnostics": {
+          "partial_rho_epistemic_given_aleatoric": 0.6268666640427715,
+          "rho_aleatoric_point": 0.9074043122179508,
+          "share_misclassified_flow_off_transient": 0.0
+        },
+        "group_level": {
+          "hyperparameters_refit_per_experiment": true,
+          "n_groups": 18,
+          "p_value": 0.0004997501249375312,
+          "p_value_note": "one-sided permutation test (rho > 0) across held-out experiments",
+          "pairs": [
+            {
+              "error": 2.3929322295788964,
+              "experiment_id": "PSI-25:T3",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.09805167180893676
+            },
+            {
+              "error": 0.4409486472048979,
+              "experiment_id": "PSI-25:T7",
+              "n_points": 4,
+              "pre_reveal_uncertainty": 0.18081423849886102
+            },
+            {
+              "error": 0.400808205156554,
+              "experiment_id": "PSI-26:10",
+              "n_points": 3,
+              "pre_reveal_uncertainty": 0.11449297133380687
+            },
+            {
+              "error": 0.07032294918027071,
+              "experiment_id": "PSI-26:2",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.05551145205177051
+            },
+            {
+              "error": 0.08954713997892812,
+              "experiment_id": "PSI-26:25",
+              "n_points": 3,
+              "pre_reveal_uncertainty": 0.0437088329895462
+            },
+            {
+              "error": 0.060101993402823004,
+              "experiment_id": "PSI-26:26",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.033223665840653865
+            },
+            {
+              "error": 0.060101993402823004,
+              "experiment_id": "PSI-26:27",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.033223665840653865
+            },
+            {
+              "error": 0.09358967002597443,
+              "experiment_id": "PSI-26:28",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.04421347435724711
+            },
+            {
+              "error": 0.09897323516959874,
+              "experiment_id": "PSI-26:29",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.046971163670209606
+            },
+            {
+              "error": 0.11408023196413442,
+              "experiment_id": "PSI-26:3",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.0585221579736058
+            },
+            {
+              "error": 0.10090516450889449,
+              "experiment_id": "PSI-26:30",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.04806111563972329
+            },
+            {
+              "error": 0.07841321550431057,
+              "experiment_id": "PSI-26:31",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.04116045443835353
+            },
+            {
+              "error": 0.07300574152150505,
+              "experiment_id": "PSI-26:32",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.06799200718728837
+            },
+            {
+              "error": 0.06955522456742116,
+              "experiment_id": "PSI-26:6",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.04186879600621418
+            },
+            {
+              "error": 0.06955522456742116,
+              "experiment_id": "PSI-26:7",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.04186879600621418
+            },
+            {
+              "error": 0.10406165884031367,
+              "experiment_id": "PSI-26:8",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.05088781204717521
+            },
+            {
+              "error": 0.1002463897868264,
+              "experiment_id": "PSI-26:9",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.054808062920128034
+            },
+            {
+              "error": 0.2562125906449831,
+              "experiment_id": "PSI-26:98",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.10852819484513426
+            }
+          ],
+          "runtime_s": 0.5,
+          "spearman_rho": 0.8200620475698035
+        },
+        "interpretation": "Point level (n=33): Spearman rho=0.87 (one-sided p=<0.001) between pre-reveal epistemic uncertainty and log loss; AUROC for flagging 2 misclassified points = 0.87. Experiment level (n=18 held-out experiments): rho=0.82 (p=<0.001). Withheld experiments with higher pre-reveal epistemic uncertainty tended to be predicted worse at both levels; this is an association in a small, imbalanced sample, not a guarantee. Caveat: aleatoric (predictive-entropy) uncertainty tracks log loss at least as strongly (rho=0.91), and the epistemic-loss association controlling for it is 0.63; so this does not show that epistemic uncertainty adds information beyond the model's overall predictive uncertainty.",
+        "point_level": {
+          "auroc_error_detection": 0.8709677419354839,
+          "n": 33,
+          "n_misclassified": 2,
+          "p_value": 0.0004997501249375312,
+          "p_value_note": "one-sided permutation test (rho > 0); points treated as exchangeable",
+          "spearman_rho": 0.8713020223967909
+        },
+        "verdict": "supported"
+      },
+      "campaigns": [
+        "BASS-II/T'ien",
+        "BASS/2012",
+        "BASS/2013"
+      ],
+      "cv": {
+        "ci_method": "percentile, group bootstrap over experiments (B=1000)",
+        "gp_mean_function": "constant",
+        "gp_vs_majority": {
+          "brier": {
+            "ci95": [
+              -0.2013959539632232,
+              -0.08689684337513451
+            ],
+            "value": -0.1470443303334521
+          },
+          "comparison": "gp minus majority_class (negative favours gp)",
+          "log_loss": {
+            "ci95": [
+              -0.503581351918103,
+              -0.20303282842590614
+            ],
+            "value": -0.367244860719178
+          }
+        },
+        "k": 5,
+        "models": [
+          {
+            "auc": {
+              "ci95": [
+                0.8592229813664596,
+                1.0
+              ],
+              "value": 0.9587826086956521
+            },
+            "brier": {
+              "ci95": [
+                0.023872295782640267,
+                0.1441403158039717
+              ],
+              "value": 0.07342443494803613
+            },
+            "ece": {
+              "ci95": [
+                0.07527242046254937,
+                0.20720606344096834
+              ],
+              "value": 0.11720148110110862
+            },
+            "log_loss": {
+              "ci95": [
+                0.1318884063607782,
+                0.45820893303624055
+              ],
+              "value": 0.2676378400603812
+            },
+            "name": "gp"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.646387037037037,
+                1.0
+              ],
+              "value": 0.8740869565217392
+            },
+            "brier": {
+              "ci95": [
+                0.03171519489153772,
+                0.18295367142941807
+              ],
+              "value": 0.09936254312881873
+            },
+            "ece": {
+              "ci95": [
+                0.09735311030903222,
+                0.23581301513719638
+              ],
+              "value": 0.14549970414496136
+            },
+            "log_loss": {
+              "ci95": [
+                0.1482961070738324,
+                0.800560207139716
+              ],
+              "value": 0.40255268145720297
+            },
+            "name": "logistic_o2_flow"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.16286619318181816,
+                0.3826732954545454
+              ],
+              "value": 0.2782608695652174
+            },
+            "brier": {
+              "ci95": [
+                0.20045089199627045,
+                0.28298728413329916
+              ],
+              "value": 0.24015814309177783
+            },
+            "ece": {
+              "ci95": [
+                0.092144478424963,
+                0.2642782293161346
+              ],
+              "value": 0.16767819342480247
+            },
+            "log_loss": {
+              "ci95": [
+                0.5948000998576707,
+                0.7803704215869353
+              ],
+              "value": 0.681718681741173
+            },
+            "name": "logistic_o2"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.5,
+                0.5
+              ],
+              "value": 0.5
+            },
+            "brier": {
+              "ci95": [
+                0.18534474590965988,
+                0.25806051179549033
+              ],
+              "value": 0.22046876528148823
+            },
+            "ece": {
+              "ci95": [
+                0.08024361145320182,
+                0.2089812092801523
+              ],
+              "value": 0.13746081504702176
+            },
+            "log_loss": {
+              "ci95": [
+                0.5604053642101183,
+                0.7142455318038876
+              ],
+              "value": 0.6348827007795592
+            },
+            "name": "majority_class"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.7103115942028985,
+                1.0
+              ],
+              "value": 0.9100869565217391
+            },
+            "brier": {
+              "ci95": [
+                0.030870639793354675,
+                0.17217265242130828
+              ],
+              "value": 0.09178082217674814
+            },
+            "ece": {
+              "ci95": [
+                0.09456229130344353,
+                0.22927240673774588
+              ],
+              "value": 0.1307625593208487
+            },
+            "log_loss": {
+              "ci95": [
+                0.14093943374142723,
+                0.6489748890154129
+              ],
+              "value": 0.33979700159374215
+            },
+            "name": "bootstrap_logistic_ensemble"
+          }
+        ],
+        "n_pooled_predictions": 165,
+        "repeats": 5,
+        "scheme": "grouped 5-fold by experiment x 5 repeats",
+        "seeds": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "error_distribution": {
+        "bins": [
+          0.0,
+          0.1,
+          0.2,
+          0.30000000000000004,
+          0.4,
+          0.5,
+          0.6000000000000001,
+          0.7000000000000001,
+          0.8,
+          0.9,
+          1.0
+        ],
+        "counts": [
+          81,
+          47,
+          13,
+          0,
+          9,
+          2,
+          8,
+          0,
+          0,
+          5
+        ],
+        "note": "bins are the ERROR_BINS+1 bin edges; counts pool all repeats",
+        "variable": "absolute error |y - p| of out-of-fold GP predictions"
+      },
+      "group_id": "pmma_sphere__stagnation",
+      "label": "PMMA spheres · axial stagnation flow",
+      "label_counts": {
+        "not_sustained": 10,
+        "sustained": 23
+      },
+      "logo": {
+        "applicable": true,
+        "folds": [
+          {
+            "auc": 0.8333333333333334,
+            "brier": 0.20341707970112616,
+            "held_out": "BASS-II/T'ien",
+            "log_loss": 0.6139594811732119,
+            "majority_brier": 0.25,
+            "majority_log_loss": 0.6955940880936138,
+            "n": 5,
+            "n_experiments": 2,
+            "n_not_sustained": 2
+          },
+          {
+            "auc": 1.0,
+            "brier": 0.18768376824591887,
+            "held_out": "BASS/2012",
+            "log_loss": 0.5666757241228522,
+            "majority_brier": 0.21367521367521367,
+            "majority_log_loss": 0.6187411636650706,
+            "n": 26,
+            "n_experiments": 15,
+            "n_not_sustained": 8
+          },
+          {
+            "auc": null,
+            "brier": 0.052525172202504744,
+            "held_out": "BASS/2013",
+            "log_loss": 0.2562125906449831,
+            "majority_brier": 0.11111111111111113,
+            "majority_log_loss": 0.40546510810816444,
+            "n": 2,
+            "n_experiments": 1,
+            "n_not_sustained": 0
+          }
+        ]
+      },
+      "majority_class_fraction": 0.696969696969697,
+      "n_experiments": 18,
+      "n_observations": 33,
+      "reliability": {
+        "bins": [
+          {
+            "count": 0,
+            "hi": 0.1,
+            "lo": 0.0,
+            "mean_predicted": null,
+            "observed_frequency": null
+          },
+          {
+            "count": 40,
+            "hi": 0.2,
+            "lo": 0.1,
+            "mean_predicted": 0.14081893868748535,
+            "observed_frequency": 0.0
+          },
+          {
+            "count": 0,
+            "hi": 0.30000000000000004,
+            "lo": 0.2,
+            "mean_predicted": null,
+            "observed_frequency": null
+          },
+          {
+            "count": 8,
+            "hi": 0.4,
+            "lo": 0.30000000000000004,
+            "mean_predicted": 0.35701518098067814,
+            "observed_frequency": 1.0
+          },
+          {
+            "count": 7,
+            "hi": 0.5,
+            "lo": 0.4,
+            "mean_predicted": 0.46150755409403343,
+            "observed_frequency": 0.2857142857142857
+          },
+          {
+            "count": 4,
+            "hi": 0.6000000000000001,
+            "lo": 0.5,
+            "mean_predicted": 0.5806716174244441,
+            "observed_frequency": 1.0
+          },
+          {
+            "count": 0,
+            "hi": 0.7000000000000001,
+            "lo": 0.6000000000000001,
+            "mean_predicted": null,
+            "observed_frequency": null
+          },
+          {
+            "count": 13,
+            "hi": 0.8,
+            "lo": 0.7000000000000001,
+            "mean_predicted": 0.7498192014218203,
+            "observed_frequency": 1.0
+          },
+          {
+            "count": 7,
+            "hi": 0.9,
+            "lo": 0.8,
+            "mean_predicted": 0.844946965640798,
+            "observed_frequency": 1.0
+          },
+          {
+            "count": 86,
+            "hi": 1.0,
+            "lo": 0.9,
+            "mean_predicted": 0.9265579040577009,
+            "observed_frequency": 0.9418604651162791
+          }
+        ],
+        "model": "GP",
+        "n_pooled_predictions": 165
+      },
+      "runtime_s": 9.0,
+      "sensitivity": [
+        {
+          "auc": 0.9252,
+          "brier": 0.056000852385954814,
+          "delta_auc": -0.033582608695652105,
+          "delta_brier": -0.01742358256208132,
+          "delta_log_loss": -0.049009581769172805,
+          "delta_vs_primary": -0.049009581769172805,
+          "log_loss": 0.2186282582912084,
+          "majority_log_loss": 0.500142586395777,
+          "n_experiments": 21,
+          "n_not_sustained": 12,
+          "n_training": 62,
+          "note": "evaluated on its own 62 rows (primary: 33); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "add low-confidence rows"
+        },
+        {
+          "auc": 0.9598260869565217,
+          "brier": 0.07288661321236951,
+          "delta_auc": 0.0010434782608695903,
+          "delta_brier": -0.0005378217356666187,
+          "delta_log_loss": -0.001395884441673434,
+          "delta_vs_primary": -0.001395884441673434,
+          "log_loss": 0.2662419556187078,
+          "majority_log_loss": 0.6348827007795592,
+          "n_experiments": 18,
+          "n_not_sustained": 10,
+          "n_training": 33,
+          "note": "evaluated on its own 33 rows (primary: 33); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "O2 initial value only"
+        },
+        {
+          "auc": 0.9690821256038648,
+          "brier": 0.07535441073661556,
+          "delta_auc": 0.010299516908212625,
+          "delta_brier": 0.0019299757885794244,
+          "delta_log_loss": 0.0003298491027541872,
+          "delta_vs_primary": 0.0003298491027541872,
+          "log_loss": 0.2679676891631354,
+          "majority_log_loss": 0.6201586877282226,
+          "n_experiments": 18,
+          "n_not_sustained": 9,
+          "n_training": 32,
+          "note": "evaluated on its own 32 rows (primary: 33); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "drop below_calibration_range rows"
+        },
+        {
+          "auc": 0.6695652173913044,
+          "brier": 0.07917681933743986,
+          "delta_auc": -0.28921739130434776,
+          "delta_brier": 0.005752384389403731,
+          "delta_log_loss": 0.02202158914971597,
+          "delta_vs_primary": 0.02202158914971597,
+          "log_loss": 0.2896594292100972,
+          "majority_log_loss": 0.32226408660077366,
+          "n_experiments": 18,
+          "n_not_sustained": 2,
+          "n_training": 25,
+          "note": "evaluated on its own 25 rows (primary: 33); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "drop flow_off_transient rows"
+        },
+        {
+          "auc": 0.9951690821256038,
+          "brier": 0.029886754427501622,
+          "delta_auc": 0.036386473429951716,
+          "delta_brier": -0.043537680520534514,
+          "delta_log_loss": -0.12235749300108292,
+          "delta_vs_primary": -0.12235749300108292,
+          "log_loss": 0.1452803470592983,
+          "majority_log_loss": 0.6065051763581446,
+          "n_experiments": 17,
+          "n_not_sustained": 9,
+          "n_training": 32,
+          "note": "evaluated on its own 32 rows (primary: 33); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "drop no_sustained_propagation rows"
+        },
+        {
+          "auc": 0.9594782608695652,
+          "brier": 0.07352073335621996,
+          "delta_auc": 0.0006956521739130972,
+          "delta_brier": 9.629840818382862e-05,
+          "delta_log_loss": 0.0002476096053538046,
+          "delta_vs_primary": 0.0002476096053538046,
+          "log_loss": 0.267885449665735,
+          "majority_log_loss": 0.6348827007795592,
+          "n_experiments": 18,
+          "n_not_sustained": 10,
+          "n_training": 33,
+          "note": "evaluated on its own 33 rows (primary: 33); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "pressure length scale 0.15 (ln units)"
+        },
+        {
+          "auc": 0.9587826086956521,
+          "brier": 0.07340048459996905,
+          "delta_auc": 0.0,
+          "delta_brier": -2.395034806708385e-05,
+          "delta_log_loss": -6.186919022560522e-05,
+          "delta_vs_primary": -6.186919022560522e-05,
+          "log_loss": 0.2675759708701556,
+          "majority_log_loss": 0.6348827007795592,
+          "n_experiments": 18,
+          "n_not_sustained": 10,
+          "n_training": 33,
+          "note": "evaluated on its own 33 rows (primary: 33); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "pressure length scale 0.6 (ln units)"
+        }
+      ],
+      "small_sample_warning": "Small sample: 18 experiments; only 10 not-sustained observations. Intervals are wide and metrics are unstable.",
+      "subgroups": [
+        {
+          "brier": null,
+          "log_loss": null,
+          "n": 0,
+          "n_not_sustained": 0,
+          "name": "O2 < 17 %"
+        },
+        {
+          "brier": 0.24937062108262445,
+          "log_loss": 0.7506749231240873,
+          "n": 7,
+          "n_not_sustained": 2,
+          "name": "O2 17-20 %"
+        },
+        {
+          "brier": 0.02605430791180081,
+          "log_loss": 0.13758939462015266,
+          "n": 26,
+          "n_not_sustained": 8,
+          "name": "O2 > 20 %"
+        },
+        {
+          "brier": 0.08017104745426201,
+          "log_loss": 0.2893115779463582,
+          "n": 10,
+          "n_not_sustained": 9,
+          "name": "airflow < 3 cm/s"
+        },
+        {
+          "brier": 0.037989043287365395,
+          "log_loss": 0.17007480721340656,
+          "n": 14,
+          "n_not_sustained": 0,
+          "name": "airflow 3-10 cm/s"
+        },
+        {
+          "brier": 0.12104991919105071,
+          "log_loss": 0.3953206268379229,
+          "n": 9,
+          "n_not_sustained": 1,
+          "name": "airflow > 10 cm/s"
+        },
+        {
+          "brier": 0.12358159759783272,
+          "log_loss": 0.40577971677261776,
+          "n": 13,
+          "n_not_sustained": 8,
+          "name": "confidence high"
+        },
+        {
+          "brier": 0.040822279225668334,
+          "log_loss": 0.17784562019742747,
+          "n": 20,
+          "n_not_sustained": 2,
+          "name": "confidence medium"
+        }
+      ]
+    },
+    {
+      "blindspot_test": {
+        "diagnostics": {
+          "partial_rho_epistemic_given_aleatoric": 0.685986161559505,
+          "rho_aleatoric_point": 0.9916256157635468
+        },
+        "group_level": {
+          "hyperparameters_refit_per_experiment": true,
+          "n_groups": 18,
+          "p_value": 0.0004997501249375312,
+          "p_value_note": "one-sided permutation test (rho > 0) across held-out experiments",
+          "pairs": [
+            {
+              "error": 0.045191568258789935,
+              "experiment_id": "PSI-26:104",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.051503399690984636
+            },
+            {
+              "error": 0.045191568258789935,
+              "experiment_id": "PSI-26:105",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.051503399690984636
+            },
+            {
+              "error": 0.05587402255292069,
+              "experiment_id": "PSI-26:106",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.06114129639427282
+            },
+            {
+              "error": 0.13531279075480182,
+              "experiment_id": "PSI-26:108",
+              "n_points": 3,
+              "pre_reveal_uncertainty": 0.08098251877027188
+            },
+            {
+              "error": 0.060591988159957394,
+              "experiment_id": "PSI-26:111",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.06513039239815249
+            },
+            {
+              "error": 0.181760802577434,
+              "experiment_id": "PSI-26:60",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.16787966683586525
+            },
+            {
+              "error": 0.09530565129507436,
+              "experiment_id": "PSI-26:61",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.10419951820829976
+            },
+            {
+              "error": 0.07611171916612272,
+              "experiment_id": "PSI-26:62",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.08524934831719891
+            },
+            {
+              "error": 0.07623448814020689,
+              "experiment_id": "PSI-26:63",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.08543134557876911
+            },
+            {
+              "error": 0.05806141050843813,
+              "experiment_id": "PSI-26:67",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.06600173013620866
+            },
+            {
+              "error": 0.07751467422291283,
+              "experiment_id": "PSI-26:80",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.08364100220240717
+            },
+            {
+              "error": 0.07751467422291283,
+              "experiment_id": "PSI-26:81",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.08364100220240717
+            },
+            {
+              "error": 0.05916045593609073,
+              "experiment_id": "PSI-26:86",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.06650919129197116
+            },
+            {
+              "error": 0.04273516775826579,
+              "experiment_id": "PSI-26:90/103",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.04858060691547217
+            },
+            {
+              "error": 0.5370120428376127,
+              "experiment_id": "PSI-26:90/27",
+              "n_points": 1,
+              "pre_reveal_uncertainty": 0.11978810553570274
+            },
+            {
+              "error": 0.2394810582114923,
+              "experiment_id": "PSI-26:91/104",
+              "n_points": 4,
+              "pre_reveal_uncertainty": 0.08757547355223803
+            },
+            {
+              "error": 0.1456958259824849,
+              "experiment_id": "PSI-26:92",
+              "n_points": 2,
+              "pre_reveal_uncertainty": 0.1123454198055428
+            },
+            {
+              "error": 0.22402785382758586,
+              "experiment_id": "PSI-26:99",
+              "n_points": 3,
+              "pre_reveal_uncertainty": 0.07531180768824734
+            }
+          ],
+          "runtime_s": 0.5,
+          "spearman_rho": 0.8448810754912099
+        },
+        "interpretation": "Point level (n=29): Spearman rho=0.95 (one-sided p=<0.001) between pre-reveal epistemic uncertainty and log loss; AUROC for flagging 0 misclassified points = n/a. Experiment level (n=18 held-out experiments): rho=0.84 (p=<0.001). Withheld experiments with higher pre-reveal epistemic uncertainty tended to be predicted worse at both levels; this is an association in a small, imbalanced sample, not a guarantee. Caveat: aleatoric (predictive-entropy) uncertainty tracks log loss at least as strongly (rho=0.99), and the epistemic-loss association controlling for it is 0.69; so this does not show that epistemic uncertainty adds information beyond the model's overall predictive uncertainty.",
+        "point_level": {
+          "auroc_error_detection": null,
+          "n": 29,
+          "n_misclassified": 0,
+          "p_value": 0.0004997501249375312,
+          "p_value_note": "one-sided permutation test (rho > 0); points treated as exchangeable",
+          "spearman_rho": 0.9502463054187192
+        },
+        "verdict": "supported"
+      },
+      "campaigns": [
+        "BASS/2012",
+        "BASS/2013"
+      ],
+      "cv": {
+        "ci_method": "percentile, group bootstrap over experiments (B=1000)",
+        "gp_mean_function": "constant",
+        "gp_vs_majority": {
+          "brier": {
+            "ci95": [
+              -0.11863495509966926,
+              -0.01057687336342077
+            ],
+            "value": -0.0635778643258384
+          },
+          "comparison": "gp minus majority_class (negative favours gp)",
+          "log_loss": {
+            "ci95": [
+              -0.3575405768195417,
+              -0.06253766027947835
+            ],
+            "value": -0.2029681900821425
+          }
+        },
+        "k": 5,
+        "models": [
+          {
+            "auc": {
+              "ci95": [
+                1.0,
+                1.0
+              ],
+              "value": 1.0
+            },
+            "brier": {
+              "ci95": [
+                0.013349599172179623,
+                0.058645887809491405
+              ],
+              "value": 0.03582983206265373
+            },
+            "ece": {
+              "ci95": [
+                0.09133660895776158,
+                0.17188043861209792
+              ],
+              "value": 0.13349642546635176
+            },
+            "log_loss": {
+              "ci95": [
+                0.10121623617731028,
+                0.21594891186915585
+              ],
+              "value": 0.15994833513613288
+            },
+            "name": "gp"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.9828571428571429,
+                1.0
+              ],
+              "value": 0.9958974358974358
+            },
+            "brier": {
+              "ci95": [
+                0.00955711926738856,
+                0.0678547154562183
+              ],
+              "value": 0.038978331433253216
+            },
+            "ece": {
+              "ci95": [
+                0.036214545572061274,
+                0.15178879028213513
+              ],
+              "value": 0.08547556619573149
+            },
+            "log_loss": {
+              "ci95": [
+                0.05122985187341377,
+                0.21168210041175975
+              ],
+              "value": 0.13435010696888577
+            },
+            "name": "logistic_o2_flow"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.283895988420182,
+                0.6573049999999999
+              ],
+              "value": 0.4828205128205128
+            },
+            "brier": {
+              "ci95": [
+                0.017430825814487877,
+                0.17707761885315781
+              ],
+              "value": 0.09690188125420228
+            },
+            "ece": {
+              "ci95": [
+                0.011510687637040027,
+                0.122155087536987
+              ],
+              "value": 0.014875677910380811
+            },
+            "log_loss": {
+              "ci95": [
+                0.12613587295374915,
+                0.5705167259441805
+              ],
+              "value": 0.34560557825115473
+            },
+            "name": "logistic_o2"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.5,
+                0.5
+              ],
+              "value": 0.5
+            },
+            "brier": {
+              "ci95": [
+                0.021391127524994905,
+                0.1777818303587503
+              ],
+              "value": 0.09940769638849213
+            },
+            "ece": {
+              "ci95": [
+                0.03192084199584147,
+                0.14184273504273473
+              ],
+              "value": 0.07259416445623372
+            },
+            "log_loss": {
+              "ci95": [
+                0.15693566643411874,
+                0.5752413282271907
+              ],
+              "value": 0.3629165252182754
+            },
+            "name": "majority_class"
+          },
+          {
+            "auc": {
+              "ci95": [
+                0.9828571428571429,
+                1.0
+              ],
+              "value": 0.9938461538461538
+            },
+            "brier": {
+              "ci95": [
+                0.009539231303515866,
+                0.07313832057877875
+              ],
+              "value": 0.04149051748429512
+            },
+            "ece": {
+              "ci95": [
+                0.03821423083169275,
+                0.1336103048885536
+              ],
+              "value": 0.07037314524190227
+            },
+            "log_loss": {
+              "ci95": [
+                0.05383507977663353,
+                0.22422686453849242
+              ],
+              "value": 0.1419367538376879
+            },
+            "name": "bootstrap_logistic_ensemble"
+          }
+        ],
+        "n_pooled_predictions": 145,
+        "repeats": 5,
+        "scheme": "grouped 5-fold by experiment x 5 repeats",
+        "seeds": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "error_distribution": {
+        "bins": [
+          0.0,
+          0.1,
+          0.2,
+          0.30000000000000004,
+          0.4,
+          0.5,
+          0.6000000000000001,
+          0.7000000000000001,
+          0.8,
+          0.9,
+          1.0
+        ],
+        "counts": [
+          100,
+          11,
+          19,
+          1,
+          10,
+          0,
+          4,
+          0,
+          0,
+          0
+        ],
+        "note": "bins are the ERROR_BINS+1 bin edges; counts pool all repeats",
+        "variable": "absolute error |y - p| of out-of-fold GP predictions"
+      },
+      "group_id": "pmma_sphere__unknown",
+      "label": "PMMA spheres · configuration not recorded",
+      "label_counts": {
+        "not_sustained": 3,
+        "sustained": 26
+      },
+      "logo": {
+        "applicable": true,
+        "folds": [
+          {
+            "auc": null,
+            "brier": 0.025393134934434264,
+            "held_out": "BASS/2012",
+            "log_loss": 0.1665196074434804,
+            "majority_brier": 0.02560000000000001,
+            "majority_log_loss": 0.1743533871447778,
+            "n": 6,
+            "n_experiments": 5,
+            "n_not_sustained": 0
+          },
+          {
+            "auc": 1.0,
+            "brier": 0.11090251065536573,
+            "held_out": "BASS/2013",
+            "log_loss": 0.374176414366523,
+            "majority_brier": 0.11345108695652174,
+            "majority_log_loss": 0.387345759892607,
+            "n": 23,
+            "n_experiments": 13,
+            "n_not_sustained": 3
+          }
+        ]
+      },
+      "majority_class_fraction": 0.896551724137931,
+      "n_experiments": 18,
+      "n_observations": 29,
+      "reliability": {
+        "bins": [
+          {
+            "count": 0,
+            "hi": 0.1,
+            "lo": 0.0,
+            "mean_predicted": null,
+            "observed_frequency": null
+          },
+          {
+            "count": 0,
+            "hi": 0.2,
+            "lo": 0.1,
+            "mean_predicted": null,
+            "observed_frequency": null
+          },
+          {
+            "count": 0,
+            "hi": 0.30000000000000004,
+            "lo": 0.2,
+            "mean_predicted": null,
+            "observed_frequency": null
+          },
+          {
+            "count": 1,
+            "hi": 0.4,
+            "lo": 0.30000000000000004,
+            "mean_predicted": 0.3938989816202907,
+            "observed_frequency": 0.0
+          },
+          {
+            "count": 10,
+            "hi": 0.5,
+            "lo": 0.4,
+            "mean_predicted": 0.414716340988431,
+            "observed_frequency": 0.0
+          },
+          {
+            "count": 0,
+            "hi": 0.6000000000000001,
+            "lo": 0.5,
+            "mean_predicted": null,
+            "observed_frequency": null
+          },
+          {
+            "count": 4,
+            "hi": 0.7000000000000001,
+            "lo": 0.6000000000000001,
+            "mean_predicted": 0.6464441546569655,
+            "observed_frequency": 0.0
+          },
+          {
+            "count": 19,
+            "hi": 0.8,
+            "lo": 0.7000000000000001,
+            "mean_predicted": 0.7648943178672925,
+            "observed_frequency": 1.0
+          },
+          {
+            "count": 11,
+            "hi": 0.9,
+            "lo": 0.8,
+            "mean_predicted": 0.8879411821966343,
+            "observed_frequency": 1.0
+          },
+          {
+            "count": 100,
+            "hi": 1.0,
+            "lo": 0.9,
+            "mean_predicted": 0.9346951227386993,
+            "observed_frequency": 1.0
+          }
+        ],
+        "model": "GP",
+        "n_pooled_predictions": 145
+      },
+      "runtime_s": 8.3,
+      "sensitivity": [
+        {
+          "auc": 0.87375,
+          "brier": 0.07804417294926454,
+          "delta_auc": -0.12624999999999997,
+          "delta_brier": 0.04221434088661081,
+          "delta_log_loss": 0.10879611814801271,
+          "delta_vs_primary": 0.10879611814801271,
+          "log_loss": 0.2687444532841456,
+          "majority_log_loss": 0.3845167652561569,
+          "n_experiments": 22,
+          "n_not_sustained": 8,
+          "n_training": 64,
+          "note": "evaluated on its own 64 rows (primary: 29); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "add low-confidence rows"
+        },
+        {
+          "auc": 1.0,
+          "brier": 0.03582983206265373,
+          "delta_auc": 0.0,
+          "delta_brier": 0.0,
+          "delta_log_loss": 0.0,
+          "delta_vs_primary": 0.0,
+          "log_loss": 0.15994833513613288,
+          "majority_log_loss": 0.3629165252182754,
+          "n_experiments": 18,
+          "n_not_sustained": 3,
+          "n_training": 29,
+          "note": "evaluated on its own 29 rows (primary: 29); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "O2 initial value only"
+        },
+        {
+          "auc": 1.0,
+          "brier": 0.03582983206265373,
+          "delta_auc": 0.0,
+          "delta_brier": 0.0,
+          "delta_log_loss": 0.0,
+          "delta_vs_primary": 0.0,
+          "log_loss": 0.15994833513613288,
+          "majority_log_loss": 0.3629165252182754,
+          "n_experiments": 18,
+          "n_not_sustained": 3,
+          "n_training": 29,
+          "note": "evaluated on its own 29 rows (primary: 29); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "drop below_calibration_range rows"
+        },
+        {
+          "auc": null,
+          "brier": null,
+          "delta_vs_primary": null,
+          "log_loss": null,
+          "n_experiments": 17,
+          "n_not_sustained": 0,
+          "n_training": 26,
+          "note": "too few experiments or a single class; not evaluated",
+          "variant": "drop flow_off_transient rows"
+        },
+        {
+          "auc": 1.0,
+          "brier": 0.03582983206265373,
+          "delta_auc": 0.0,
+          "delta_brier": 0.0,
+          "delta_log_loss": 0.0,
+          "delta_vs_primary": 0.0,
+          "log_loss": 0.15994833513613288,
+          "majority_log_loss": 0.3629165252182754,
+          "n_experiments": 18,
+          "n_not_sustained": 3,
+          "n_training": 29,
+          "note": "evaluated on its own 29 rows (primary: 29); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "drop no_sustained_propagation rows"
+        },
+        {
+          "auc": 1.0,
+          "brier": 0.0360304352426347,
+          "delta_auc": 0.0,
+          "delta_brier": 0.00020060317998096822,
+          "delta_log_loss": 0.0005829776707104717,
+          "delta_vs_primary": 0.0005829776707104717,
+          "log_loss": 0.16053131280684335,
+          "majority_log_loss": 0.3629165252182754,
+          "n_experiments": 18,
+          "n_not_sustained": 3,
+          "n_training": 29,
+          "note": "evaluated on its own 29 rows (primary: 29); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "pressure length scale 0.15 (ln units)"
+        },
+        {
+          "auc": 1.0,
+          "brier": 0.035779468860277205,
+          "delta_auc": 0.0,
+          "delta_brier": -5.0363202376522975e-05,
+          "delta_log_loss": -0.00014701075992984425,
+          "delta_vs_primary": -0.00014701075992984425,
+          "log_loss": 0.15980132437620304,
+          "majority_log_loss": 0.3629165252182754,
+          "n_experiments": 18,
+          "n_not_sustained": 3,
+          "n_training": 29,
+          "note": "evaluated on its own 29 rows (primary: 29); delta is variant minus primary log loss, not a like-for-like comparison when the row set differs",
+          "variant": "pressure length scale 0.6 (ln units)"
+        }
+      ],
+      "small_sample_warning": "Small sample: 18 experiments; only 3 not-sustained observations. Intervals are wide and metrics are unstable.",
+      "subgroups": [
+        {
+          "brier": null,
+          "log_loss": null,
+          "n": 0,
+          "n_not_sustained": 0,
+          "name": "O2 < 17 %"
+        },
+        {
+          "brier": 0.04668370512277279,
+          "log_loss": 0.1836302144962877,
+          "n": 19,
+          "n_not_sustained": 3,
+          "name": "O2 17-20 %"
+        },
+        {
+          "brier": 0.015207473248427519,
+          "log_loss": 0.11495276435183868,
+          "n": 10,
+          "n_not_sustained": 0,
+          "name": "O2 > 20 %"
+        },
+        {
+          "brier": 0.11133366863508853,
+          "log_loss": 0.37448765229583997,
+          "n": 8,
+          "n_not_sustained": 3,
+          "name": "airflow < 3 cm/s"
+        },
+        {
+          "brier": 0.0035078519989962466,
+          "log_loss": 0.05975619836823708,
+          "n": 13,
+          "n_not_sustained": 0,
+          "name": "airflow 3-10 cm/s"
+        },
+        {
+          "brier": 0.012849213093662316,
+          "log_loss": 0.10822124022425646,
+          "n": 8,
+          "n_not_sustained": 0,
+          "name": "airflow > 10 cm/s"
+        },
+        {
+          "brier": 0.08504203207133912,
+          "log_loss": 0.29103911503017355,
+          "n": 10,
+          "n_not_sustained": 3,
+          "name": "confidence high"
+        },
+        {
+          "brier": 0.009928674163345625,
+          "log_loss": 0.09095318782347991,
+          "n": 19,
+          "n_not_sustained": 0,
+          "name": "confidence medium"
+        }
+      ]
+    }
+  ],
+  "model_version": "gp-laplace-v1+8783ff5a.b75416",
+  "not_modelled": {
+    "nomex_fabric__concurrent": "3 training experiments (needs ≥ 6); 0 sustained observations (needs ≥ 3)",
+    "nomex_fabric__unknown": "3 training experiments (needs ≥ 6); 1 sustained observations (needs ≥ 3); 2 not-sustained observations (needs ≥ 3)",
+    "paraffin_slab__concurrent": "1 training experiments (needs ≥ 6); 1 sustained observations (needs ≥ 3); 1 not-sustained observations (needs ≥ 3); not-sustained outcomes in 1 experiment(s) (needs ≥ 2)",
+    "paraffin_slab__unknown": "1 training experiments (needs ≥ 6); 0 sustained observations (needs ≥ 3); 1 not-sustained observations (needs ≥ 3); not-sustained outcomes in 1 experiment(s) (needs ≥ 2)",
+    "pmma_slab__concurrent": "2 training experiments (needs ≥ 6); 0 not-sustained observations (needs ≥ 3); not-sustained outcomes in 0 experiment(s) (needs ≥ 2)",
+    "pmma_slab__unknown": "3 training experiments (needs ≥ 6); 1 sustained observations (needs ≥ 3)",
+    "sibal_fabric__opposed": "2 training experiments (needs ≥ 6); 1 sustained observations (needs ≥ 3); 1 not-sustained observations (needs ≥ 3); not-sustained outcomes in 1 experiment(s) (needs ≥ 2)",
+    "sibal_fabric__unknown": "0 not-sustained observations (needs ≥ 3); not-sustained outcomes in 0 experiment(s) (needs ≥ 2)",
+    "ultem_sheet__unknown": "1 training experiments (needs ≥ 6); 0 sustained observations (needs ≥ 3); 1 not-sustained observations (needs ≥ 3); not-sustained outcomes in 1 experiment(s) (needs ≥ 2)",
+    "wax_candle__unknown": "1 not-sustained observations (needs ≥ 3); not-sustained outcomes in 1 experiment(s) (needs ≥ 2)",
+    "wax_candle__wake": "3 training experiments (needs ≥ 6); 2 sustained observations (needs ≥ 3); 1 not-sustained observations (needs ≥ 3); not-sustained outcomes in 1 experiment(s) (needs ≥ 2)"
+  },
+  "runtime_s": 20.9
+}

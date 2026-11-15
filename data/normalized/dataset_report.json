@@ -1,18 +1,22 @@
 {
  "counts": {
-  "investigations": 24,
-  "experiments": 254,
-  "observations": 684,
-  "experiments_included_in_training": 189,
-  "observations_included_in_training": 481,
+  "investigations": 28,
+  "experiments": 276,
+  "observations": 749,
+  "experiments_included_in_training": 210,
+  "observations_included_in_training": 566,
   "experiments_by_investigation": {
+   "NTRS-20030111833": 8,
+   "NTRS-20080034883": 6,
+   "NTRS-20210011521": 5,
+   "NTRS-20240002981": 3,
    "PSI-100": 2,
    "PSI-25": 129,
    "PSI-26": 121,
    "PSI-98": 2
   },
   "observations_by_investigation": {
-   "PSI-25": 366,
+   "PSI-25": 431,
    "PSI-26": 318
   },
   "experiments_by_campaign": {
@@ -24,69 +28,76 @@
    "BASS-II/T'ien": 29,
    "BASS/2012": 80,
    "BASS/2013": 41,
+   "DARTFire": 8,
+   "Glenn 5.18 s drop tower flammability limits": 6,
    "SAFFIRE/SAFFIRE-I": 2,
-   "SAFFIRE/SAFFIRE-III": 2
+   "SAFFIRE/SAFFIRE-III": 2,
+   "Saffire-IV": 2,
+   "Saffire-V": 3,
+   "Saffire-VI": 3
   },
   "observations_by_campaign": {
-   "BASS-II/Bhattacharjee": 50,
-   "BASS-II/Fernandez-Pello": 109,
-   "BASS-II/Miller": 79,
-   "BASS-II/Olson": 104,
-   "BASS-II/T'ien": 24,
+   "BASS-II/Bhattacharjee": 49,
+   "BASS-II/Ferkul": 5,
+   "BASS-II/Fernandez-Pello": 121,
+   "BASS-II/Miller": 95,
+   "BASS-II/Olson": 113,
+   "BASS-II/T'ien": 48,
    "BASS/2012": 199,
    "BASS/2013": 119
   },
   "observations_by_material_family": {
-   "nomex_fabric": 6,
+   "nomex_fabric": 9,
    "paraffin_slab": 7,
-   "pmma_rod": 213,
-   "pmma_slab": 89,
-   "pmma_sphere": 206,
-   "pmma_thin_film": 50,
-   "sibal_fabric": 45,
+   "pmma_rod": 234,
+   "pmma_slab": 105,
+   "pmma_sphere": 208,
+   "pmma_thin_film": 49,
+   "sibal_fabric": 67,
    "ultem_sheet": 2,
-   "wax_candle": 66
+   "wax_candle": 68
   },
   "observations_by_flame_configuration": {
-   "concurrent": 26,
-   "opposed": 242,
-   "stagnation": 162,
-   "unknown": 138,
+   "concurrent": 51,
+   "opposed": 256,
+   "stagnation": 135,
+   "unknown": 191,
    "wake": 116
   },
   "observations_by_label": {
-   "0": 86,
-   "1": 580,
-   "null": 18
+   "0": 147,
+   "1": 587,
+   "null": 15
   },
   "observations_by_confidence": {
-   "high": 87,
-   "low": 187,
-   "medium": 410
+   "high": 243,
+   "low": 169,
+   "medium": 337
   },
   "training_observations_by_family": {
-   "nomex_fabric": 3,
+   "nomex_fabric": 6,
    "paraffin_slab": 3,
-   "pmma_rod": 199,
-   "pmma_slab": 85,
-   "pmma_sphere": 102,
-   "pmma_thin_film": 36,
-   "sibal_fabric": 39,
+   "pmma_rod": 227,
+   "pmma_slab": 102,
+   "pmma_sphere": 104,
+   "pmma_thin_film": 48,
+   "sibal_fabric": 60,
    "ultem_sheet": 1,
-   "wax_candle": 13
+   "wax_candle": 15
   }
  },
  "exclusions": {
   "observations_by_reason": {
-   "low_confidence": 178,
+   "low_confidence": 164,
    "n2_suppression": 2,
-   "no_numeric_airflow": 7,
-   "not_ignited": 16
+   "no_numeric_airflow": 4,
+   "not_ignited": 13
   },
   "experiments_by_reason": {
+   "context only: different apparatus or test duration": 22,
    "different apparatus and scale: context only": 4,
    "low_confidence": 19,
-   "no_curated_flow_steps": 30,
+   "no_curated_flow_steps": 9,
    "not_ignited": 12
   }
  },
@@ -99,38 +110,45 @@
    "co_initial_out_of_range": 13,
    "co_initial_over_range": 1,
    "context_only": 4,
+   "context_record": 22,
    "date_parsed_from_text": 12,
    "date_year_implausible": 1,
    "date_year_mismatch": 5,
    "duplicate_as_run_number": 10,
+   "notes_from_nasa_tm_20210011385": 126,
    "o2_anomaly": 15,
    "o2_final_out_of_range": 4,
+   "o2_initial_out_of_range": 7,
+   "o2_out_of_range": 7,
    "over_range": 3,
    "possible_duplicate": 4,
    "pressure_assumed": 129,
-   "test_confidence_low": 48,
+   "test_confidence_low": 41,
    "test_date_from_notes": 4
   },
   "observations": {
    "air_factor_from_bass2_note": 86,
-   "below_calibration_range": 211,
+   "below_calibration_range": 232,
    "calibration_borrowed_from_bass2": 154,
    "calibration_day_gap_over_30_days": 13,
-   "calibration_nearest_day": 275,
-   "calibration_same_day_not_covering_value": 14,
-   "flow_approximate": 4,
-   "flow_interpolated_to_fan_off": 211,
-   "flow_off_transient": 22,
-   "flow_upper_bound": 2,
+   "calibration_nearest_day": 293,
+   "calibration_same_day_not_covering_value": 15,
+   "flow_approximate": 5,
+   "flow_interpolated_to_fan_off": 232,
+   "flow_off_transient": 26,
+   "flow_upper_bound": 4,
    "no_restrictor_for_calibration": 1,
-   "no_sustained_propagation": 12,
+   "no_sustained_propagation": 27,
    "o2_initial_only": 353,
-   "o2_interpolated": 331,
-   "pressure_assumed": 366
+   "o2_interpolated": 396,
+   "outcome_evidence_nasa_tm_20210011385": 209,
+   "pressure_assumed": 431
   },
   "range_check_counts": {
    "co_initial_out_of_range": 13,
-   "o2_final_out_of_range": 4
+   "o2_final_out_of_range": 4,
+   "o2_initial_out_of_range": 7,
+   "o2_out_of_range": 7
   }
  },
  "provenance_failures": {
@@ -141,370 +159,370 @@
   "experiments": {
    "experiment_id": {
     "missing": 0,
-    "total": 254,
+    "total": 276,
     "fraction_missing": 0.0
    },
    "investigation_id": {
     "missing": 0,
-    "total": 254,
+    "total": 276,
     "fraction_missing": 0.0
    },
    "investigation_name": {
     "missing": 0,
-    "total": 254,
+    "total": 276,
     "fraction_missing": 0.0
    },
    "investigation_acronym": {
     "missing": 0,
-    "total": 254,
+    "total": 276,
     "fraction_missing": 0.0
    },
    "campaign_group": {
     "missing": 0,
-    "total": 254,
+    "total": 276,
     "fraction_missing": 0.0
    },
    "test_label": {
     "missing": 0,
-    "total": 254,
+    "total": 276,
     "fraction_missing": 0.0
    },
    "sample_id": {
-    "missing": 0,
-    "total": 254,
-    "fraction_missing": 0.0
+    "missing": 22,
+    "total": 276,
+    "fraction_missing": 0.0797
    },
    "test_date": {
-    "missing": 1,
-    "total": 254,
-    "fraction_missing": 0.0039
+    "missing": 23,
+    "total": 276,
+    "fraction_missing": 0.0833
    },
    "oxygen_percent": {
     "missing": 0,
-    "total": 254,
+    "total": 276,
     "fraction_missing": 0.0
    },
    "oxygen_percent_initial": {
     "missing": 0,
-    "total": 254,
+    "total": 276,
     "fraction_missing": 0.0
    },
    "oxygen_percent_final": {
-    "missing": 127,
-    "total": 254,
-    "fraction_missing": 0.5
+    "missing": 149,
+    "total": 276,
+    "fraction_missing": 0.5399
    },
    "total_pressure_kpa": {
     "missing": 129,
-    "total": 254,
-    "fraction_missing": 0.5079
+    "total": 276,
+    "fraction_missing": 0.4674
    },
    "total_pressure_atm_raw": {
-    "missing": 133,
-    "total": 254,
-    "fraction_missing": 0.5236
+    "missing": 155,
+    "total": 276,
+    "fraction_missing": 0.5616
    },
    "pressure_assumed_kpa": {
-    "missing": 125,
-    "total": 254,
-    "fraction_missing": 0.4921
+    "missing": 147,
+    "total": 276,
+    "fraction_missing": 0.5326
    },
    "pressure_assumption_source": {
-    "missing": 125,
-    "total": 254,
-    "fraction_missing": 0.4921
+    "missing": 147,
+    "total": 276,
+    "fraction_missing": 0.5326
    },
    "airflow_cm_s": {
-    "missing": 55,
-    "total": 254,
-    "fraction_missing": 0.2165
+    "missing": 52,
+    "total": 276,
+    "fraction_missing": 0.1884
    },
    "airflow_min_cm_s": {
-    "missing": 34,
-    "total": 254,
-    "fraction_missing": 0.1339
+    "missing": 35,
+    "total": 276,
+    "fraction_missing": 0.1268
    },
    "airflow_max_cm_s": {
-    "missing": 34,
-    "total": 254,
-    "fraction_missing": 0.1339
+    "missing": 35,
+    "total": 276,
+    "fraction_missing": 0.1268
    },
    "material_type": {
     "missing": 4,
-    "total": 254,
-    "fraction_missing": 0.0157
+    "total": 276,
+    "fraction_missing": 0.0145
    },
    "material_family": {
     "missing": 0,
-    "total": 254,
+    "total": 276,
     "fraction_missing": 0.0
    },
    "specimen_geometry": {
-    "missing": 0,
-    "total": 254,
-    "fraction_missing": 0.0
+    "missing": 1,
+    "total": 276,
+    "fraction_missing": 0.0036
    },
    "material_thickness_mm": {
-    "missing": 212,
-    "total": 254,
-    "fraction_missing": 0.8346
+    "missing": 234,
+    "total": 276,
+    "fraction_missing": 0.8478
    },
    "specimen_diameter_mm": {
-    "missing": 130,
-    "total": 254,
-    "fraction_missing": 0.5118
+    "missing": 152,
+    "total": 276,
+    "fraction_missing": 0.5507
    },
    "specimen_width_mm": {
-    "missing": 166,
-    "total": 254,
-    "fraction_missing": 0.6535
+    "missing": 188,
+    "total": 276,
+    "fraction_missing": 0.6812
    },
    "flame_configuration": {
     "missing": 0,
-    "total": 254,
+    "total": 276,
     "fraction_missing": 0.0
    },
    "gravity_environment": {
     "missing": 0,
-    "total": 254,
+    "total": 276,
     "fraction_missing": 0.0
    },
    "experimental_platform": {
     "missing": 0,
-    "total": 254,
+    "total": 276,
     "fraction_missing": 0.0
    },
    "flow_restrictor": {
-    "missing": 5,
-    "total": 254,
-    "fraction_missing": 0.0197
+    "missing": 27,
+    "total": 276,
+    "fraction_missing": 0.0978
    },
    "observed_outcome": {
     "missing": 0,
-    "total": 254,
+    "total": 276,
     "fraction_missing": 0.0
    },
    "outcome_definition": {
     "missing": 0,
-    "total": 254,
+    "total": 276,
     "fraction_missing": 0.0
    },
    "measurement_method": {
     "missing": 0,
-    "total": 254,
+    "total": 276,
     "fraction_missing": 0.0
    },
    "co2_percent_initial": {
-    "missing": 16,
-    "total": 254,
-    "fraction_missing": 0.063
+    "missing": 38,
+    "total": 276,
+    "fraction_missing": 0.1377
    },
    "co2_percent_final": {
-    "missing": 131,
-    "total": 254,
-    "fraction_missing": 0.5157
+    "missing": 153,
+    "total": 276,
+    "fraction_missing": 0.5543
    },
    "co_ppm_initial": {
-    "missing": 128,
-    "total": 254,
-    "fraction_missing": 0.5039
+    "missing": 150,
+    "total": 276,
+    "fraction_missing": 0.5435
    },
    "co_ppm_final": {
-    "missing": 134,
-    "total": 254,
-    "fraction_missing": 0.5276
+    "missing": 156,
+    "total": 276,
+    "fraction_missing": 0.5652
    },
    "notes_raw": {
-    "missing": 129,
-    "total": 254,
-    "fraction_missing": 0.5079
+    "missing": 3,
+    "total": 276,
+    "fraction_missing": 0.0109
    },
    "source_url": {
     "missing": 0,
-    "total": 254,
+    "total": 276,
     "fraction_missing": 0.0
    },
    "source_doi": {
-    "missing": 0,
-    "total": 254,
-    "fraction_missing": 0.0
+    "missing": 22,
+    "total": 276,
+    "fraction_missing": 0.0797
    },
    "source_file": {
-    "missing": 4,
-    "total": 254,
-    "fraction_missing": 0.0157
+    "missing": 26,
+    "total": 276,
+    "fraction_missing": 0.0942
    },
    "source_sheet": {
-    "missing": 4,
-    "total": 254,
-    "fraction_missing": 0.0157
+    "missing": 26,
+    "total": 276,
+    "fraction_missing": 0.0942
    },
    "source_row": {
-    "missing": 4,
-    "total": 254,
-    "fraction_missing": 0.0157
+    "missing": 26,
+    "total": 276,
+    "fraction_missing": 0.0942
    },
    "extraction_method": {
     "missing": 0,
-    "total": 254,
+    "total": 276,
     "fraction_missing": 0.0
    },
    "extraction_confidence": {
     "missing": 0,
-    "total": 254,
+    "total": 276,
     "fraction_missing": 0.0
    },
    "quality_flags": {
     "missing": 0,
-    "total": 254,
+    "total": 276,
     "fraction_missing": 0.0
    },
    "included_in_training": {
     "missing": 0,
-    "total": 254,
+    "total": 276,
     "fraction_missing": 0.0
    },
    "exclusion_reason": {
-    "missing": 189,
-    "total": 254,
-    "fraction_missing": 0.7441
+    "missing": 210,
+    "total": 276,
+    "fraction_missing": 0.7609
    },
    "n_observations": {
     "missing": 0,
-    "total": 254,
+    "total": 276,
     "fraction_missing": 0.0
    }
   },
   "observations": {
    "observation_id": {
     "missing": 0,
-    "total": 684,
+    "total": 749,
     "fraction_missing": 0.0
    },
    "experiment_id": {
     "missing": 0,
-    "total": 684,
+    "total": 749,
     "fraction_missing": 0.0
    },
    "investigation_id": {
     "missing": 0,
-    "total": 684,
+    "total": 749,
     "fraction_missing": 0.0
    },
    "campaign_group": {
     "missing": 0,
-    "total": 684,
+    "total": 749,
     "fraction_missing": 0.0
    },
    "material_family": {
     "missing": 0,
-    "total": 684,
+    "total": 749,
     "fraction_missing": 0.0
    },
    "flame_configuration": {
     "missing": 0,
-    "total": 684,
+    "total": 749,
     "fraction_missing": 0.0
    },
    "step_index": {
     "missing": 0,
-    "total": 684,
+    "total": 749,
     "fraction_missing": 0.0
    },
    "oxygen_percent": {
     "missing": 0,
-    "total": 684,
+    "total": 749,
     "fraction_missing": 0.0
    },
    "airflow_cm_s": {
-    "missing": 7,
-    "total": 684,
-    "fraction_missing": 0.0102
+    "missing": 4,
+    "total": 749,
+    "fraction_missing": 0.0053
    },
    "airflow_uncertainty_cm_s": {
-    "missing": 473,
-    "total": 684,
-    "fraction_missing": 0.6915
+    "missing": 517,
+    "total": 749,
+    "fraction_missing": 0.6903
    },
    "airflow_basis": {
     "missing": 0,
-    "total": 684,
+    "total": 749,
     "fraction_missing": 0.0
    },
    "flow_raw_value": {
-    "missing": 6,
-    "total": 684,
-    "fraction_missing": 0.0088
+    "missing": 3,
+    "total": 749,
+    "fraction_missing": 0.004
    },
    "flow_raw_unit": {
     "missing": 0,
-    "total": 684,
+    "total": 749,
     "fraction_missing": 0.0
    },
    "flow_calibration_ref": {
-    "missing": 298,
-    "total": 684,
-    "fraction_missing": 0.4357
+    "missing": 338,
+    "total": 749,
+    "fraction_missing": 0.4513
    },
    "total_pressure_kpa": {
-    "missing": 366,
-    "total": 684,
-    "fraction_missing": 0.5351
+    "missing": 431,
+    "total": 749,
+    "fraction_missing": 0.5754
    },
    "pressure_for_analysis_kpa": {
     "missing": 0,
-    "total": 684,
+    "total": 749,
     "fraction_missing": 0.0
    },
    "flame_state": {
     "missing": 0,
-    "total": 684,
+    "total": 749,
     "fraction_missing": 0.0
    },
    "extinction_mode": {
-    "missing": 608,
-    "total": 684,
-    "fraction_missing": 0.8889
+    "missing": 627,
+    "total": 749,
+    "fraction_missing": 0.8371
    },
    "label": {
-    "missing": 18,
-    "total": 684,
-    "fraction_missing": 0.0263
+    "missing": 15,
+    "total": 749,
+    "fraction_missing": 0.02
    },
    "raw_token": {
     "missing": 0,
-    "total": 684,
+    "total": 749,
     "fraction_missing": 0.0
    },
    "raw_column": {
     "missing": 0,
-    "total": 684,
+    "total": 749,
     "fraction_missing": 0.0
    },
    "source_row": {
     "missing": 0,
-    "total": 684,
+    "total": 749,
     "fraction_missing": 0.0
    },
    "confidence": {
     "missing": 0,
-    "total": 684,
+    "total": 749,
     "fraction_missing": 0.0
    },
    "quality_flags": {
     "missing": 0,
-    "total": 684,
+    "total": 749,
     "fraction_missing": 0.0
    },
    "included_in_training": {
     "missing": 0,
-    "total": 684,
+    "total": 749,
     "fraction_missing": 0.0
    },
    "exclusion_reason": {
-    "missing": 481,
-    "total": 684,
-    "fraction_missing": 0.7032
+    "missing": 566,
+    "total": 749,
+    "fraction_missing": 0.7557
    }
   }
  },
@@ -557,5 +575,30 @@
  "curation_tests_without_matrix_row": [],
  "curation_step_tests_without_test_row": [],
  "pressure_assumption_sourced": true,
- "dataset_version": "da32b5c9ca7c"
+ "evidence": {
+  "steps_with_tm_evidence": 209,
+  "tests_with_tm_evidence_steps": 105,
+  "steps_with_tm_evidence_in_training": 206,
+  "experiments_with_tm_notes": 126,
+  "configuration_changes_vs_previous_labels": {
+   "n_changed": 21,
+   "by_transition": {
+    "opposed -> unknown": 2,
+    "stagnation -> unknown": 12,
+    "unknown -> concurrent": 5,
+    "unknown -> stagnation": 2
+   },
+   "compared_with": "data/normalized/experiments.json before this build"
+  },
+  "context_records_by_source": {
+   "NTRS-20030111833 (DARTFire)": 8,
+   "NTRS-20080034883 (Glenn 5.18 s drop tower flammability limits)": 6,
+   "NTRS-20210011521 (Saffire-IV)": 2,
+   "NTRS-20210011521 (Saffire-V)": 3,
+   "NTRS-20240002981 (Saffire-VI)": 3
+  },
+  "n_context_records": 22
+ },
+ "context_problems": [],
+ "dataset_version": "8783ff5aa6a2"
 }

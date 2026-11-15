@@ -1,0 +1,246 @@
+{
+  "algorithm": "GP classifier (logit link, Laplace approximation, ARD SE kernel, MAP-II)",
+  "config": {
+    "cv_k_max": 5,
+    "cv_repeats": 5,
+    "cv_seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "ensemble_members": 200,
+    "loeo_refit_budget_s": 480.0,
+    "mean_options": [
+      "constant",
+      "linear_o2"
+    ],
+    "min_group_rows": 1,
+    "n_bootstrap": 1000,
+    "n_permutations": 2000,
+    "n_restarts": 8,
+    "only_groups": null,
+    "pressure_length_scale": 0.3,
+    "priors": {
+      "b0": [
+        0.0,
+        3.0
+      ],
+      "b1": [
+        0.0,
+        1.0
+      ],
+      "l_flow": [
+        0.0,
+        0.75
+      ],
+      "l_o2": [
+        1.0986122887,
+        0.75
+      ],
+      "signal_var": [
+        1.3862943611,
+        0.75
+      ]
+    },
+    "seed": 0,
+    "training_confidence": [
+      "high",
+      "medium"
+    ]
+  },
+  "dataset_version": "8783ff5aa6a2",
+  "group_hashes": {
+    "nomex_fabric__concurrent": "4826a1451bd4580477aa508c91bc09e302901fb0894ea2801ce7f7de83cf0cc5",
+    "nomex_fabric__unknown": "174c8ae687d273f956a1804c254505ae5e43f20ef0ba22002cb39e84172dde5a",
+    "paraffin_slab__concurrent": "4eb2dc5f8499e7f43876887aaf46a28a13a978e86a0e4ac2630d78d89820a1d5",
+    "paraffin_slab__unknown": "4caab1d3924fde1ebea4ed0e03667115ad1359cc9cb8aafa48f7e8cbb47d28e2",
+    "pmma_rod__opposed": "fb00afba2293d448d4206c6dc32a782589bd478ddc5070faaa79255d36cba6f3",
+    "pmma_rod__stagnation": "72a832180c2b6bc424f6a0522eaf719e47acd23d1b6cac3a41936f3f4959f54e",
+    "pmma_rod__unknown": "b3901dbd9daa4175bdb90bd6e7fe7c3e0423eb508dae854415ae5b3fa79393d9",
+    "pmma_slab__concurrent": "60607a45a3f221361aa9fe5f9cebb429e8853de657237a86a867bda000e1a460",
+    "pmma_slab__opposed": "5c4e9be0db3f5fda53f844aa5eeee2f7f6bac1ff1cc1e0c4746d032d15f9ac52",
+    "pmma_slab__unknown": "a63b4e4ccad10b0247331dbc5e6542cc07ecd4ae2f7377ecd6fb98edf9feefcf",
+    "pmma_sphere__stagnation": "aa47b5b283c3e2cc612ce320f14c5091fcd0f95d5b8dee961ac05c34efe5162f",
+    "pmma_sphere__unknown": "8efcd0b2fb99375d8d73efad7a1c6d48eb7b36cef26ddf782f35bf73db785f22",
+    "pmma_sphere__wake": "019f2798d944d70be3703e8a64873edb7c697187d7127fe237bd8457322ca45b",
+    "pmma_thin_film__opposed": "514e879c5268a3235476a63dc860a216da013f1dff71ffadea4fbe6281af61e7",
+    "sibal_fabric__concurrent": "1a8801bcfac263cc47a58d2c6cf76be6a739ed15bac71b4c0d7d10749625e782",
+    "sibal_fabric__opposed": "dda8012fe9e29d84d4f1575aaa25fe56d44cc35847d99e5df52583489b36d75b",
+    "sibal_fabric__unknown": "3f7d48104a783ba0fd7efaee713cd388008f322df1975a19c7bbf64ab5f2bf02",
+    "ultem_sheet__unknown": "78823aa713900e16091edc97f87b4c1fcd006436d0c7db78fbce7fc9a4229595",
+    "wax_candle__unknown": "edff0fa47c2303fe6e6ac8a322e0aa2a14fa1c205e037218757e5fffc5576eb2",
+    "wax_candle__wake": "885fa95ccb92128af6086e745e0793b0af7ba14d30b9e5dd6edb83b5f506871d"
+  },
+  "groups": {
+    "nomex_fabric__concurrent": {
+      "mean_function": null,
+      "model_reason": "3 training experiments (needs ≥ 6); 0 sustained observations (needs ≥ 3)",
+      "model_status": "insufficient_data",
+      "n_experiments": 3,
+      "n_observations": 3,
+      "sha256": "4826a1451bd4580477aa508c91bc09e302901fb0894ea2801ce7f7de83cf0cc5"
+    },
+    "nomex_fabric__unknown": {
+      "mean_function": null,
+      "model_reason": "3 training experiments (needs ≥ 6); 1 sustained observations (needs ≥ 3); 2 not-sustained observations (needs ≥ 3)",
+      "model_status": "insufficient_data",
+      "n_experiments": 3,
+      "n_observations": 3,
+      "sha256": "174c8ae687d273f956a1804c254505ae5e43f20ef0ba22002cb39e84172dde5a"
+    },
+    "paraffin_slab__concurrent": {
+      "mean_function": null,
+      "model_reason": "1 training experiments (needs ≥ 6); 1 sustained observations (needs ≥ 3); 1 not-sustained observations (needs ≥ 3); not-sustained outcomes in 1 experiment(s) (needs ≥ 2)",
+      "model_status": "insufficient_data",
+      "n_experiments": 1,
+      "n_observations": 2,
+      "sha256": "4eb2dc5f8499e7f43876887aaf46a28a13a978e86a0e4ac2630d78d89820a1d5"
+    },
+    "paraffin_slab__unknown": {
+      "mean_function": null,
+      "model_reason": "1 training experiments (needs ≥ 6); 0 sustained observations (needs ≥ 3); 1 not-sustained observations (needs ≥ 3); not-sustained outcomes in 1 experiment(s) (needs ≥ 2)",
+      "model_status": "insufficient_data",
+      "n_experiments": 1,
+      "n_observations": 1,
+      "sha256": "4caab1d3924fde1ebea4ed0e03667115ad1359cc9cb8aafa48f7e8cbb47d28e2"
+    },
+    "pmma_rod__opposed": {
+      "mean_function": "constant",
+      "model_reason": null,
+      "model_status": "modeled",
+      "n_experiments": 24,
+      "n_observations": 108,
+      "sha256": "fb00afba2293d448d4206c6dc32a782589bd478ddc5070faaa79255d36cba6f3"
+    },
+    "pmma_rod__stagnation": {
+      "mean_function": "constant",
+      "model_reason": null,
+      "model_status": "modeled",
+      "n_experiments": 15,
+      "n_observations": 67,
+      "sha256": "72a832180c2b6bc424f6a0522eaf719e47acd23d1b6cac3a41936f3f4959f54e"
+    },
+    "pmma_rod__unknown": {
+      "mean_function": "constant",
+      "model_reason": null,
+      "model_status": "modeled",
+      "n_experiments": 12,
+      "n_observations": 52,
+      "sha256": "b3901dbd9daa4175bdb90bd6e7fe7c3e0423eb508dae854415ae5b3fa79393d9"
+    },
+    "pmma_slab__concurrent": {
+      "mean_function": null,
+      "model_reason": "2 training experiments (needs ≥ 6); 0 not-sustained observations (needs ≥ 3); not-sustained outcomes in 0 experiment(s) (needs ≥ 2)",
+      "model_status": "insufficient_data",
+      "n_experiments": 2,
+      "n_observations": 3,
+      "sha256": "60607a45a3f221361aa9fe5f9cebb429e8853de657237a86a867bda000e1a460"
+    },
+    "pmma_slab__opposed": {
+      "mean_function": "constant",
+      "model_reason": null,
+      "model_status": "modeled",
+      "n_experiments": 22,
+      "n_observations": 95,
+      "sha256": "5c4e9be0db3f5fda53f844aa5eeee2f7f6bac1ff1cc1e0c4746d032d15f9ac52"
+    },
+    "pmma_slab__unknown": {
+      "mean_function": null,
+      "model_reason": "3 training experiments (needs ≥ 6); 1 sustained observations (needs ≥ 3)",
+      "model_status": "insufficient_data",
+      "n_experiments": 3,
+      "n_observations": 4,
+      "sha256": "a63b4e4ccad10b0247331dbc5e6542cc07ecd4ae2f7377ecd6fb98edf9feefcf"
+    },
+    "pmma_sphere__stagnation": {
+      "mean_function": "constant",
+      "model_reason": null,
+      "model_status": "modeled",
+      "n_experiments": 18,
+      "n_observations": 33,
+      "sha256": "aa47b5b283c3e2cc612ce320f14c5091fcd0f95d5b8dee961ac05c34efe5162f"
+    },
+    "pmma_sphere__unknown": {
+      "mean_function": "constant",
+      "model_reason": null,
+      "model_status": "modeled",
+      "n_experiments": 18,
+      "n_observations": 29,
+      "sha256": "8efcd0b2fb99375d8d73efad7a1c6d48eb7b36cef26ddf782f35bf73db785f22"
+    },
+    "pmma_sphere__wake": {
+      "mean_function": "constant",
+      "model_reason": null,
+      "model_status": "modeled",
+      "n_experiments": 24,
+      "n_observations": 42,
+      "sha256": "019f2798d944d70be3703e8a64873edb7c697187d7127fe237bd8457322ca45b"
+    },
+    "pmma_thin_film__opposed": {
+      "mean_function": "linear_o2",
+      "model_reason": null,
+      "model_status": "modeled",
+      "n_experiments": 16,
+      "n_observations": 48,
+      "sha256": "514e879c5268a3235476a63dc860a216da013f1dff71ffadea4fbe6281af61e7"
+    },
+    "sibal_fabric__concurrent": {
+      "mean_function": "constant",
+      "model_reason": null,
+      "model_status": "modeled",
+      "n_experiments": 25,
+      "n_observations": 42,
+      "sha256": "1a8801bcfac263cc47a58d2c6cf76be6a739ed15bac71b4c0d7d10749625e782"
+    },
+    "sibal_fabric__opposed": {
+      "mean_function": null,
+      "model_reason": "2 training experiments (needs ≥ 6); 1 sustained observations (needs ≥ 3); 1 not-sustained observations (needs ≥ 3); not-sustained outcomes in 1 experiment(s) (needs ≥ 2)",
+      "model_status": "insufficient_data",
+      "n_experiments": 2,
+      "n_observations": 2,
+      "sha256": "dda8012fe9e29d84d4f1575aaa25fe56d44cc35847d99e5df52583489b36d75b"
+    },
+    "sibal_fabric__unknown": {
+      "mean_function": null,
+      "model_reason": "0 not-sustained observations (needs ≥ 3); not-sustained outcomes in 0 experiment(s) (needs ≥ 2)",
+      "model_status": "insufficient_data",
+      "n_experiments": 10,
+      "n_observations": 16,
+      "sha256": "3f7d48104a783ba0fd7efaee713cd388008f322df1975a19c7bbf64ab5f2bf02"
+    },
+    "ultem_sheet__unknown": {
+      "mean_function": null,
+      "model_reason": "1 training experiments (needs ≥ 6); 0 sustained observations (needs ≥ 3); 1 not-sustained observations (needs ≥ 3); not-sustained outcomes in 1 experiment(s) (needs ≥ 2)",
+      "model_status": "insufficient_data",
+      "n_experiments": 1,
+      "n_observations": 1,
+      "sha256": "78823aa713900e16091edc97f87b4c1fcd006436d0c7db78fbce7fc9a4229595"
+    },
+    "wax_candle__unknown": {
+      "mean_function": null,
+      "model_reason": "1 not-sustained observations (needs ≥ 3); not-sustained outcomes in 1 experiment(s) (needs ≥ 2)",
+      "model_status": "insufficient_data",
+      "n_experiments": 7,
+      "n_observations": 12,
+      "sha256": "edff0fa47c2303fe6e6ac8a322e0aa2a14fa1c205e037218757e5fffc5576eb2"
+    },
+    "wax_candle__wake": {
+      "mean_function": null,
+      "model_reason": "3 training experiments (needs ≥ 6); 2 sustained observations (needs ≥ 3); 1 not-sustained observations (needs ≥ 3); not-sustained outcomes in 1 experiment(s) (needs ≥ 2)",
+      "model_status": "insufficient_data",
+      "n_experiments": 3,
+      "n_observations": 3,
+      "sha256": "885fa95ccb92128af6086e745e0793b0af7ba14d30b9e5dd6edb83b5f506871d"
+    }
+  },
+  "has_validation": true,
+  "model_version": "gp-laplace-v1+8783ff5a.b75416",
+  "timings_s": {
+    "fit": 4.6,
+    "total": 25.6,
+    "validation": 20.9
+  },
+  "trained_at": "2026-11-15T17:38:28+00:00"
+}

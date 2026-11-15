@@ -1,0 +1,47 @@
+{
+  "flame_configuration": "concurrent",
+  "gp": null,
+  "group_id": "pmma_slab__concurrent",
+  "hyperparameters": null,
+  "label": "PMMA slabs · concurrent flow",
+  "material_family": "pmma_slab",
+  "mean_function": null,
+  "metrics_summary": {},
+  "model_reason": "2 training experiments (needs ≥ 6); 0 not-sustained observations (needs ≥ 3); not-sustained outcomes in 0 experiment(s) (needs ≥ 2)",
+  "model_status": "insufficient_data",
+  "training_set": {
+    "airflow_cm_s_range": [
+      6.999999999999998,
+      9.000000000000002
+    ],
+    "campaigns": [
+      "BASS/2012"
+    ],
+    "confidence_included": [
+      "high",
+      "medium"
+    ],
+    "filters": [
+      "included_in_training",
+      "label not null",
+      "confidence in ['high', 'medium']",
+      "oxygen, airflow and analysis pressure present"
+    ],
+    "label_counts": {
+      "not_sustained": 0,
+      "sustained": 3
+    },
+    "n_experiments": 2,
+    "n_flow_off_transient": 0,
+    "n_observations": 3,
+    "oxygen_percent_range": [
+      21.933930359,
+      21.933930359
+    ],
+    "sustained_fraction": 1.0,
+    "z_p_range": [
+      -0.027722857041967433,
+      -0.027722857041967433
+    ]
+  }
+}

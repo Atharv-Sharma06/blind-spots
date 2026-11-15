@@ -46,6 +46,9 @@ STEPS_HEADER: Final = [
     "note",
 ]
 
+#: optional trailing step columns (TM Appendix A evidence); a chunk may omit all of them
+STEPS_OPTIONAL: Final = ["evidence_source", "evidence_page", "evidence_quote"]
+
 LABEL_ZERO_MODES = {"quench_low_flow", "blowoff_high_flow", "at_constant_flow"}
 TRAINING_CONFIDENCE = {"high", "medium"}
 CONFIDENCE_ORDER = {"low": 0, "medium": 1, "high": 2}
@@ -80,11 +83,14 @@ class CurationData:
     problems: list[str] = field(default_factory=list)
 
 
-def _read_csv(path: Path, expected: list[str], problems: list[str]) -> list[dict[str, str]]:
+def _read_csv(
+    path: Path, expected: list[str], problems: list[str], optional: list[str] | None = None
+) -> list[dict[str, str]]:
     with path.open(newline="", encoding="utf-8") as fh:
         reader = csv.DictReader(fh)
         got = list(reader.fieldnames or [])
-        if got != expected:
+        extras = [c for c in (optional or []) if c in got]
+        if got != expected and got != expected + extras:
             problems.append(f"{path.name}: header differs from the contract (got {got})")
             missing = [c for c in expected if c not in got]
             if missing:
@@ -107,7 +113,7 @@ def load_curation(curation_dir: Path) -> CurationData:
     seen: set[tuple[str, str, str]] = set()
     for path in sorted((curation_dir / "steps").glob("*.csv")):
         data.step_chunks.append(path.stem)
-        for row in _read_csv(path, STEPS_HEADER, data.problems):
+        for row in _read_csv(path, STEPS_HEADER, data.problems, STEPS_OPTIONAL):
             s = CurationStep(row, path.stem)
             ident = (*s.test_key, row["step_index"])
             if ident in seen:

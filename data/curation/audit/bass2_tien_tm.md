@@ -1,0 +1,113 @@
+# bass2_tien reconciliation with NASA/TM-20210011385 Appendix A (2026-11-15)
+
+Source: data/curation/evidence/bass2_tm_appendix_a.csv (Table A.6, pp.112-113 printed). Format: test_label | field | old -> new | quote.
+
+- T1 | flame_configuration | concurrent -> concurrent (unchanged) | "Appendix A prints no flow-configuration label (extraction: sample-distance column '1'); kept Zhao et al./Table 7.1 concurrent"
+- T2 | flame_configuration | concurrent -> concurrent (unchanged) | "Appendix A prints no flow-configuration label (extraction: sample-distance column '1'); kept Zhao et al./Table 7.1 concurrent"
+- T3 | flame_configuration | unknown -> stagnation | "Appendix A label 'Stagnation'"
+- T3 | configuration_evidence | (old text) -> NASA/TM-20210011385 Appendix A Table A.6 p.113 (pdf 121): 'Stagnation'; no conflicting NASA source (ReadMe gives no flow direction) | ''
+- T3 | terminal_event | unknown -> brief_flame_only | 'Multiple ignition attempts on card 3, brief flames go out'
+- T4 | flame_configuration | concurrent -> concurrent (unchanged) | "Appendix A prints no flow-configuration label (extraction: sample-distance column '1'); kept Zhao et al./Table 7.1 concurrent"
+- T4 | terminal_event | unknown -> extinguished_low_flow | 'O2 reading creeped up slightly after a long pause in operations; flow velocity changed immediately after ignition down to 1 (fan pot 0.9); extinguished after turning into flamelet'
+- T5 | flame_configuration | concurrent -> concurrent | "Appendix A label 'Concurrent'"
+- T5 | configuration_evidence | (old text) -> NASA/TM-20210011385 Appendix A Table A.6 p.113 (pdf 121): 'Concurrent'; consistent with Zhao et al. 2017 (concurrent) | ''
+- T6 | flame_configuration | concurrent -> concurrent | "Appendix A label 'Concurrent'"
+- T6 | configuration_evidence | (old text) -> NASA/TM-20210011385 Appendix A Table A.6 p.113 (pdf 121): 'Concurrent'; consistent with Zhao et al. 2017 (concurrent) | ''
+- T7 | flame_configuration | unknown -> stagnation | "Appendix A label 'Stagnation'"
+- T7 | configuration_evidence | (old text) -> NASA/TM-20210011385 Appendix A Table A.6 p.113 (pdf 121): 'Stagnation'; no conflicting NASA source (ReadMe gives no flow direction) | ''
+- T7 | terminal_event | unknown -> extinguished_low_flow | 'Broke one igniter quickly, took a while to ignite, turned pot down in series ignition at 3.4, 1.6, 1.0, 0.4, 0.36, 0.34, 0.32, 0.31, 0.30, 0.29, 0.285, 0.28 extinction finally, HCl 1.8'
+- T9 | flame_configuration | concurrent -> concurrent | "Appendix A label 'Concurrent'"
+- T9 | configuration_evidence | (old text) -> NASA/TM-20210011385 Appendix A Table A.6 p.113 (pdf 121): 'Concurrent'; consistent with Zhao et al. 2017 (concurrent) | ''
+- T9 | terminal_event | unknown -> brief_flame_only | 'Brief ignition but flame extinguished before spreading beyond igniter'
+- T10 | flame_configuration | concurrent -> concurrent | "Appendix A label 'Concurrent'"
+- T10 | configuration_evidence | (old text) -> NASA/TM-20210011385 Appendix A Table A.6 p.112 (pdf 120): 'Concurrent'; consistent with Zhao et al. 2017 (concurrent) | ''
+- T10 | terminal_event | unknown -> brief_flame_only | 'Brief ignition but flame extinguished before spreading beyond igniter'
+- T11 | flame_configuration | concurrent -> concurrent | "Appendix A label 'Concurrent'"
+- T11 | configuration_evidence | (old text) -> NASA/TM-20210011385 Appendix A Table A.6 p.112 (pdf 120): 'Concurrent'; consistent with Zhao et al. 2017 (concurrent) | ''
+- T11 | terminal_event | unknown -> burnout | 'Burned completely, steady, HCl 0.3 to 0.9'
+- T12 | flame_configuration | concurrent -> concurrent | "Appendix A label 'Concurrent'"
+- T12 | configuration_evidence | (old text) -> NASA/TM-20210011385 Appendix A Table A.6 p.112 (pdf 120): 'Concurrent'; consistent with Zhao et al. 2017 (concurrent) | ''
+- T12 | terminal_event | unknown -> self_extinguished | 'Extinguished quickly'
+- T13 | flame_configuration | concurrent -> concurrent | "Appendix A label 'Concurrent'"
+- T13 | configuration_evidence | (old text) -> NASA/TM-20210011385 Appendix A Table A.6 p.112 (pdf 120): 'Concurrent'; consistent with Zhao et al. 2017 (concurrent) | ''
+- T13 | terminal_event | unknown -> extinguished_low_flow | 'HCL 0.2 end, 0.1 start, no HCN, flame extinguished quickly after flow change.'
+- T14 | flame_configuration | concurrent -> concurrent | "Appendix A label 'Concurrent'"
+- T14 | configuration_evidence | (old text) -> NASA/TM-20210011385 Appendix A Table A.6 p.112 (pdf 120): 'Concurrent'; consistent with Zhao et al. 2017 (concurrent) | ''
+- T14 | terminal_event | unknown -> extinguished_low_flow | 'Extinguished as we reduced flow below 3 cm/s'
+- T15 | flame_configuration | concurrent -> concurrent (unchanged) | "Appendix A prints no flow-configuration label (extraction: sample-distance column '1'); kept Zhao et al./Table 7.1 concurrent"
+- T16 | flame_configuration | concurrent -> concurrent | "Appendix A label 'Concurrent'"
+- T16 | configuration_evidence | (old text) -> NASA/TM-20210011385 Appendix A Table A.6 p.112 (pdf 120): 'Concurrent'; consistent with Zhao et al. 2017 (concurrent) | ''
+- T16 | terminal_event | unknown -> burnout | 'Initial HCl 0.2 final 0.5, no HCN, flame spread whole sample at 3 cm/s'
+- T17 | flame_configuration | concurrent -> concurrent | "Appendix A label 'Concurrent'"
+- T17 | configuration_evidence | (old text) -> NASA/TM-20210011385 Appendix A Table A.6 p.112 (pdf 120): 'Concurrent'; consistent with Zhao et al. 2017 (concurrent) | ''
+- T18 | flame_configuration | concurrent -> concurrent | "Appendix A label 'Concurrent'"
+- T18 | configuration_evidence | (old text) -> NASA/TM-20210011385 Appendix A Table A.6 p.112 (pdf 120): 'Concurrent'; consistent with Zhao et al. 2017 (concurrent) | ''
+- T18 | terminal_event | unknown -> brief_flame_only | 'Brief ignition but flame extinguished as it spread away from igniter, further than previous runs today'
+- T19 | flame_configuration | concurrent -> concurrent | "Appendix A label 'Concurrent'"
+- T19 | configuration_evidence | (old text) -> NASA/TM-20210011385 Appendix A Table A.6 p.112 (pdf 120): 'Concurrent'; consistent with Zhao et al. 2017 (concurrent) | ''
+- T20 | flame_configuration | concurrent -> concurrent | "Appendix A label 'Concurrent'"
+- T20 | configuration_evidence | (old text) -> NASA/TM-20210011385 Appendix A Table A.6 p.112 (pdf 120): 'Concurrent'; consistent with Zhao et al. 2017 (concurrent) | ''
+- T20 | terminal_event | unknown -> extinguished_low_flow | 'Quick extinction when we turned air down to 3 cm/s, HCl 0.8 end'
+- T21 | flame_configuration | concurrent -> concurrent | "Appendix A label 'Concurrent'"
+- T21 | configuration_evidence | (old text) -> NASA/TM-20210011385 Appendix A Table A.6 p.112 (pdf 120): 'Concurrent'; consistent with Zhao et al. 2017 (concurrent) | ''
+- T21 | terminal_event | unknown -> blowoff | 'Successful blowoff! HCl still 0.8 end'
+- T22 | flame_configuration | concurrent -> concurrent | "Appendix A label 'Concurrent'"
+- T22 | configuration_evidence | (old text) -> NASA/TM-20210011385 Appendix A Table A.6 p.112 (pdf 120): 'Concurrent'; consistent with Zhao et al. 2017 (concurrent) | ''
+- T22 | terminal_event | unknown -> extinguished_low_flow | 'Ignited at 11, turned down to 5 and extinguished, HCl 2.0'
+- T23 | flame_configuration | unknown -> concurrent | "Appendix A label 'Concurrent'"
+- T23 | configuration_evidence | (old text) -> NASA/TM-20210011385 Appendix A Table A.6 p.112 (pdf 120): 'Concurrent'; consistent with Zhao et al. 2017 (concurrent) | ''
+- T23 | terminal_event | unknown -> ignition_failed | 'Did not ignite with moved igniter, HCl 0.8'
+- T24 | flame_configuration | unknown -> concurrent | "Appendix A label 'Concurrent'"
+- T24 | configuration_evidence | (old text) -> NASA/TM-20210011385 Appendix A Table A.6 p.112 (pdf 120): 'Concurrent'; consistent with Zhao et al. 2017 (concurrent) | ''
+- T25 | flame_configuration | concurrent -> concurrent | "Appendix A label 'Concurrent'"
+- T25 | configuration_evidence | (old text) -> NASA/TM-20210011385 Appendix A Table A.6 p.113 (pdf 121): 'Concurrent'; consistent with Zhao et al. 2017 (concurrent) | ''
+- T26 | flame_configuration | concurrent -> concurrent | "Appendix A label 'Concurrent'"
+- T26 | configuration_evidence | (old text) -> NASA/TM-20210011385 Appendix A Table A.6 p.113 (pdf 121): 'Concurrent'; consistent with Zhao et al. 2017 (concurrent) | ''
+- T27 | flame_configuration | concurrent -> concurrent | "Appendix A label 'Concurrent'"
+- T27 | configuration_evidence | (old text) -> NASA/TM-20210011385 Appendix A Table A.6 p.113 (pdf 121): 'Concurrent'; consistent with Zhao et al. 2017 (concurrent) | ''
+- T27 | terminal_event | unknown -> burnout | 'Ignition at 5 cm/s, then quickly to 2 cm/s (fan pot 0.7); fuel is burned out'
+- T28a | flame_configuration | concurrent -> concurrent | "Appendix A label 'Concurrent'"
+- T28a | configuration_evidence | (old text) -> NASA/TM-20210011385 Appendix A Table A.6 p.113 (pdf 121): 'Concurrent'; consistent with Zhao et al. 2017 (concurrent) | ''
+- T28a | terminal_event | unknown -> brief_flame_only | 'Tried to get one-sided ignition, but flame only briefly flashed then went out'
+- T28b | flame_configuration | concurrent -> concurrent | "Appendix A label 'Concurrent'"
+- T28b | configuration_evidence | (old text) -> NASA/TM-20210011385 Appendix A Table A.6 p.113 (pdf 121): 'Concurrent'; consistent with Zhao et al. 2017 (concurrent) | ''
+- T28b | terminal_event | unknown -> brief_flame_only | 'Tried to get one-sided ignition, but again flame only briefly flashed then went out'
+- T29 | flame_configuration | concurrent -> concurrent | "Appendix A label 'Concurrent'"
+- T29 | configuration_evidence | (old text) -> NASA/TM-20210011385 Appendix A Table A.6 p.113 (pdf 121): 'Concurrent'; consistent with Zhao et al. 2017 (concurrent) | ''
+- T29 | terminal_event | unknown -> extinguished_low_flow | 'Alex commented that he thought the angle of the igniter should be reversed to get one-sided ignition, so he tried that; one-sided flame initially but quickly became two-sided; after ignition, fan pot changed to 0.6 and flame went out after a few seconds'
+- T2 | step air 9 evidence/confidence | medium -> high | 'Flow velocity changed to 9 to 5 fairly early then very late in the burn changed to 4'
+- T2 | step air 5 evidence/confidence | medium -> high | 'Flow velocity changed to 9 to 5 fairly early then very late in the burn changed to 4'
+- T5 | step air 10 evidence/confidence | medium -> medium | 'ignited at 10, turned down to 2, then 1'
+- T5 | step air 2 evidence/confidence | medium -> medium | 'seemed to burn full sample length as a flamelet'
+- T6 | step air 5 evidence/confidence | medium -> medium | 'still did not extinguish'
+- T6 | step air 2 evidence/confidence | medium -> medium | 'still did not extinguish'
+- T6 | step air 1 evidence/confidence | medium -> medium | 'still did not extinguish'
+- T13 | step air 5 evidence/confidence | medium -> high | 'flame extinguished quickly after flow change'
+- T14 | step air 5 evidence/confidence | medium -> high | 'Extinguished as we reduced flow below 3 cm/s'
+- T20 | step air 11 evidence/confidence | medium -> high | 'Quick extinction when we turned air down to 3 cm/s'
+- T3 | step added | (none) -> 10 air_cm_s  brief_flame_no_sustain | 'Multiple ignition attempts on card 3, brief flames go out'
+- T4 | step added | (none) -> 1 air_cm_s  extinguished quench_low_flow | 'extinguished after turning into flamelet'
+- T5 | step added | (none) -> 1 air_cm_s  sustained | 'seemed to burn full sample length as a flamelet'
+- T6 | step added | (none) -> 1 air_cm_s < sustained | 'still did not extinguish'
+- T7 | step added | (none) -> 0.28 pot  extinguished quench_low_flow | '0.28 extinction finally'
+- T9 | step added | (none) -> 10 air_cm_s  brief_flame_no_sustain | 'Brief ignition but flame extinguished before spreading beyond igniter'
+- T10 | step added | (none) -> 5 air_cm_s  brief_flame_no_sustain | 'Brief ignition but flame extinguished before spreading beyond igniter'
+- T11 | step added | (none) -> 5 air_cm_s  sustained | 'Burned completely, steady'
+- T12 | step added | (none) -> 5 air_cm_s  extinguished at_constant_flow | 'Extinguished quickly'
+- T13 | step added | (none) -> 1 air_cm_s  extinguished quench_low_flow | 'flame extinguished quickly after flow change'
+- T14 | step added | (none) -> 3 air_cm_s < extinguished quench_low_flow | 'Extinguished as we reduced flow below 3 cm/s'
+- T15 | step added | (none) -> 29 air_cm_s  sustained | 'no blowoff attained'
+- T16 | step added | (none) -> 3 air_cm_s  sustained | 'flame spread whole sample at 3 cm/s'
+- T17 | step added | (none) -> 53 air_cm_s  sustained | 'Tried to blowoff, but did not'
+- T19 | step added | (none) -> 11 air_cm_s  sustained | 'Steady burn'
+- T20 | step added | (none) -> 3 air_cm_s  extinguished quench_low_flow | 'Quick extinction when we turned air down to 3 cm/s'
+- T21 | step added | (none) -> 47 air_cm_s max extinguished blowoff_high_flow | 'Successful blowoff!'
+- T22 | step added | (none) -> 5 air_cm_s  extinguished quench_low_flow | 'turned down to 5 and extinguished'
+- T23 | step added | (none) -> 10 air_cm_s  not_ignited | 'Did not ignite with moved igniter'
+- T24 | step added | (none) -> 10 air_cm_s  sustained | 'got steady spread of a one-sided flame'
+- T27 | step added | (none) -> 2 air_cm_s  sustained | 'fuel is burned out'
+- T28a | step added | (none) -> 5 air_cm_s  brief_flame_no_sustain | 'flame only briefly flashed then went out'
+- T28b | step added | (none) -> 5 air_cm_s  brief_flame_no_sustain | 'flame only briefly flashed then went out'
+- T29 | step added | (none) -> 0.6 pot  extinguished quench_low_flow | 'after ignition, fan pot changed to 0.6 and flame went out after a few seconds'
+- T29 | step air 5 evidence/confidence | medium -> high | 'one-sided flame initially but quickly became two-sided'
+- T18 | step air 5 flame_state | sustained -> brief_flame_no_sustain | 'Brief ignition but flame extinguished as it spread away from igniter'

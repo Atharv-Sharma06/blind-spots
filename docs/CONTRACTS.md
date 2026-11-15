@@ -441,3 +441,44 @@ Semantic colors (one meaning each; never reuse a hue for another meaning):
 | warning / extrapolation | `--warn` | `#B42318` text only for verdict badges |
 
 Every chart: axis titles with units, legend with units, accessible data-table fallback.
+
+---
+
+## 2.5 TM Appendix A evidence (BASS-II)
+
+`data/curation/evidence/bass2_tm_appendix_a.csv` (columns `test_label,pi_sheet,configuration_label,observation_text,
+printed_page,pdf_page,table,source_url,extraction_note`) holds the 126 as-run rows printed in NASA/TM-20210011385
+Appendix A. Steps CSVs may carry three optional trailing columns `evidence_source,evidence_page,evidence_quote`
+(a chunk may omit all three). Rules implemented in the pipeline:
+- A step whose `raw_column` is exactly `TM Appendix A observation` is verified against the evidence CSV: `raw_token`
+  must be a substring of that test's `observation_text` (same `pi_sheet` preferred), else `provenance_mismatch`
+  (same rule as `scripts/check_curation_provenance.py`).
+- Observations with a non-empty `evidence_source` get the quality flag `outcome_evidence_nasa_tm_20210011385`;
+  `confidence` stays as written in the CSV.
+- PSI-25 `ExperimentRecord.notes_raw` = the Appendix A `observation_text` verbatim (the PSI-25 workbook has no
+  observation column), flag `notes_from_nasa_tm_20210011385`; `measurement_method` states the TM as the source.
+- `dataset_report.json` key `evidence`: `steps_with_tm_evidence`, `tests_with_tm_evidence_steps`,
+  `steps_with_tm_evidence_in_training`, `experiments_with_tm_notes`, `configuration_changes_vs_previous_labels`
+  (diff against `data/normalized/experiments.json` as it was before this build), `context_records_by_source`.
+
+## 2.6 Context tables (other apparatus or durations)
+
+`data/curation/context_microgravity/<source_id>.csv`, UTF-8, header exactly
+`context_id,investigation_short,investigation_name,platform,gravity_environment,years,material,specimen_geometry,
+sample_dimensions,flame_configuration,oxygen_percent,total_pressure_kpa,total_pressure_raw,airflow_cm_s,airflow_raw,
+outcome_text,source_title,source_url,ntrs_id,page,table,raw_text` (on one line). One row per printed test/sample
+row; numbers as printed (conversions only into `*_kpa` / `*_cm_s`, printed value+unit kept in `*_raw`);
+`outcome_text` verbatim and only when printed. A file with another header is skipped and reported in
+`context_problems`. Each row becomes an `ExperimentRecord`:
+- `experiment_id` = `<investigation_short>:<part of context_id after the first colon>`; `investigation_id` =
+  `NTRS-<ntrs_id>` (one `Investigation` per NTRS document, role `integrated_context`, `landing_url` = the NTRS
+  citation URL, license "NASA Technical Reports Server document; see source", `doi` null); `campaign_group` =
+  `investigation_short`.
+- Pressure only from the printed value (`total_pressure_kpa`), never assumed. `observed_outcome` only from the
+  explicit words burns / extinguishes / extinguished / no ignition, else `unknown`.
+- `material_family` / `specimen_geometry` only when determinable (else `other` / null); `extraction_method`
+  `manually_transcribed`; `included_in_training` false, `exclusion_reason` "context only: different apparatus or
+  test duration"; flag `context_record`; zero observations; `notes_raw` = `outcome_text | raw_text`.
+
+`blindspots build-dataset` reads `BLINDSPOTS_NORMALIZED_OUT` as the output directory;
+`python -m blindspots.pipeline.build_dataset --out DIR` does the same (default `data/normalized`).

@@ -1,110 +1,122 @@
-investigation_id,test_label,source_file,source_sheet,source_row,step_index,flow_value,flow_unit,flow_qualifier,flame_state,extinction_mode,raw_token,raw_column,token_row,confidence,note
-PSI-25,P1,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,2,0,5,air_cm_s,,sustained,,"5,2",Air display,2,medium,flame state implied by list order
-PSI-25,P1,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,2,1,2,air_cm_s,,sustained,,"2, slow decr",Air display,2,medium,flame state implied by list order
-PSI-25,P1,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,2,2,,none,,extinguished,quench_low_flow,slow decr to ext,Air display,2,medium,extinction flow not stated; went out during slow decrease after 2
-PSI-25,P2,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,3,0,5,air_cm_s,,sustained,,"5, 2.5",Air display,3,medium,pot .9 (inferred pairing)
-PSI-25,P2,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,3,1,2.5,air_cm_s,,sustained,,"2.5, 2",Air display,3,medium,pot .5 (inferred pairing)
-PSI-25,P2,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,3,2,2,air_cm_s,,sustained,,2 (pot,Air display,3,medium,pot .35 (inferred pairing); pot .33 listed later
-PSI-25,P3a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,4,0,5,air_cm_s,,sustained,,"5, 2.5",Air display,4,medium,pot 1.15 (inferred pairing)
-PSI-25,P3a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,4,1,2.5,air_cm_s,,sustained,,2.5 (1.15,Air display,4,medium,pot .5 (inferred pairing)
-PSI-25,P3a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,4,2,0.35,pot,,sustained,,".35,",Air display,4,medium,
-PSI-25,P3a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,4,3,0.33,pot,,sustained,,.33.,Air display,4,medium,
-PSI-25,P3a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,4,4,0.32,pot,,sustained,,".32,",Air display,4,medium,
-PSI-25,P3a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,4,5,0.315,pot,,sustained,,.315,Air display,4,medium,
-PSI-25,P3a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,4,6,0.31,pot,,sustained,,".31,",Air display,4,medium,
-PSI-25,P3b,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,5,0,5,air_cm_s,,sustained,,"5, very low",Air display,5,medium,pot 0.85 (inferred pairing)
-PSI-25,P3b,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,5,1,0.32,pot,,sustained,,"0.32,",Air display,5,medium,
-PSI-25,P3b,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,5,2,0.31,pot,,sustained,,"0.31,",Air display,5,medium,
-PSI-25,P3b,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,5,3,0.305,pot,,sustained,,0.305,Air display,5,medium,
-PSI-25,P3b,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,5,4,0.3,pot,,sustained,,"0.30,",Air display,5,medium,written 0.30
-PSI-25,P4,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,6,0,5,air_cm_s,,sustained,,"5, pots",Air display,6,medium,fan display 48
-PSI-25,P4,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,6,1,0.4,pot,,sustained,,pots 0.4,Air display,6,medium,
-PSI-25,P4,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,6,2,0.36,pot,,sustained,,"0.36,",Air display,6,medium,
-PSI-25,P4,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,6,3,0.32,pot,,sustained,,"0.32,",Air display,6,medium,
-PSI-25,P4,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,6,4,0.308,pot,,sustained,,0.308,Air display,6,medium,
-PSI-25,P4,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,6,5,0.3,pot,,sustained,,".3, off",Air display,6,medium,written .3; followed by off
-PSI-25,P5,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,7,0,5,air_cm_s,,sustained,,5cm/s,Fan display,7,medium,pot 1.5; air display '5 down to ext'
-PSI-25,P5,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,7,1,0.9,pot,,sustained,,"0.9,",Fan display,7,medium,
-PSI-25,P5,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,7,2,0.4,pot,,sustained,,"0.4,",Fan display,7,medium,
-PSI-25,P5,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,7,3,0.36,pot,,sustained,,"0.36,",Fan display,7,medium,
-PSI-25,P5,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,7,4,0.32,pot,,sustained,,"0.32,",Fan display,7,medium,
-PSI-25,P5,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,7,5,0.308,pot,,sustained,,"0.308,",Fan display,7,medium,
-PSI-25,P5,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,7,6,0.3,pot,,sustained,,"0.3,",Fan display,7,medium,
-PSI-25,P5,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,7,7,0.29,pot,,sustained,,"0.29,",Fan display,7,medium,
-PSI-25,P5,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,7,8,0.28,pot,,sustained,,"0.28,",Fan display,7,medium,
-PSI-25,P5,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,7,9,0,pot,,extinguished,quench_low_flow,0 ext,Fan display,7,medium,extinguished at pot 0 (may equal fan off); air display '5 down to ext'
-PSI-25,P6,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,8,0,5,air_cm_s,,sustained,,"5, pots",Air display,8,medium,fan display 48
-PSI-25,P6,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,8,1,0.4,pot,,sustained,,pots 0.4,Air display,8,medium,
-PSI-25,P6,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,8,2,0.36,pot,,sustained,,"0.36,",Air display,8,medium,
-PSI-25,P6,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,8,3,0.32,pot,,sustained,,"0.32,",Air display,8,medium,
-PSI-25,P6,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,8,4,0.31,pot,,sustained,,"0.31,",Air display,8,medium,followed by off
-PSI-25,P8,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,9,0,5,air_cm_s,,brief_flame_no_sustain,,"5, would not stay lit",Air display,9,high,fan 48
-PSI-25,P8,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,9,1,10,air_cm_s,,brief_flame_no_sustain,,"10, 15 ibid",Air display,9,medium,fan 62; 'ibid' = same as above
-PSI-25,P8,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,9,2,15,air_cm_s,,brief_flame_no_sustain,,15 ibid,Air display,9,medium,fan 75; 'ibid' = same as above
-PSI-25,P9,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,10,0,5,air_cm_s,,sustained,,5cm/s,Fan display,10,medium,pot 1.5; air display '5 down to ext'
-PSI-25,P9,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,10,1,0.9,pot,,sustained,,"0.9,",Fan display,10,medium,
-PSI-25,P9,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,10,2,0.4,pot,,sustained,,"0.4,",Fan display,10,medium,
-PSI-25,P9,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,10,3,0.36,pot,,sustained,,"0.36,",Fan display,10,medium,
-PSI-25,P9,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,10,4,0.32,pot,,sustained,,"0.32,",Fan display,10,medium,
-PSI-25,P9,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,10,5,0.3,pot,,sustained,,"0.3,",Fan display,10,medium,
-PSI-25,P9,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,10,6,0.28,pot,,extinguished,quench_low_flow,0.28 ext,Fan display,10,high,
-PSI-25,P10,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,11,0,5,air_cm_s,,sustained,,"5, pots",Air display,11,medium,"fan display 48, 41"
-PSI-25,P10,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,11,1,0.4,pot,,sustained,,pots 0.4,Air display,11,medium,
-PSI-25,P10,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,11,2,0.36,pot,,sustained,,"0.36,",Air display,11,medium,
-PSI-25,P10,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,11,3,0.32,pot,,sustained,,"0.32,",Air display,11,medium,
-PSI-25,P10,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,11,4,0.31,pot,,sustained,,"0.31,",Air display,11,medium,
-PSI-25,P10,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,11,5,0.3,pot,,extinguished,quench_low_flow,0.30 extinguished,Air display,11,high,written 0.30
-PSI-25,P12,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,12,0,5,air_cm_s,,sustained,,"5, 3",Air display,12,medium,fan 60 / pot 2.6
-PSI-25,P12,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,12,1,3,air_cm_s,,sustained,,"3,2",Air display,12,medium,fan 52 / pot 1.6
-PSI-25,P12,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,12,2,2,air_cm_s,,sustained,,"2,1",Air display,12,medium,fan 48 / pot 1.2
-PSI-25,P12,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,12,3,1,air_cm_s,,sustained,,"1, 0.5",Air display,12,medium,fan 44.5 / pot .75
-PSI-25,P12,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,12,4,0.5,air_cm_s,,sustained,,"0.5, lower",Air display,12,medium,fan 42 / pot .5
-PSI-25,P12,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,12,5,0.4,pot,,sustained,,".4,.36",Fan display,12,medium,fan 41.5; air display 'lower'
-PSI-25,P12,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,12,6,0.36,pot,,sustained,,".36,0",Fan display,12,medium,fan 41; air display 'lower'
-PSI-25,P13a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,13,0,5,air_cm_s,,sustained,,5cm/s,Fan display,13,medium,pot 1.1; air display '5 down to ext'
-PSI-25,P13a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,13,1,0.4,pot,,sustained,,"0.4,",Fan display,13,medium,
-PSI-25,P13a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,13,2,0.36,pot,,sustained,,"0.36,",Fan display,13,medium,
-PSI-25,P13a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,13,3,0.32,pot,,sustained,,"0.32,",Fan display,13,medium,
-PSI-25,P13a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,13,4,0.3,pot,,sustained,,"0.3,",Fan display,13,medium,
-PSI-25,P13a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,13,5,0.28,pot,,sustained,,"0.28,",Fan display,13,medium,
-PSI-25,P13a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,13,6,0.26,pot,,sustained,,"0.26,",Fan display,13,medium,
-PSI-25,P13a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,13,7,0,pot,,extinguished,quench_low_flow,0 ext,Fan display,13,medium,extinguished at pot 0 (may equal fan off); air display '5 down to ext'
-PSI-25,P13b,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,14,0,5,air_cm_s,,sustained,,5cm/s,Fan display,14,medium,pot 1.3; air display '5 down to ext'
-PSI-25,P13b,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,14,1,0.4,pot,,sustained,,"0.4,",Fan display,14,medium,
-PSI-25,P13b,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,14,2,0.36,pot,,sustained,,"0.36,",Fan display,14,medium,
-PSI-25,P13b,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,14,3,0.32,pot,,extinguished,quench_low_flow,0.32 ext,Fan display,14,high,
-PSI-25,P14,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,15,0,5,air_cm_s,,sustained,,"5, low",Air display,15,medium,fan 46; pot .85 (inferred pairing)
-PSI-25,P14,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,15,1,0.4,pot,,sustained,,".4, .32",Air display,15,medium,fan 41; air display 'low'
-PSI-25,P15,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,16,0,5,air_cm_s,,sustained,,"5, (",Air display,16,medium,fan 46; followed by pot 0.36
-PSI-25,P16,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,17,0,5,air_cm_s,,sustained,,"5,8",Air display,17,medium,fan 49 / pot 1.3
-PSI-25,P16,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,17,1,8,air_cm_s,,sustained,,"8,2",Air display,17,medium,fan 62 / pot 2.8 (flow increase)
-PSI-25,P16,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,17,2,2,air_cm_s,,sustained,,"2,low",Air display,17,medium,fan 44 / pot 0.7
-PSI-25,P16,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,17,3,0.4,pot,,sustained,,"0.4,",Fan display,17,medium,fan 41.5; air display 'low'
-PSI-25,P16,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,17,4,0.36,pot,,sustained,,"0.36,",Fan display,17,medium,fan 41
-PSI-25,P17,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,18,0,5,air_cm_s,,sustained,,"5, 3",Air display,18,medium,fan 60 / pot 2.6
-PSI-25,P17,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,18,1,3,air_cm_s,,sustained,,"3, 2",Air display,18,medium,fan 52 / pot 1.6
-PSI-25,P17,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,18,2,2,air_cm_s,,sustained,,"2, 22",Air display,18,medium,fan 48 / pot 1.2
-PSI-25,P17,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,18,3,22,air_cm_s,,sustained,,"22, 2",Air display,18,medium,pot 10 (max setting); fan written 233 exceeds 122 display max; air display lags so 22 may be transient
-PSI-25,P17,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,18,4,2,air_cm_s,,sustained,,"2, low",Air display,18,medium,fan 48 / pot 1.2
-PSI-25,P17,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,18,5,0.36,pot,,sustained,,"0.36,",Fan display,18,medium,fan 41; air display 'low'
-PSI-25,P19,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,20,0,5,air_cm_s,,sustained,,"5,8",Air display,20,medium,fan 49 / pot 1.3
-PSI-25,P19,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,20,1,8,air_cm_s,,sustained,,"8,2",Air display,20,medium,fan 62 / pot 2.8
-PSI-25,P19,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,20,2,2,air_cm_s,,sustained,,"2,max",Air display,20,medium,fan 44 / pot 0.7
-PSI-25,P19,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,20,3,0.4,pot,,sustained,,"0.4,",Fan display,20,medium,fan 41.5
-PSI-25,P19,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,20,4,0.36,pot,,sustained,,"0.36,",Fan display,20,medium,list order
-PSI-25,P19,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,20,5,122,fan_display,max,sustained,,max,Air display,20,low,pot 10; fan 122; no blowoff stated; later setting pot .32 listed; flame state at max inferred only from later settings being listed (blowoff not ruled out)
-PSI-25,P22a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,24,0,5,air_cm_s,,sustained,,"5, down to ext",Air display,24,medium,fan cell begins 5
-PSI-25,P22a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,24,1,0.36,pot,,sustained,,"0.36,",Fan display,24,medium,
-PSI-25,P22a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,24,2,0.32,pot,,extinguished,quench_low_flow,0.32 ext after some time,Fan display,24,medium,"went out after some time at this low setting; air display '5, down to ext'"
-PSI-25,P22b,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,25,0,5,air_cm_s,,sustained,,5 down to ext,Air display,25,medium,fan cell begins 5
-PSI-25,P22b,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,25,1,0.36,pot,,sustained,,p.36,Fan display,25,medium,written p.36
-PSI-25,P22b,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,25,2,0.34,pot,,sustained,,"0.34,",Fan display,25,medium,
-PSI-25,P22b,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,25,3,0.33,pot,,sustained,,"0.33,",Fan display,25,medium,
-PSI-25,P22b,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,25,4,0.32,pot,,sustained,,"0.32,",Fan display,25,medium,
-PSI-25,P22b,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,25,5,0.31,pot,,extinguished,quench_low_flow,0.31 ext,Fan display,25,high,
-PSI-25,P25,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,28,0,5,air_cm_s,,sustained,,5 down to ext,Air display,28,medium,fan cell begins 5
-PSI-25,P25,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,28,1,0.36,pot,,sustained,,p.36,Fan display,28,medium,written p.36
-PSI-25,P25,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,28,2,0.34,pot,,sustained,,"0.34,",Fan display,28,medium,
-PSI-25,P25,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,28,3,0.33,pot,,sustained,,"0.33,",Fan display,28,medium,
-PSI-25,P25,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,28,4,0.32,pot,,sustained,,"0.32,",Fan display,28,medium,
-PSI-25,P25,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,28,5,0.31,pot,,extinguished,quench_low_flow,0.31 ext,Fan display,28,high,
+investigation_id,test_label,source_file,source_sheet,source_row,step_index,flow_value,flow_unit,flow_qualifier,flame_state,extinction_mode,raw_token,raw_column,token_row,confidence,note,evidence_source,evidence_page,evidence_quote
+PSI-25,P1,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,2,0,5,air_cm_s,,sustained,,"5,2",Air display,2,medium,flame state implied by list order,,,
+PSI-25,P1,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,2,1,2,air_cm_s,,sustained,,"2, slow decr",Air display,2,medium,flame state implied by list order,,,
+PSI-25,P1,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,2,2,0.315,pot,,extinguished,quench_low_flow,pot 0.315,TM Appendix A observation,2,high,"corrected per TM Appendix A: extinction flow now stated (pot 0.315); original cell ""slow decr to ext"" gave none",nasa_tm_20210011385_appendix_a,106 (pdf 114),got down to extinction at pot 0.315 (finite low flow)
+PSI-25,P2,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,3,0,5,air_cm_s,,sustained,,"5, 2.5",Air display,3,medium,pot .9 (inferred pairing),,,
+PSI-25,P2,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,3,1,2.5,air_cm_s,,sustained,,"2.5, 2",Air display,3,medium,pot .5 (inferred pairing),,,
+PSI-25,P2,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,3,2,2,air_cm_s,,sustained,,2 (pot,Air display,3,medium,pot .35 (inferred pairing); pot .33 listed later,,,
+PSI-25,P2,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,3,3,0.33,pot,,sustained,,.33,Air display,3,high,"Pot .33 from cell list; TM: stable flame at pot 0.33; extinction not observed (fan turned off, not slow ramp)",nasa_tm_20210011385_appendix_a,106 (pdf 114),stable flame at pot 0.33
+PSI-25,P3a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,4,0,5,air_cm_s,,sustained,,"5, 2.5",Air display,4,medium,pot 1.15 (inferred pairing),,,
+PSI-25,P3a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,4,1,2.5,air_cm_s,,sustained,,2.5 (1.15,Air display,4,medium,pot .5 (inferred pairing),,,
+PSI-25,P3a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,4,2,0.35,pot,,sustained,,".35,",Air display,4,medium,,,,
+PSI-25,P3a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,4,3,0.33,pot,,sustained,,.33.,Air display,4,medium,,,,
+PSI-25,P3a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,4,4,0.32,pot,,sustained,,".32,",Air display,4,medium,,,,
+PSI-25,P3a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,4,5,0.315,pot,,sustained,,.315,Air display,4,medium,,,,
+PSI-25,P3a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,4,6,0.31,pot,,sustained,,".31,",Air display,4,medium,,,,
+PSI-25,P3a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,4,7,0.3,pot,,extinguished,quench_low_flow,.3),Air display,4,high,"TM: extinguished at 0.3 pot (very small flame, but steady spread)",nasa_tm_20210011385_appendix_a,107 (pdf 115),"extinguished at 0.3 pot very small flame, but steady spread"
+PSI-25,P3b,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,5,0,5,air_cm_s,,sustained,,"5, very low",Air display,5,medium,pot 0.85 (inferred pairing),,,
+PSI-25,P3b,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,5,1,0.32,pot,,sustained,,"0.32,",Air display,5,high,,nasa_tm_20210011385_appendix_a,107 (pdf 115),"pot 0.32 spread, 0.31 spread"
+PSI-25,P3b,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,5,2,0.31,pot,,sustained,,"0.31,",Air display,5,high,,nasa_tm_20210011385_appendix_a,107 (pdf 115),"pot 0.32 spread, 0.31 spread"
+PSI-25,P3b,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,5,3,0.305,pot,,sustained,,0.305,Air display,5,medium,,,,
+PSI-25,P3b,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,5,4,0.3,pot,,sustained,,"0.30,",Air display,5,medium,written 0.30,,,
+PSI-25,P4,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,6,0,5,air_cm_s,,sustained,,"5, pots",Air display,6,medium,fan display 48,,,
+PSI-25,P4,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,6,1,0.4,pot,,sustained,,pots 0.4,Air display,6,high,,nasa_tm_20210011385_appendix_a,107 (pdf 115),steady at multiple pots until turned off flow
+PSI-25,P4,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,6,2,0.36,pot,,sustained,,"0.36,",Air display,6,high,,nasa_tm_20210011385_appendix_a,107 (pdf 115),steady at multiple pots until turned off flow
+PSI-25,P4,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,6,3,0.32,pot,,sustained,,"0.32,",Air display,6,high,,nasa_tm_20210011385_appendix_a,107 (pdf 115),steady at multiple pots until turned off flow
+PSI-25,P4,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,6,4,0.308,pot,,sustained,,0.308,Air display,6,high,,nasa_tm_20210011385_appendix_a,107 (pdf 115),steady at multiple pots until turned off flow
+PSI-25,P4,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,6,5,0.3,pot,,sustained,,".3, off",Air display,6,high,written .3; followed by off,nasa_tm_20210011385_appendix_a,107 (pdf 115),steady at multiple pots until turned off flow
+PSI-25,P5,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,7,0,5,air_cm_s,,sustained,,5cm/s,Fan display,7,high,pot 1.5; air display '5 down to ext',nasa_tm_20210011385_appendix_a,107 (pdf 115),"0.9, 0.4, 0.36, 0.32, 0.308, 0.3, 0.29, 0.28 (flame persisted for all)"
+PSI-25,P5,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,7,1,0.9,pot,,sustained,,"0.9,",Fan display,7,high,,nasa_tm_20210011385_appendix_a,107 (pdf 115),"0.9, 0.4, 0.36, 0.32, 0.308, 0.3, 0.29, 0.28 (flame persisted for all)"
+PSI-25,P5,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,7,2,0.4,pot,,sustained,,"0.4,",Fan display,7,high,,nasa_tm_20210011385_appendix_a,107 (pdf 115),"0.9, 0.4, 0.36, 0.32, 0.308, 0.3, 0.29, 0.28 (flame persisted for all)"
+PSI-25,P5,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,7,3,0.36,pot,,sustained,,"0.36,",Fan display,7,high,,nasa_tm_20210011385_appendix_a,107 (pdf 115),"0.9, 0.4, 0.36, 0.32, 0.308, 0.3, 0.29, 0.28 (flame persisted for all)"
+PSI-25,P5,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,7,4,0.32,pot,,sustained,,"0.32,",Fan display,7,high,,nasa_tm_20210011385_appendix_a,107 (pdf 115),"0.9, 0.4, 0.36, 0.32, 0.308, 0.3, 0.29, 0.28 (flame persisted for all)"
+PSI-25,P5,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,7,5,0.308,pot,,sustained,,"0.308,",Fan display,7,high,,nasa_tm_20210011385_appendix_a,107 (pdf 115),"0.9, 0.4, 0.36, 0.32, 0.308, 0.3, 0.29, 0.28 (flame persisted for all)"
+PSI-25,P5,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,7,6,0.3,pot,,sustained,,"0.3,",Fan display,7,high,,nasa_tm_20210011385_appendix_a,107 (pdf 115),"0.9, 0.4, 0.36, 0.32, 0.308, 0.3, 0.29, 0.28 (flame persisted for all)"
+PSI-25,P5,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,7,7,0.29,pot,,sustained,,"0.29,",Fan display,7,high,,nasa_tm_20210011385_appendix_a,107 (pdf 115),"0.9, 0.4, 0.36, 0.32, 0.308, 0.3, 0.29, 0.28 (flame persisted for all)"
+PSI-25,P5,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,7,8,0.28,pot,,sustained,,"0.28,",Fan display,7,high,,nasa_tm_20210011385_appendix_a,107 (pdf 115),"0.9, 0.4, 0.36, 0.32, 0.308, 0.3, 0.29, 0.28 (flame persisted for all)"
+PSI-25,P5,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,7,9,0,pot,,extinguished,flow_turned_off,0 ext,Fan display,7,high,extinguished at pot 0 (may equal fan off); air display '5 down to ext'; corrected per TM Appendix A: flow deliberately turned to 0,nasa_tm_20210011385_appendix_a,107 (pdf 115),finally turned down flow to 0 to extinguish
+PSI-25,P6,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,8,0,5,air_cm_s,,sustained,,"5, pots",Air display,8,high,fan display 48,nasa_tm_20210011385_appendix_a,107 (pdf 115),"steady burning until turned flow off, multiple pot settings"
+PSI-25,P6,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,8,1,0.4,pot,,sustained,,pots 0.4,Air display,8,high,,nasa_tm_20210011385_appendix_a,107 (pdf 115),"steady burning until turned flow off, multiple pot settings"
+PSI-25,P6,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,8,2,0.36,pot,,sustained,,"0.36,",Air display,8,high,,nasa_tm_20210011385_appendix_a,107 (pdf 115),"steady burning until turned flow off, multiple pot settings"
+PSI-25,P6,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,8,3,0.32,pot,,sustained,,"0.32,",Air display,8,high,,nasa_tm_20210011385_appendix_a,107 (pdf 115),"steady burning until turned flow off, multiple pot settings"
+PSI-25,P6,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,8,4,0.31,pot,,sustained,,"0.31,",Air display,8,high,followed by off,nasa_tm_20210011385_appendix_a,107 (pdf 115),"steady burning until turned flow off, multiple pot settings"
+PSI-25,P8,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,9,0,5,air_cm_s,,brief_flame_no_sustain,,"5, would not stay lit",Air display,9,high,fan 48,nasa_tm_20210011385_appendix_a,107 (pdf 115),would not stay lit
+PSI-25,P8,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,9,1,10,air_cm_s,,brief_flame_no_sustain,,"10, 15 ibid",Air display,9,high,fan 62; 'ibid' = same as above,nasa_tm_20210011385_appendix_a,107 (pdf 115),would not stay lit
+PSI-25,P8,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,9,2,15,air_cm_s,,brief_flame_no_sustain,,15 ibid,Air display,9,high,fan 75; 'ibid' = same as above,nasa_tm_20210011385_appendix_a,107 (pdf 115),would not stay lit
+PSI-25,P9,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,10,0,5,air_cm_s,,sustained,,5cm/s,Fan display,10,medium,pot 1.5; air display '5 down to ext',,,
+PSI-25,P9,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,10,1,0.9,pot,,sustained,,"0.9,",Fan display,10,medium,,,,
+PSI-25,P9,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,10,2,0.4,pot,,sustained,,"0.4,",Fan display,10,medium,,,,
+PSI-25,P9,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,10,3,0.36,pot,,sustained,,"0.36,",Fan display,10,medium,,,,
+PSI-25,P9,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,10,4,0.32,pot,,sustained,,"0.32,",Fan display,10,medium,,,,
+PSI-25,P9,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,10,5,0.3,pot,,sustained,,"0.3,",Fan display,10,medium,,,,
+PSI-25,P9,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,10,6,0.28,pot,,extinguished,quench_low_flow,0.28 ext,Fan display,10,high,,nasa_tm_20210011385_appendix_a,107 (pdf 115),flame out at 0.28
+PSI-25,P10,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,11,0,5,air_cm_s,,sustained,,"5, pots",Air display,11,high,"fan display 48, 41",nasa_tm_20210011385_appendix_a,106 (pdf 114),steady burn at multiple velocities
+PSI-25,P10,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,11,1,0.4,pot,,sustained,,pots 0.4,Air display,11,high,,nasa_tm_20210011385_appendix_a,106 (pdf 114),steady burn at multiple velocities
+PSI-25,P10,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,11,2,0.36,pot,,sustained,,"0.36,",Air display,11,high,,nasa_tm_20210011385_appendix_a,106 (pdf 114),steady burn at multiple velocities
+PSI-25,P10,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,11,3,0.32,pot,,sustained,,"0.32,",Air display,11,high,,nasa_tm_20210011385_appendix_a,106 (pdf 114),steady burn at multiple velocities
+PSI-25,P10,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,11,4,0.31,pot,,sustained,,"0.31,",Air display,11,high,,nasa_tm_20210011385_appendix_a,106 (pdf 114),steady burn at multiple velocities
+PSI-25,P10,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,11,5,0.3,pot,,extinguished,quench_low_flow,0.30 extinguished,Air display,11,high,written 0.30,nasa_tm_20210011385_appendix_a,106 (pdf 114),finite quench at pot 0.3
+PSI-25,P12,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,12,0,5,air_cm_s,,sustained,,"5, 3",Air display,12,medium,fan 60 / pot 2.6,,,
+PSI-25,P12,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,12,1,3,air_cm_s,,sustained,,"3,2",Air display,12,medium,fan 52 / pot 1.6,,,
+PSI-25,P12,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,12,2,2,air_cm_s,,sustained,,"2,1",Air display,12,medium,fan 48 / pot 1.2,,,
+PSI-25,P12,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,12,3,1,air_cm_s,,sustained,,"1, 0.5",Air display,12,medium,fan 44.5 / pot .75,,,
+PSI-25,P12,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,12,4,0.5,air_cm_s,,sustained,,"0.5, lower",Air display,12,medium,fan 42 / pot .5,,,
+PSI-25,P12,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,12,5,0.4,pot,,sustained,,".4,.36",Fan display,12,medium,fan 41.5; air display 'lower',,,
+PSI-25,P12,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,12,6,0.36,pot,,sustained,,".36,0",Fan display,12,high,fan 41; air display 'lower'; flame oscillating but present,nasa_tm_20210011385_appendix_a,106 (pdf 114),oscillating at 0.36
+PSI-25,P12,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,12,7,0.34,pot,,extinguished,quench_low_flow,0.34,Fan display,12,high,TM: out immediately at 0.34,nasa_tm_20210011385_appendix_a,106 (pdf 114),out immediately at 0.34
+PSI-25,P13a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,13,0,5,air_cm_s,,sustained,,5cm/s,Fan display,13,medium,pot 1.1; air display '5 down to ext',,,
+PSI-25,P13a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,13,1,0.4,pot,,sustained,,"0.4,",Fan display,13,medium,,,,
+PSI-25,P13a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,13,2,0.36,pot,,sustained,,"0.36,",Fan display,13,medium,,,,
+PSI-25,P13a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,13,3,0.32,pot,,sustained,,"0.32,",Fan display,13,medium,,,,
+PSI-25,P13a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,13,4,0.3,pot,,sustained,,"0.3,",Fan display,13,medium,,,,
+PSI-25,P13a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,13,5,0.28,pot,,sustained,,"0.28,",Fan display,13,medium,,,,
+PSI-25,P13a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,13,6,0.26,pot,,sustained,,"0.26,",Fan display,13,medium,,,,
+PSI-25,P13a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,13,7,0,pot,,extinguished,flow_turned_off,0 ext,Fan display,13,high,extinguished at pot 0 (may equal fan off); air display '5 down to ext'; corrected per TM Appendix A: flame went out when pot turned to 0,nasa_tm_20210011385_appendix_a,106 (pdf 114),flame out when pot turned to 0
+PSI-25,P13b,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,14,0,5,air_cm_s,,sustained,,5cm/s,Fan display,14,medium,pot 1.3; air display '5 down to ext',,,
+PSI-25,P13b,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,14,1,0.4,pot,,sustained,,"0.4,",Fan display,14,medium,,,,
+PSI-25,P13b,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,14,2,0.36,pot,,sustained,,"0.36,",Fan display,14,medium,,,,
+PSI-25,P13b,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,14,3,0.32,pot,,extinguished,quench_low_flow,0.32 ext,Fan display,14,high,,nasa_tm_20210011385_appendix_a,106 (pdf 114),flame out when pot turned to 0.32
+PSI-25,P14,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,15,0,5,air_cm_s,,sustained,,"5, low",Air display,15,medium,fan 46; pot .85 (inferred pairing),,,
+PSI-25,P14,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,15,1,0.4,pot,,sustained,,".4, .32",Air display,15,medium,fan 41; air display 'low',,,
+PSI-25,P14,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,15,2,0.31,pot,,extinguished,quench_low_flow,extinguished at 0.31,TM Appendix A observation,15,medium,"TM: extinguished at 0.31; unit not printed in TM, read as pot from the cell settings (.85, .4, .32)",nasa_tm_20210011385_appendix_a,106 (pdf 114),extinguished at 0.31
+PSI-25,P15,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,16,0,5,air_cm_s,,sustained,,"5, (",Air display,16,medium,fan 46; followed by pot 0.36,,,
+PSI-25,P16,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,17,0,5,air_cm_s,,sustained,,"5,8",Air display,17,medium,fan 49 / pot 1.3,,,
+PSI-25,P16,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,17,1,8,air_cm_s,,sustained,,"8,2",Air display,17,medium,fan 62 / pot 2.8 (flow increase),,,
+PSI-25,P16,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,17,2,2,air_cm_s,,sustained,,"2,low",Air display,17,medium,fan 44 / pot 0.7,,,
+PSI-25,P16,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,17,3,0.4,pot,,sustained,,"0.4,",Fan display,17,medium,fan 41.5; air display 'low',,,
+PSI-25,P16,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,17,4,0.36,pot,,sustained,,"0.36,",Fan display,17,medium,fan 41,,,
+PSI-25,P16,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,17,5,0.32,pot,,extinguished,quench_low_flow,0.32,Fan display,17,high,TM: Extinguished at pot 0.32,nasa_tm_20210011385_appendix_a,106 (pdf 114),Extinguished at pot 0.32
+PSI-25,P17,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,18,0,5,air_cm_s,,sustained,,"5, 3",Air display,18,medium,fan 60 / pot 2.6,,,
+PSI-25,P17,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,18,1,3,air_cm_s,,sustained,,"3, 2",Air display,18,medium,fan 52 / pot 1.6,,,
+PSI-25,P17,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,18,2,2,air_cm_s,,sustained,,"2, 22",Air display,18,medium,fan 48 / pot 1.2,,,
+PSI-25,P17,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,18,3,22,air_cm_s,,sustained,,"22, 2",Air display,18,high,pot 10 (max setting); fan written 233 exceeds 122 display max; air display lags so 22 may be transient; TM: blowoff tried without success at the high flow,nasa_tm_20210011385_appendix_a,106 (pdf 114),leading edge receded slightly but did not blowoff
+PSI-25,P17,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,18,4,2,air_cm_s,,sustained,,"2, low",Air display,18,medium,fan 48 / pot 1.2,,,
+PSI-25,P17,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,18,5,0.36,pot,,sustained,,"0.36,",Fan display,18,medium,fan 41; air display 'low',,,
+PSI-25,P17,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,18,6,0.34,pot,,extinguished,quench_low_flow,0.34,Fan display,18,high,TM: oscillated and out at 0.34,nasa_tm_20210011385_appendix_a,106 (pdf 114),oscillated and out at 0.34
+PSI-25,P18,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,19,0,0.32,pot,,extinguished,quench_low_flow,extinction at fan pot 0.32,TM Appendix A observation,19,high,"TM: finally turned pot down slowly, extinction at fan pot 0.32; cycling steps not emitted",nasa_tm_20210011385_appendix_a,106 (pdf 114),extinction at fan pot 0.32
+PSI-25,P19,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,20,0,5,air_cm_s,,sustained,,"5,8",Air display,20,medium,fan 49 / pot 1.3,,,
+PSI-25,P19,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,20,1,8,air_cm_s,,sustained,,"8,2",Air display,20,medium,fan 62 / pot 2.8,,,
+PSI-25,P19,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,20,2,2,air_cm_s,,sustained,,"2,max",Air display,20,medium,fan 44 / pot 0.7,,,
+PSI-25,P19,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,20,3,0.4,pot,,sustained,,"0.4,",Fan display,20,medium,fan 41.5,,,
+PSI-25,P19,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,20,4,0.36,pot,,sustained,,"0.36,",Fan display,20,medium,list order,,,
+PSI-25,P19,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,20,5,122,fan_display,max,sustained,,max,Air display,20,high,"pot 10; fan 122; no blowoff stated; later setting pot .32 listed; flame state at max inferred only from later settings being listed (blowoff not ruled out); TM: blowoff tried, did not occur at pot 10 with 2 restrictors",nasa_tm_20210011385_appendix_a,106 (pdf 114),did not blowoff at pot 10
+PSI-25,P19,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,20,6,0.32,pot,,extinguished,quench_low_flow,0.32,Fan display,20,high,TM: flame out at 0.32,nasa_tm_20210011385_appendix_a,106 (pdf 114),flame out at 0.32
+PSI-25,P20,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,21,0,0.335,pot,,extinguished,quench_low_flow,extinction at fan pot 0.335,TM Appendix A observation,21,high,"TM: finally turned pot down slowly, extinction at fan pot 0.335; cycling steps not emitted",nasa_tm_20210011385_appendix_a,106 (pdf 114),extinction at fan pot 0.335
+PSI-25,P21a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,22,0,5,air_cm_s,,extinguished,at_constant_flow,5,Air display,22,high,"TM: flame self-extinguished at 5 cm/s after sample end became flat, dim flame",nasa_tm_20210011385_appendix_a,106 (pdf 114),Flame self-extinguished at 5 cm/s
+PSI-25,P22a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,24,0,5,air_cm_s,,sustained,,"5, down to ext",Air display,24,medium,fan cell begins 5,,,
+PSI-25,P22a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,24,1,0.36,pot,,sustained,,"0.36,",Fan display,24,medium,,,,
+PSI-25,P22a,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,24,2,0.32,pot,,extinguished,quench_low_flow,0.32 ext after some time,Fan display,24,high,"went out after some time at this low setting; air display '5, down to ext'",nasa_tm_20210011385_appendix_a,107 (pdf 115),Extinguished at higher flow
+PSI-25,P22b,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,25,0,5,air_cm_s,,sustained,,5 down to ext,Air display,25,medium,fan cell begins 5,,,
+PSI-25,P22b,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,25,1,0.36,pot,,sustained,,p.36,Fan display,25,medium,written p.36,,,
+PSI-25,P22b,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,25,2,0.34,pot,,sustained,,"0.34,",Fan display,25,medium,,,,
+PSI-25,P22b,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,25,3,0.33,pot,,sustained,,"0.33,",Fan display,25,medium,,,,
+PSI-25,P22b,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,25,4,0.32,pot,,sustained,,"0.32,",Fan display,25,medium,,,,
+PSI-25,P22b,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,25,5,0.31,pot,,extinguished,quench_low_flow,0.31 ext,Fan display,25,high,,nasa_tm_20210011385_appendix_a,107 (pdf 115),Extinguished at lower flow than P22a by a bit
+PSI-25,P23,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,26,0,0.38,pot,,extinguished,quench_low_flow,extinction at fan pot 0.38,TM Appendix A observation,26,high,"TM: finally turned pot down slowly, extinction at fan pot 0.38; cycling steps not emitted",nasa_tm_20210011385_appendix_a,107 (pdf 115),extinction at fan pot 0.38
+PSI-25,P24,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,27,0,0.30,pot,,extinguished,quench_low_flow,extinction at fan pot 0.30,TM Appendix A observation,27,high,"TM: finally turned pot down slowly, extinction at fan pot 0.30; cycling steps not emitted",nasa_tm_20210011385_appendix_a,107 (pdf 115),extinction at fan pot 0.30
+PSI-25,P25,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,28,0,5,air_cm_s,,sustained,,5 down to ext,Air display,28,medium,fan cell begins 5,,,
+PSI-25,P25,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,28,1,0.36,pot,,sustained,,p.36,Fan display,28,medium,written p.36,,,
+PSI-25,P25,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,28,2,0.34,pot,,sustained,,"0.34,",Fan display,28,medium,,,,
+PSI-25,P25,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,28,3,0.33,pot,,sustained,,"0.33,",Fan display,28,medium,,,,
+PSI-25,P25,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,28,4,0.32,pot,,sustained,,"0.32,",Fan display,28,medium,,,,
+PSI-25,P25,data/raw/psi/PSI-25/PSI-25_Science Documents_BASS-II_Test.Matrices.xlsx,Fernandez-Pello,28,5,0.31,pot,,extinguished,quench_low_flow,0.31 ext,Fan display,28,high,,nasa_tm_20210011385_appendix_a,107 (pdf 115),extinguished at same 0.31 pot

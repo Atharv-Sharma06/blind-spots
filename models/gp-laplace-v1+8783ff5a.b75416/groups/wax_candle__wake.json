@@ -1,0 +1,48 @@
+{
+  "flame_configuration": "wake",
+  "gp": null,
+  "group_id": "wax_candle__wake",
+  "hyperparameters": null,
+  "label": "Wax candles · wake ignition",
+  "material_family": "wax_candle",
+  "mean_function": null,
+  "metrics_summary": {},
+  "model_reason": "3 training experiments (needs ≥ 6); 2 sustained observations (needs ≥ 3); 1 not-sustained observations (needs ≥ 3); not-sustained outcomes in 1 experiment(s) (needs ≥ 2)",
+  "model_status": "insufficient_data",
+  "training_set": {
+    "airflow_cm_s_range": [
+      0.0,
+      3.0198
+    ],
+    "campaigns": [
+      "BASS/2012",
+      "BASS/2013"
+    ],
+    "confidence_included": [
+      "high",
+      "medium"
+    ],
+    "filters": [
+      "included_in_training",
+      "label not null",
+      "confidence in ['high', 'medium']",
+      "oxygen, airflow and analysis pressure present"
+    ],
+    "label_counts": {
+      "not_sustained": 1,
+      "sustained": 2
+    },
+    "n_experiments": 3,
+    "n_flow_off_transient": 1,
+    "n_observations": 3,
+    "oxygen_percent_range": [
+      21.111,
+      21.2449255751
+    ],
+    "sustained_fraction": 0.6666666666666666,
+    "z_p_range": [
+      -0.028020512331747655,
+      -0.020202707317519466
+    ]
+  }
+}

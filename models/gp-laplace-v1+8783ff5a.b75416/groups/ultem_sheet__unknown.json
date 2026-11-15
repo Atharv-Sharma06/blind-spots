@@ -1,0 +1,47 @@
+{
+  "flame_configuration": "unknown",
+  "gp": null,
+  "group_id": "ultem_sheet__unknown",
+  "hyperparameters": null,
+  "label": "Ultem sheet · configuration not recorded",
+  "material_family": "ultem_sheet",
+  "mean_function": null,
+  "metrics_summary": {},
+  "model_reason": "1 training experiments (needs ≥ 6); 0 sustained observations (needs ≥ 3); 1 not-sustained observations (needs ≥ 3); not-sustained outcomes in 1 experiment(s) (needs ≥ 2)",
+  "model_status": "insufficient_data",
+  "training_set": {
+    "airflow_cm_s_range": [
+      8.000000000000002,
+      8.000000000000002
+    ],
+    "campaigns": [
+      "BASS/2012"
+    ],
+    "confidence_included": [
+      "high",
+      "medium"
+    ],
+    "filters": [
+      "included_in_training",
+      "label not null",
+      "confidence in ['high', 'medium']",
+      "oxygen, airflow and analysis pressure present"
+    ],
+    "label_counts": {
+      "not_sustained": 1,
+      "sustained": 0
+    },
+    "n_experiments": 1,
+    "n_flow_off_transient": 0,
+    "n_observations": 1,
+    "oxygen_percent_range": [
+      22.5254635675,
+      22.5254635675
+    ],
+    "sustained_fraction": 0.0,
+    "z_p_range": [
+      0.007602605764363893,
+      0.007602605764363893
+    ]
+  }
+}

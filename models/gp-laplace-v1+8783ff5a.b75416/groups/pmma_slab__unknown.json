@@ -1,0 +1,47 @@
+{
+  "flame_configuration": "unknown",
+  "gp": null,
+  "group_id": "pmma_slab__unknown",
+  "hyperparameters": null,
+  "label": "PMMA slabs · configuration not recorded",
+  "material_family": "pmma_slab",
+  "mean_function": null,
+  "metrics_summary": {},
+  "model_reason": "3 training experiments (needs ≥ 6); 1 sustained observations (needs ≥ 3)",
+  "model_status": "insufficient_data",
+  "training_set": {
+    "airflow_cm_s_range": [
+      3.9999999999999996,
+      10.000000000000002
+    ],
+    "campaigns": [
+      "BASS/2012"
+    ],
+    "confidence_included": [
+      "high",
+      "medium"
+    ],
+    "filters": [
+      "included_in_training",
+      "label not null",
+      "confidence in ['high', 'medium']",
+      "oxygen, airflow and analysis pressure present"
+    ],
+    "label_counts": {
+      "not_sustained": 3,
+      "sustained": 1
+    },
+    "n_experiments": 3,
+    "n_flow_off_transient": 0,
+    "n_observations": 4,
+    "oxygen_percent_range": [
+      21.983426531,
+      22.3838060993
+    ],
+    "sustained_fraction": 0.25,
+    "z_p_range": [
+      -0.023767054209443333,
+      -0.01204594617821874
+    ]
+  }
+}

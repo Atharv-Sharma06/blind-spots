@@ -2,6 +2,9 @@
 
 For every row of a steps CSV, checks that `raw_token` is an exact substring of the cell at
 (`token_row`, column whose normalized header == `raw_column`) in `source_file`/`source_sheet`.
+A steps row whose `raw_column` is exactly "TM Appendix A observation" is instead checked against
+`data/curation/evidence/bass2_tm_appendix_a.csv`: `raw_token` must be a substring of that test's
+`observation_text` (matched on `test_label`, and on `source_sheet` when it names a PSI-25 sheet).
 For tests CSVs, checks that `source_row` holds the cited `test_label` in its test-number column.
 
 Usage (repo root):
@@ -22,6 +25,8 @@ import openpyxl
 
 ROOT = Path(__file__).resolve().parents[1]
 HEADER_ROW = {"as run matrix": 3}  # every BASS-II sheet uses row 1
+TM_COLUMN = "TM Appendix A observation"
+TM_EVIDENCE = "data/curation/evidence/bass2_tm_appendix_a.csv"
 
 
 def norm(text: object) -> str:
@@ -49,9 +54,39 @@ def header_map(path: str, name: str) -> dict[str, int]:
     return {norm(ws.cell(hr, c).value): c for c in range(1, ws.max_column + 1) if norm(ws.cell(hr, c).value)}
 
 
+@lru_cache(maxsize=None)
+def tm_observations() -> dict[str, list[tuple[str, str]]]:
+    """test_label -> [(pi_sheet, observation_text)] from the TM Appendix A evidence CSV."""
+    out: dict[str, list[tuple[str, str]]] = {}
+    with open(ROOT / TM_EVIDENCE, newline="", encoding="utf-8") as fh:
+        for row in csv.DictReader(fh):
+            out.setdefault(row["test_label"], []).append((row["pi_sheet"], row["observation_text"]))
+    return out
+
+
+def check_tm_row(i: int, r: dict[str, str]) -> str | None:
+    token = r["raw_token"]
+    try:
+        cands = tm_observations().get(r["test_label"], [])
+    except FileNotFoundError:
+        return f"line {i}: {TM_EVIDENCE} not found"
+    same_sheet = [t for sh, t in cands if sh == r["source_sheet"]]
+    texts = same_sheet or [t for _, t in cands]
+    if not texts:
+        return f"line {i}: {r['test_label']}: no TM Appendix A row in {TM_EVIDENCE}"
+    if token == "" or not any(token in t for t in texts):
+        return f"line {i}: {r['test_label']}: raw_token {token!r} not found in TM Appendix A observation {texts[0]!r}"
+    return None
+
+
 def check_steps(rows: list[dict[str, str]]) -> list[str]:
     errors = []
     for i, r in enumerate(rows, start=2):
+        if norm(r["raw_column"]) == TM_COLUMN:
+            err = check_tm_row(i, r)
+            if err:
+                errors.append(err)
+            continue
         path, name = r["source_file"], r["source_sheet"]
         hmap = header_map(path, name)
         col = hmap.get(norm(r["raw_column"]))

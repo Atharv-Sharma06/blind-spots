@@ -1,0 +1,47 @@
+{
+  "flame_configuration": "unknown",
+  "gp": null,
+  "group_id": "nomex_fabric__unknown",
+  "hyperparameters": null,
+  "label": "Nomex fabric · configuration not recorded",
+  "material_family": "nomex_fabric",
+  "mean_function": null,
+  "metrics_summary": {},
+  "model_reason": "3 training experiments (needs ≥ 6); 1 sustained observations (needs ≥ 3); 2 not-sustained observations (needs ≥ 3)",
+  "model_status": "insufficient_data",
+  "training_set": {
+    "airflow_cm_s_range": [
+      14.499999999999998,
+      14.999999999999998
+    ],
+    "campaigns": [
+      "BASS/2012"
+    ],
+    "confidence_included": [
+      "high",
+      "medium"
+    ],
+    "filters": [
+      "included_in_training",
+      "label not null",
+      "confidence in ['high', 'medium']",
+      "oxygen, airflow and analysis pressure present"
+    ],
+    "label_counts": {
+      "not_sustained": 2,
+      "sustained": 1
+    },
+    "n_experiments": 3,
+    "n_flow_off_transient": 0,
+    "n_observations": 3,
+    "oxygen_percent_range": [
+      21.6292134831,
+      22.5254635675
+    ],
+    "sustained_fraction": 0.3333333333333333,
+    "z_p_range": [
+      -0.023767054209443333,
+      0.007602605764363893
+    ]
+  }
+}

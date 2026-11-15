@@ -1,0 +1,3 @@
+# reconcile-bass2_olson (2026-11-15)
+Olson tests/steps reconciled with NASA/TM-20210011385 Appendix A (Tables A.5). Appendix A "Stagnation" adopted; "Concurrent" and "?" labels set flame_configuration unknown (conflict with BASS-II ReadMe stagnation, conservative). Steps gained evidence_source/evidence_page/evidence_quote. Full change log: data/curation/audit/bass2_olson_tm.md.
+Judgement calls: O12 steps not_ignited -> brief_flame_no_sustain (TM: flame with igniter died on removal); O16 outcome assigned to its sole recorded setting; O17, O13b, O1, O3b, O6 left unchanged (ambiguous or no text).

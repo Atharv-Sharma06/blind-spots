@@ -6,7 +6,9 @@ Matrices (BASS, BASS-II) + curation tables (interpretation with provenance) + fa
 
 from __future__ import annotations
 
+import argparse
 import json
+import os
 from collections import Counter
 from collections.abc import Sequence
 from pathlib import Path
@@ -15,6 +17,7 @@ from typing import Any, Literal
 from blindspots.config import REPO_ROOT
 from blindspots.ingestion.bass import PSI26_MATRIX_FILE, read_bass
 from blindspots.ingestion.bass2 import PSI25_MATRIX_FILE, RawTest, read_bass2
+from blindspots.ingestion.context import load_context
 from blindspots.ingestion.investigations import build_investigations
 from blindspots.ingestion.profiles import ProfilesData, iss_nominal_pressure, load_profiles
 from blindspots.ingestion.saffire import SAFFIRE_FILE, load_saffire
@@ -44,6 +47,12 @@ BASS2_HEADER_YEAR = 2014
 MEASUREMENT_METHOD = (
     "Test-level values from the source matrix cells; flow schedule and outcomes transcribed from the "
     "matrix free text into curation tables with cell-level provenance."
+)
+TM_EVIDENCE_SOURCE_FLAG = "outcome_evidence_nasa_tm_20210011385"
+TM_NOTES_FLAG = "notes_from_nasa_tm_20210011385"
+TM_METHOD_SUFFIX = (
+    " Observation text (notes_raw) is quoted verbatim from NASA/TM-20210011385 Appendix A "
+    "(printed p.{page}), not from the PSI-25 workbook, which has no observation column."
 )
 OUTCOME_DEFINITION = (
     "terminal_event assigned during curation from the matrix observation text (see data/curation)."
@@ -144,6 +153,7 @@ def build_records(
             notes["matrices_missing"].append(rel)
     p_kpa, p_source, p_sourced = iss_nominal_pressure(profiles.profiles)
     cells = provenance.SourceCells(repo_root)
+    tm = provenance.TmEvidence.load(repo_root)
     experiments: list[ExperimentRecord] = []
     observations: list[Observation] = []
     matched: set[tuple[str, str]] = set()
@@ -203,15 +213,20 @@ def build_records(
             step_flags.extend(flow_flags)
             o2_step, o2_flags = oxygen_for_step(raw.o2_initial, raw.o2_final, idx, n_steps, o2_anomaly)
             step_flags.extend(o2_flags)
-            err = provenance.check_step(
-                cells,
-                r["source_file"],
-                r["source_sheet"],
-                _int(r["source_row"]) or 0,
-                _int(r["token_row"]),
-                r["raw_column"],
-                r["raw_token"],
-            )
+            if provenance.is_tm_column(r["raw_column"]):
+                err = tm.check_step(r["test_label"], r["source_sheet"], r["raw_token"])
+            else:
+                err = provenance.check_step(
+                    cells,
+                    r["source_file"],
+                    r["source_sheet"],
+                    _int(r["source_row"]) or 0,
+                    _int(r["token_row"]),
+                    r["raw_column"],
+                    r["raw_token"],
+                )
+            if r.get("evidence_source"):
+                step_flags.append(TM_EVIDENCE_SOURCE_FLAG)
             prov_ok = err is None and test_prov_ok
             if not prov_ok:
                 step_flags.append(provenance.FLAG)
@@ -280,6 +295,13 @@ def build_records(
             )
             exp_reason = top[0][0]
         cr = cur.row if cur else {}
+        notes_raw = raw.notes_raw
+        method = MEASUREMENT_METHOD
+        tm_row = tm.row_for(raw.test_label, raw.source_sheet) if raw.investigation_id == "PSI-25" else None
+        if tm_row is not None and tm_row["observation_text"]:
+            notes_raw = tm_row["observation_text"]
+            flags.append(TM_NOTES_FLAG)
+            method = MEASUREMENT_METHOD + TM_METHOD_SUFFIX.format(page=tm_row["printed_page"])
         experiments.append(
             ExperimentRecord(
                 experiment_id=eid,
@@ -312,12 +334,12 @@ def build_records(
                 flow_restrictor=raw.flow_restrictor,
                 observed_outcome=cr.get("terminal_event") or None,
                 outcome_definition=OUTCOME_DEFINITION if cur else None,
-                measurement_method=MEASUREMENT_METHOD,
+                measurement_method=method,
                 co2_percent_initial=raw.co2_initial,
                 co2_percent_final=raw.co2_final,
                 co_ppm_initial=raw.co_initial,
                 co_ppm_final=raw.co_final,
-                notes_raw=raw.notes_raw,
+                notes_raw=notes_raw,
                 source_url=inv.landing_url,
                 source_doi=inv.doi,
                 source_file=raw.source_file,
@@ -347,6 +369,41 @@ def _counts(items: Sequence[Any], attr: str) -> dict[str, int]:
             Counter(str(getattr(i, attr)) if getattr(i, attr) is not None else "null" for i in items).items()
         )
     )
+
+
+def _evidence_summary(
+    experiments: Sequence[ExperimentRecord],
+    observations: Sequence[Observation],
+    context: Sequence[ExperimentRecord],
+    previous: list[dict[str, Any]] | None,
+) -> dict[str, Any]:
+    """Counts of TM-evidence-backed steps, configuration changes vs the previous build, context records."""
+    backed = [o for o in observations if TM_EVIDENCE_SOURCE_FLAG in o.quality_flags]
+    changes: dict[str, Any] | None = None
+    if previous is not None:
+        old = {e["experiment_id"]: e.get("flame_configuration") for e in previous}
+        trans: Counter[str] = Counter()
+        for e in experiments:
+            if e.experiment_id in old and old[e.experiment_id] != e.flame_configuration:
+                trans[f"{old[e.experiment_id]} -> {e.flame_configuration}"] += 1
+        changes = {
+            "n_changed": sum(trans.values()),
+            "by_transition": dict(sorted(trans.items())),
+            "compared_with": "data/normalized/experiments.json before this build",
+        }
+    return {
+        "evidence": {
+            "steps_with_tm_evidence": len(backed),
+            "tests_with_tm_evidence_steps": len({o.experiment_id for o in backed}),
+            "steps_with_tm_evidence_in_training": sum(o.included_in_training for o in backed),
+            "experiments_with_tm_notes": sum(TM_NOTES_FLAG in e.quality_flags for e in experiments),
+            "configuration_changes_vs_previous_labels": changes,
+            "context_records_by_source": dict(
+                sorted(Counter(f"{c.investigation_id} ({c.campaign_group})" for c in context).items())
+            ),
+            "n_context_records": len(context),
+        }
+    }
 
 
 def make_report(
@@ -428,6 +485,16 @@ def build(repo_root: Path = REPO_ROOT, out_dir: Path | None = None) -> dict[str,
     curation = load_curation(data_dir / "curation")
     experiments, observations, notes = build_records(repo_root, curation, cal, profiles, inv_by_id)
     experiments.extend(load_saffire(data_dir / "curation" / SAFFIRE_FILE, inv_by_id))
+    ctx_records, ctx_invs, ctx_problems = load_context(data_dir / "curation" / "context_microgravity")
+    experiments.extend(ctx_records)
+    invs = invs + [i for i in ctx_invs if i.investigation_id not in inv_by_id]
+    prev_path = data_dir / "normalized" / "experiments.json"
+    previous: list[dict[str, Any]] | None = None
+    if prev_path.is_file():
+        try:
+            previous = json.loads(prev_path.read_text(encoding="utf-8"))
+        except ValueError:
+            previous = None
     dups = find_duplicates(experiments)
     range_counts = apply_range_checks(experiments, observations)
     errors = revalidate(invs, experiments, observations) + dups.id_errors
@@ -439,7 +506,12 @@ def build(repo_root: Path = REPO_ROOT, out_dir: Path | None = None) -> dict[str,
         )
         for i in invs
     ]
-    extra = {"calibration_file_found": cal is not None, **notes}
+    extra = {
+        "calibration_file_found": cal is not None,
+        **notes,
+        **_evidence_summary(experiments, observations, ctx_records, previous),
+        "context_problems": ctx_problems,
+    }
     report = make_report(
         invs,
         experiments,
@@ -455,8 +527,19 @@ def build(repo_root: Path = REPO_ROOT, out_dir: Path | None = None) -> dict[str,
     return report
 
 
-def main() -> None:
-    report = build()
+def main(argv: Sequence[str] | None = None) -> None:
+    parser = argparse.ArgumentParser(prog="build-dataset")
+    parser.add_argument(
+        "--out",
+        type=Path,
+        default=None,
+        help="output directory (default: $BLINDSPOTS_NORMALIZED_OUT or <repo>/data/normalized)",
+    )
+    args, _unknown = parser.parse_known_args(argv if argv is not None else [])
+    out = args.out or (
+        Path(os.environ["BLINDSPOTS_NORMALIZED_OUT"]) if os.environ.get("BLINDSPOTS_NORMALIZED_OUT") else None
+    )
+    report = build(out_dir=out)
     c = report["counts"]
     print(f"dataset {report['dataset_version']}: {c['experiments']} experiments, {c['observations']} obs")
     n_e, n_o = c["experiments_included_in_training"], c["observations_included_in_training"]
@@ -467,3 +550,9 @@ def main() -> None:
     if report["errors"]:
         print("ERRORS:", *report["errors"], sep="\n  ")
         raise SystemExit(1)
+
+
+if __name__ == "__main__":
+    import sys
+
+    main(sys.argv[1:])

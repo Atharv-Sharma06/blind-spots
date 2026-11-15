@@ -1,0 +1,49 @@
+{
+  "flame_configuration": "unknown",
+  "gp": null,
+  "group_id": "wax_candle__unknown",
+  "hyperparameters": null,
+  "label": "Wax candles · configuration not recorded",
+  "material_family": "wax_candle",
+  "mean_function": null,
+  "metrics_summary": {},
+  "model_reason": "1 not-sustained observations (needs ≥ 3); not-sustained outcomes in 1 experiment(s) (needs ≥ 2)",
+  "model_status": "insufficient_data",
+  "training_set": {
+    "airflow_cm_s_range": [
+      1.0,
+      10.066
+    ],
+    "campaigns": [
+      "BASS-II/Ferkul",
+      "BASS/2012",
+      "BASS/2013"
+    ],
+    "confidence_included": [
+      "high",
+      "medium"
+    ],
+    "filters": [
+      "included_in_training",
+      "label not null",
+      "confidence in ['high', 'medium']",
+      "oxygen, airflow and analysis pressure present"
+    ],
+    "label_counts": {
+      "not_sustained": 1,
+      "sustained": 11
+    },
+    "n_experiments": 7,
+    "n_flow_off_transient": 0,
+    "n_observations": 12,
+    "oxygen_percent_range": [
+      15.9,
+      22.219853431
+    ],
+    "sustained_fraction": 0.9166666666666666,
+    "z_p_range": [
+      -0.030459207484708574,
+      0.00027630034022565694
+    ]
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "flame_configuration": "opposed",
+  "gp": null,
+  "group_id": "sibal_fabric__opposed",
+  "hyperparameters": null,
+  "label": "SIBAL cotton/fiberglass fabric · opposed flow",
+  "material_family": "sibal_fabric",
+  "mean_function": null,
+  "metrics_summary": {},
+  "model_reason": "2 training experiments (needs ≥ 6); 1 sustained observations (needs ≥ 3); 1 not-sustained observations (needs ≥ 3); not-sustained outcomes in 1 experiment(s) (needs ≥ 2)",
+  "model_status": "insufficient_data",
+  "training_set": {
+    "airflow_cm_s_range": [
+      9.000000000000002,
+      10.000000000000002
+    ],
+    "campaigns": [
+      "BASS/2012"
+    ],
+    "confidence_included": [
+      "high",
+      "medium"
+    ],
+    "filters": [
+      "included_in_training",
+      "label not null",
+      "confidence in ['high', 'medium']",
+      "oxygen, airflow and analysis pressure present"
+    ],
+    "label_counts": {
+      "not_sustained": 1,
+      "sustained": 1
+    },
+    "n_experiments": 2,
+    "n_flow_off_transient": 0,
+    "n_observations": 2,
+    "oxygen_percent_range": [
+      21.8944140781,
+      22.219853431
+    ],
+    "sustained_fraction": 0.5,
+    "z_p_range": [
+      -0.013111902301102159,
+      -0.012578782206860185
+    ]
+  }
+}

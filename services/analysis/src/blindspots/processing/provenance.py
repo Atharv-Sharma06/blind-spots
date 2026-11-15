@@ -7,6 +7,7 @@ of the cell at (``token_row``, column whose normalised header equals ``raw_colum
 
 from __future__ import annotations
 
+import csv
 from pathlib import Path
 from typing import Any
 
@@ -16,6 +17,8 @@ from blindspots.processing.units import cell_text, norm_text
 
 HEADER_ROW_BY_SHEET = {"as run matrix": 3}
 FLAG = "provenance_mismatch"
+TM_COLUMN = "TM Appendix A observation"
+TM_EVIDENCE_REL = "data/curation/evidence/bass2_tm_appendix_a.csv"
 
 
 class SourceCells:
@@ -91,3 +94,48 @@ def check_test(
     if norm_text(text) != test_label.split("/")[0]:
         return f"test_label {test_label!r} but row {source_row} holds {norm_text(text)!r}"
     return None
+
+
+class TmEvidence:
+    """NASA/TM-20210011385 Appendix A rows (``bass2_tm_appendix_a.csv``), keyed by test label."""
+
+    def __init__(self, rows: list[dict[str, str]] | None = None) -> None:
+        self.rows: list[dict[str, str]] = rows or []
+        self.by_label: dict[str, list[dict[str, str]]] = {}
+        for r in self.rows:
+            self.by_label.setdefault(r["test_label"], []).append(r)
+
+    @classmethod
+    def load(cls, repo_root: Path) -> TmEvidence:
+        path = repo_root / TM_EVIDENCE_REL
+        if not path.is_file():
+            return cls()
+        with path.open(newline="", encoding="utf-8") as fh:
+            return cls(list(csv.DictReader(fh)))
+
+    def row_for(self, test_label: str, sheet: str | None) -> dict[str, str] | None:
+        """The Appendix A row of a test: same sheet if one matches, else the only row with that label."""
+        cands = self.by_label.get(test_label, [])
+        same = [r for r in cands if r["pi_sheet"] == sheet]
+        if same:
+            return same[0]
+        return cands[0] if len(cands) == 1 and sheet is None else None
+
+    def check_step(self, test_label: str, sheet: str | None, raw_token: str) -> str | None:
+        """Same rule as scripts/check_curation_provenance.py: the token must be a substring of the
+        test's Appendix A observation text (sheet preferred, any sheet otherwise)."""
+        cands = self.by_label.get(test_label, [])
+        texts = [r["observation_text"] for r in cands if r["pi_sheet"] == sheet] or [
+            r["observation_text"] for r in cands
+        ]
+        if not texts:
+            return f"{test_label}: no TM Appendix A row in {TM_EVIDENCE_REL}"
+        if raw_token == "" or not any(raw_token in t for t in texts):
+            return (
+                f"{test_label}: raw_token {raw_token!r} not found in TM Appendix A observation {texts[0]!r}"
+            )
+        return None
+
+
+def is_tm_column(raw_column: str) -> bool:
+    return norm_text(raw_column) == TM_COLUMN

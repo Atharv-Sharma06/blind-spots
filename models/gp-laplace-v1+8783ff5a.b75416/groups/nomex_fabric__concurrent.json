@@ -1,0 +1,47 @@
+{
+  "flame_configuration": "concurrent",
+  "gp": null,
+  "group_id": "nomex_fabric__concurrent",
+  "hyperparameters": null,
+  "label": "Nomex fabric · concurrent flow",
+  "material_family": "nomex_fabric",
+  "mean_function": null,
+  "metrics_summary": {},
+  "model_reason": "3 training experiments (needs ≥ 6); 0 sustained observations (needs ≥ 3)",
+  "model_status": "insufficient_data",
+  "training_set": {
+    "airflow_cm_s_range": [
+      8.0528,
+      15.098999999999998
+    ],
+    "campaigns": [
+      "BASS-II/Ferkul"
+    ],
+    "confidence_included": [
+      "high",
+      "medium"
+    ],
+    "filters": [
+      "included_in_training",
+      "label not null",
+      "confidence in ['high', 'medium']",
+      "oxygen, airflow and analysis pressure present"
+    ],
+    "label_counts": {
+      "not_sustained": 3,
+      "sustained": 0
+    },
+    "n_experiments": 3,
+    "n_flow_off_transient": 0,
+    "n_observations": 3,
+    "oxygen_percent_range": [
+      21.0,
+      22.2
+    ],
+    "sustained_fraction": 0.0,
+    "z_p_range": [
+      0.00027630034022565694,
+      0.00027630034022565694
+    ]
+  }
+}
