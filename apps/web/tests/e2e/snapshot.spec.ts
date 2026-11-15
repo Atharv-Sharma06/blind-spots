@@ -39,17 +39,19 @@ test.describe("Explore (snapshot, no API)", () => {
     await expect(candidateMarks(page).first()).toBeVisible();
     expect(await obsMarks(page).count()).toBeGreaterThan(0);
     expect(apiCalls(api.urls()), "snapshot mode must not call the live API").toEqual([]);
-    await expect(page.getByText("Precomputed snapshot: slice values are limited to those exported")).toBeVisible();
+    await expect(page.getByText("Precomputed snapshot: slices are limited to the exported values")).toBeVisible();
   });
 
   test("the slice control offers exactly the exported slices", async ({ page }) => {
     await openExplore(page);
+    // D1 default plane: O2 x pressure, sliced at an exported airflow
+    await expect(mapGroup(page)).toHaveAttribute("aria-label", /oxygen versus pressure/);
     const slice = page.getByRole("combobox", { name: /slice/i });
     await expect(slice).toBeVisible();
     const current = (await slice.innerText()).trim();
     await slice.click();
     const labels = (await page.getByRole("option").allInnerTexts()).map((t) => t.trim());
-    expect(labels).toEqual(manifest.slices.o2_flow.map((v) => `${v.toFixed(1)} kPa`));
+    expect(labels).toEqual(manifest.slices.o2_pressure.map((v) => `${v.toFixed(1)} cm/s`));
     // pick a different exported slice: the map re-renders from the snapshot with no error state
     const otherIdx = labels.findIndex((l) => l !== current);
     expect(otherIdx).toBeGreaterThanOrEqual(0);
@@ -58,12 +60,12 @@ test.describe("Explore (snapshot, no API)", () => {
     await expect(mapGroup(page)).toBeVisible();
     await expect(page.locator("[data-error-code]")).toHaveCount(0);
 
-    await page.getByRole("radio", { name: /pressure/ }).click();
-    await expect(page).toHaveURL(/plane=o2_pressure/);
+    await page.getByRole("radio", { name: /airflow/ }).click();
+    await expect(page).toHaveURL(/plane=o2_flow/);
     const s2 = page.getByRole("combobox", { name: /slice/i });
     await s2.click();
     const labels2 = (await page.getByRole("option").allInnerTexts()).map((t) => t.trim());
-    expect(labels2).toEqual(manifest.slices.o2_pressure.map((v) => `${v.toFixed(1)} cm/s`));
+    expect(labels2).toEqual(manifest.slices.o2_flow.map((v) => `${v.toFixed(1)} kPa`));
     await page.keyboard.press("Escape");
     await expect(mapGroup(page)).toBeVisible();
   });
@@ -73,17 +75,19 @@ test.describe("Explore (snapshot, no API)", () => {
     await page.getByTestId("target-selector").click();
     const dialog = page.getByRole("dialog", { name: "Target atmosphere" });
     await expect(dialog.getByRole("button", { name: "Custom target…" })).toBeDisabled();
-    await expect(dialog).toContainText("Custom targets require the live analysis service. This deployment serves a precomputed snapshot.");
+    await expect(dialog).toContainText("Custom targets are computed on demand; this version serves precomputed results for the documented atmospheres only.");
+    // public visitors are never told to run the service themselves (LEAD_DECISIONS D7)
+    await expect(dialog).not.toContainText(/run the (analysis )?service locally/i);
     // documented profiles are all listed (envelopes excluded)
     for (const id of manifest.profiles) expect(id).toBeTruthy();
     expect(await dialog.getByRole("button", { pressed: false }).count()).toBeGreaterThan(0);
   });
 
-  test("a hand-written custom target URL shows the 'requires the live analysis service' state, not fabricated numbers", async ({ page }) => {
+  test("a hand-written custom target URL shows the 'not in this precomputed version' state, not fabricated numbers", async ({ page }) => {
     const custom = { label: "User-selected hypothetical conditions", oxygen_percent: { nominal: 23, min: null, max: null }, total_pressure_kpa: { nominal: 101.3, min: null, max: null }, airflow_cm_s: null };
     const enc = Buffer.from(JSON.stringify(custom)).toString("base64url");
     await page.goto(`/?target=custom:${enc}`);
-    await expect(page.getByText("Requires the live analysis service").first()).toBeVisible();
+    await expect(page.getByText("Not in this precomputed version").first()).toBeVisible();
     await expect(page.getByTestId("verdict-badge")).toHaveCount(0);
     await expect(page.getByTestId("top-candidate")).toHaveCount(0);
   });
@@ -116,11 +120,11 @@ test.describe("Explore (snapshot, no API)", () => {
       for (const p of manifest.profiles) {
         await page.goto(`/?group=${g}&target=${p}`);
         const verdict = page.getByTestId("verdict-badge");
-        const rank = page.getByTestId("top-candidate").or(page.getByText("No eligible candidates")).or(page.getByText("Requires the live analysis service").first()).or(page.locator("[data-error-code]").first());
+        const rank = page.getByTestId("top-candidate").or(page.getByText("No eligible candidates")).or(page.getByText("Not in this precomputed version").first()).or(page.locator("[data-error-code]").first());
         try {
           await expect(verdict).toBeVisible({ timeout: 20_000 });
           await expect(rank).toBeVisible({ timeout: 20_000 });
-          if ((await page.locator("[data-error-code]").count()) > 0 || (await page.getByText("Requires the live analysis service").count()) > 0) problems.push(`${g} x ${p}: error or snapshot gap shown`);
+          if ((await page.locator("[data-error-code]").count()) > 0 || (await page.getByText("Not in this precomputed version").count()) > 0) problems.push(`${g} x ${p}: error or snapshot gap shown`);
           else if ((await page.getByTestId("top-candidate").count()) === 0) problems.push(`${g} x ${p}: no top candidate`);
         } catch {
           problems.push(`${g} x ${p}: did not render`);
@@ -137,7 +141,7 @@ test.describe("Explore (snapshot, no API)", () => {
     const cf = page.getByTestId("counterfactual-panel");
     await expect(cf).toBeVisible();
     // either the precomputed scenarios, or the explicit live-only notice; never a blank panel
-    await expect(cf.getByTestId("scenario-sustained").or(page.getByText("Requires the live analysis service").first())).toBeVisible();
+    await expect(cf.getByTestId("scenario-sustained").or(page.getByText("Not in this precomputed version").first())).toBeVisible();
     await expect(page.getByTestId("hypothetical-label")).toHaveText("Hypothetical outcome — not an experimental result");
   });
 
@@ -149,7 +153,7 @@ test.describe("Explore (snapshot, no API)", () => {
     await toggles.nth(1).click();
     await page.getByTestId("open-compare").click();
     const sheet = page.getByRole("dialog", { name: "Compare candidates" });
-    await expect(sheet.getByTestId("compare-verdict").or(sheet.getByText("Requires the live analysis service"))).toBeVisible();
+    await expect(sheet.getByTestId("compare-verdict").or(sheet.getByText("Not in this precomputed version"))).toBeVisible();
   });
 
   test("layer toggles work in snapshot mode", async ({ page }) => {
@@ -186,7 +190,7 @@ test.describe("Other pages (snapshot, no API)", () => {
     const rows = page.getByRole("table", { name: "Experiments" }).locator("tbody tr");
     await expect(rows.first()).toBeVisible();
     expect(await rows.count()).toBeGreaterThan(20);
-    await expect(page.getByTestId("data-source-badge")).toHaveAttribute("data-source", "snapshot");
+    await expect(page.getByTestId("data-source-badge").first()).toHaveAttribute("data-source", "snapshot");
     await rows.first().click();
     await expect(page.getByRole("dialog").getByRole("heading", { name: /^Flow steps/ })).toBeVisible();
     await expect(page.getByRole("dialog").getByRole("link", { name: /View original NASA record/ })).toHaveAttribute("href", /^https:\/\/(psi|ntrs)\.nasa\.gov\//);
@@ -214,7 +218,7 @@ test.describe("Other pages (snapshot, no API)", () => {
   test("Brief renders and offers downloads, or says it needs the live service", async ({ page }) => {
     await page.goto("/brief");
     const brief = page.getByTestId("brief");
-    await expect(brief.getByRole("heading", { level: 1 }).or(brief.getByText("Requires the live analysis service"))).toBeVisible();
+    await expect(brief.getByRole("heading", { level: 1 }).or(brief.getByText("Not in this precomputed version"))).toBeVisible();
     if ((await brief.getByRole("heading", { level: 1 }).count()) > 0) {
       await expect(brief.getByRole("button", { name: /Download \.md/ })).toBeEnabled();
       await expect(brief).toContainText("This brief contains no test procedures");

@@ -57,6 +57,9 @@ test.describe("Guided demo (live API)", () => {
     for (let i = 0; i < 5; i++) await page.keyboard.press("ArrowRight");
     await expect(card(page).getByText("Demo complete")).toBeVisible();
     await card(page).getByRole("button", { name: "Replay" }).click();
+    // Replay re-opens on the title card; ArrowRight skips it to scene 1
+    await expect(card(page).getByRole("button", { name: "Start" })).toBeVisible();
+    await page.keyboard.press("ArrowRight");
     await expect(sceneLabel(page, 1)).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(card(page)).toHaveCount(0);
@@ -65,18 +68,48 @@ test.describe("Guided demo (live API)", () => {
   test("?demo=1 starts the demo automatically and exiting drops the parameter", async ({ page }) => {
     await page.goto("/?demo=1");
     await expect(card(page)).toBeVisible();
-    await expect(sceneLabel(page, 1)).toBeVisible();
+    // a title card opens the demo, then scene 1
+    await expect(sceneLabel(page, 1)).toBeVisible({ timeout: 10_000 });
     await card(page).getByRole("button", { name: "Exit" }).click();
     await expect(card(page)).toHaveCount(0);
     await expect(page).not.toHaveURL(/demo=1/);
   });
 
-  test("autoplay advances without interaction", async ({ page }) => {
+  test("autoplay advances without interaction (title card, then scene 2 within 10 s)", async ({ page }) => {
     await openExplore(page);
     await page.getByRole("button", { name: "Guided demo" }).click();
+    await expect(card(page)).toBeVisible();
+    // D6: 3 s title card + 4.5 s per scene
+    await expect(sceneLabel(page, 2)).toBeVisible({ timeout: 10_000 });
+  });
+
+  test("?demo=1 plays to the end card within 30 s (LEAD_DECISIONS D6)", async ({ page }) => {
+    test.setTimeout(75_000);
+    await page.goto("/?demo=1");
+    await expect(card(page)).toBeVisible();
+    const t0 = Date.now();
+    await expect(card(page).getByText("Demo complete")).toBeVisible({ timeout: 32_000 });
+    expect(Date.now() - t0, "demo length").toBeLessThanOrEqual(31_000);
+    await expect(card(page).getByRole("heading", { level: 2, name: "Blind Spots" })).toBeVisible();
+  });
+
+  test("Pause during the title card skips it and pauses on scene 1; Exit returns focus to the launcher", async ({ page }) => {
+    await openExplore(page);
+    const launcher = page.getByTestId("demo-launcher");
+    await launcher.click();
+    await expect(card(page).getByRole("button", { name: "Start" })).toBeVisible();
+    await card(page).getByRole("button", { name: "Pause" }).click();
     await expect(sceneLabel(page, 1)).toBeVisible();
-    // scene length is a UI constant of a few seconds; wait for the first automatic step
-    await expect(sceneLabel(page, 2)).toBeVisible({ timeout: 30_000 });
+    await expect(card(page)).toContainText("paused");
+    await page.waitForTimeout(5_500); // longer than one scene: paused means it stays on scene 1
+    await expect(sceneLabel(page, 1)).toBeVisible();
+    await card(page).getByRole("button", { name: "Exit" }).click();
+    await expect(card(page)).toHaveCount(0);
+    await expect(launcher).toBeFocused();
+    // layers are back to the D1 defaults
+    // target and candidates are always drawn (no chip); the chips that exist follow D1
+    for (const l of ["observations", "context"]) await expect(layerChip(page, l)).toHaveAttribute("aria-pressed", "true");
+    for (const l of ["prediction", "uncertainty", "coverage"]) await expect(layerChip(page, l)).toHaveAttribute("aria-pressed", "false");
   });
 
   test("when the target pressure is outside the group's observed range, scenes 2-5 use the O2 x pressure plane with the context layer on from scene 3", async ({ page, request }) => {

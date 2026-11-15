@@ -82,6 +82,22 @@ def _points_supported(a: dict) -> int | None:
     return None
 
 
+# Display aliases for prose lists only (the full NASA names stay in the profile table and the app).
+SHORT_NAME = {
+    "shuttle_staged_pre_eva": "Shuttle pre-EVA",
+    "exploration_atmosphere_8p2_34": "Exploration Atmosphere",
+    "artemis_surface_habitat_10p2_26p5": "Artemis Surface Habitat",
+    "eawg_2006_8p0_32": "EAWG 2006",
+    "orion_cm_lunar_design_10p2": "Orion lunar",
+    "skylab": "Skylab",
+    "apollo_cm": "Apollo",
+}
+
+
+def _short(pid: str, label: str) -> str:
+    return SHORT_NAME.get(pid) or label.split(" (")[0]
+
+
 def compute(root: Path) -> dict:
     c = _client(root)
     groups = _ok(c.get("/api/groups"), "GET /api/groups")
@@ -140,6 +156,8 @@ def compute(root: Path) -> dict:
     X["H_N_REDUCED_ZERO"] = sum(1 for pid in reduced if pid in zero)
     X["H_REDUCED_ALL_ZERO"] = bool(reduced) and all(pid in zero for pid in reduced)
     X["H_REDUCED_LIST"] = "; ".join(per_profile[pid]["label"] for pid in reduced)
+    X["H_REDUCED_SHORT"] = ", ".join(_short(pid, per_profile[pid]["label"]) for pid in reduced)
+    X["H_N_ENVELOPES"] = sum(1 for p in profiles if p.get("kind") == "envelope")
     X["H_ZERO_AT_1ATM_LIST"] = "; ".join(per_profile[pid]["label"] for pid in zero if pid not in reduced)
     X["H_PROFILE_TABLE"] = _profile_table(per_profile, groups)
 

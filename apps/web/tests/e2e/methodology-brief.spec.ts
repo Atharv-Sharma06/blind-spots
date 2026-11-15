@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { EXPLORE_H1 } from "./helpers";
 
 test.describe("Methodology (live API)", () => {
   test("renders every section and the validation charts with sample sizes", async ({ page, request }) => {
@@ -17,7 +18,7 @@ test.describe("Methodology (live API)", () => {
     await expect(v.getByText("Experiments", { exact: true }).first()).toBeVisible();
     await expect(v.getByText("Observations (training)")).toBeVisible();
     await expect(v).toContainText(/Out-of-fold predictions pooled: \d+/);
-    await expect(v.getByRole("table").first()).toContainText("majority_class");
+    await expect(v.getByRole("table").first()).toContainText("Majority-class guess");
 
     // the numbers on the page are the API's: the validated group's experiment count
     const val = await (await request.get("/api/model/validation")).json();
@@ -99,6 +100,6 @@ test.describe("Research brief (live API)", () => {
     if (group) await expect(page).toHaveURL(new RegExp(`group=${group}`));
     await expect(page.getByTestId("brief").getByRole("heading", { level: 1 })).toBeVisible();
     await page.getByRole("link", { name: /Back to Explore/ }).click();
-    await expect(page.getByRole("heading", { level: 1, name: "Experimental coverage" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: EXPLORE_H1 })).toBeVisible();
   });
 });

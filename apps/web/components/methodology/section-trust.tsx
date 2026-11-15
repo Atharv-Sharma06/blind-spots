@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import type { ApiQuery } from "@/hooks/api";
 import type { GroupSummary } from "@/lib/types";
 import { fmtCount } from "@/lib/format";
@@ -45,6 +46,84 @@ function Tile({ value, label, note }: { value: string; label: string; note: stri
   );
 }
 
+/** Placeholder text block: wraps like the text it stands in for, so the section keeps its loaded height. */
+function Ghost({ children, className }: { children: ReactNode; className?: string }) {
+  return <span className={`rounded-sm bg-subtle text-transparent [box-decoration-break:clone] motion-safe:animate-pulse ${className ?? ""}`}>{children}</span>;
+}
+
+/** Loading state with the loaded layout's structure (tiles, group table, limits), so later sections do not shift. */
+function TrustSkeleton({ groups }: { groups: GroupSummary[] | undefined }) {
+  const rows = groups?.length ? groups.map((g) => g.label) : Array.from({ length: 20 }, () => "Material · flame configuration");
+  const tiles = [
+    ["groups where the model beats a simple guess", "Log-loss 95 % interval below a majority-class guess. Clearly worse in none."],
+    ["groups where its uncertainty flags its own errors", "Blind-spot test supported; inconclusive in 00, not supported in 00."],
+    ["replays where target-aware ranking beat random", "Tied in 00, worse in 0; against the nearest-gap rule 0 better, 0 worse."],
+    ["pressure range of all integrated data", "About 1 atm. At lower cabin pressures the model has no evidence and says so."],
+  ];
+  return (
+    <div role="status" aria-label="Loading the validation summary">
+      <div aria-hidden className="space-y-6">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {tiles.map(([label, note]) => (
+            <div key={label} className="min-w-0 rounded-md border border-border bg-surface px-4 py-3">
+              <div className="num text-[22px] font-medium leading-tight tracking-[-0.01em]"><Ghost>00 of 00</Ghost></div>
+              <div className="mt-1 text-[13px] font-medium"><Ghost>{label}</Ghost></div>
+              <div className="mt-0.5 text-xs leading-snug"><Ghost>{note}</Ghost></div>
+            </div>
+          ))}
+        </div>
+        <div>
+          <h3 className="mb-2 text-[14px] font-semibold"><Ghost>Group by group</Ghost></h3>
+          <div className="relative overflow-x-hidden rounded-md border border-border bg-surface">
+            <table className="w-full min-w-[720px] border-collapse text-[13px]">
+              <thead>
+                <tr className="border-b border-border bg-subtle text-left text-xs">
+                  <th className="px-3 py-2 font-medium"><Ghost>Material and flame configuration</Ghost></th>
+                  <th className="px-3 py-2 font-medium"><Ghost>Tests</Ghost></th>
+                  <th className="px-3 py-2 font-medium"><Ghost>Versus a majority-class guess (log loss)</Ghost></th>
+                  <th className="px-3 py-2 font-medium"><Ghost>Blind-spot test</Ghost></th>
+                  <th className="px-3 py-2 text-right font-medium"><Ghost>Ranking vs random</Ghost><div className="font-normal"><Ghost>better / tied / worse</Ghost></div></th>
+                  <th className="px-3 py-2" />
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((label, i) => (
+                  <tr key={i} className="border-b border-border align-top last:border-b-0">
+                    <th className="w-[30%] px-3 py-2 text-left font-medium"><Ghost>{label}</Ghost></th>
+                    <td className="num px-3 py-2 text-right"><Ghost>00</Ghost></td>
+                    <td className="px-3 py-2"><Ghost>No clear difference</Ghost><div className="num whitespace-nowrap text-xs"><Ghost>0.000 vs 0.000</Ghost></div></td>
+                    <td className="px-3 py-2"><Ghost>Inconclusive</Ghost></td>
+                    <td className="num whitespace-nowrap px-3 py-2 text-right"><Ghost>0 / 0 / 0</Ghost></td>
+                    <td className="px-3 py-1.5 text-right"><span className="inline-flex min-h-7 items-center px-1.5 text-xs"><Ghost>Details</Ghost></span></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-2 max-w-[78ch] text-xs leading-relaxed">
+            <Ghost>
+              Log loss: lower is better (out-of-fold, grouped by experiment, 95 % group-bootstrap intervals). &quot;Better&quot; means the whole interval of the difference lies below 0. Ranking vs random: replays on held-out real experiments in which each strategy picks tests one at a time (section 4).
+            </Ghost>
+          </p>
+        </div>
+        <div className="max-w-[78ch] space-y-2">
+          <h3 className="text-[14px] font-semibold"><Ghost>Read the results with these limits</Ghost></h3>
+          <ul className="space-y-1.5 pl-5 text-[14px] leading-relaxed">
+            {[
+              "The blind-spot test passes only in a few material groups and flame configurations. There the model misclassified only a few points, and without the flow-turned-off steps a few not-sustained observations remain. Treat it as unproven for physical extinction boundaries.",
+              "Uncertainty is reported, not recalibrated: the model is uncertainty-aware, not certified as calibrated. Its expected calibration error is higher than that of a constant guess in 00 of 00 groups (section 4).",
+              "The ranking's advantage is modest: it beat random in 00 of 00 replays and has no reliable edge over simply testing the nearest gap (0 better, 00 tied, 0 worse). The replays share groups, so they are not independent.",
+              "Every integrated observation is near 1 atm, so no pressure effect is learned. At other pressures, and beyond the tested oxygen range, the model reverts toward the group's base rate; the support verdict (section 2) withholds the probability there.",
+            ].map((t) => (
+              <li key={t}><Ghost>{t}</Ghost></li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /** "Can you trust it?": a plain-language summary computed from GET /api/model/validation and /api/groups. */
 export function TrustSection({
   validation,
@@ -65,6 +144,7 @@ export function TrustSection({
         The short answer, computed from the out-of-sample checks in section 4. Every test is grouped by experiment, so the model is always scored on tests it did not see.
       </p>
       <div className="mt-5">
+        {validation.isPending ? <TrustSkeleton groups={groups} /> : (
         <QueryBoundary query={validation} rows={4}>
           {(v) => {
             const gs = v.groups;
@@ -214,6 +294,7 @@ export function TrustSection({
             );
           }}
         </QueryBoundary>
+        )}
       </div>
     </section>
   );

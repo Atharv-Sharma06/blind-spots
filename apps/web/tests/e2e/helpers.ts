@@ -5,10 +5,14 @@ import { expect, type Locator, type Page } from "@playwright/test";
 export const mapGroup = (page: Page): Locator => page.locator('[role="group"][aria-label^="Coverage map"]');
 export const obsMarks = (page: Page): Locator =>
   mapGroup(page).locator('g[role="button"][aria-label*="flame sustained"], g[role="button"][aria-label*="not sustained"], g[role="button"][aria-label*="outcome not determined"]');
-export const candidateMarks = (page: Page): Locator => mapGroup(page).locator('g[role="button"][aria-label^="Candidate"]');
+/** One marker per position: coincident candidates share a marker whose label lists each rank (LEAD_DECISIONS D3). */
+export const candidateMarks = (page: Page): Locator => mapGroup(page).locator('g[role="button"][aria-label^="Research candidate"]');
 /** Context layer marks: documented-but-not-integrated test envelopes (<title>) and point markers (triangles). */
 export const contextEnvelopes = (page: Page): Locator => mapGroup(page).locator("title", { hasText: "not integrated" });
 export const contextPoints = (page: Page): Locator => mapGroup(page).locator('g:has(> path[stroke-width="1.2"])');
+
+/** Explore h1 (LEAD_DECISIONS D1 product line). */
+export const EXPLORE_H1 = "Blind Spots: where NASA's microgravity fire evidence ends, and what to learn next.";
 
 export const layerChip = (page: Page, layer: string): Locator => page.getByTestId(`layer-${layer}`);
 export const groupSelect = (page: Page): Locator => page.getByRole("combobox", { name: "Material and flame configuration" });
@@ -16,11 +20,12 @@ export const groupSelect = (page: Page): Locator => page.getByRole("combobox", {
 /** Open Explore and wait until the map, target analysis and candidate panel have real content. */
 export async function openExplore(page: Page, query = ""): Promise<void> {
   await page.goto(`/${query}`);
-  await expect(page.getByRole("heading", { level: 1, name: "Experimental coverage" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: EXPLORE_H1 })).toBeVisible();
   await expect(mapGroup(page)).toBeVisible();
-  await expect(obsMarks(page).first()).toBeVisible();
   await expect(page.getByTestId("target-analysis")).toBeVisible();
   await expect(page.getByTestId("obs-note")).toBeVisible();
+  // a slice can legitimately hold no observations (the blind spot); when the note says some are plotted, they are drawn
+  await expect.poll(async () => (await plottedCount(page)).plotted === 0 || (await obsMarks(page).count()) > 0).toBe(true);
 }
 
 export async function waitForCandidates(page: Page): Promise<void> {

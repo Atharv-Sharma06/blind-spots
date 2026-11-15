@@ -1056,7 +1056,7 @@ export default function ParameterMap(props: ParameterMapProps) {
                   <g key={b.id} pointerEvents="none">
                     <rect x={b.x} y={b.y} width={b.w} height={b.h} fill="none" stroke={MUTED} strokeOpacity={0.45} strokeWidth={1} strokeDasharray="2 3" />
                     {b.lab && (
-                      <text x={b.lab.x} y={b.lab.y} fontSize={10} fill={MUTED} stroke="var(--surface)" strokeWidth={3} paintOrder="stroke">{b.badge}<title>{`${b.label}: documented test conditions, not integrated into the model`}</title></text>
+                      <text x={b.lab.x} y={b.lab.y} fontSize={10} fill={MUTED} stroke="var(--surface)" strokeWidth={3} paintOrder="stroke" strokeLinejoin="round">{b.badge}<title>{`${b.label}: documented test conditions, not integrated into the model`}</title></text>
                     )}
                   </g>
                 ))}
@@ -1127,6 +1127,7 @@ export default function ParameterMap(props: ParameterMapProps) {
                   const top = g.members[0]!;
                   const sel = g.members.some((m) => m.id === selectedCandidateId);
                   const offRanks = g.members.filter((m) => m.off).map((m) => m.rank);
+                  const offText = offRanks.length === 0 ? "" : offRanks.length === g.members.length ? "off-slice" : `rank ${offRanks.join(", ")} off-slice`;
                   const shape = (h: number, e: number) => `M${X - h - e},${Y}L${X - h + 11},${Y - 11 - e}H${X + h - 11}L${X + h + e},${Y}L${X + h - 11},${Y + 11 + e}H${X - h + 11}Z`;
                   const desc = g.members
                     .map((m) => `Research candidate ${m.rank}${m.slice != null ? `, ${sliceName} ${fmt(m.slice)} ${sliceUnit}` : ""}${m.off ? ", off this slice" : ""}`)
@@ -1138,7 +1139,7 @@ export default function ParameterMap(props: ParameterMapProps) {
                       role="button"
                       tabIndex={tabKey === key ? 0 : -1}
                       aria-pressed={sel}
-                      aria-label={`${desc}. Oxygen ${fmt(top.x, 1)} percent, ${yName.toLowerCase()} ${fmt(top.y)} ${yUnit}`}
+                      aria-label={`${g.label}${offText ? " " + offText : ""}: ${desc}. Oxygen ${fmt(top.x, 1)} percent, ${yName.toLowerCase()} ${fmt(top.y)} ${yUnit}`}
                       style={{ outline: "none", cursor: "pointer" }}
                       onClick={(e) => { e.stopPropagation(); onSelectCandidate?.(sel ? null : top.id); }}
                       onKeyDown={(e) => onItemKey(e, items.find((i) => i.key === key) ?? { key, kind: "cand", id: top.id, px: X, py: Y })}
@@ -1154,11 +1155,16 @@ export default function ParameterMap(props: ParameterMapProps) {
                         strokeWidth={1.5}
                       />
                       <text x={X} y={Y + 3.5} textAnchor="middle" fontSize={10} fontWeight={600} fill={g.anyOn ? "#fff" : ACCENT} pointerEvents="none" style={{ fontVariantNumeric: "tabular-nums" }}>{g.label}</text>
-                      {offRanks.length > 0 && (
-                        <text x={X + half + 5} y={Y + 3.5} fontSize={10} fill={MUTED} stroke="var(--surface)" strokeWidth={3} paintOrder="stroke" pointerEvents="none">
-                          {offRanks.length === g.members.length ? "off-slice" : `${offRanks.join(", ")} off-slice`}
-                        </text>
-                      )}
+                      {offRanks.length > 0 && (() => {
+                        const offLabel = offText;
+                        // Flip the label to the left of the marker when it would run past the plot's right edge (narrow maps).
+                        const flip = X + half + 5 + offLabel.length * 5.6 > iw;
+                        return (
+                          <text x={flip ? X - half - 5 : X + half + 5} y={Y + 3.5} textAnchor={flip ? "end" : "start"} fontSize={10} fill={MUTED} stroke="var(--surface)" strokeWidth={3} paintOrder="stroke" strokeLinejoin="round" pointerEvents="none">
+                            {offLabel}
+                          </text>
+                        );
+                      })()}
                       {(sel || focusKey === key) && <path d={shape(half, 4)} fill="none" stroke={INK} strokeWidth={2} />}
                     </g>
                   );
@@ -1169,22 +1175,22 @@ export default function ParameterMap(props: ParameterMapProps) {
             {/* labels that must sit above everything */}
             <g transform={`translate(${M.l},${M.t})`} pointerEvents="none" clipPath={`url(#${uid}-plot)`}>
               {layers.target && tgt?.lab && (
-                <text x={tgt.lab.x} y={tgt.lab.y} fontSize={11} fontWeight={500} fill={INK} stroke="var(--surface)" strokeWidth={3} paintOrder="stroke">{tgt.lab.text}</text>
+                <text x={tgt.lab.x} y={tgt.lab.y} fontSize={11} fontWeight={500} fill={INK} stroke="var(--surface)" strokeWidth={3} paintOrder="stroke" strokeLinejoin="round">{tgt.lab.text}</text>
               )}
               {contourLabel && (
-                <text x={contourLabel.x} y={contourLabel.y} fontSize={11} fontWeight={500} fill={INK} stroke="var(--surface)" strokeWidth={3.5} paintOrder="stroke">{CONTOUR_LABEL}</text>
+                <text x={contourLabel.x} y={contourLabel.y} fontSize={11} fontWeight={500} fill={INK} stroke="var(--surface)" strokeWidth={3.5} paintOrder="stroke" strokeLinejoin="round">{CONTOUR_LABEL}</text>
               )}
               {layers.prediction && rasters && !rasters.supportedRuns.length && (
-                <text x={iw / 2} y={ih - 12} textAnchor="middle" fontSize={12} fill={MUTED} stroke="var(--surface)" strokeWidth={4} paintOrder="stroke">No supported model estimate on this slice; P(sustained) is not drawn.</text>
+                <text x={iw / 2} y={ih - 12} textAnchor="middle" fontSize={12} fill={MUTED} stroke="var(--surface)" strokeWidth={4} paintOrder="stroke" strokeLinejoin="round">No supported model estimate on this slice; P(sustained) is not drawn.</text>
               )}
               {wholeGap && (
-                <text x={iw / 2} y={ih - 12} textAnchor="middle" fontSize={12} fill={MUTED} stroke="var(--surface)" strokeWidth={4} paintOrder="stroke">Sparse coverage across this whole slice</text>
+                <text x={iw / 2} y={ih - 12} textAnchor="middle" fontSize={12} fill={MUTED} stroke="var(--surface)" strokeWidth={4} paintOrder="stroke" strokeLinejoin="round">Sparse coverage across this whole slice</text>
               )}
               {modelMissing && (
-                <text x={iw / 2} y={ih / 2} textAnchor="middle" fontSize={13} fill={MUTED} stroke="var(--surface)" strokeWidth={4} paintOrder="stroke">No fitted model grid for this group: prediction and uncertainty are not available.</text>
+                <text x={iw / 2} y={ih / 2} textAnchor="middle" fontSize={13} fill={MUTED} stroke="var(--surface)" strokeWidth={4} paintOrder="stroke" strokeLinejoin="round">No fitted model grid for this group: prediction and uncertainty are not available.</text>
               )}
               {hypotheticalSurface && (layers.prediction || layers.uncertainty) && (
-                <text x={8} y={16} fontSize={11} fill={INK} stroke="var(--surface)" strokeWidth={3} paintOrder="stroke">What-if surface (hypothetical observation added)</text>
+                <text x={8} y={ih - 30} fontSize={11} fill={INK} stroke="var(--surface)" strokeWidth={3} paintOrder="stroke" strokeLinejoin="round">What-if surface (hypothetical observation added)</text>
               )}
             </g>
           </svg>

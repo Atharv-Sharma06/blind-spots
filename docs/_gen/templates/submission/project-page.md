@@ -45,9 +45,11 @@ not a fire-safety assessment or NASA product.
 
 Fire is one of the most serious hazards in a sealed crew cabin, and flames behave differently in microgravity. NASA has
 adopted an exploration atmosphere of 8.2 psia and 34 % O2 "for future spacecraft that will be used for high-frequency
-EVAs" (NTRS 20140000417), and a NASA forum notes that "Artemis habitat and suit atmospheric parameters have not been
-finalized" (NTRS 20220011152). {{LUNAR_SENTENCE}} Before anyone trusts a flammability number for such a cabin, on a spacecraft or in a Moon or
-Mars habitat, they need to know how much comparable experimental evidence exists. Blind Spots answers that question for any
+EVAs" (NTRS 20140000417). NASA's lunar Surface Habitat study assumes a nominal 10.2 psia / 26.5 % O2 cabin that can also
+operate at 8.2 psia / 34 % O2 (NTRS 20220000245); Artemis habitat atmospheric parameters have not been finalized (NTRS
+20220011152).
+Before anyone trusts a flammability number for such a cabin, on a spacecraft or in a Moon or Mars habitat, they need to
+know how much comparable experimental evidence exists. Blind Spots answers that question for any
 documented NASA cabin atmosphere, and then asks which next computation or experiment would teach the most.
 
 ### Key findings (computed from the artifacts)
@@ -55,10 +57,10 @@ documented NASA cabin atmosphere, and then asks which next computation or experi
 1. **The evidence ends at 1 atm.** All {{ENV_N_EXP}} integrated ISS BASS/BASS-II tests ran at {{ENV_O2}} % O2 and
    {{ENV_P}} kPa (`data/normalized/observations.json`).
 2. **ISS air is covered; exploration air is not.** Summed over the {{H_N_GROUPS}} material and flame-configuration
-   groups, the ISS cabin has {{H_ISS_COMPARABLE}} comparable observations; the NASA Exploration Atmosphere has
-   {{H_EXPL_COMPARABLE}}, in every group (nearest {{H_EXPL_NN_MIN}} to {{H_EXPL_NN_MAX}} reference distances).
-   {{H_N_ZERO}} of the {{H_N_PROFILES_ANALYSED}} documented NASA atmospheres analysed have none, including every one below
-   1 atm ({{H_REDUCED_LIST}}) (`POST /api/target/assess`, computed for every group).
+   groups, the ISS cabin has {{H_ISS_COMPARABLE}} comparable observations (in {{H_ISS_GROUPS_WITH}} of the {{H_N_GROUPS}}
+   groups); the NASA Exploration Atmosphere has {{H_EXPL_COMPARABLE}}, in every group (nearest {{H_EXPL_NN_MIN}} to
+   {{H_EXPL_NN_MAX}} reference distances). {{H_N_ZERO}} of the {{H_N_PROFILES_ANALYSED}} documented NASA atmospheres
+   analysed have none, including all {{H_N_REDUCED}} below 1 atm ({{H_REDUCED_SHORT}}).
 3. **The model says when it does not know.** For thin PMMA films (the default group), {{DX_PTS_WITH}} of {{DX_NPTS}}
    Exploration Atmosphere target points have a comparable observation; the app answers "Insufficient experimental evidence
    for a reliable estimate." instead of a probability.
@@ -76,7 +78,7 @@ documented NASA cabin atmosphere, and then asks which next computation or experi
 1. **Coverage map.** For one material and flame configuration, where integrated experiments exist in oxygen x airflow and
    oxygen x pressure space, and how far any point is from the nearest comparable observation. Documented tests that are not
    integrated into the model (Saffire-I and III to VI, DARTFire, the Glenn drop-tower limits) form a separate context layer.
-2. **Target assessment.** Pick one of {{N_PROFILES}} documented NASA atmosphere profiles (each with verbatim NASA quotes,
+2. **Target assessment.** Pick one of {{H_N_PROFILES_ANALYSED}} documented NASA cabin atmospheres (each with verbatim NASA quotes,
    machine-checked against the downloaded documents) or a user-defined hypothetical (live service only): comparable
    observations, nearest distance, a verdict (supported, extrapolation, insufficient evidence) and the documented NASA work
    that is not integrated.

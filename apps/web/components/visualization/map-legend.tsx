@@ -62,7 +62,7 @@ export default function MapLegend(p: MapLegendProps) {
   const plumTicks = [0, 0.25, 0.5, 0.75, 1];
   const kpa = [50, 70, 101.325];
   return (
-    <div className={cn("grid gap-x-8 gap-y-4 text-[12px] leading-snug sm:grid-cols-2 lg:grid-cols-3", p.className)} aria-label="Map legend" role="group">
+    <div className={cn("grid gap-x-8 gap-y-4 text-[12px] leading-snug sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-6", p.className)} aria-label="Map legend" role="group">
       {l.observations && (
         <Group name="Observed (integrated records)">
           <Item swatch={<circle cx="11" cy="8" r="4.5" fill={OBSERVED} stroke="#fff" strokeWidth="1" />} title="Flame sustained" />

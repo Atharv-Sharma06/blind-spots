@@ -28,14 +28,14 @@ not a fire-safety assessment or NASA product.
 
 ## Link to Project Demo
 
-30-second video: <VIDEO_URL>
+30-second video: https://blind-spots-kappa.vercel.app/video/blind-spots-demo-30s.webm
 
 ---
 
 ## Link to Final Project
 
-- Live app (no login): <DEPLOYED_URL>
-- Source code: <GITHUB_URL>
+- Live app (no login): https://blind-spots-kappa.vercel.app
+- Source code: https://github.com/Atharv-Sharma06/blind-spots
 
 ---
 
@@ -45,9 +45,11 @@ not a fire-safety assessment or NASA product.
 
 Fire is one of the most serious hazards in a sealed crew cabin, and flames behave differently in microgravity. NASA has
 adopted an exploration atmosphere of 8.2 psia and 34 % O2 "for future spacecraft that will be used for high-frequency
-EVAs" (NTRS 20140000417), and a NASA forum notes that "Artemis habitat and suit atmospheric parameters have not been
-finalized" (NTRS 20220011152). NASA's lunar Surface Habitat study states: "SH is assumed to operate at a nominal atmospheric operating pressure of 10.2 psia and 26.5% oxygen concentration and a capability of operating at 8.2 psia and 34% oxygen" (NTRS 20220000245, PDF p. 4). Before anyone trusts a flammability number for such a cabin, on a spacecraft or in a Moon or
-Mars habitat, they need to know how much comparable experimental evidence exists. Blind Spots answers that question for any
+EVAs" (NTRS 20140000417). NASA's lunar Surface Habitat study assumes a nominal 10.2 psia / 26.5 % O2 cabin that can also
+operate at 8.2 psia / 34 % O2 (NTRS 20220000245); Artemis habitat atmospheric parameters have not been finalized (NTRS
+20220011152).
+Before anyone trusts a flammability number for such a cabin, on a spacecraft or in a Moon or Mars habitat, they need to
+know how much comparable experimental evidence exists. Blind Spots answers that question for any
 documented NASA cabin atmosphere, and then asks which next computation or experiment would teach the most.
 
 ### Key findings (computed from the artifacts)
@@ -55,10 +57,10 @@ documented NASA cabin atmosphere, and then asks which next computation or experi
 1. **The evidence ends at 1 atm.** All 250 integrated ISS BASS/BASS-II tests ran at 13.5 to 22.7 % O2 and
    98.3 to 102.2 kPa (`data/normalized/observations.json`).
 2. **ISS air is covered; exploration air is not.** Summed over the 20 material and flame-configuration
-   groups, the ISS cabin has 241 comparable observations; the NASA Exploration Atmosphere has
-   0, in every group (nearest 8.1 to 10.3 reference distances).
-   8 of the 11 documented NASA atmospheres analysed have none, including every one below
-   1 atm (Space Shuttle staged pre-EVA cabin (10.2 psia / 26.5 % O2); NASA Exploration Atmosphere (8.2 psia / 34 % O2); Artemis lunar Surface Habitat, nominal (10.2 psia / 26.5 % O2); EAWG 2006 recommendation (8.0 psia / 32 % O2), superseded; Orion crew module design basis, lunar missions (up to 30 % O2 at 10.2 psia); Skylab cabin (5 psia / ~70 % O2); Apollo command module cabin (5 psia / ~100 % O2)) (`POST /api/target/assess`, computed for every group).
+   groups, the ISS cabin has 241 comparable observations (in 19 of the 20
+   groups); the NASA Exploration Atmosphere has 0, in every group (nearest 8.1 to
+   10.3 reference distances). 8 of the 11 documented NASA atmospheres
+   analysed have none, including all 7 below 1 atm (Shuttle pre-EVA, Exploration Atmosphere, Artemis Surface Habitat, EAWG 2006, Orion lunar, Skylab, Apollo).
 3. **The model says when it does not know.** For thin PMMA films (the default group), 0 of 9
    Exploration Atmosphere target points have a comparable observation; the app answers "Insufficient experimental evidence
    for a reliable estimate." instead of a probability.
@@ -76,7 +78,7 @@ documented NASA cabin atmosphere, and then asks which next computation or experi
 1. **Coverage map.** For one material and flame configuration, where integrated experiments exist in oxygen x airflow and
    oxygen x pressure space, and how far any point is from the nearest comparable observation. Documented tests that are not
    integrated into the model (Saffire-I and III to VI, DARTFire, the Glenn drop-tower limits) form a separate context layer.
-2. **Target assessment.** Pick one of 12 documented NASA atmosphere profiles (each with verbatim NASA quotes,
+2. **Target assessment.** Pick one of 11 documented NASA cabin atmospheres (each with verbatim NASA quotes,
    machine-checked against the downloaded documents) or a user-defined hypothetical (live service only): comparable
    observations, nearest distance, a verdict (supported, extrapolation, insufficient evidence) and the documented NASA work
    that is not integrated.
@@ -108,11 +110,11 @@ documented NASA cabin atmosphere, and then asks which next computation or experi
 
 ### Honest limits
 
-- The GP beats a majority-class guess (CI excludes 0) in 6 of 9 groups (`pmma_rod__stagnation`, `pmma_rod__unknown`, `pmma_thin_film__opposed`, `pmma_sphere__wake`, `pmma_sphere__stagnation`, `pmma_sphere__unknown`);
+- The GP beats a majority-class guess (CI excludes 0) in 6 of 9 groups (PMMA rods, axial stagnation flow; PMMA rods, configuration not recorded; Thin PMMA films, opposed flow; PMMA spheres, wake ignition; PMMA spheres, axial stagnation flow; PMMA spheres, configuration not recorded);
   elsewhere it is not distinguishable. Classes are imbalanced (78% sustained) and samples small (12 to
   25 experiments per group).
 - In the sphere groups most negatives are flow-turned-off steps; grouped-CV AUC before and after dropping them:
-  `pmma_sphere__wake` 0.99 to 0.82; `pmma_sphere__stagnation` 0.96 to 0.67; `pmma_sphere__unknown` has no other negatives (CV AUC 1.00 with them; not evaluable without).
+  PMMA spheres, wake ignition: 0.99 with all 10 not-sustained observations; 0.82 without them, but only 1 not-sustained observation remains, so that AUC is not interpretable; PMMA spheres, axial stagnation flow: 0.96 with all 10 not-sustained observations; 0.67 without them, but only 2 not-sustained observations remain, so that AUC is not interpretable; PMMA spheres, configuration not recorded: 1.00 with all 3 not-sustained observations; none remain without them, so not evaluable.
 - Retrospective test of the ranking (18 scenarios): better than random in 11, indistinguishable in
   5, worse in 2; modest small-sample evidence, not proof.
 - Gaps are gaps in the integrated records, not in NASA's knowledge. Microgravity only; partial-gravity work (for example the

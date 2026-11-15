@@ -58,7 +58,7 @@ export function TargetSelector() {
       }}
     >
       <SheetTrigger asChild>
-        <Button variant="secondary" size="md" className="max-w-full min-w-0 justify-between gap-2" data-testid="target-selector">
+        <Button variant="secondary" size="md" className="max-w-full min-w-0 shrink justify-between gap-2" data-testid="target-selector">
           <span className="text-muted">Target</span>{" "}
           <span className="truncate font-medium">{currentLabel}</span>
           <span className="sr-only">, change target</span>

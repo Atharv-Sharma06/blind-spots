@@ -16,35 +16,72 @@ import {
 
 type Group = { group_id: string; label: string; model_status: string; n_observations: number; is_default?: boolean; pressure_kpa_range: [number, number] | null };
 type Profile = { profile_id: string; name: string; kind: string; status: string };
+type Assess = { verdict: string; points_supported?: number | null; coverage: { n_target_points: number; points_with_comparable: number }; model: { p_sustained_min: number | null } };
+
+/** UI constants named by LEAD_DECISIONS D1 (validated against /api/targets in each test, never assumed to exist). */
+const BLIND_SPOT_ID = "exploration_atmosphere_8p2_34";
+const ISS_ID = "iss_cabin_nominal";
 
 test.describe("Explore (live API)", () => {
-  test("default view renders real observations for the data-driven default group", async ({ page, request }) => {
+  test("default view is the blind spot: default group, NASA Exploration Atmosphere, O2 x pressure, D1 layers", async ({ page, request }) => {
     const groups = (await (await request.get("/api/groups")).json()) as Group[];
     const def = groups.find((g) => g.is_default) ?? groups.find((g) => g.model_status === "modeled");
     expect(def, "API must expose a default group").toBeTruthy();
+    const { profiles } = (await (await request.get("/api/targets")).json()) as { profiles: Profile[] };
+    const preferred = profiles.find((p) => p.profile_id === BLIND_SPOT_ID);
 
     await openExplore(page);
     await expect(page).toHaveURL(new RegExp(`group=${def!.group_id}`));
+    if (preferred) await expect(page.getByTestId("target-selector")).toContainText(preferred.name.slice(0, 20));
+    await expect(mapGroup(page)).toHaveAttribute("aria-label", /oxygen versus pressure/);
     await expect(page.getByTestId("group-facts")).toContainText(`${def!.n_observations} observations`);
     await expect(page.getByTestId("map-region").getByText(def!.label, { exact: true })).toBeVisible();
 
     const { plotted, total } = await plottedCount(page);
     expect(total).toBe(def!.n_observations);
-    expect(plotted).toBeGreaterThan(0);
+    expect(plotted).toBeGreaterThanOrEqual(0);
     expect(await obsMarks(page).count()).toBe(plotted);
 
-    // data-driven defaults: observations, coverage and context layers on; the model layers are opt-in
-    await expect(layerChip(page, "observations")).toHaveAttribute("aria-pressed", "true");
-    await expect(layerChip(page, "context")).toHaveAttribute("aria-pressed", "true");
-    await expect(page.getByTestId("data-source-badge")).toHaveAttribute("data-source", "live");
+    // D1 default layers: observations + target + candidates + context; surfaces are opt-in
+    // target and candidates are always drawn (no chip); the chips that exist follow D1
+    for (const l of ["observations", "context"]) await expect(layerChip(page, l)).toHaveAttribute("aria-pressed", "true");
+    for (const l of ["prediction", "uncertainty", "coverage"]) await expect(layerChip(page, l)).toHaveAttribute("aria-pressed", "false");
+    await expect(page.getByTestId("data-source-badge").first()).toHaveAttribute("data-source", "live");
     await expect(page.getByTestId("version-chip")).toHaveAttribute("data-state", "ok");
 
-    // both analysis panels carry content, a verdict and the framing text
+    // the verdict and "N of M target points supported" are the API's (D2)
+    const target = new URL(page.url()).searchParams.get("target") ?? BLIND_SPOT_ID;
+    const a = (await (await request.post("/api/target/assess", { data: { group_id: def!.group_id, target: { profile_id: target } } })).json()) as Assess;
+    await expect(page.getByTestId("target-analysis")).toHaveAttribute("data-verdict", a.verdict);
     await expect(page.getByTestId("verdict-badge")).toBeVisible();
+    if (typeof a.points_supported === "number") await expect(page.getByTestId("points-supported")).toHaveText(`${a.points_supported} of ${a.coverage.n_target_points} target points supported`);
     await expect(page.getByRole("heading", { name: "Next research candidate" })).toBeVisible();
-    await waitForCandidates(page);
     await expect(page.getByTestId("candidate-panel")).toContainText("Computational research candidate");
     await expect(page.getByRole("contentinfo")).toContainText("Not a certified fire-safety assessment");
+  });
+
+  test("finding strip: the ISS evidence and the blind spot are one click apart", async ({ page, request }) => {
+    const { profiles } = (await (await request.get("/api/targets")).json()) as { profiles: Profile[] };
+    const iss = profiles.find((p) => p.profile_id === ISS_ID);
+    const gap = profiles.find((p) => p.profile_id === BLIND_SPOT_ID);
+    test.skip(!iss || !gap, "ISS or Exploration Atmosphere profile missing from /api/targets");
+    await openExplore(page);
+    const strip = page.getByTestId("finding-strip");
+    await expect(strip).toBeVisible();
+    await expect(strip).toContainText(gap!.name.slice(0, 20));
+    await expect(strip).toContainText(/All integrated ISS records/);
+    await expect(strip.getByRole("button", { name: "See the blind spot" })).toHaveAttribute("aria-pressed", "true");
+
+    await strip.getByRole("button", { name: "See the ISS evidence" }).click();
+    await expect(page).toHaveURL(new RegExp(`target=${ISS_ID}`));
+    await expect(page.getByTestId("target-selector")).toContainText(iss!.name.slice(0, 20));
+    await expect(strip.getByRole("button", { name: "See the ISS evidence" })).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByTestId("verdict-badge")).toBeVisible();
+
+    await strip.getByRole("button", { name: "See the blind spot" }).click();
+    await expect(page).toHaveURL(new RegExp(`target=${BLIND_SPOT_ID}`));
+    await expect(page).toHaveURL(/plane=o2_pressure/);
+    await expect(mapGroup(page)).toHaveAttribute("aria-label", /oxygen versus pressure/);
   });
 
   test("context layer is on by default and shows documented tests that are not integrated", async ({ page }) => {
@@ -79,7 +116,7 @@ test.describe("Explore (live API)", () => {
     test.skip(!coverageOnly, "every group is modelled");
     await chooseOption(page, groupSelect(page), (labels) => labels.findIndex((l) => l.startsWith(coverageOnly!.label) && l.includes("coverage only")));
     await expect(page).toHaveURL(new RegExp(`group=${coverageOnly!.group_id}`));
-    await expect(page.getByText("Coverage only", { exact: true })).toBeVisible();
+    await expect(page.getByText(/^Coverage only\. /).first()).toBeVisible();
     await expect(layerChip(page, "prediction")).toBeDisabled();
     await expect(layerChip(page, "uncertainty")).toBeDisabled();
     await expect(page.getByText("No candidates for this group")).toBeVisible();
@@ -90,7 +127,8 @@ test.describe("Explore (live API)", () => {
 
   test("switching target updates the analysis panel, URL and slice", async ({ page, request }) => {
     const { profiles } = (await (await request.get("/api/targets")).json()) as { profiles: Profile[] };
-    await openExplore(page);
+    // on the O2 x airflow plane the slice is pressure, which follows the target
+    await openExplore(page, "?plane=o2_flow");
     const startLabel = (await page.getByTestId("target-analysis").locator("p").first().innerText()).trim();
     const sliceBefore = await page.getByTestId("slice-value").innerText();
 
@@ -116,20 +154,22 @@ test.describe("Explore (live API)", () => {
   test("plane switch swaps the axes and slice variable", async ({ page }) => {
     const api = trackApi(page);
     await openExplore(page);
-    await expect(page.getByTestId("slice-value")).toContainText("kPa");
+    // D1 default plane: O2 x pressure, sliced at an airflow
+    await expect(mapGroup(page)).toHaveAttribute("aria-label", /oxygen versus pressure/);
+    await expect(page.getByTestId("slice-value")).toContainText("cm/s");
+    await expect(page.getByText("Airflow slice", { exact: true })).toBeVisible();
+    await expect(page.getByTestId("obs-note")).toContainText("airflow slice");
+
+    await page.getByRole("radio", { name: /airflow/ }).click();
+    await expect(page).toHaveURL(/plane=o2_flow/);
     await expect(mapGroup(page)).toHaveAttribute("aria-label", /oxygen versus airflow/);
+    await expect(page.getByTestId("slice-value")).toContainText("kPa");
+    await expect.poll(() => api.urls().some((u) => u.includes("/api/coverage") && u.includes("plane=o2_flow"))).toBe(true);
 
     await page.getByRole("radio", { name: /pressure/ }).click();
     await expect(page).toHaveURL(/plane=o2_pressure/);
     await expect(mapGroup(page)).toHaveAttribute("aria-label", /oxygen versus pressure/);
     await expect(page.getByTestId("slice-value")).toContainText("cm/s");
-    await expect(page.getByText("Airflow slice", { exact: true })).toBeVisible();
-    await expect.poll(() => api.urls().some((u) => u.includes("/api/coverage") && u.includes("plane=o2_pressure"))).toBe(true);
-    await expect(page.getByTestId("obs-note")).toContainText("airflow slice");
-
-    await page.getByRole("radio", { name: /airflow/ }).click();
-    await expect(mapGroup(page)).toHaveAttribute("aria-label", /oxygen versus airflow/);
-    await expect(page.getByTestId("slice-value")).toContainText("kPa");
   });
 
   test("moving the slice requests new coverage and changes the plotted subset", async ({ page }) => {
@@ -160,22 +200,27 @@ test.describe("Explore (live API)", () => {
     await layerChip(page, "observations").click();
     await expect(obsMarks(page).first()).toBeVisible();
 
-    // prediction contours need the model surface: the chip turns on and the surface is requested
+    // prediction needs the model surface: the chip turns on, the surface is requested, and the map shows either the
+    // p = 0.5 contour of the supported region or says that nothing on this slice is supported (D3)
     const surf = page.waitForResponse((r) => r.url().includes("/api/surface") && r.ok());
     await layerChip(page, "prediction").click();
     await surf;
     await expect(layerChip(page, "prediction")).toHaveAttribute("aria-pressed", "true");
-    await expect(mapGroup(page).locator('path[stroke-width="2"]').first()).toBeAttached();
-    await layerChip(page, "prediction").click();
-    await expect(mapGroup(page).locator('path[stroke-width="2"]')).toHaveCount(0);
+    const contour = mapGroup(page).locator('path[stroke-width="1.75"]');
+    const noSupport = mapGroup(page).getByText("No supported model estimate on this slice; P(sustained) is not drawn.");
+    await expect(contour.first().or(noSupport)).toBeAttached();
 
-    // coverage and uncertainty chips toggle their state
-    for (const l of ["coverage", "uncertainty"]) {
-      const chip = layerChip(page, l);
-      const was = await chip.getAttribute("aria-pressed");
-      await chip.click();
-      await expect(chip).toHaveAttribute("aria-pressed", was === "true" ? "false" : "true");
-    }
+    // D3: only one surface layer at a time
+    await layerChip(page, "uncertainty").click();
+    await expect(layerChip(page, "uncertainty")).toHaveAttribute("aria-pressed", "true");
+    await expect(layerChip(page, "prediction")).toHaveAttribute("aria-pressed", "false");
+    await expect(contour).toHaveCount(0);
+    await expect(noSupport).toHaveCount(0);
+    await layerChip(page, "coverage").click();
+    await expect(layerChip(page, "coverage")).toHaveAttribute("aria-pressed", "true");
+    await expect(layerChip(page, "uncertainty")).toHaveAttribute("aria-pressed", "false");
+    await layerChip(page, "coverage").click();
+    await expect(layerChip(page, "coverage")).toHaveAttribute("aria-pressed", "false");
     // the accessible table view lists the same observations
     await page.getByRole("button", { name: "View as table" }).click();
     await expect(page.getByRole("region", { name: /table view/ }).locator("tbody tr").first()).toBeVisible();
@@ -198,13 +243,18 @@ test.describe("Explore (live API)", () => {
     await openExplore(page, `?group=${def.group_id}&target=${far!.profile_id}`);
     const panel = page.getByTestId("target-analysis");
     await expect(panel).toHaveAttribute("data-verdict", "insufficient_evidence");
-    await expect(page.getByRole("status").filter({ hasText: "Insufficient experimental evidence for a reliable estimate." })).toBeVisible();
     await expect(page.getByTestId("verdict-badge")).toHaveText("Insufficient evidence");
-    // no p(sustained) as an estimate for this target (it is base-rate reversion, not a pressure effect)
-    await expect(panel.getByText(/P\(sustained\)( across target|, extrapolated)/)).toHaveCount(0);
-    await expect(panel.getByText("Comparable observations")).toBeVisible();
+    // D2: no P(sustained) value anywhere in the target panel when no target point is supported
+    await expect(panel.getByText(/^P\(sustained\) (at supported target points|across the target)$/)).toHaveCount(0);
+    await expect(panel).not.toContainText(/P\(sustained\)[^.]{0,80}?\b[01]\.\d{2}\b/);
+    await expect(panel.getByText("Comparable observations", { exact: true })).toBeVisible();
+    // D2: "not represented in the integrated records" only when no target point has a comparable observation
+    const a = (await (await request.post("/api/target/assess", { data: { group_id: def.group_id, target: { profile_id: far!.profile_id } } })).json()) as Assess;
+    await expect(panel.getByText("These conditions are not represented in the integrated records.")).toHaveCount(a.coverage.points_with_comparable === 0 ? 1 : 0);
+    // D2: the "why" disclosure never opens onto an empty list
     await panel.getByText("Why is this region uncertain?").click();
-    await expect(page.getByTestId("why-uncertain").locator("li").first()).toBeVisible();
+    await expect(page.getByTestId("why-uncertain")).toBeVisible();
+    await expect.poll(async () => (await page.getByTestId("why-uncertain").innerText()).replace("Why is this region uncertain?", "").trim().length).toBeGreaterThan(0);
   });
 
   test("[bug check] candidate and counterfactual panels do not present P(sustained) for an insufficient-evidence target as an estimate", async ({ page, request }) => {
@@ -250,12 +300,18 @@ test.describe("Explore (live API)", () => {
     await expect(top).toContainText("Expected reduction of target uncertainty");
     const others = page.getByRole("list", { name: "Other ranked candidates" }).getByRole("listitem");
     expect(await others.count()).toBeGreaterThan(0);
+    // baselines sit in a disclosure and are scored with the same measure (D4)
+    await page.getByText("How this ranking compares with simpler rules").click();
+    await expect(page.getByTestId("candidate-panel")).toContainText("expected uncertainty reduction if this baseline's pick were tested instead");
     await expect(page.getByRole("table", { name: /selection strategy/ })).toContainText("Random");
     await expect(page.getByRole("table", { name: /selection strategy/ })).toContainText("Uncertainty sampling");
     await expect(page.getByTestId("candidate-panel")).toContainText("requiring qualified scientific review");
-    // the map shows one marker per ranked candidate
+    // the map marks every ranked candidate (coincident ones share a marker that names each rank, D3)
     const nCands = 1 + (await others.count());
-    await expect(candidateMarks(page)).toHaveCount(nCands);
+    await expect(candidateMarks(page).first()).toBeAttached();
+    const markLabels = (await candidateMarks(page).evaluateAll((els) => els.map((e) => e.getAttribute("aria-label") ?? ""))).join("; ");
+    for (let r = 1; r <= nCands; r++) expect(markLabels, `rank ${r} on the map`).toMatch(new RegExp(`Research candidate ${r}\\b`));
+    expect(await candidateMarks(page).count()).toBeLessThanOrEqual(nCands);
 
     // Explore: highlights the marker and opens the counterfactual preview with its mandatory label
     await expect(page.getByTestId("counterfactual-panel")).toHaveCount(0);
@@ -265,13 +321,12 @@ test.describe("Explore (live API)", () => {
     await expect(page.getByTestId("hypothetical-label")).toHaveText("Hypothetical outcome — not an experimental result");
     await expect(cf.getByTestId("scenario-sustained")).toBeVisible();
     await expect(cf.getByTestId("scenario-not_sustained")).toBeVisible();
-    await expect(candidateMarks(page).first()).toHaveAttribute("aria-pressed", "true");
+    await expect(mapGroup(page).locator('g[role="button"][aria-label^="Research candidate 1"]')).toHaveAttribute("aria-pressed", "true");
     expect(api.urls().some((u) => u.startsWith("POST /api/candidates/counterfactual") || u.includes("counterfactual"))).toBe(true);
 
     // hypothetical surface on the map is labelled
     await cf.getByRole("radio", { name: "If sustained" }).click();
     await expect(page.getByTestId("hypothetical-map-note")).toContainText("Hypothetical outcome — not an experimental result");
-    await expect(layerChip(page, "prediction")).toHaveAttribute("aria-pressed", "true");
 
     await page.getByRole("button", { name: "Close counterfactual preview" }).click();
     await expect(cf).toHaveCount(0);

@@ -1,11 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
-import { useQueries } from "@tanstack/react-query";
-import { api } from "@/lib/api";
-import { queryKeys } from "@/hooks/api";
+import { useHeadline } from "@/hooks/api";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/cn";
 import { fmtFixed } from "@/lib/format";
 import { useExploreStore } from "@/lib/explore-store";
@@ -25,55 +21,32 @@ function profileConditions(p: AtmosphereProfile): string | null {
   return `${fmtFixed(kpa / KPA_PER_PSI, 1)} psia / ${fmtFixed(o2, 0)} % O₂`;
 }
 
-const range = (vals: Array<[number, number] | null>): [number, number] | null => {
-  const flat = vals.flatMap((v) => (v ? v : []));
-  return flat.length ? [Math.min(...flat), Math.max(...flat)] : null;
-};
-
-/** Sums comparable observations over every analysis group for one profile (from /api/target/assess). */
-function useProfileTotals(groups: readonly GroupSummary[], profileId: string | null) {
-  return useQueries({
-    queries: groups.map((g) => {
-      const body = { group_id: g.group_id, target: { profile_id: profileId ?? "" } };
-      return {
-        queryKey: queryKeys.assess(body),
-        queryFn: ({ signal }: { signal: AbortSignal }) => api.assessTarget(body, signal),
-        enabled: !!profileId,
-        staleTime: 60_000,
-        retry: false,
-      };
-    }),
-    combine: (rs) => {
-      if (!profileId || rs.length === 0 || rs.some((r) => !r.data)) return null;
-      let total = 0;
-      let groupsWith = 0;
-      for (const r of rs) {
-        const n = r.data?.data.coverage.comparable_observations ?? 0;
-        total += n;
-        if (n > 0) groupsWith += 1;
-      }
-      return { total, groupsWith, groups: rs.length };
-    },
-  });
+/** Placeholder text block: wraps exactly like the real text it stands in for, so nothing moves when data arrive. */
+function Ghost({ children }: { children: string }) {
+  return <span className="rounded-sm bg-subtle text-transparent [box-decoration-break:clone] motion-safe:animate-pulse">{children}</span>;
 }
 
 /**
- * Headline finding, computed from the API (never hard-coded): comparable observations for the ISS cabin
+ * Headline finding from GET /api/headline (never hard-coded): comparable observations for the ISS cabin
  * versus the NASA Exploration Atmosphere across all analysis groups, plus the integrated envelope.
  */
 export function FindingStrip({ groups, profiles, onShowMap }: { groups: readonly GroupSummary[]; profiles: readonly AtmosphereProfile[]; onShowMap: () => void }) {
+  const headline = useHeadline();
   const iss = profiles.find((p) => p.profile_id === ISS_PROFILE_ID) ?? null;
   const gap = profiles.find((p) => p.profile_id === BLIND_SPOT_PROFILE_ID) ?? null;
-  const issT = useProfileTotals(groups, iss ? iss.profile_id : null);
-  const gapT = useProfileTotals(groups, gap ? gap.profile_id : null);
+  const h = headline.data?.data;
+  const issT = h?.profiles.find((p) => p.profile_id === ISS_PROFILE_ID) ?? null;
+  const gapT = h?.profiles.find((p) => p.profile_id === BLIND_SPOT_PROFILE_ID) ?? null;
   const target = useExploreStore((s) => s.target);
   const plane = useExploreStore((s) => s.plane);
-  const o2 = useMemo(() => range(groups.map((g) => g.oxygen_percent_range)), [groups]);
-  const kpa = useMemo(() => range(groups.map((g) => g.pressure_kpa_range)), [groups]);
-  const partlyAssumed = groups.some((g) => !g.pressure_measured);
+  const o2 = h?.envelope.oxygen_percent ?? null;
+  const kpa = h?.envelope.pressure_kpa ?? null;
+  const partlyAssumed = (h?.envelope.n_steps_pressure_assumed ?? 0) > 0;
 
-  const loading = groups.length === 0 || profiles.length === 0 || (iss && !issT) || (gap && !gapT);
-  if (!loading && (!iss || !gap)) return null;
+  const loading = headline.isPending || groups.length === 0 || profiles.length === 0;
+  // D1: hide the strip on error or when either profile is absent; never show placeholder numbers.
+  if (headline.isError) return null;
+  if (!loading && (!iss || !gap || !issT || !gapT)) return null;
 
   const current = "profile_id" in target ? target.profile_id : null;
   const go = (profileId: string, p: "o2_flow" | "o2_pressure") => {
@@ -92,28 +65,46 @@ export function FindingStrip({ groups, profiles, onShowMap }: { groups: readonly
     <section aria-label="Key finding" data-testid="finding-strip" className="rounded-lg border border-border bg-surface px-4 py-3">
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
         {loading || !iss || !gap || !issT || !gapT ? (
-          <div role="status" aria-label="Loading the key finding" className="grid flex-1 gap-3 sm:grid-cols-3">
-            {[0, 1, 2].map((k) => (
-              <div key={k} className="space-y-1.5">
-                <Skeleton className="h-3 w-2/3" />
-                <Skeleton className="h-5 w-1/2" />
+          <div role="status" aria-label="Loading the key finding" className="flex-1">
+            <dl aria-hidden className="grid gap-x-6 gap-y-3 sm:grid-cols-3">
+              {[iss, gap].map((p, k) => (
+                <div key={k} className="min-w-0">
+                  <dt className="text-xs text-muted">
+                    <Ghost>{p ? `${p.name}${profileConditions(p) ? ` (${profileConditions(p)})` : ""}` : k === 0 ? "ISS cabin (nominal operating range)" : "NASA Exploration Atmosphere (8.2 psia / 34 % O2)"}</Ghost>
+                  </dt>
+                  <dd className="mt-0.5 text-[13px] text-fg">
+                    <span className="num text-[17px] font-semibold"><Ghost>000</Ghost></span>
+                    <Ghost>{" comparable observations, in 00 of 00 material groups"}</Ghost>
+                  </dd>
+                </div>
+              ))}
+              <div className="min-w-0">
+                <dt className="text-xs text-muted">
+                  <Ghost>All integrated ISS records</Ghost>
+                </dt>
+                <dd className="mt-0.5 text-[13px] text-fg">
+                  <span className="num text-[17px] font-semibold"><Ghost>00.0–00.0</Ghost></span>
+                  <Ghost>{" % O₂, "}</Ghost>
+                  <span className="num text-[17px] font-semibold"><Ghost>00–000</Ghost></span>
+                  <Ghost>{" kPa (pressure partly assumed)"}</Ghost>
+                </dd>
               </div>
-            ))}
+            </dl>
           </div>
         ) : (
           <dl className="grid flex-1 gap-x-6 gap-y-3 sm:grid-cols-3">
             <div className="min-w-0">
               <dt className="text-xs text-muted">{iss.name}{profileConditions(iss) ? ` (${profileConditions(iss)})` : ""}</dt>
               <dd className="mt-0.5 text-[13px] text-fg">
-                <span className="num text-[17px] font-semibold">{issT.total}</span> comparable observations
-                <span className="text-muted">, in {issT.groupsWith} of {issT.groups} material groups</span>
+                <span className="num text-[17px] font-semibold">{issT.comparable_observations}</span> comparable observations
+                <span className="text-muted">, in {issT.groups_with_comparable} of {issT.n_groups} material groups</span>
               </dd>
             </div>
             <div className="min-w-0">
               <dt className="text-xs text-muted">{gap.name}{profileConditions(gap) ? ` (${profileConditions(gap)})` : ""}</dt>
               <dd className="mt-0.5 text-[13px] text-fg">
-                <span className="num text-[17px] font-semibold">{gapT.total}</span> comparable observations
-                <span className="text-muted">{gapT.groupsWith === 0 ? `, in all ${gapT.groups} material groups` : `, in ${gapT.groupsWith} of ${gapT.groups} material groups`}</span>
+                <span className="num text-[17px] font-semibold">{gapT.comparable_observations}</span> comparable observations
+                <span className="text-muted">{gapT.groups_with_comparable === 0 ? `, in all ${gapT.n_groups} material groups` : `, in ${gapT.groups_with_comparable} of ${gapT.n_groups} material groups`}</span>
               </dd>
             </div>
             {o2 && kpa ? (

@@ -27,10 +27,17 @@ def pct(x, nd=0):
 
 
 def table(header, rows):
+    # group columns hold technical ids; say so in the header (prose uses readable labels via lab())
+    header = ["group id" if h == "group" else h for h in header]
     out = ["| " + " | ".join(header) + " |", "|" + "|".join("---" for _ in header) + "|"]
     for r in rows:
         out.append("| " + " | ".join(str(c) for c in r) + " |")
     return "\n".join(out)
+
+
+def lab(g):
+    """Readable group label for prose (e.g. "PMMA spheres, wake ignition"); falls back to the id."""
+    return (g.get("label") or g["group_id"]).replace(" \u00b7 ", ", ")
 
 
 def verdict_vs_majority(g):
@@ -248,14 +255,11 @@ def build(F: dict) -> dict:
     X["N_GP_BETTER"] = cnt["GP better"]
     X["N_GP_INDIST"] = cnt["not distinguishable"]
     X["N_GP_WORSE"] = cnt["GP worse"]
-    better = [g["group_id"] for g in groups if verdict_vs_majority(g).startswith("GP better")]
+    better = [g for g in groups if verdict_vs_majority(g).startswith("GP better")]
     X["GP_INDIST_GROUPS"] = (
-        ", ".join(
-            f"`{g['group_id']}`" for g in groups if verdict_vs_majority(g).startswith("not distinguishable")
-        )
-        or "none"
+        "; ".join(lab(g) for g in groups if verdict_vs_majority(g).startswith("not distinguishable")) or "none"
     )
-    X["GP_BETTER_GROUPS"] = ", ".join(f"`{x}`" for x in better) or "none"
+    X["GP_BETTER_GROUPS"] = "; ".join(lab(g) for g in better) or "none"
     # share of negatives that are flow-off transients / brief flames
     fo_rows, fo_ids = [], []
     conf = []
@@ -267,7 +271,7 @@ def build(F: dict) -> dict:
         n_fo, n_ns = neg - left_fo, neg - left_ns
         fo_rows.append((f"`{g['group_id']}`", neg, n_fo, pct(n_fo / neg), n_ns, pct(n_ns / neg)))
         if n_fo / neg >= 0.8:
-            fo_ids.append(f"`{g['group_id']}` ({n_fo} of {neg})")
+            fo_ids.append((g["group_id"], f"{lab(g)} ({n_fo} of {neg})"))
         sub = {s["name"]: s for s in g["subgroups"]}
         hi = sub.get("confidence high")
         if hi and neg:
@@ -291,23 +295,32 @@ def build(F: dict) -> dict:
         fo = sv["drop flow_off_transient rows"]
         gp_auc = next((m["auc"]["value"] for m in g["cv"]["models"] if m.get("name") == "gp"), None)
         if (neg - fo["n_not_sustained"]) / neg >= 0.8 and gp_auc is not None:
-            if fo.get("auc") is None:
+            left = fo["n_not_sustained"]
+            if fo.get("auc") is None or not left:
                 auc_parts.append(
-                    f"`{g['group_id']}` has no other negatives (CV AUC {gp_auc:.2f} with them; not evaluable without)"
+                    f"{lab(g)}: {gp_auc:.2f} with all {neg} not-sustained observations; none remain without them, so not evaluable"
+                )
+            elif left < 3 or fo.get("few_not_sustained"):
+                obs = "observation remains" if left == 1 else "observations remain"
+                auc_parts.append(
+                    f"{lab(g)}: {gp_auc:.2f} with all {neg} not-sustained observations; {fo['auc']:.2f} without them, "
+                    f"but only {left} not-sustained {obs}, so that AUC is not interpretable"
                 )
             else:
-                auc_parts.append(f"`{g['group_id']}` {gp_auc:.2f} to {fo['auc']:.2f}")
+                auc_parts.append(
+                    f"{lab(g)}: {gp_auc:.2f} to {fo['auc']:.2f} ({left} of {neg} not-sustained observations remain)"
+                )
         bc = sv["drop below_calibration_range rows"]
         n_all = g["label_counts"]["sustained"] + neg
         if bc["n_training"] < 0.5 * n_all or bc["n_not_sustained"] < 0.5 * neg:
             below_parts.append(
-                f"`{g['group_id']}` ({bc['n_training']} of {n_all} training rows and {bc['n_not_sustained']} of {neg} negatives remain)"
+                f"{lab(g)} ({bc['n_training']} of {n_all} training rows and {bc['n_not_sustained']} of {neg} negatives remain)"
             )
     X["FLOWOFF_AUC"] = "; ".join(auc_parts) or "none"
     X["BELOWCAL_RELIANT"] = "; ".join(below_parts) or "none"
-    fo_set = {x.split("`")[1] for x in fo_ids}
-    X["GP_BETTER_NOT_FLOWOFF"] = ", ".join(f"`{x}`" for x in better if x not in fo_set) or "none"
-    X["FLOWOFF_GROUPS"] = ", ".join(fo_ids) or "none"
+    fo_set = {gid for gid, _ in fo_ids}
+    X["GP_BETTER_NOT_FLOWOFF"] = "; ".join(lab(g) for g in better if g["group_id"] not in fo_set) or "none"
+    X["FLOWOFF_GROUPS"] = "; ".join(t for _, t in fo_ids) or "none"
     X["N_FLOWOFF_GROUPS"] = len(fo_ids)
     X["CONFHIGH_MIN"], X["CONFHIGH_MAX"] = (pct(min(conf)), pct(max(conf))) if conf else ("n/a", "n/a")
     X["N_EXP_MIN"] = min(g["n_experiments"] for g in groups)
@@ -357,11 +370,11 @@ def build(F: dict) -> dict:
     X["BS_INCONCLUSIVE"] = vc["inconclusive"]
     X["BS_NOT_SUPPORTED"] = vc["not_supported"]
     X["BS_SUPPORTED_GROUPS"] = (
-        ", ".join(f"`{g['group_id']}`" for g in groups if g["blindspot_test"]["verdict"] == "supported")
+        "; ".join(lab(g) for g in groups if g["blindspot_test"]["verdict"] == "supported")
         or "none"
     )
     X["BS_INCONC_GROUPS"] = (
-        ", ".join(f"`{g['group_id']}`" for g in groups if g["blindspot_test"]["verdict"] == "inconclusive")
+        "; ".join(lab(g) for g in groups if g["blindspot_test"]["verdict"] == "inconclusive")
         or "none"
     )
     pr = [g["blindspot_test"]["diagnostics"]["partial_rho_epistemic_given_aleatoric"] for g in groups]

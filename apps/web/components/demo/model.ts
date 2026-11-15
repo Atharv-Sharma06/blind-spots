@@ -10,7 +10,7 @@ export const SCENE_COUNT = 5;
 /** Scene index 6 is the end card. */
 export const END_SCENE = SCENE_COUNT + 1;
 
-export const TITLE_LINE = "Blind Spots — where NASA's microgravity fire evidence ends, and what to learn next";
+export const TITLE_LINE = "Blind Spots: where NASA's microgravity fire evidence ends, and what to learn next.";
 export const TITLE_SUBLINE = "Fire safety in crew cabins: spacecraft, Moon and Mars habitats.";
 export const END_NAME = "Blind Spots";
 export const END_LINE = "Where NASA's microgravity fire evidence ends, and what to learn next.";
@@ -130,7 +130,7 @@ export function sceneCaption(i: CaptionInput): SceneCaption {
       caption,
       facts: [
         { label: "Verdict", value: verdictLabel(assess.verdict) },
-        { label: "Target points with nearby data", value: `${c.points_with_comparable} of ${c.n_target_points}` },
+        { label: "Target points with comparable observations", value: `${c.points_with_comparable} of ${c.n_target_points}` },
         ...(c.nn_distance_min !== null ? [{ label: "Nearest observation", value: `${fmtFixed(c.nn_distance_min, 1)} reference distances` }] : []),
       ],
     };
@@ -148,7 +148,9 @@ export function sceneCaption(i: CaptionInput): SceneCaption {
     }
     return {
       title: "What to learn next",
-      caption: `Active learning picks the most informative next experiment: candidate ${top.rank}.`,
+      caption: top.reasons.some((x) => (x.code as string) === "at_target_conditions")
+        ? "Most informative next test: at the target conditions themselves."
+        : `Active learning picks the most informative next experiment: candidate ${top.rank}.`,
       facts: [
         { label: "Oxygen", value: fmtOxygen(top.oxygen_percent) },
         { label: "Pressure", value: fmtPressure(top.pressure_kpa) },
@@ -170,7 +172,7 @@ export function sceneCaption(i: CaptionInput): SceneCaption {
     const span = loS === null || hiS === null ? null : loS === hiS ? loS : `${loS.replace(/\s*%$/, "")}–${hiS}`;
     return {
       title: "What it would change",
-      caption: span ? `Either outcome would cut the model's target uncertainty by ${span}.` : "Previewing how the model would update under either outcome.",
+      caption: span ? `If tested, either hypothetical outcome would cut target uncertainty by ${span}.` : "If tested, the model would update like this (hypothetical outcomes).",
       facts: sc.map((s) => ({
         label: s.outcome === "sustained" ? "If flame sustained" : "If flame not sustained",
         value: `−${fmtFractionPercent(s.variance_reduction_fraction, 1)}`,

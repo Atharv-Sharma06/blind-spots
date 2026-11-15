@@ -179,9 +179,15 @@ def build_candidate(
         reasons.append(
             _reason(
                 "at_target_conditions",
-                "This condition lies within one reference distance of the target conditions. The most "
-                "informative single experiment is at the target conditions themselves; this follows from the "
-                "model's distance-based (stationary) correlation assumption.",
+                (
+                    "This condition lies within one reference distance of the target conditions. The most "
+                    "informative single experiment is at the target conditions themselves; this follows "
+                    "from the model's distance-based (stationary) correlation assumption."
+                    if rank == 1
+                    else "This condition lies within one reference distance of the target conditions; the "
+                    "model's distance-based (stationary) correlation assumption favours conditions at the "
+                    "target itself."
+                ),
                 st["target_d"],
             )
         )
@@ -249,8 +255,8 @@ def build_candidate(
         )
     else:
         sentence += (
-            "; no P(sustained) estimate is given because this condition is not supported by comparable "
-            f"observations (remaining uncertainty, latent std ratio, {st['ratio']:.2f})"
+            "; no P(sustained) estimate is given because this condition is not supported by the integrated "
+            f"evidence (remaining uncertainty, latent std ratio, {st['ratio']:.2f})"
         )
     sentence += (
         f" and the nearest integrated observation is {nn:.1f} reference distances away."
@@ -320,7 +326,8 @@ def _assumptions(ctx: Ctx) -> list[str]:
     ]
     note = ctx.resolved.payload.get("airflow_band_note")
     if note:
-        out.append(str(note).removeprefix("Airflow band: "))
+        text = str(note).removeprefix("Airflow band: ")
+        out.append(text[:1].upper() + text[1:])
     for flag in ctx.resolved.flags:
         if flag == "documented_upper_bound_used":
             out.append(

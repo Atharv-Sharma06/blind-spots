@@ -2,11 +2,11 @@
 
 **Blind Spots: where NASA's microgravity fire evidence ends, and what to learn next.**
 
-Fire safety in crew cabins (spacecraft, Moon and Mars habitats) depends on how flames behave in microgravity at the cabin's
-oxygen level and pressure. Blind Spots measures how far NASA's integrated microgravity flame records reach toward a chosen
-cabin atmosphere. Its method is machine learning: a Gaussian-process model that says when it does not know, plus active
-learning that ranks the most informative next experiment. Built for NASA Space Apps Challenge 2026, "Flame in Freefall".
-Not endorsed by NASA.
+NASA's next crew cabins are planned at 8.2 psia and 34 % O2. All {{ENV_N_EXP}} integrated ISS flame tests (BASS, BASS-II)
+ran at about 1 atm. Blind Spots measures that gap: {{H_ISS_COMPARABLE}} comparable observations for the ISS cabin,
+{{H_EXPL_COMPARABLE}} for the Exploration Atmosphere in every material group. There, a Gaussian-process model answers
+"Insufficient experimental evidence for a reliable estimate." and active learning ranks what would teach the most.
+Built for NASA Space Apps Challenge 2026, "Flame in Freefall"; not endorsed by NASA.
 
 **Try it:** [live app]({{DEPLOYED_URL}}) (press **Guided demo**) · [30-second video]({{VIDEO_URL}}) · [source code]({{GITHUB_URL}})
 
@@ -22,7 +22,7 @@ Not endorsed by NASA.
   comparable evidence, what an uncertainty-aware model predicts, where it refuses to guess, and which computation would
   reduce its uncertainty about that atmosphere the most.
 - **The finding.** All integrated ISS records lie at {{ENV_O2}} % O2 and {{ENV_P}} kPa. The ISS cabin has
-  {{H_ISS_COMPARABLE}} comparable observations across the {{H_N_GROUPS}} material and flame-configuration groups; the NASA
+  {{H_ISS_COMPARABLE}} comparable observations, in {{H_ISS_GROUPS_WITH}} of the {{H_N_GROUPS}} material and flame-configuration groups; the NASA
   Exploration Atmosphere has {{H_EXPL_COMPARABLE}}, in every group (nearest {{H_EXPL_NN_MIN}} to {{H_EXPL_NN_MAX}}
   reference distances). So the app answers "Insufficient experimental evidence for a reliable estimate." instead of
   printing a probability.
@@ -39,7 +39,7 @@ snapshot serves), dataset `{{DV}}`, model `{{MV}}`:
 {{H_PROFILE_TABLE}}
 
 - {{H_N_ZERO}} of the {{H_N_PROFILES_ANALYSED}} documented NASA atmospheres analysed have no comparable integrated observation
-  in any group, including all {{H_N_REDUCED}} below 1 atm ({{H_REDUCED_LIST}}).
+  in any group, including all {{H_N_REDUCED}} below 1 atm ({{H_REDUCED_SHORT}}).
 - Default view (thin PMMA films, opposed flow, the API's default group): {{DX_PTS_WITH}} of {{DX_NPTS}} Exploration
   Atmosphere target points have a comparable observation; the nearest is {{DX_NN}} reference distances away.
 - Top-ranked computational research candidate for that target: {{TC_O2}} % O2, {{TC_P}} kPa, {{TC_U}} cm/s, expected
@@ -99,7 +99,7 @@ would teach us the most?*
 - **Honest context**: NASA investigations that are *not* integrated (for example SoFIE-GEL, Saffire-V/VI) are listed alongside every target assessment as
   "not represented in the integrated records"; this is never phrased as "NASA has not studied this".
 - **Experiment explorer**: every integrated test with the source cell behind each value.
-- **Guided demo and defaults**: the default analysis group is data-driven (`is_default` on `/api/groups`, currently `{{DEFAULT_GROUP}}`) and the context layer is on by default; the built-in guided demo walks through coverage, target, gap, candidate and counterfactual in about a minute.
+- **Guided demo and defaults**: the default analysis group is data-driven (`is_default` on `/api/groups`, currently {{DG_LABEL}}, id `{{DEFAULT_GROUP}}`) and the context layer is on by default; the built-in guided demo walks through coverage, target, gap, candidate and counterfactual in about a minute.
 
 ## Key differentiator
 
@@ -135,7 +135,7 @@ Full list, licences and caveats: [docs/data-sources.md](docs/data-sources.md). C
 ## Scientific methodology (summary)
 
 1. **Unit of observation**: one flow step of one test (flame sustained or not at a recorded airflow and O2). Steps of a test are correlated, so all validation is grouped by experiment.
-2. **Analysis groups**: material family plus flame configuration (for example `pmma_rod__stagnation`). A group is modelled only with at least 6 training
+2. **Analysis groups**: material family plus flame configuration (for example PMMA rods in axial stagnation flow, id `pmma_rod__stagnation`). A group is modelled only with at least 6 training
    experiments, at least 3 sustained and 3 not-sustained rows and not-sustained rows in at least 2 experiments; otherwise only coverage is shown.
 3. **Coordinates**: O2 percent, ln(1 + airflow cm/s), ln(pressure / 101.325 kPa). Every integrated observation is near 1 atm, so the GP pressure length scale is **fixed** at {{LP}}
    (ln units) and cannot be learned; anything at another pressure is assumption-driven, and a 0.15 / 0.3 / 0.6 sensitivity check is reported.

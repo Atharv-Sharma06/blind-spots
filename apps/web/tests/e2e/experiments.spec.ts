@@ -35,7 +35,7 @@ test.describe("Experiments (live API)", () => {
     await openExperiments(page);
     await expect(summary(page)).toContainText(`${all.length} of ${all.length} experiments`);
     await expect(rows(page)).toHaveCount(all.length);
-    await expect(page.getByTestId("data-source-badge")).toHaveAttribute("data-source", "live");
+    await expect(page.getByTestId("data-source-badge").first()).toHaveAttribute("data-source", "live");
     await expect(page.getByRole("columnheader", { name: /Pressure kPa/ })).toBeVisible();
   });
 

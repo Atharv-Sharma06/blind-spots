@@ -34,7 +34,7 @@ Of the modelled groups, 9 met the modelability rule; 11 groups have coverage onl
 
 Modelled groups (training rows):
 
-| group | training experiments | training observations | sustained | not sustained | majority class | GP mean | campaigns |
+| group id | training experiments | training observations | sustained | not sustained | majority class | GP mean | campaigns |
 |---|---|---|---|---|---|---|---|
 | `pmma_rod__opposed` | 24 | 108 | 87 | 21 | 81% | constant | BASS-II/Fernandez-Pello |
 | `pmma_slab__opposed` | 22 | 95 | 80 | 15 | 84% | constant | BASS-II/Miller, BASS/2013 |
@@ -49,7 +49,7 @@ Modelled groups (training rows):
 ## 2. What the data look like (and why that limits the claims)
 
 - 78% of training rows are "sustained"; the majority-class baseline is therefore strong. Not-sustained modes: quench_low_flow 40, brief_flame_no_sustain 26, flow_turned_off 24, at_constant_flow 20, blowoff_high_flow 12.
-- 24 not-sustained rows are flow-off transients (flow turned off, ~0 cm/s). In 3 groups at least 80% of the not-sustained rows are such transients: `pmma_sphere__wake` (9 of 10), `pmma_sphere__stagnation` (8 of 10), `pmma_sphere__unknown` (3 of 3).
+- 24 not-sustained rows are flow-off transients (flow turned off, ~0 cm/s). In 3 groups at least 80% of the not-sustained rows are such transients: PMMA spheres, wake ignition (9 of 10); PMMA spheres, axial stagnation flow (8 of 10); PMMA spheres, configuration not recorded (3 of 3).
 - Operating conditions covered by the training rows: O2 13.5 to 22.7 %, airflow 0.00 to 53.3 cm/s, pressure 98.3 to 102.2 kPa (that is, about 1 atm; BASS-II pressure is an assumed value).
 - 139 of 565 training rows have airflow below the calibrated range (linear extrapolation); 386 have interpolated O2.
 
@@ -58,7 +58,7 @@ Modelled groups (training rows):
 Per-group GP classifiers. The table shows the learned length scales (how far O2 or flow must change before the latent function changes appreciably) and the predicted probability of a sustained flame at 1 atm at the 10th and 90th percentile
 of each group's training O2 and flow.
 
-| group | learned O2 length scale (%) | learned flow length scale (ln units) | training 10th to 90th percentile | P(sustained): low O2, low flow | high O2, low flow | low O2, high flow | high O2, high flow |
+| group id | learned O2 length scale (%) | learned flow length scale (ln units) | training 10th to 90th percentile | P(sustained): low O2, low flow | high O2, low flow | low O2, high flow | high O2, high flow |
 |---|---|---|---|---|---|---|---|
 | `pmma_rod__opposed` | 1.90 | 0.37 | O2 16.7 to 20.4 %, flow 0.32 to 5.0 cm/s | 0.71 | 0.75 | 0.69 | 0.91 |
 | `pmma_rod__stagnation` | 1.39 | 1.38 | O2 14.3 to 16.6 %, flow 1.30 to 21.6 cm/s | 0.69 | 0.82 | 0.11 | 0.86 |
@@ -81,7 +81,7 @@ Qualitative reading of the table (commentary written for dataset `4fe55f76142a`;
 
 Grouped 5-fold by experiment x 5 repeats; log loss, lower is better; 95% group-bootstrap CIs (1000 draws). The majority-class baseline predicts the training prevalence everywhere.
 
-| group | gp log loss | logistic_o2_flow log loss | logistic_o2 log loss | bootstrap_logistic_ensemble log loss | majority_class log loss |
+| group id | gp log loss | logistic_o2_flow log loss | logistic_o2 log loss | bootstrap_logistic_ensemble log loss | majority_class log loss |
 |---|---|---|---|---|---|
 | `pmma_rod__opposed` | 0.493 [0.417, 0.597] | 0.548 [0.420, 0.736] | 0.507 [0.415, 0.641] | 0.535 [0.416, 0.713] | 0.497 [0.410, 0.622] |
 | `pmma_slab__opposed` | 0.445 [0.365, 0.555] | 0.438 [0.352, 0.562] | 0.434 [0.350, 0.558] | 0.438 [0.355, 0.557] | 0.439 [0.362, 0.549] |
@@ -95,7 +95,7 @@ Grouped 5-fold by experiment x 5 repeats; log loss, lower is better; 95% group-b
 
 Paired comparison of the GP with the majority class (negative = GP better), plus Brier and AUC:
 
-| group | exp. | sust./not sust. | GP log loss [95% CI] | majority log loss | GP minus majority log loss | GP Brier | majority Brier | GP AUC | log loss vs majority |
+| group id | exp. | sust./not sust. | GP log loss [95% CI] | majority log loss | GP minus majority log loss | GP Brier | majority Brier | GP AUC | log loss vs majority |
 |---|---|---|---|---|---|---|---|---|---|
 | `pmma_rod__opposed` | 24 | 87/21 | 0.493 [0.417, 0.597] | 0.497 [0.410, 0.622] | -0.004 [-0.048, 0.030] | 0.158 [0.125, 0.203] | 0.158 [0.120, 0.212] | 0.587 [0.502, 0.689] | not distinguishable (CI includes 0) |
 | `pmma_slab__opposed` | 22 | 80/15 | 0.445 [0.365, 0.555] | 0.439 [0.362, 0.549] | 0.006 [-0.021, 0.033] | 0.134 [0.102, 0.180] | 0.134 [0.102, 0.179] | 0.481 [0.332, 0.652] | not distinguishable (CI includes 0) |
@@ -109,12 +109,12 @@ Paired comparison of the GP with the majority class (negative = GP better), plus
 
 Reading:
 
-- The GP beats the majority class on log loss with a CI that excludes 0 in 6 of 9 groups (`pmma_rod__stagnation`, `pmma_rod__unknown`, `pmma_thin_film__opposed`, `pmma_sphere__wake`, `pmma_sphere__stagnation`, `pmma_sphere__unknown`); it is not distinguishable in 3 and worse in 0.
-- Of the groups where the GP wins, 3 are groups whose not-sustained rows are mostly flow-off transients, where the gain mostly reflects "flow near zero means no flame". Removing those rows (sensitivity table in [validation.md](validation.md)) leaves one or no negatives in some groups, so the win cannot be re-evaluated there.
-- Groups where the GP is not distinguishable from the majority class: `pmma_rod__opposed`, `pmma_slab__opposed`, `sibal_fabric__concurrent`. With this much imbalance and this few experiments, the model's discrimination is modest and uncertain in those groups.
+- The GP beats the majority class on log loss with a CI that excludes 0 in 6 of 9 groups (PMMA rods, axial stagnation flow; PMMA rods, configuration not recorded; Thin PMMA films, opposed flow; PMMA spheres, wake ignition; PMMA spheres, axial stagnation flow; PMMA spheres, configuration not recorded); it is not distinguishable in 3 and worse in 0.
+- Of the groups where the GP wins, 0 are groups whose not-sustained rows are mostly flow-off transients, where the gain mostly reflects "flow near zero means no flame". Removing those rows (sensitivity table in [validation.md](validation.md)) leaves one or no negatives in some groups, so the win cannot be re-evaluated there.
+- Groups where the GP is not distinguishable from the majority class: PMMA rods, opposed flow; PMMA slabs, opposed flow; SIBAL cotton/fiberglass fabric, concurrent flow. With this much imbalance and this few experiments, the model's discrimination is modest and uncertain in those groups.
 - Leave-one-campaign-out (11 held-out campaigns across groups with more than one campaign; the GP log loss is higher than the majority-class log loss in 4 of them) is a harder test because O2 is partly confounded with campaign; several folds have very few rows or not-sustained rows:
 
-| group | held-out campaign | n | not sustained | GP log loss | majority log loss | which is lower |
+| group id | held-out campaign | n | not sustained | GP log loss | majority log loss | which is lower |
 |---|---|---|---|---|---|---|
 | `pmma_slab__opposed` | BASS-II/Miller | 93 | 13 | 1.613 | 1.233 | GP worse |
 | `pmma_slab__opposed` | BASS/2013 | 2 | 2 | 2.296 | 1.915 | GP worse |
@@ -133,7 +133,7 @@ Reading:
 The test asks whether the model's epistemic uncertainty, computed before an outcome is revealed, ranks where it makes larger errors on withheld experiments (point level on out-of-fold predictions, experiment level with leave-one-experiment-out refits).
 Verdict rule: supported if rho > 0 with p < 0.05 at both levels and the point-level partial rho of epistemic uncertainty given aleatoric uncertainty is > 0 with p < 0.05; not supported if rho <= 0 at both; otherwise inconclusive.
 
-| group | point n | point rho | point p | AUROC (misclassified) | experiments | experiment rho | experiment p | rho aleatoric vs loss | partial rho (epistemic given aleatoric) | verdict |
+| group id | point n | point rho | point p | AUROC (misclassified) | experiments | experiment rho | experiment p | rho aleatoric vs loss | partial rho (epistemic given aleatoric) | verdict |
 |---|---|---|---|---|---|---|---|---|---|---|
 | `pmma_rod__opposed` | 108 | 0.26 | 0.0025 | 0.65 (of 22) | 24 | 0.43 | 0.0140 | 0.63 | 0.28 | **supported** |
 | `pmma_slab__opposed` | 95 | 0.37 | 0.0005 | 0.57 (of 15) | 22 | -0.10 | 0.6872 | 0.64 | 0.15 | **inconclusive** |
@@ -145,7 +145,7 @@ Verdict rule: supported if rho > 0 with p < 0.05 at both levels and the point-le
 | `pmma_sphere__stagnation` | 33 | 0.87 | 0.0005 | 0.87 (of 2) | 18 | 0.82 | 0.0005 | 0.91 | 0.63 | **supported** |
 | `pmma_sphere__unknown` | 29 | 0.95 | 0.0005 | n/a (of 0) | 18 | 0.84 | 0.0005 | 0.99 | 0.69 | **supported** |
 
-Verdicts as computed: **4 supported, 5 inconclusive, 0 not supported** of 9 groups (supported: `pmma_rod__opposed`, `pmma_sphere__wake`, `pmma_sphere__stagnation`, `pmma_sphere__unknown`; inconclusive: `pmma_slab__opposed`, `pmma_rod__stagnation`, `pmma_rod__unknown`, `pmma_thin_film__opposed`, `sibal_fabric__concurrent`).
+Verdicts as computed: **4 supported, 5 inconclusive, 0 not supported** of 9 groups (supported: PMMA rods, opposed flow; PMMA spheres, wake ignition; PMMA spheres, axial stagnation flow; PMMA spheres, configuration not recorded; inconclusive: PMMA slabs, opposed flow; PMMA rods, axial stagnation flow; PMMA rods, configuration not recorded; Thin PMMA films, opposed flow; SIBAL cotton/fiberglass fabric, concurrent flow).
 
 Caveats that matter: aleatoric uncertainty tracks loss at least as strongly as epistemic uncertainty in 8 of 9 groups; the partial correlation of epistemic uncertainty given aleatoric uncertainty is 0.15 to 0.80, so epistemic uncertainty has not been shown to add information beyond the model's overall predictive uncertainty.
 Point-level p-values treat points as exchangeable and are optimistic; with 0 to 22 misclassified points per group the AUROC rests on very few events.
@@ -180,7 +180,7 @@ target-aware score whose retrospective advantage, where present, is small-sample
 
 Per scenario (AUC difference of the target log-loss curve; negative favours EVR; tag from the CI):
 
-| group | target scenario | pool/target experiments | target sust./not sust. | AUC diff EVR - random [95% CI] | EVR - uncertainty sampling | EVR - nearest gap | majority-class log loss (target) | EVR final log loss | random final log loss |
+| group id | target scenario | pool/target experiments | target sust./not sust. | AUC diff EVR - random [95% CI] | EVR - uncertainty sampling | EVR - nearest gap | majority-class log loss (target) | EVR final log loss | random final log loss |
 |---|---|---|---|---|---|---|---|---|---|
 | `pmma_rod__opposed` | lowest_o2_quartile | 18/6 | 23/7 | +0.004 [-0.083, +0.077] indist. | -0.109 [-0.186, -0.039] EVR better | -0.050 [-0.097, -0.010] EVR better | 0.555 | 0.579 | 0.578 |
 | `pmma_rod__opposed` | low_airflow_frontier | 17/7 | 42/7 | -0.700 [-0.991, -0.438] EVR better | -0.916 [-1.130, -0.724] EVR better | -0.648 [-0.824, -0.469] EVR better | 0.459 | 0.522 | 0.557 |

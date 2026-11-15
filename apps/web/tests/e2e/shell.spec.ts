@@ -1,7 +1,8 @@
 import { expect, test } from "@playwright/test";
+import { EXPLORE_H1 } from "./helpers";
 
 const PAGES = [
-  { path: "/", nav: "Explore", heading: "Experimental coverage" },
+  { path: "/", nav: "Explore", heading: EXPLORE_H1 },
   { path: "/experiments", nav: "Experiments", heading: "Experiments" },
   { path: "/methodology", nav: "Methodology", heading: "Methodology" },
 ] as const;

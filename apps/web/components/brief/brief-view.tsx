@@ -95,7 +95,7 @@ export function BriefView() {
         <Button asChild variant="ghost" size="sm">
           <Link href={exploreHref}><ArrowLeft aria-hidden />Back to Explore</Link>
         </Button>
-        <div className="ml-auto flex gap-2">
+        <div className="ml-auto flex flex-wrap gap-2">
           <Button variant="secondary" disabled={!brief} onClick={() => brief && download(`blind-spots-brief-${slug(groupId ?? "group")}.md`, cleanBriefText(brief.markdown))}>
             <Download aria-hidden />Download .md
           </Button>

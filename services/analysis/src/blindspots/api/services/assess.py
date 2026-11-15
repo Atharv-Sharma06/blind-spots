@@ -388,13 +388,16 @@ def investigation_relevance(
         rng = []
         if rec.get("oxygen_percent_range"):
             lo, hi = rec["oxygen_percent_range"]
-            rng.append(f"{fmt_num(lo)}{DASH}{fmt_num(hi)}% O₂")
+            rng.append(f"{fmt_num(lo)}% O₂" if lo == hi else f"{fmt_num(lo)}{DASH}{fmt_num(hi)}% O₂")
         if rec.get("pressure_kpa_range"):
             lo, hi = rec["pressure_kpa_range"]
-            rng.append(f"{lo:.1f}{DASH}{hi:.1f} kPa")
+            rng.append(f"{lo:.1f} kPa" if lo == hi else f"{lo:.1f}{DASH}{hi:.1f} kPa")
         if rec.get("flow_cm_s_range"):
             lo, hi = rec["flow_cm_s_range"]
-            rng.append(f"{fmt_num(lo)}{DASH}{fmt_num(hi)} cm/s")
+            if lo == hi == 0:
+                rng.append("no forced flow")
+            else:
+                rng.append(f"{fmt_num(lo)} cm/s" if lo == hi else f"{fmt_num(lo)}{DASH}{fmt_num(hi)} cm/s")
         env = f"Documented test envelope ({', '.join(rng)})" if rng else "Documented test envelope"
         urls = [q["url"] for q in rec.get("sources", []) if q.get("url")]
         out.append(

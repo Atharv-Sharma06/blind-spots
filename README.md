@@ -2,13 +2,13 @@
 
 **Blind Spots: where NASA's microgravity fire evidence ends, and what to learn next.**
 
-Fire safety in crew cabins (spacecraft, Moon and Mars habitats) depends on how flames behave in microgravity at the cabin's
-oxygen level and pressure. Blind Spots measures how far NASA's integrated microgravity flame records reach toward a chosen
-cabin atmosphere. Its method is machine learning: a Gaussian-process model that says when it does not know, plus active
-learning that ranks the most informative next experiment. Built for NASA Space Apps Challenge 2026, "Flame in Freefall".
-Not endorsed by NASA.
+NASA's next crew cabins are planned at 8.2 psia and 34 % O2. All 250 integrated ISS flame tests (BASS, BASS-II)
+ran at about 1 atm. Blind Spots measures that gap: 241 comparable observations for the ISS cabin,
+0 for the Exploration Atmosphere in every material group. There, a Gaussian-process model answers
+"Insufficient experimental evidence for a reliable estimate." and active learning ranks what would teach the most.
+Built for NASA Space Apps Challenge 2026, "Flame in Freefall"; not endorsed by NASA.
 
-**Try it:** [live app](<DEPLOYED_URL>) (press **Guided demo**) · [30-second video](<VIDEO_URL>) · [source code](<GITHUB_URL>)
+**Try it:** [live app](https://blind-spots-kappa.vercel.app) (press **Guided demo**) · [30-second video](https://blind-spots-kappa.vercel.app/video/blind-spots-demo-30s.webm) · [source code](https://github.com/Atharv-Sharma06/blind-spots)
 
 ![Coverage map, oxygen against pressure: every integrated ISS flame observation sits at about 1 atm, far from a reduced-pressure cabin target](submission/stills/02-target-gap.png)
 
@@ -22,7 +22,7 @@ Not endorsed by NASA.
   comparable evidence, what an uncertainty-aware model predicts, where it refuses to guess, and which computation would
   reduce its uncertainty about that atmosphere the most.
 - **The finding.** All integrated ISS records lie at 13.5 to 22.7 % O2 and 98.3 to 102.2 kPa. The ISS cabin has
-  241 comparable observations across the 20 material and flame-configuration groups; the NASA
+  241 comparable observations, in 19 of the 20 material and flame-configuration groups; the NASA
   Exploration Atmosphere has 0, in every group (nearest 8.1 to 10.3
   reference distances). So the app answers "Insufficient experimental evidence for a reliable estimate." instead of
   printing a probability.
@@ -51,7 +51,7 @@ snapshot serves), dataset `4fe55f76142a`, model `gp-laplace-v1+4fe55f76.adfbbd`:
 | Apollo command module cabin (5 psia / ~100 % O2) | 100 | 34.5 | 0 | 0 | 40.1 to 42.8 |
 
 - 8 of the 11 documented NASA atmospheres analysed have no comparable integrated observation
-  in any group, including all 7 below 1 atm (Space Shuttle staged pre-EVA cabin (10.2 psia / 26.5 % O2); NASA Exploration Atmosphere (8.2 psia / 34 % O2); Artemis lunar Surface Habitat, nominal (10.2 psia / 26.5 % O2); EAWG 2006 recommendation (8.0 psia / 32 % O2), superseded; Orion crew module design basis, lunar missions (up to 30 % O2 at 10.2 psia); Skylab cabin (5 psia / ~70 % O2); Apollo command module cabin (5 psia / ~100 % O2)).
+  in any group, including all 7 below 1 atm (Shuttle pre-EVA, Exploration Atmosphere, Artemis Surface Habitat, EAWG 2006, Orion lunar, Skylab, Apollo).
 - Default view (thin PMMA films, opposed flow, the API's default group): 0 of 9 Exploration
   Atmosphere target points have a comparable observation; the nearest is 8.3 reference distances away.
 - Top-ranked computational research candidate for that target: 34.0 % O2, 56.5 kPa, 1.71 cm/s, expected
@@ -111,7 +111,7 @@ would teach us the most?*
 - **Honest context**: NASA investigations that are *not* integrated (for example SoFIE-GEL, Saffire-V/VI) are listed alongside every target assessment as
   "not represented in the integrated records"; this is never phrased as "NASA has not studied this".
 - **Experiment explorer**: every integrated test with the source cell behind each value.
-- **Guided demo and defaults**: the default analysis group is data-driven (`is_default` on `/api/groups`, currently `pmma_thin_film__opposed`) and the context layer is on by default; the built-in guided demo walks through coverage, target, gap, candidate and counterfactual in about a minute.
+- **Guided demo and defaults**: the default analysis group is data-driven (`is_default` on `/api/groups`, currently Thin PMMA films · opposed flow, id `pmma_thin_film__opposed`) and the context layer is on by default; the built-in guided demo walks through coverage, target, gap, candidate and counterfactual in about a minute.
 
 ## Key differentiator
 
@@ -157,7 +157,7 @@ Full list, licences and caveats: [docs/data-sources.md](docs/data-sources.md). C
 ## Scientific methodology (summary)
 
 1. **Unit of observation**: one flow step of one test (flame sustained or not at a recorded airflow and O2). Steps of a test are correlated, so all validation is grouped by experiment.
-2. **Analysis groups**: material family plus flame configuration (for example `pmma_rod__stagnation`). A group is modelled only with at least 6 training
+2. **Analysis groups**: material family plus flame configuration (for example PMMA rods in axial stagnation flow, id `pmma_rod__stagnation`). A group is modelled only with at least 6 training
    experiments, at least 3 sustained and 3 not-sustained rows and not-sustained rows in at least 2 experiments; otherwise only coverage is shown.
 3. **Coordinates**: O2 percent, ln(1 + airflow cm/s), ln(pressure / 101.325 kPa). Every integrated observation is near 1 atm, so the GP pressure length scale is **fixed** at 0.3
    (ln units) and cannot be learned; anything at another pressure is assumption-driven, and a 0.15 / 0.3 / 0.6 sensitivity check is reported.
@@ -272,7 +272,7 @@ Copied from `models/gp-laplace-v1+4fe55f76.adfbbd/validation.json` and `models/r
 
 Grouped 5-fold cross-validation by experiment x 5 repeats; log loss, lower is better; CI from a group bootstrap (1000 draws).
 
-| group | experiments | sust./not sust. | GP log loss | majority log loss | GP minus majority [95% CI] | log loss vs majority | blind-spot test |
+| group id | experiments | sust./not sust. | GP log loss | majority log loss | GP minus majority [95% CI] | log loss vs majority | blind-spot test |
 |---|---|---|---|---|---|---|---|
 | `pmma_rod__opposed` | 24 | 87/21 | 0.493 | 0.497 | -0.004 [-0.048, 0.030] | not distinguishable (CI includes 0) | supported |
 | `pmma_slab__opposed` | 22 | 80/15 | 0.445 | 0.439 | 0.006 [-0.021, 0.033] | not distinguishable (CI includes 0) | inconclusive |
@@ -293,9 +293,9 @@ Grouped 5-fold cross-validation by experiment x 5 repeats; log loss, lower is be
 See [docs/limitations.md](docs/limitations.md). The most important ones:
 
 - Strong class imbalance (78% of training rows are "sustained") and small samples (12 to 25 experiments per modelled group); the GP is a statistically
-  significant improvement over the majority-class baseline in 6 of 9 groups, and in 3 of those the gain is mostly "flow near zero means no flame".
-- The sphere groups' discrimination comes largely from flow-turned-off steps (grouped-CV AUC before and after dropping them: `pmma_sphere__wake` 0.99 to 0.82; `pmma_sphere__stagnation` 0.96 to 0.67; `pmma_sphere__unknown` has no other negatives (CV AUC 1.00 with them; not evaluable without)); many near-quench rod steps rely on the documented below-calibration flow extrapolation (rows remaining without them: `pmma_rod__opposed` (36 of 108 training rows and 4 of 21 negatives remain); `pmma_rod__stagnation` (32 of 66 training rows and 13 of 18 negatives remain); `pmma_rod__unknown` (35 of 52 training rows and 2 of 7 negatives remain); `pmma_thin_film__opposed` (37 of 48 training rows and 3 of 11 negatives remain)).
-- The GP clearly beats the majority-class baseline only in `pmma_rod__stagnation`, `pmma_rod__unknown`, `pmma_thin_film__opposed`, `pmma_sphere__wake`, `pmma_sphere__stagnation`, `pmma_sphere__unknown`; it is roughly at baseline in `pmma_rod__opposed`, `pmma_slab__opposed`, `sibal_fabric__concurrent`. Every group uses a constant GP mean fixed a priori (no mean-function selection).
+  significant improvement over the majority-class baseline in 6 of 9 groups, and in 0 of those the gain is mostly "flow near zero means no flame".
+- The sphere groups' discrimination comes largely from flow-turned-off steps (grouped-CV AUC before and after dropping them: PMMA spheres, wake ignition: 0.99 with all 10 not-sustained observations; 0.82 without them, but only 1 not-sustained observation remains, so that AUC is not interpretable; PMMA spheres, axial stagnation flow: 0.96 with all 10 not-sustained observations; 0.67 without them, but only 2 not-sustained observations remain, so that AUC is not interpretable; PMMA spheres, configuration not recorded: 1.00 with all 3 not-sustained observations; none remain without them, so not evaluable); many near-quench rod steps rely on the documented below-calibration flow extrapolation (rows remaining without them: PMMA rods, opposed flow (36 of 108 training rows and 4 of 21 negatives remain); PMMA rods, axial stagnation flow (32 of 66 training rows and 13 of 18 negatives remain); PMMA rods, configuration not recorded (35 of 52 training rows and 2 of 7 negatives remain); Thin PMMA films, opposed flow (37 of 48 training rows and 3 of 11 negatives remain)).
+- The GP clearly beats the majority-class baseline only in PMMA rods, axial stagnation flow; PMMA rods, configuration not recorded; Thin PMMA films, opposed flow; PMMA spheres, wake ignition; PMMA spheres, axial stagnation flow; PMMA spheres, configuration not recorded; it is roughly at baseline in PMMA rods, opposed flow; PMMA slabs, opposed flow; SIBAL cotton/fiberglass fabric, concurrent flow. Every group uses a constant GP mean fixed a priori (no mean-function selection).
 - All integrated data are at about 1 atm (98.3 to 102.2 kPa); BASS-II pressure is an assumption and the pressure length scale is fixed. At low pressure predictions revert to the prior (for example about 0.6 at 34 % O2 and 56.5 kPa is reversion, not a pressure effect), so the interface shows no p(sustained) for insufficient-evidence targets.
 - Airflow provenance: 332 of 565 training steps use a recorded airflow (duct reading or a value stated in the source); 233 are converted from fan or pot settings with the BASS-II calibration; none use a borrowed calibration. Many "sustained" labels are implied by list order in the source matrices.
 - Gaps are gaps in the integrated records, not in NASA's knowledge: SoFIE-GEL, Saffire-V/VI and others are not integrated.

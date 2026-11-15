@@ -110,7 +110,7 @@ export function TargetAnalysis({ query, group, pending }: TargetAnalysisProps) {
         <ResolvedTargetSummary t={a.target} />
         {!pending ? (
           <p className="sr-only" aria-live="polite" aria-atomic="true">
-            {`${a.target.label}${group ? `, ${group.label}` : ""}: ${verdictLabel(a.verdict)}.${sup !== null ? ` ${sup} of ${cov.n_target_points} target points supported.` : ""} ${cov.comparable_observations} comparable observations.`}
+            {`${a.target.label}${group ? `, ${group.label}` : ""}: ${verdictLabel(a.verdict)}.${sup !== null ? ` ${sup} of ${cov.n_target_points} target points supported.` : ""} ${cov.comparable_observations} comparable observation${cov.comparable_observations === 1 ? "" : "s"}.`}
           </p>
         ) : null}
 

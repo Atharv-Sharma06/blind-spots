@@ -47,7 +47,7 @@ def sparse_message(count: int) -> str:
     )
 
 
-OUTSIDE_MESSAGE = "The point lies outside the observed region (the conditions spanned by the observations)."
+OUTSIDE_MESSAGE = "Outside the observed region (the conditions spanned by the observations)."
 
 
 def pressure_message(dp: float) -> str:

@@ -182,7 +182,7 @@ export function verdictLabel(v: Verdict | null | undefined): string {
 }
 
 const VERDICT_TEXT: Record<Verdict, string> = {
-  supported: "Supported: close to comparable observations inside the observed region.",
+  supported: "Supported: inside the observed region or near 3 or more comparable observations, with low remaining model uncertainty.",
   extrapolation: "Extrapolation: not well constrained by comparable observations; the estimate depends on model assumptions.",
   insufficient_evidence: INSUFFICIENT_EVIDENCE_SENTENCE,
 };

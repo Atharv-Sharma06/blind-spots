@@ -120,7 +120,7 @@ export function CandidatePanel(p: CandidatePanelProps) {
           data-testid="top-candidate"
           className={cn("space-y-3 rounded-md border bg-surface p-3", selectedId === top.candidate_id ? "border-accent" : "border-border")}
         >
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="flex items-center gap-1.5 text-[13px] font-semibold">
               <span aria-hidden className="inline-block size-2.5 rotate-45 bg-accent" />
               Candidate {top.rank}
@@ -202,7 +202,7 @@ export function CandidatePanel(p: CandidatePanelProps) {
           </ul>
         ) : null}
 
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-xs text-muted">Pick two candidates to compare side by side.</p>
           <Button size="sm" variant="secondary" disabled={!compareReady} onClick={onOpenCompare} data-testid="open-compare">Compare selected</Button>
         </div>

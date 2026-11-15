@@ -75,7 +75,7 @@ baselines' picks, scored with the same model: random 0.0%, uncertainty sampling 
 
 ## Slide 7: Try it
 
-**On the slide:** <DEPLOYED_URL> · <GITHUB_URL>. For combustion scientists and cabin designers. Built with AI
+**On the slide:** https://blind-spots-kappa.vercel.app · https://github.com/Atharv-Sharma06/blind-spots. For combustion scientists and cabin designers. Built with AI
 assistance; the app uses no generative AI. Not endorsed by NASA.
 
 **Speaker notes:** Press Guided demo (30 s). Next steps (not implemented): integrate SoFIE-GEL and Saffire-V/VI when per-test

@@ -58,7 +58,9 @@ export function verdictSentence(a: AssessResponse): string {
   if (k === 0) return `No target point has a comparable observation.${nnText}`;
   if (v === "extrapolation") {
     return s !== null
-      ? `Comparable observations reach ${k} of ${n} target points, but the model is confident at only ${s}; elsewhere estimates depend on model assumptions.`
+      ? s === 0
+        ? `Comparable observations reach ${k} of ${n} target points, but the model is not confident at any of them; estimates there depend on model assumptions.`
+        : `Comparable observations reach ${k} of ${n} target points, but the model is confident at only ${s}; elsewhere estimates depend on model assumptions.`
       : `Comparable observations reach ${k} of ${n} target points, but the model is not confident across enough of the target; estimates there depend on model assumptions.`;
   }
   return `Comparable observations reach only ${k} of ${n} target points.`;

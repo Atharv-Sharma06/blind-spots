@@ -38,13 +38,13 @@ integrated NASA records only and are not an experimental validation of fire safe
 
 - Class imbalance is large. Across the 9 modelled groups the majority class is 69% to 90% of the rows, and the
   majority-class baseline is hard to beat on log loss. In 6 of 9 groups the GP log loss is better than the majority
-  class with a CI that excludes 0 (`pmma_rod__stagnation`, `pmma_rod__unknown`, `pmma_thin_film__opposed`, `pmma_sphere__wake`, `pmma_sphere__stagnation`, `pmma_sphere__unknown`); in 3 it is not distinguishable; in 0 it is worse.
+  class with a CI that excludes 0 (PMMA rods, axial stagnation flow; PMMA rods, configuration not recorded; Thin PMMA films, opposed flow; PMMA spheres, wake ignition; PMMA spheres, axial stagnation flow; PMMA spheres, configuration not recorded); in 3 it is not distinguishable; in 0 it is worse.
 - Sample sizes are small (12 to 25 experiments per group, 3 to 21 not-sustained rows per group). Intervals are
   wide and point estimates are unstable.
 - Not-sustained rows of type `flow_off_transient` (flow turned off, ~0 cm/s) are not a physical quench boundary, and brief-flame rows
   (`no_sustained_propagation`) are not extinction events at a flow setting either. Share of each group's not-sustained rows (from the sensitivity rows below):
 
-| group | not-sustained rows | of which flow_off_transient | share | of which no_sustained_propagation (brief flame) | share |
+| group id | not-sustained rows | of which flow_off_transient | share | of which no_sustained_propagation (brief flame) | share |
 |---|---|---|---|---|---|
 | `pmma_rod__opposed` | 21 | 2 | 10% | 3 | 14% |
 | `pmma_slab__opposed` | 15 | 1 | 7% | 2 | 13% |
@@ -56,11 +56,11 @@ integrated NASA records only and are not an experimental validation of fire safe
 | `pmma_sphere__stagnation` | 10 | 8 | 80% | 1 | 10% |
 | `pmma_sphere__unknown` | 3 | 3 | 100% | 0 | 0% |
 
-  Groups where at least 80% of the not-sustained rows are flow-off transients: `pmma_sphere__wake` (9 of 10), `pmma_sphere__stagnation` (8 of 10), `pmma_sphere__unknown` (3 of 3). Any large gain over the majority class in those
+  Groups where at least 80% of the not-sustained rows are flow-off transients: PMMA spheres, wake ignition (9 of 10); PMMA spheres, axial stagnation flow (8 of 10); PMMA spheres, configuration not recorded (3 of 3). Any large gain over the majority class in those
   groups mostly reflects "flow near zero means label 0", not a learned flammability boundary. Grouped-CV AUC of the GP before and after dropping the flow-off rows
-  (sensitivity rows below): `pmma_sphere__wake` 0.99 to 0.82; `pmma_sphere__stagnation` 0.96 to 0.67; `pmma_sphere__unknown` has no other negatives (CV AUC 1.00 with them; not evaluable without).
-- Many near-quench negatives rely on the documented below-calibration flow interpolation (flow values below the calibrated range are extrapolated and flagged `below_calibration_range`). Dropping those rows leaves: `pmma_rod__opposed` (36 of 108 training rows and 4 of 21 negatives remain); `pmma_rod__stagnation` (32 of 66 training rows and 13 of 18 negatives remain); `pmma_rod__unknown` (35 of 52 training rows and 2 of 7 negatives remain); `pmma_thin_film__opposed` (37 of 48 training rows and 3 of 11 negatives remain). Groups not listed keep at least half of their rows and negatives.
-- The GP clearly beats the majority-class baseline (CI of the paired log-loss difference excludes 0) only in: `pmma_rod__stagnation`, `pmma_rod__unknown`, `pmma_thin_film__opposed`, `pmma_sphere__wake`, `pmma_sphere__stagnation`, `pmma_sphere__unknown`. In `pmma_rod__opposed`, `pmma_slab__opposed`, `sibal_fabric__concurrent` it is roughly at the baseline (CI includes 0). Groups that beat the baseline without being dominated by flow-off negatives: `pmma_rod__stagnation`, `pmma_rod__unknown`, `pmma_thin_film__opposed`.
+  (sensitivity rows below): PMMA spheres, wake ignition: 0.99 with all 10 not-sustained observations; 0.82 without them, but only 1 not-sustained observation remains, so that AUC is not interpretable; PMMA spheres, axial stagnation flow: 0.96 with all 10 not-sustained observations; 0.67 without them, but only 2 not-sustained observations remain, so that AUC is not interpretable; PMMA spheres, configuration not recorded: 1.00 with all 3 not-sustained observations; none remain without them, so not evaluable.
+- Many near-quench negatives rely on the documented below-calibration flow interpolation (flow values below the calibrated range are extrapolated and flagged `below_calibration_range`). Dropping those rows leaves: PMMA rods, opposed flow (36 of 108 training rows and 4 of 21 negatives remain); PMMA rods, axial stagnation flow (32 of 66 training rows and 13 of 18 negatives remain); PMMA rods, configuration not recorded (35 of 52 training rows and 2 of 7 negatives remain); Thin PMMA films, opposed flow (37 of 48 training rows and 3 of 11 negatives remain). Groups not listed keep at least half of their rows and negatives.
+- The GP clearly beats the majority-class baseline (CI of the paired log-loss difference excludes 0) only in: PMMA rods, axial stagnation flow; PMMA rods, configuration not recorded; Thin PMMA films, opposed flow; PMMA spheres, wake ignition; PMMA spheres, axial stagnation flow; PMMA spheres, configuration not recorded. In PMMA rods, opposed flow; PMMA slabs, opposed flow; SIBAL cotton/fiberglass fabric, concurrent flow it is roughly at the baseline (CI includes 0). Groups that beat the baseline without being dominated by flow-off negatives: PMMA rods, axial stagnation flow; PMMA rods, configuration not recorded; Thin PMMA films, opposed flow.
 - Pressure: all integrated observations lie at 98.3 to 102.2 kPa and the pressure length scale is fixed. At low pressure (for example 34 % O2 at 56.5 kPa) the posterior reverts to the prior: the model reports `insufficient_evidence` (latent std ratio about 1.0) and a probability near the prior mean level (about 0.6 in the groups checked), which is reversion and not a pressure effect. The API still returns `p_sustained` next to the verdict; the interface does not present it as an estimate for `insufficient_evidence` targets.
 - Every integrated observation is near 1 atm (98.3 to 102.2 kPa; BASS measured, BASS-II assumed). The pressure length scale cannot be
   learned; the 0.15 / 0.3 / 0.6 sensitivity rows change the cross-validated log loss by at most 0.001 (absolute, any group), which is expected
@@ -72,7 +72,7 @@ integrated NASA records only and are not an experimental validation of fire safe
 
 Value [95% CI]; log loss and Brier lower is better. "GP minus majority" is the group-bootstrap CI of the paired difference.
 
-| group | exp. | sust./not sust. | GP log loss [95% CI] | majority log loss | GP minus majority log loss | GP Brier | majority Brier | GP AUC | log loss vs majority |
+| group id | exp. | sust./not sust. | GP log loss [95% CI] | majority log loss | GP minus majority log loss | GP Brier | majority Brier | GP AUC | log loss vs majority |
 |---|---|---|---|---|---|---|---|---|---|
 | `pmma_rod__opposed` | 24 | 87/21 | 0.493 [0.417, 0.597] | 0.497 [0.410, 0.622] | -0.004 [-0.048, 0.030] | 0.158 [0.125, 0.203] | 0.158 [0.120, 0.212] | 0.587 [0.502, 0.689] | not distinguishable (CI includes 0) |
 | `pmma_slab__opposed` | 22 | 80/15 | 0.445 [0.365, 0.555] | 0.439 [0.362, 0.549] | 0.006 [-0.021, 0.033] | 0.134 [0.102, 0.180] | 0.134 [0.102, 0.179] | 0.481 [0.332, 0.652] | not distinguishable (CI includes 0) |
@@ -94,7 +94,7 @@ refits (hyperparameters refit for each held-out experiment), mean epistemic unce
 of epistemic given aleatoric uncertainty is > 0 with p < 0.05; not supported if rho <= 0 at both; otherwise inconclusive.
 The smallest reportable p is 1/2001.
 
-| group | point n | point rho | point p | AUROC (misclassified) | experiments | experiment rho | experiment p | rho aleatoric vs loss | partial rho (epistemic given aleatoric) | verdict |
+| group id | point n | point rho | point p | AUROC (misclassified) | experiments | experiment rho | experiment p | rho aleatoric vs loss | partial rho (epistemic given aleatoric) | verdict |
 |---|---|---|---|---|---|---|---|---|---|---|
 | `pmma_rod__opposed` | 108 | 0.26 | 0.0025 | 0.65 (of 22) | 24 | 0.43 | 0.0140 | 0.63 | 0.28 | **supported** |
 | `pmma_slab__opposed` | 95 | 0.37 | 0.0005 | 0.57 (of 15) | 22 | -0.10 | 0.6872 | 0.64 | 0.15 | **inconclusive** |
@@ -107,7 +107,7 @@ The smallest reportable p is 1/2001.
 | `pmma_sphere__unknown` | 29 | 0.95 | 0.0005 | n/a (of 0) | 18 | 0.84 | 0.0005 | 0.99 | 0.69 | **supported** |
 
 Result as computed: 4 supported, 5 inconclusive, 0 not supported out of 9 groups.
-Supported: `pmma_rod__opposed`, `pmma_sphere__wake`, `pmma_sphere__stagnation`, `pmma_sphere__unknown`. Inconclusive: `pmma_slab__opposed`, `pmma_rod__stagnation`, `pmma_rod__unknown`, `pmma_thin_film__opposed`, `sibal_fabric__concurrent`.
+Supported: PMMA rods, opposed flow; PMMA spheres, wake ignition; PMMA spheres, axial stagnation flow; PMMA spheres, configuration not recorded. Inconclusive: PMMA slabs, opposed flow; PMMA rods, axial stagnation flow; PMMA rods, configuration not recorded; Thin PMMA films, opposed flow; SIBAL cotton/fiberglass fabric, concurrent flow.
 
 Reading: where the verdict is "supported", epistemic uncertainty and loss rise together. But outcome-variability (aleatoric)
 uncertainty tracks loss at least as strongly as epistemic uncertainty in 8 of 9 groups (point-level rho), and the partial correlation
@@ -144,7 +144,7 @@ target-aware score whose retrospective advantage, where present, is small-sample
 
 Per scenario (AUC difference of the target log-loss curve; negative favours EVR; tag from the CI):
 
-| group | target scenario | pool/target experiments | target sust./not sust. | AUC diff EVR - random [95% CI] | EVR - uncertainty sampling | EVR - nearest gap | majority-class log loss (target) | EVR final log loss | random final log loss |
+| group id | target scenario | pool/target experiments | target sust./not sust. | AUC diff EVR - random [95% CI] | EVR - uncertainty sampling | EVR - nearest gap | majority-class log loss (target) | EVR final log loss | random final log loss |
 |---|---|---|---|---|---|---|---|---|---|
 | `pmma_rod__opposed` | lowest_o2_quartile | 18/6 | 23/7 | +0.004 [-0.083, +0.077] indist. | -0.109 [-0.186, -0.039] EVR better | -0.050 [-0.097, -0.010] EVR better | 0.555 | 0.579 | 0.578 |
 | `pmma_rod__opposed` | low_airflow_frontier | 17/7 | 42/7 | -0.700 [-0.991, -0.438] EVR better | -0.916 [-1.130, -0.724] EVR better | -0.648 [-0.824, -0.469] EVR better | 0.459 | 0.522 | 0.557 |

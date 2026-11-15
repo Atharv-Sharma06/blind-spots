@@ -38,7 +38,7 @@ Point out that all data sit at about 1 atm, so the pressure plane shows how litt
 (for profiles without their own band: the documented ventilation band with a near-quiescent extension, labelled as an analysis choice), and the "Documented NASA work not integrated here" callout. "Coverage by material" assesses the same target in every group; click a row to switch the map.
 
 **1:40 - Model and honesty (30 s).** Open **Methodology > Validation**: per-group cross-validation versus the majority-class baseline with group-bootstrap CIs, calibration, leave-one-campaign-out and the blind-spot test. Say plainly: the GP beats the majority-class baseline (CI excludes 0) in 6 of 9 groups,
-3 of those mostly because flow-off transients are easy negatives; the blind-spot test is supported in 4 groups and inconclusive in 5; pressure is assumption-driven (fixed length scale 0.3). The retrospective check is modest: EVR beat random in 11 of 18 scenarios.
+0 of those mostly because flow-off transients are easy negatives; the blind-spot test is supported in 4 groups and inconclusive in 5; pressure is assumption-driven (fixed length scale 0.3). The retrospective check is modest: EVR beat random in 11 of 18 scenarios.
 
 **2:10 - Candidates (30 s).** In **Next research candidate** read the ranked candidates with their reasons, feasibility status ("outside the demonstrated envelope: feasibility not verified; requires qualified review") and the random / uncertainty-sampling / nearest-gap baselines.
 Select two and use **Compare selected** (it can answer "indistinguishable"). The candidate panel also shows the sensitivity of the ranking to the assumed pressure correlation (pressure length scales 0.15 / 0.3 / 0.6).

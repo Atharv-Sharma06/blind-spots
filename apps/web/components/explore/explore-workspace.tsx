@@ -24,6 +24,7 @@ import {
   useTargets,
 } from "@/hooks/api";
 import { isApiError } from "@/lib/api";
+import { snapSlice } from "@/lib/snapshot";
 import { verdictLabel } from "@/lib/format";
 import {
   exploreActions,
@@ -48,6 +49,7 @@ import {
   contextForMap,
   frameDomain,
   nearestIds,
+  targetSliceFor,
   observationsForMap,
   targetForMap,
   xDomainFor,
@@ -57,7 +59,7 @@ import { DemoLauncher, DemoOverlay } from "@/components/demo/guided-demo";
 
 // Plot height set by CSS (phones 340, tablets 440, lg+: fits the sticky map card in the viewport), so the server
 // render already has the final height and phones do not jump at load (a04-02).
-const MAP_PLOT_CLASS = "h-[340px] sm:h-[440px] lg:h-[clamp(420px,calc(100vh-400px),640px)]";
+const MAP_PLOT_CLASS = "h-[340px] sm:h-[440px] lg:h-[clamp(380px,calc(100vh-450px),640px)]";
 
 const Panel = ({ id, title, children, busy = false }: { id: string; title: string; children: React.ReactNode; busy?: boolean }) => (
   <section aria-labelledby={id} aria-busy={busy} className="rounded-lg border border-border bg-surface p-4">
@@ -188,6 +190,17 @@ export function ExploreWorkspace() {
     a.selectCandidate(c.candidate_id);
     a.setCounterfactualOpen(true);
     a.setLayers({ candidates: true, target: true, observations: true });
+    // Live: put the explored candidate on the drawn slice. Snapshot: the exporter stored every candidate's
+    // counterfactual at the target's slice on each plane (snapped to the manifest slices), so go there instead;
+    // otherwise a slice the user moved earlier would show "Not in this precomputed version".
+    if (dm.isSnapshot) {
+      const t = targetSliceFor(plane, assess?.target);
+      const v = t === null ? null : snapSlice(plane, t, dm.slices);
+      if (v !== null) a.setSlice(v, plane);
+    } else {
+      const v = plane === "o2_pressure" ? c.airflow_cm_s : c.pressure_kpa;
+      if (v != null) a.setSlice(v, plane);
+    }
     // The map card is sticky at lg, so bringing the preview into view keeps the reframed map visible beside it.
     setTimeout(() => {
       document.getElementById("counterfactual-preview")?.scrollIntoView({ block: "nearest", behavior: "smooth" });
@@ -319,7 +332,7 @@ export function ExploreWorkspace() {
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between lg:gap-8">
           <div className="min-w-0 max-w-[760px]">
             <p className="text-[15px] text-fg">
-              Fire safety in crew cabins: spacecraft, and Moon and Mars habitats. This maps which cabin atmospheres NASA&apos;s ISS flame experiments cover, and which they do not.
+              Fire safety in crew cabins on spacecraft and in Moon and Mars habitats. This maps which cabin atmospheres NASA&apos;s ISS flame experiments cover, and which they do not.
             </p>
             <p className="mt-1 text-[13px] text-muted">
               Machine learning: a Gaussian-process model that says when it does not know, plus active learning that ranks the most informative next experiment.

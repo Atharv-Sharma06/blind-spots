@@ -25,7 +25,7 @@ A group is modelled only if it has at least 6 training experiments, at least 3 s
 
 Modelled groups in this build:
 
-| group | training experiments | training observations | sustained | not sustained | majority class | GP mean | campaigns |
+| group id | training experiments | training observations | sustained | not sustained | majority class | GP mean | campaigns |
 |---|---|---|---|---|---|---|---|
 | `pmma_rod__opposed` | 24 | 108 | 87 | 21 | 81% | constant | BASS-II/Fernandez-Pello |
 | `pmma_slab__opposed` | 22 | 95 | 80 | 15 | 84% | constant | BASS-II/Miller, BASS/2013 |
@@ -132,9 +132,9 @@ Rebuilding the committed inputs (`build-dataset`, `train`, `retrospective`) was 
 
 ## 12. Caveats that bound every metric
 
-1. **Flow-off negatives.** In the sphere groups most negatives are flow-turned-off steps ("flow near zero means no flame"). Grouped-CV AUC of the GP before and after dropping them: `pmma_sphere__wake` 0.99 to 0.82; `pmma_sphere__stagnation` 0.96 to 0.67; `pmma_sphere__unknown` has no other negatives (CV AUC 1.00 with them; not evaluable without).
-2. **Below-calibration flow extrapolation.** Many near-quench negatives depend on flow values extrapolated below the calibrated range. Rows remaining when those are dropped: `pmma_rod__opposed` (36 of 108 training rows and 4 of 21 negatives remain); `pmma_rod__stagnation` (32 of 66 training rows and 13 of 18 negatives remain); `pmma_rod__unknown` (35 of 52 training rows and 2 of 7 negatives remain); `pmma_thin_film__opposed` (37 of 48 training rows and 3 of 11 negatives remain).
-3. **Where the GP beats the majority-class baseline** (CI excludes 0): `pmma_rod__stagnation`, `pmma_rod__unknown`, `pmma_thin_film__opposed`, `pmma_sphere__wake`, `pmma_sphere__stagnation`, `pmma_sphere__unknown`. Roughly at baseline: `pmma_rod__opposed`, `pmma_slab__opposed`, `sibal_fabric__concurrent`.
+1. **Flow-off negatives.** In the sphere groups most negatives are flow-turned-off steps ("flow near zero means no flame"). Grouped-CV AUC of the GP before and after dropping them: PMMA spheres, wake ignition: 0.99 with all 10 not-sustained observations; 0.82 without them, but only 1 not-sustained observation remains, so that AUC is not interpretable; PMMA spheres, axial stagnation flow: 0.96 with all 10 not-sustained observations; 0.67 without them, but only 2 not-sustained observations remain, so that AUC is not interpretable; PMMA spheres, configuration not recorded: 1.00 with all 3 not-sustained observations; none remain without them, so not evaluable.
+2. **Below-calibration flow extrapolation.** Many near-quench negatives depend on flow values extrapolated below the calibrated range. Rows remaining when those are dropped: PMMA rods, opposed flow (36 of 108 training rows and 4 of 21 negatives remain); PMMA rods, axial stagnation flow (32 of 66 training rows and 13 of 18 negatives remain); PMMA rods, configuration not recorded (35 of 52 training rows and 2 of 7 negatives remain); Thin PMMA films, opposed flow (37 of 48 training rows and 3 of 11 negatives remain).
+3. **Where the GP beats the majority-class baseline** (CI excludes 0): PMMA rods, axial stagnation flow; PMMA rods, configuration not recorded; Thin PMMA films, opposed flow; PMMA spheres, wake ignition; PMMA spheres, axial stagnation flow; PMMA spheres, configuration not recorded. Roughly at baseline: PMMA rods, opposed flow; PMMA slabs, opposed flow; SIBAL cotton/fiberglass fabric, concurrent flow.
 4. **Pressure.** All integrated observations lie at 98.3 to 102.2 kPa and the pressure length scale is fixed (0.3, ln units). At low pressure predictions revert to the prior: a value near 0.6 at 34 % O2 and 56.5 kPa is reversion (latent std ratio about 1), not a pressure effect. For `insufficient_evidence` targets the interface shows no p(sustained).
 5. **Blind-spot test** (strict rule including partial correlation given aleatoric uncertainty): supported in 4 groups, inconclusive in 5.
 6. **Retrospective acquisition test**: EVR beat random in 11 of 18 scenarios (indistinguishable 5, worse 2) and uncertainty sampling in 13 (2, 3): modest small-sample evidence.
