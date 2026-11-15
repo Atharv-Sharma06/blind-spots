@@ -404,14 +404,10 @@
     "mean_selection": {
       "chosen": "constant",
       "cv_log_loss": {
-        "constant": 0.14286652137779193,
-        "linear_o2": 0.1561698946164055
+        "constant": 0.14286652137779193
       },
-      "diff_ci95": [
-        -0.0018726107846584734,
-        0.04079409021348061
-      ],
-      "diff_log_loss_linear_minus_constant": 0.013303373238613605,
+      "diff_ci95": null,
+      "diff_log_loss_linear_minus_constant": null,
       "rule": "keep 'constant' unless the 95% group-bootstrap CI of (linear_o2 - constant) log loss < 0"
     },
     "n_experiments": 24,

@@ -8,10 +8,10 @@ from blindspots.acquisition import baselines, candidates, targets
 from blindspots.acquisition.batch import greedy_batch
 from blindspots.acquisition.counterfactual import counterfactual
 from blindspots.acquisition.evr import (
+    effective_curvature,
     evr_fraction,
     expected_target_mi_reduction,
     expected_variance_reduction,
-    mean_curvature,
 )
 from blindspots.coverage.coverage import to_coords
 
@@ -45,10 +45,10 @@ def test_evr_matches_bruteforce_rank1(gp) -> None:
     evr = expected_variance_reduction(gp, T, C, w)
     mu_c, var_c = gp.latent(C)
     for j in range(len(C)):
-        # exact Gaussian update with pseudo-observation noise 1/wbar
-        wbar = mean_curvature(mu_c[j : j + 1], var_c[j : j + 1])[0]
+        # exact Gaussian update with pseudo-observation noise 1/W_eff (outcome-averaged Laplace curvature)
+        w_eff = effective_curvature(mu_c[j : j + 1], var_c[j : j + 1])[0]
         S = gp.latent_cov(np.vstack([T, C[j : j + 1]]), np.vstack([T, C[j : j + 1]]))
-        post = S[:-1, :-1] - np.outer(S[:-1, -1], S[:-1, -1]) / (S[-1, -1] + 1 / wbar)
+        post = S[:-1, :-1] - np.outer(S[:-1, -1], S[:-1, -1]) / (S[-1, -1] + 1 / w_eff)
         brute = (w * (np.diag(S)[:-1] - np.diag(post))).sum()
         assert np.isclose(evr[j], brute)
     frac = evr_fraction(gp, T, C, w)

@@ -13,8 +13,7 @@
     "ensemble_members": 200,
     "loeo_refit_budget_s": 480.0,
     "mean_options": [
-      "constant",
-      "linear_o2"
+      "constant"
     ],
     "min_group_rows": 1,
     "n_bootstrap": 1000,
@@ -56,17 +55,17 @@
     "nomex_fabric__unknown": "174c8ae687d273f956a1804c254505ae5e43f20ef0ba22002cb39e84172dde5a",
     "paraffin_slab__concurrent": "4eb2dc5f8499e7f43876887aaf46a28a13a978e86a0e4ac2630d78d89820a1d5",
     "paraffin_slab__unknown": "4caab1d3924fde1ebea4ed0e03667115ad1359cc9cb8aafa48f7e8cbb47d28e2",
-    "pmma_rod__opposed": "fb00afba2293d448d4206c6dc32a782589bd478ddc5070faaa79255d36cba6f3",
-    "pmma_rod__stagnation": "72a832180c2b6bc424f6a0522eaf719e47acd23d1b6cac3a41936f3f4959f54e",
-    "pmma_rod__unknown": "b3901dbd9daa4175bdb90bd6e7fe7c3e0423eb508dae854415ae5b3fa79393d9",
+    "pmma_rod__opposed": "6d935a550537b5a4affc41f82fc686f34f9030616fb0ad25b00071bd3c80ad12",
+    "pmma_rod__stagnation": "634c5b56475d64af5b40c7678af8427421e7532c6609d84ccf90c20a487198a1",
+    "pmma_rod__unknown": "15178c0c6355fad05ef98030dd8d4669b588feee76eca9e7b5f960f48761e853",
     "pmma_slab__concurrent": "60607a45a3f221361aa9fe5f9cebb429e8853de657237a86a867bda000e1a460",
-    "pmma_slab__opposed": "5c4e9be0db3f5fda53f844aa5eeee2f7f6bac1ff1cc1e0c4746d032d15f9ac52",
+    "pmma_slab__opposed": "b668520dfbc9876d2a2d5c9cc96f79a5e120d73c147f8a9be762efd8455c716a",
     "pmma_slab__unknown": "a63b4e4ccad10b0247331dbc5e6542cc07ecd4ae2f7377ecd6fb98edf9feefcf",
-    "pmma_sphere__stagnation": "aa47b5b283c3e2cc612ce320f14c5091fcd0f95d5b8dee961ac05c34efe5162f",
-    "pmma_sphere__unknown": "8efcd0b2fb99375d8d73efad7a1c6d48eb7b36cef26ddf782f35bf73db785f22",
-    "pmma_sphere__wake": "019f2798d944d70be3703e8a64873edb7c697187d7127fe237bd8457322ca45b",
-    "pmma_thin_film__opposed": "514e879c5268a3235476a63dc860a216da013f1dff71ffadea4fbe6281af61e7",
-    "sibal_fabric__concurrent": "1a8801bcfac263cc47a58d2c6cf76be6a739ed15bac71b4c0d7d10749625e782",
+    "pmma_sphere__stagnation": "9610b4676c216f1e700b984d439f32d6820e7511d9f86322fb611ec1a9fc0813",
+    "pmma_sphere__unknown": "a7aafee19232aa1f0a5569604dfdcc7be1c50ba71dbb506f7c26a6b497e570a4",
+    "pmma_sphere__wake": "0e92f6daf8c51810e30b1752a6fca63477037d6be7e12713859f1ed1420ccdeb",
+    "pmma_thin_film__opposed": "4edd596dff1e9a3384e6c07c2f2c8119c9e769dbba38525e8b3c0769d3f388f9",
+    "sibal_fabric__concurrent": "9fd81ccb62063ccd381f3ef614eee6a893a2d5e4ec123ac558c4e31932fcb676",
     "sibal_fabric__opposed": "dda8012fe9e29d84d4f1575aaa25fe56d44cc35847d99e5df52583489b36d75b",
     "sibal_fabric__unknown": "3f7d48104a783ba0fd7efaee713cd388008f322df1975a19c7bbf64ab5f2bf02",
     "ultem_sheet__unknown": "78823aa713900e16091edc97f87b4c1fcd006436d0c7db78fbce7fc9a4229595",
@@ -112,7 +111,7 @@
       "model_status": "modeled",
       "n_experiments": 24,
       "n_observations": 108,
-      "sha256": "fb00afba2293d448d4206c6dc32a782589bd478ddc5070faaa79255d36cba6f3"
+      "sha256": "6d935a550537b5a4affc41f82fc686f34f9030616fb0ad25b00071bd3c80ad12"
     },
     "pmma_rod__stagnation": {
       "mean_function": "constant",
@@ -120,7 +119,7 @@
       "model_status": "modeled",
       "n_experiments": 15,
       "n_observations": 67,
-      "sha256": "72a832180c2b6bc424f6a0522eaf719e47acd23d1b6cac3a41936f3f4959f54e"
+      "sha256": "634c5b56475d64af5b40c7678af8427421e7532c6609d84ccf90c20a487198a1"
     },
     "pmma_rod__unknown": {
       "mean_function": "constant",
@@ -128,7 +127,7 @@
       "model_status": "modeled",
       "n_experiments": 12,
       "n_observations": 52,
-      "sha256": "b3901dbd9daa4175bdb90bd6e7fe7c3e0423eb508dae854415ae5b3fa79393d9"
+      "sha256": "15178c0c6355fad05ef98030dd8d4669b588feee76eca9e7b5f960f48761e853"
     },
     "pmma_slab__concurrent": {
       "mean_function": null,
@@ -144,7 +143,7 @@
       "model_status": "modeled",
       "n_experiments": 22,
       "n_observations": 95,
-      "sha256": "5c4e9be0db3f5fda53f844aa5eeee2f7f6bac1ff1cc1e0c4746d032d15f9ac52"
+      "sha256": "b668520dfbc9876d2a2d5c9cc96f79a5e120d73c147f8a9be762efd8455c716a"
     },
     "pmma_slab__unknown": {
       "mean_function": null,
@@ -160,7 +159,7 @@
       "model_status": "modeled",
       "n_experiments": 18,
       "n_observations": 33,
-      "sha256": "aa47b5b283c3e2cc612ce320f14c5091fcd0f95d5b8dee961ac05c34efe5162f"
+      "sha256": "9610b4676c216f1e700b984d439f32d6820e7511d9f86322fb611ec1a9fc0813"
     },
     "pmma_sphere__unknown": {
       "mean_function": "constant",
@@ -168,7 +167,7 @@
       "model_status": "modeled",
       "n_experiments": 18,
       "n_observations": 29,
-      "sha256": "8efcd0b2fb99375d8d73efad7a1c6d48eb7b36cef26ddf782f35bf73db785f22"
+      "sha256": "a7aafee19232aa1f0a5569604dfdcc7be1c50ba71dbb506f7c26a6b497e570a4"
     },
     "pmma_sphere__wake": {
       "mean_function": "constant",
@@ -176,15 +175,15 @@
       "model_status": "modeled",
       "n_experiments": 24,
       "n_observations": 42,
-      "sha256": "019f2798d944d70be3703e8a64873edb7c697187d7127fe237bd8457322ca45b"
+      "sha256": "0e92f6daf8c51810e30b1752a6fca63477037d6be7e12713859f1ed1420ccdeb"
     },
     "pmma_thin_film__opposed": {
-      "mean_function": "linear_o2",
+      "mean_function": "constant",
       "model_reason": null,
       "model_status": "modeled",
       "n_experiments": 16,
       "n_observations": 48,
-      "sha256": "514e879c5268a3235476a63dc860a216da013f1dff71ffadea4fbe6281af61e7"
+      "sha256": "4edd596dff1e9a3384e6c07c2f2c8119c9e769dbba38525e8b3c0769d3f388f9"
     },
     "sibal_fabric__concurrent": {
       "mean_function": "constant",
@@ -192,7 +191,7 @@
       "model_status": "modeled",
       "n_experiments": 25,
       "n_observations": 42,
-      "sha256": "1a8801bcfac263cc47a58d2c6cf76be6a739ed15bac71b4c0d7d10749625e782"
+      "sha256": "9fd81ccb62063ccd381f3ef614eee6a893a2d5e4ec123ac558c4e31932fcb676"
     },
     "sibal_fabric__opposed": {
       "mean_function": null,
@@ -236,11 +235,11 @@
     }
   },
   "has_validation": true,
-  "model_version": "gp-laplace-v1+8783ff5a.b75416",
+  "model_version": "gp-laplace-v1+8783ff5a.adfbbd",
   "timings_s": {
-    "fit": 4.6,
-    "total": 25.6,
-    "validation": 20.9
+    "fit": 2.3,
+    "total": 21.0,
+    "validation": 18.7
   },
-  "trained_at": "2026-11-15T17:38:28+00:00"
+  "trained_at": "2026-11-15T18:00:12+00:00"
 }

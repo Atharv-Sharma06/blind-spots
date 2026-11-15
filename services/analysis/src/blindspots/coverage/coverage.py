@@ -63,19 +63,21 @@ def count_within(points: np.ndarray, obs: np.ndarray, r: float = 1.0) -> np.ndar
 def inside_hull(points: np.ndarray, obs: np.ndarray) -> np.ndarray:
     """Whether each point lies in the convex hull of the observations.
 
-    The hull is taken over the varying dimensions only. A dimension whose observed spread is below
-    1e-9 is degenerate and is checked separately: |delta| / s <= 1 against the observed value.
-    Collinear or otherwise degenerate hulls return False (conservative).
+    The hull is taken over the varying dimensions only. A dimension whose observed spread is smaller
+    than its coverage scale (e.g. BASS pressures 98-102 kPa, a spread of ~0.04 in ln units versus
+    s_p = 0.1) is treated as degenerate and checked separately: the point must lie within the observed
+    range padded by one scale. Collinear or otherwise degenerate hulls return False (conservative).
     """
     pts = _as2d(points)
     if len(obs) == 0:
         return np.zeros(len(pts), dtype=bool)
     o = _as2d(obs)
     spread = o.max(axis=0) - o.min(axis=0)
-    varying = spread >= DEGENERATE_SPREAD
+    varying = spread >= np.asarray(SCALES, dtype=float)
     ok = np.ones(len(pts), dtype=bool)
     for j in np.flatnonzero(~varying):
-        ok &= np.abs(pts[:, j] - o[0, j]) / SCALES[j] <= 1.0 + 1e-12
+        lo_j, hi_j = o[:, j].min() - SCALES[j], o[:, j].max() + SCALES[j]
+        ok &= (pts[:, j] >= lo_j - 1e-12) & (pts[:, j] <= hi_j + 1e-12)
     vdims = np.flatnonzero(varying)
     if len(vdims) == 0:
         return ok

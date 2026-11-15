@@ -335,7 +335,9 @@ class GPLaplaceClassifier:
         bounds_all = self._bounds()
         lo = np.array([b[0] for b in bounds_all])
         hi = np.array([b[1] for b in bounds_all])
-        th0 = np.clip(self._theta(), lo, hi)
+        # Only free parameters are clipped into the optimizer bounds; fixed values stay exactly as set.
+        th0 = self._theta()
+        th0[free] = np.clip(th0[free], lo[free], hi[free])
         rng = np.random.default_rng(self.seed)
         scale = np.array(
             [0.5] * self.length_scales.size + [0.5, 1.0] + ([0.3] if self.mean == "linear_o2" else [])
@@ -355,7 +357,7 @@ class GPLaplaceClassifier:
                 bounds=[b for b, f in zip(bounds_all, free, strict=True) if f],
                 options={"maxiter": 200},
             )
-            if res.fun < _FAIL_VALUE:
+            if res.success and res.fun < _FAIL_VALUE:
                 n_ok += 1
             if res.fun < best_val - 1e-9:
                 best_val = float(res.fun)

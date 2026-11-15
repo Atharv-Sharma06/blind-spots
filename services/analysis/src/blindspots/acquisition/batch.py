@@ -7,13 +7,13 @@ from typing import Any
 import numpy as np
 
 from blindspots.acquisition.candidates import STATUS_TEXT, CandidateSet
-from blindspots.acquisition.evr import mean_curvature, normalize_weights
+from blindspots.acquisition.evr import normalize_weights, update_factor
 
 NO_CANDIDATES: dict[str, str] = {"status": "no_eligible_candidates"}
 
 
 class JointPosterior:
-    """Posterior covariance over [targets; candidates] with Gaussian-surrogate rank-1 updates."""
+    """Posterior covariance over [targets; candidates] with outcome-averaged Laplace rank-1 updates."""
 
     def __init__(self, model: Any, target_X: np.ndarray, cand_X: np.ndarray, weights: np.ndarray | None):
         self.t = np.atleast_2d(target_X)
@@ -29,22 +29,22 @@ class JointPosterior:
         """EVR for candidate indices (all remaining when None) under the current covariance."""
         cols = np.arange(self.nt, len(self.S)) if idx is None else np.asarray(idx) + self.nt
         var = np.diag(self.S)[cols]
-        wbar = mean_curvature(self.mu[cols], var)
+        factor = update_factor(self.mu[cols], var)
         num = (self.w[:, None] * self.S[: self.nt][:, cols] ** 2).sum(axis=0)
-        return np.asarray(num / (var + 1.0 / wbar))
+        return np.asarray(num * factor)
 
     def evr_initial(self, i: int) -> float:
         col = self.nt + i
         var = self.S0[col, col]
-        wbar = float(mean_curvature(self.mu[col : col + 1], np.array([var]))[0])
-        return float((self.w * self.S0[: self.nt, col] ** 2).sum() / (var + 1.0 / wbar))
+        factor = float(update_factor(self.mu[col : col + 1], np.array([var]))[0])
+        return float((self.w * self.S0[: self.nt, col] ** 2).sum() * factor)
 
     def downdate(self, i: int) -> None:
         col = self.nt + i
         var = self.S[col, col]
-        wbar = float(mean_curvature(self.mu[col : col + 1], np.array([var]))[0])
+        factor = float(update_factor(self.mu[col : col + 1], np.array([var]))[0])
         v = self.S[:, col].copy()
-        self.S -= np.outer(v, v) / (var + 1.0 / wbar)
+        self.S -= np.outer(v, v) * factor
 
 
 def _record(

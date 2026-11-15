@@ -36,7 +36,7 @@ class Envelope:
         if len(self.obs) == 0:
             return np.zeros(len(x), dtype=bool)
         lo, hi = self.obs.min(axis=0), self.obs.max(axis=0)
-        pad = np.where(hi - lo < 1e-9, SCALES, 0.0)
+        pad = np.where(hi - lo < np.asarray(SCALES, dtype=float), SCALES, 0.0)
         in_box = np.all((x >= lo - pad - 1e-12) & (x <= hi + pad + 1e-12), axis=1)
         return in_box & inside_hull(x, self.obs)
 

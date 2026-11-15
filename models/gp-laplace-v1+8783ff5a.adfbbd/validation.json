@@ -1,11 +1,13 @@
 {
   "acquisition_retrospective": null,
   "dataset_version": "8783ff5aa6a2",
-  "generated_at": "2026-11-15T17:38:49+00:00",
+  "generated_at": "2026-11-15T18:00:31+00:00",
   "groups": [
     {
       "blindspot_test": {
         "diagnostics": {
+          "partial_note": "point-level partial Spearman of epistemic uncertainty vs log loss given aleatoric",
+          "partial_p_value": 0.07396301849075462,
           "partial_rho_epistemic_given_aleatoric": 0.14289307183753616,
           "rho_aleatoric_point": 0.6907123191098155,
           "share_misclassified_flow_off_transient": 0.047619047619047616
@@ -164,7 +166,7 @@
           "runtime_s": 1.6,
           "spearman_rho": 0.3765217391304348
         },
-        "interpretation": "Point level (n=108): Spearman rho=0.42 (one-sided p=<0.001) between pre-reveal epistemic uncertainty and log loss; AUROC for flagging 21 misclassified points = 0.62. Experiment level (n=24 held-out experiments): rho=0.38 (p=0.028). Withheld experiments with higher pre-reveal epistemic uncertainty tended to be predicted worse at both levels; this is an association in a small, imbalanced sample, not a guarantee. Caveat: aleatoric (predictive-entropy) uncertainty tracks log loss at least as strongly (rho=0.69), and the epistemic-loss association controlling for it is 0.14; so this does not show that epistemic uncertainty adds information beyond the model's overall predictive uncertainty.",
+        "interpretation": "Point level (n=108): Spearman rho=0.42 (one-sided p=<0.001) between pre-reveal epistemic uncertainty and log loss; AUROC for flagging 21 misclassified points = 0.62. Experiment level (n=24 held-out experiments): rho=0.38 (p=0.028). The two levels do not agree, or the evidence is below the 0.05 threshold; treat as inconclusive. Controlling for aleatoric uncertainty, the point-level association is 0.14 (p=0.074). Possible reasons: aleatoric (outcome-variability) uncertainty tracks log loss more strongly (rho=0.69), so errors concentrate where the model already expects mixed outcomes rather than where data are sparse; 5% of misclassified points are flow-turned-off transient labels, which are not a physical quench boundary.",
         "point_level": {
           "auroc_error_detection": 0.6239737274220033,
           "n": 108,
@@ -173,7 +175,7 @@
           "p_value_note": "one-sided permutation test (rho > 0); points treated as exchangeable",
           "spearman_rho": 0.4246953804529042
         },
-        "verdict": "supported"
+        "verdict": "inconclusive"
       },
       "campaigns": [
         "BASS-II/Fernandez-Pello"
@@ -486,7 +488,7 @@
         "model": "GP",
         "n_pooled_predictions": 540
       },
-      "runtime_s": 14.7,
+      "runtime_s": 14.1,
       "sensitivity": [
         {
           "auc": 0.6118883415435139,
@@ -657,6 +659,8 @@
     {
       "blindspot_test": {
         "diagnostics": {
+          "partial_note": "point-level partial Spearman of epistemic uncertainty vs log loss given aleatoric",
+          "partial_p_value": 0.07296351824087956,
           "partial_rho_epistemic_given_aleatoric": 0.1476396216100488,
           "rho_aleatoric_point": 0.6446108622620381,
           "share_misclassified_flow_off_transient": 0.06666666666666667
@@ -803,7 +807,7 @@
           "runtime_s": 1.1,
           "spearman_rho": -0.09994353472614342
         },
-        "interpretation": "Point level (n=95): Spearman rho=0.37 (one-sided p=<0.001) between pre-reveal epistemic uncertainty and log loss; AUROC for flagging 15 misclassified points = 0.57. Experiment level (n=22 held-out experiments): rho=-0.10 (p=0.687). The two levels do not agree, or the evidence is below the 0.05 threshold; treat as inconclusive. Possible reasons: aleatoric (outcome-variability) uncertainty tracks log loss more strongly (rho=0.64), so errors concentrate where the model already expects mixed outcomes rather than where data are sparse; 7% of misclassified points are flow-turned-off transient labels, which are not a physical quench boundary.",
+        "interpretation": "Point level (n=95): Spearman rho=0.37 (one-sided p=<0.001) between pre-reveal epistemic uncertainty and log loss; AUROC for flagging 15 misclassified points = 0.57. Experiment level (n=22 held-out experiments): rho=-0.10 (p=0.687). The two levels do not agree, or the evidence is below the 0.05 threshold; treat as inconclusive. Controlling for aleatoric uncertainty, the point-level association is 0.15 (p=0.073). Possible reasons: aleatoric (outcome-variability) uncertainty tracks log loss more strongly (rho=0.64), so errors concentrate where the model already expects mixed outcomes rather than where data are sparse; 7% of misclassified points are flow-turned-off transient labels, which are not a physical quench boundary.",
         "point_level": {
           "auroc_error_detection": 0.5691666666666667,
           "n": 95,
@@ -1148,7 +1152,7 @@
         "model": "GP",
         "n_pooled_predictions": 475
       },
-      "runtime_s": 13.3,
+      "runtime_s": 12.6,
       "sensitivity": [
         {
           "auc": 0.42884552845528456,
@@ -1319,6 +1323,8 @@
     {
       "blindspot_test": {
         "diagnostics": {
+          "partial_note": "point-level partial Spearman of epistemic uncertainty vs log loss given aleatoric",
+          "partial_p_value": 0.02948525737131434,
           "partial_rho_epistemic_given_aleatoric": 0.23765216284752025,
           "rho_aleatoric_point": 0.7198898555351584,
           "share_misclassified_flow_off_transient": 0.0
@@ -1420,10 +1426,10 @@
               "pre_reveal_uncertainty": 0.032002215126549695
             }
           ],
-          "runtime_s": 0.7,
+          "runtime_s": 0.6,
           "spearman_rho": 0.04285714285714286
         },
-        "interpretation": "Point level (n=67): Spearman rho=0.52 (one-sided p=<0.001) between pre-reveal epistemic uncertainty and log loss; AUROC for flagging 14 misclassified points = 0.62. Experiment level (n=15 held-out experiments): rho=0.04 (p=0.450). The two levels do not agree, or the evidence is below the 0.05 threshold; treat as inconclusive. Possible reasons: aleatoric (outcome-variability) uncertainty tracks log loss more strongly (rho=0.72), so errors concentrate where the model already expects mixed outcomes rather than where data are sparse.",
+        "interpretation": "Point level (n=67): Spearman rho=0.52 (one-sided p=<0.001) between pre-reveal epistemic uncertainty and log loss; AUROC for flagging 14 misclassified points = 0.62. Experiment level (n=15 held-out experiments): rho=0.04 (p=0.450). The two levels do not agree, or the evidence is below the 0.05 threshold; treat as inconclusive. Controlling for aleatoric uncertainty, the point-level association is 0.24 (p=0.029). Possible reasons: aleatoric (outcome-variability) uncertainty tracks log loss more strongly (rho=0.72), so errors concentrate where the model already expects mixed outcomes rather than where data are sparse.",
         "point_level": {
           "auroc_error_detection": 0.6172506738544474,
           "n": 67,
@@ -1745,7 +1751,7 @@
         "model": "GP",
         "n_pooled_predictions": 335
       },
-      "runtime_s": 10.4,
+      "runtime_s": 9.6,
       "sensitivity": [
         {
           "auc": 0.7854910714285714,
@@ -1916,6 +1922,8 @@
     {
       "blindspot_test": {
         "diagnostics": {
+          "partial_note": "point-level partial Spearman of epistemic uncertainty vs log loss given aleatoric",
+          "partial_p_value": 0.2673663168415792,
           "partial_rho_epistemic_given_aleatoric": 0.08178297900468808,
           "rho_aleatoric_point": 0.8142235123367199,
           "share_misclassified_flow_off_transient": 0.0
@@ -1999,10 +2007,10 @@
               "pre_reveal_uncertainty": 0.05184004821646427
             }
           ],
-          "runtime_s": 0.5,
+          "runtime_s": 0.4,
           "spearman_rho": -0.2097902097902098
         },
-        "interpretation": "Point level (n=52): Spearman rho=0.37 (one-sided p=0.003) between pre-reveal epistemic uncertainty and log loss; AUROC for flagging 6 misclassified points = 0.47. Experiment level (n=12 held-out experiments): rho=-0.21 (p=0.774). The two levels do not agree, or the evidence is below the 0.05 threshold; treat as inconclusive. Possible reasons: aleatoric (outcome-variability) uncertainty tracks log loss more strongly (rho=0.81), so errors concentrate where the model already expects mixed outcomes rather than where data are sparse.",
+        "interpretation": "Point level (n=52): Spearman rho=0.37 (one-sided p=0.003) between pre-reveal epistemic uncertainty and log loss; AUROC for flagging 6 misclassified points = 0.47. Experiment level (n=12 held-out experiments): rho=-0.21 (p=0.774). The two levels do not agree, or the evidence is below the 0.05 threshold; treat as inconclusive. Controlling for aleatoric uncertainty, the point-level association is 0.08 (p=0.267). Possible reasons: aleatoric (outcome-variability) uncertainty tracks log loss more strongly (rho=0.81), so errors concentrate where the model already expects mixed outcomes rather than where data are sparse.",
         "point_level": {
           "auroc_error_detection": 0.4673913043478261,
           "n": 52,
@@ -2347,7 +2355,7 @@
         "model": "GP",
         "n_pooled_predictions": 260
       },
-      "runtime_s": 9.9,
+      "runtime_s": 9.2,
       "sensitivity": [
         {
           "auc": 0.5164539007092198,
@@ -2518,124 +2526,126 @@
     {
       "blindspot_test": {
         "diagnostics": {
-          "partial_rho_epistemic_given_aleatoric": 0.46381837985023644,
-          "rho_aleatoric_point": 0.9380156317846288,
+          "partial_note": "point-level partial Spearman of epistemic uncertainty vs log loss given aleatoric",
+          "partial_p_value": 0.0004997501249375312,
+          "partial_rho_epistemic_given_aleatoric": 0.4568824465901398,
+          "rho_aleatoric_point": 0.9143508467216674,
           "share_misclassified_flow_off_transient": 0.0
         },
         "group_level": {
           "hyperparameters_refit_per_experiment": true,
           "n_groups": 16,
-          "p_value": 0.12293853073463268,
+          "p_value": 0.1714142928535732,
           "p_value_note": "one-sided permutation test (rho > 0) across held-out experiments",
           "pairs": [
             {
-              "error": 0.02049111389818123,
+              "error": 0.0787206240273967,
               "experiment_id": "PSI-25:B1",
               "n_points": 1,
-              "pre_reveal_uncertainty": 0.024445272675036295
+              "pre_reveal_uncertainty": 0.0692225059021696
             },
             {
-              "error": 0.2882041736749105,
+              "error": 0.3105737164398252,
               "experiment_id": "PSI-25:B10",
               "n_points": 6,
-              "pre_reveal_uncertainty": 0.040716545016305374
+              "pre_reveal_uncertainty": 0.04270474780995285
             },
             {
-              "error": 0.27160356626224375,
+              "error": 0.28675644334846984,
               "experiment_id": "PSI-25:B11",
               "n_points": 5,
-              "pre_reveal_uncertainty": 0.03979699729334306
+              "pre_reveal_uncertainty": 0.042080206218243245
             },
             {
-              "error": 0.2650510897299715,
+              "error": 0.28155862524006253,
               "experiment_id": "PSI-25:B13",
               "n_points": 7,
-              "pre_reveal_uncertainty": 0.04233733647110864
+              "pre_reveal_uncertainty": 0.04621133761098106
             },
             {
-              "error": 1.1638003814403683,
+              "error": 1.80684124756978,
               "experiment_id": "PSI-25:B14",
               "n_points": 1,
-              "pre_reveal_uncertainty": 0.1706547346704257
+              "pre_reveal_uncertainty": 0.14313859337188783
             },
             {
-              "error": 0.15878276915150769,
+              "error": 0.25216626232576633,
               "experiment_id": "PSI-25:B15",
               "n_points": 2,
-              "pre_reveal_uncertainty": 0.10232910098768758
+              "pre_reveal_uncertainty": 0.12535985822794773
             },
             {
-              "error": 0.47069293686844277,
+              "error": 0.497474181058807,
               "experiment_id": "PSI-25:B16",
               "n_points": 3,
-              "pre_reveal_uncertainty": 0.08766001012932849
+              "pre_reveal_uncertainty": 0.0920238772117743
             },
             {
-              "error": 0.35915836260880546,
+              "error": 0.4357488632064321,
               "experiment_id": "PSI-25:B17",
               "n_points": 3,
-              "pre_reveal_uncertainty": 0.06775181048256135
+              "pre_reveal_uncertainty": 0.06942957355327739
             },
             {
-              "error": 0.36607541175674185,
+              "error": 0.42090344180689476,
               "experiment_id": "PSI-25:B18",
               "n_points": 2,
-              "pre_reveal_uncertainty": 0.14065946764815174
+              "pre_reveal_uncertainty": 0.13707244302963273
             },
             {
-              "error": 0.3593808810160517,
+              "error": 0.41533349228547234,
               "experiment_id": "PSI-25:B19",
               "n_points": 2,
-              "pre_reveal_uncertainty": 0.14494912385376138
+              "pre_reveal_uncertainty": 0.14298384470450023
             },
             {
-              "error": 0.3879459445625988,
+              "error": 0.33876176321812884,
               "experiment_id": "PSI-25:B20",
               "n_points": 3,
-              "pre_reveal_uncertainty": 0.06768059413412149
+              "pre_reveal_uncertainty": 0.06889905178839202
             },
             {
-              "error": 0.784670586012016,
+              "error": 0.741305118133625,
               "experiment_id": "PSI-25:B21",
               "n_points": 2,
-              "pre_reveal_uncertainty": 0.03154528862660633
+              "pre_reveal_uncertainty": 0.032794230239738785
             },
             {
-              "error": 0.37342157661560615,
+              "error": 0.3841700416484401,
               "experiment_id": "PSI-25:B22",
               "n_points": 4,
-              "pre_reveal_uncertainty": 0.038374714267496446
+              "pre_reveal_uncertainty": 0.03884979429414355
             },
             {
-              "error": 0.032528685067656056,
+              "error": 0.05122943343361008,
               "experiment_id": "PSI-25:B6",
               "n_points": 3,
-              "pre_reveal_uncertainty": 0.028111109794446084
+              "pre_reveal_uncertainty": 0.03496974897781458
             },
             {
-              "error": 0.19377452284909186,
+              "error": 0.2760302775005938,
               "experiment_id": "PSI-25:B8",
               "n_points": 2,
-              "pre_reveal_uncertainty": 0.11041395385858564
+              "pre_reveal_uncertainty": 0.12613382249447497
             },
             {
-              "error": 0.4106572092656336,
+              "error": 0.38795910662003896,
               "experiment_id": "PSI-25:B9",
               "n_points": 2,
-              "pre_reveal_uncertainty": 0.04667756972682127
+              "pre_reveal_uncertainty": 0.048297355909228235
             }
           ],
-          "runtime_s": 0.6,
-          "spearman_rho": 0.3235294117647059
+          "runtime_s": 0.5,
+          "spearman_rho": 0.2647058823529412
         },
-        "interpretation": "Point level (n=48): Spearman rho=0.69 (one-sided p=<0.001) between pre-reveal epistemic uncertainty and log loss; AUROC for flagging 7 misclassified points = 0.63. Experiment level (n=16 held-out experiments): rho=0.32 (p=0.123). The two levels do not agree, or the evidence is below the 0.05 threshold; treat as inconclusive. Possible reasons: aleatoric (outcome-variability) uncertainty tracks log loss more strongly (rho=0.94), so errors concentrate where the model already expects mixed outcomes rather than where data are sparse.",
+        "interpretation": "Point level (n=48): Spearman rho=0.60 (one-sided p=<0.001) between pre-reveal epistemic uncertainty and log loss; AUROC for flagging 7 misclassified points = 0.62. Experiment level (n=16 held-out experiments): rho=0.26 (p=0.171). The two levels do not agree, or the evidence is below the 0.05 threshold; treat as inconclusive. Controlling for aleatoric uncertainty, the point-level association is 0.46 (p=<0.001). Possible reasons: aleatoric (outcome-variability) uncertainty tracks log loss more strongly (rho=0.91), so errors concentrate where the model already expects mixed outcomes rather than where data are sparse.",
         "point_level": {
-          "auroc_error_detection": 0.6306620209059234,
+          "auroc_error_detection": 0.6202090592334495,
           "n": 48,
           "n_misclassified": 7,
           "p_value": 0.0004997501249375312,
           "p_value_note": "one-sided permutation test (rho > 0); points treated as exchangeable",
-          "spearman_rho": 0.6948545375597047
+          "spearman_rho": 0.6046461137646548
         },
         "verdict": "inconclusive"
       },
@@ -2644,22 +2654,22 @@
       ],
       "cv": {
         "ci_method": "percentile, group bootstrap over experiments (B=1000)",
-        "gp_mean_function": "linear_o2",
+        "gp_mean_function": "constant",
         "gp_vs_majority": {
           "brier": {
             "ci95": [
-              -0.1049438033284705,
-              -0.04904954236426361
+              -0.08775539298558646,
+              -0.04061749930306494
             ],
-            "value": -0.07495129049643796
+            "value": -0.06386463819896747
           },
           "comparison": "gp minus majority_class (negative favours gp)",
           "log_loss": {
             "ci95": [
-              -0.2718986338383117,
-              -0.156098779112511
+              -0.2336246655619346,
+              -0.12838165240595042
             ],
-            "value": -0.21322267539682938
+            "value": -0.1801492527623575
           }
         },
         "k": 5,
@@ -2667,31 +2677,31 @@
           {
             "auc": {
               "ci95": [
-                0.8737067632850242,
-                0.9723101604278075
+                0.823384144051886,
+                0.9549861103705678
               ],
-              "value": 0.9203931203931204
+              "value": 0.8919901719901719
             },
             "brier": {
               "ci95": [
-                0.07755716053921465,
-                0.13569855437767062
+                0.08581217842046038,
+                0.15223546419982467
               ],
-              "value": 0.10483672011232668
+              "value": 0.11592337240979718
             },
             "ece": {
               "ci95": [
-                0.06269481106892831,
-                0.17065610901517136
+                0.06479291890516375,
+                0.18926526625753254
               ],
-              "value": 0.08931778712148646
+              "value": 0.08060539032386395
             },
             "log_loss": {
               "ci95": [
-                0.264102681404767,
-                0.41225952177461944
+                0.2902830760072792,
+                0.4586612416230506
               ],
-              "value": 0.3334261319409989
+              "value": 0.3664995545754708
             },
             "name": "gp"
           },
@@ -2846,15 +2856,15 @@
           1.0
         ],
         "counts": [
-          86,
+          75,
+          44,
+          24,
           30,
-          42,
-          19,
-          23,
-          23,
-          10,
-          7,
-          0,
+          32,
+          13,
+          12,
+          8,
+          2,
           0
         ],
         "note": "bins are the ERROR_BINS+1 bin edges; counts pool all repeats",
@@ -2891,75 +2901,75 @@
             "observed_frequency": null
           },
           {
-            "count": 1,
+            "count": 0,
             "hi": 0.30000000000000004,
             "lo": 0.2,
-            "mean_predicted": 0.2422352270645275,
-            "observed_frequency": 0.0
+            "mean_predicted": null,
+            "observed_frequency": null
           },
           {
-            "count": 20,
+            "count": 10,
             "hi": 0.4,
             "lo": 0.30000000000000004,
-            "mean_predicted": 0.3493849289955216,
+            "mean_predicted": 0.36710119274222397,
+            "observed_frequency": 0.3
+          },
+          {
+            "count": 32,
+            "hi": 0.5,
+            "lo": 0.4,
+            "mean_predicted": 0.4588356118006194,
             "observed_frequency": 0.25
           },
           {
-            "count": 18,
-            "hi": 0.5,
-            "lo": 0.4,
-            "mean_predicted": 0.44485893980472885,
-            "observed_frequency": 0.3888888888888889
-          },
-          {
-            "count": 28,
+            "count": 13,
             "hi": 0.6000000000000001,
             "lo": 0.5,
-            "mean_predicted": 0.5516800513175034,
-            "observed_frequency": 0.42857142857142855
+            "mean_predicted": 0.5624031339593962,
+            "observed_frequency": 0.6153846153846154
           },
           {
-            "count": 9,
+            "count": 32,
             "hi": 0.7000000000000001,
             "lo": 0.6000000000000001,
-            "mean_predicted": 0.6453174561597296,
-            "observed_frequency": 0.4444444444444444
+            "mean_predicted": 0.6589928050257249,
+            "observed_frequency": 0.71875
           },
           {
-            "count": 48,
+            "count": 32,
             "hi": 0.8,
             "lo": 0.7000000000000001,
-            "mean_predicted": 0.747267689350075,
-            "observed_frequency": 0.8541666666666666
+            "mean_predicted": 0.7625068243841796,
+            "observed_frequency": 0.75
           },
           {
-            "count": 30,
+            "count": 46,
             "hi": 0.9,
             "lo": 0.8,
-            "mean_predicted": 0.8514954424728118,
-            "observed_frequency": 1.0
+            "mean_predicted": 0.850451737393661,
+            "observed_frequency": 0.9565217391304348
           },
           {
-            "count": 86,
+            "count": 75,
             "hi": 1.0,
             "lo": 0.9,
-            "mean_predicted": 0.9609571162051516,
+            "mean_predicted": 0.9451851438027294,
             "observed_frequency": 1.0
           }
         ],
         "model": "GP",
         "n_pooled_predictions": 240
       },
-      "runtime_s": 10.9,
+      "runtime_s": 9.3,
       "sensitivity": [
         {
-          "auc": 0.9203931203931204,
-          "brier": 0.10483672011232668,
+          "auc": 0.8919901719901719,
+          "brier": 0.11592337240979718,
           "delta_auc": 0.0,
           "delta_brier": 0.0,
           "delta_log_loss": 0.0,
           "delta_vs_primary": 0.0,
-          "log_loss": 0.3334261319409989,
+          "log_loss": 0.3664995545754708,
           "majority_log_loss": 0.5466488073378283,
           "n_experiments": 16,
           "n_not_sustained": 11,
@@ -2968,13 +2978,13 @@
           "variant": "add low-confidence rows"
         },
         {
-          "auc": 0.9194103194103194,
-          "brier": 0.10437798575658146,
-          "delta_auc": -0.0009828009828010131,
-          "delta_brier": -0.00045873435574522725,
-          "delta_log_loss": -0.0006145101127617569,
-          "delta_vs_primary": -0.0006145101127617569,
-          "log_loss": 0.33281162182823715,
+          "auc": 0.8945454545454545,
+          "brier": 0.115533683700469,
+          "delta_auc": 0.0025552825552825897,
+          "delta_brier": -0.0003896887093281787,
+          "delta_log_loss": -0.0005252325309763606,
+          "delta_vs_primary": -0.0005252325309763606,
+          "log_loss": 0.3659743220444944,
           "majority_log_loss": 0.5466488073378283,
           "n_experiments": 16,
           "n_not_sustained": 11,
@@ -2983,13 +2993,13 @@
           "variant": "O2 initial value only"
         },
         {
-          "auc": 0.996078431372549,
-          "brier": 0.03804116995449339,
-          "delta_auc": 0.07568531097942865,
-          "delta_brier": -0.0667955501578333,
-          "delta_log_loss": -0.1868897818016861,
-          "delta_vs_primary": -0.1868897818016861,
-          "log_loss": 0.1465363501393128,
+          "auc": 0.9196078431372549,
+          "brier": 0.050478363553140844,
+          "delta_auc": 0.02761767114708291,
+          "delta_brier": -0.06544500885665633,
+          "delta_log_loss": -0.174329019154568,
+          "delta_vs_primary": -0.174329019154568,
+          "log_loss": 0.1921705354209028,
           "majority_log_loss": 0.3065419017819984,
           "n_experiments": 16,
           "n_not_sustained": 3,
@@ -2998,13 +3008,13 @@
           "variant": "drop below_calibration_range rows"
         },
         {
-          "auc": 0.9203931203931204,
-          "brier": 0.10483672011232668,
+          "auc": 0.8919901719901719,
+          "brier": 0.11592337240979718,
           "delta_auc": 0.0,
           "delta_brier": 0.0,
           "delta_log_loss": 0.0,
           "delta_vs_primary": 0.0,
-          "log_loss": 0.3334261319409989,
+          "log_loss": 0.3664995545754708,
           "majority_log_loss": 0.5466488073378283,
           "n_experiments": 16,
           "n_not_sustained": 11,
@@ -3013,13 +3023,13 @@
           "variant": "drop flow_off_transient rows"
         },
         {
-          "auc": 0.910054054054054,
-          "brier": 0.10460868504063163,
-          "delta_auc": -0.010339066339066338,
-          "delta_brier": -0.0002280350716950541,
-          "delta_log_loss": -0.003113240223023006,
-          "delta_vs_primary": -0.003113240223023006,
-          "log_loss": 0.3303128917179759,
+          "auc": 0.8833513513513513,
+          "brier": 0.11534447497056602,
+          "delta_auc": -0.008638820638820599,
+          "delta_brier": -0.0005788974392311602,
+          "delta_log_loss": -0.007579049678432981,
+          "delta_vs_primary": -0.007579049678432981,
+          "log_loss": 0.3589205048970378,
           "majority_log_loss": 0.5270636526929142,
           "n_experiments": 15,
           "n_not_sustained": 10,
@@ -3028,13 +3038,13 @@
           "variant": "drop no_sustained_propagation rows"
         },
         {
-          "auc": 0.9203931203931204,
-          "brier": 0.10483672011232668,
+          "auc": 0.8919901719901719,
+          "brier": 0.11592337240979718,
           "delta_auc": 0.0,
           "delta_brier": 0.0,
           "delta_log_loss": 0.0,
           "delta_vs_primary": 0.0,
-          "log_loss": 0.3334261319409989,
+          "log_loss": 0.3664995545754708,
           "majority_log_loss": 0.5466488073378283,
           "n_experiments": 16,
           "n_not_sustained": 11,
@@ -3043,13 +3053,13 @@
           "variant": "pressure length scale 0.15 (ln units)"
         },
         {
-          "auc": 0.9203931203931204,
-          "brier": 0.10483672011232668,
+          "auc": 0.8919901719901719,
+          "brier": 0.11592337240979718,
           "delta_auc": 0.0,
           "delta_brier": 0.0,
           "delta_log_loss": 0.0,
           "delta_vs_primary": 0.0,
-          "log_loss": 0.3334261319409989,
+          "log_loss": 0.3664995545754708,
           "majority_log_loss": 0.5466488073378283,
           "n_experiments": 16,
           "n_not_sustained": 11,
@@ -3061,57 +3071,57 @@
       "small_sample_warning": "Small sample: 16 experiments; only 11 not-sustained observations. Intervals are wide and metrics are unstable.",
       "subgroups": [
         {
-          "brier": 0.41566054343190084,
-          "log_loss": 1.0441306114465319,
+          "brier": 0.6595316567561185,
+          "log_loss": 1.6844498239514387,
           "n": 1,
           "n_not_sustained": 1,
           "name": "O2 < 17 %"
         },
         {
-          "brier": 0.11973993743203647,
-          "log_loss": 0.4062286375506632,
+          "brier": 0.13213063963365004,
+          "log_loss": 0.4256786155627031,
           "n": 13,
           "n_not_sustained": 4,
           "name": "O2 17-20 %"
         },
         {
-          "brier": 0.08999655398068546,
-          "log_loss": 0.28468680686949394,
+          "brier": 0.09373799716696163,
+          "log_loss": 0.3051090233340005,
           "n": 34,
           "n_not_sustained": 6,
           "name": "O2 > 20 %"
         },
         {
-          "brier": 0.20177520278813463,
-          "log_loss": 0.5820684195831909,
+          "brier": 0.20477837822162098,
+          "log_loss": 0.5913183609378228,
           "n": 19,
           "n_not_sustained": 8,
           "name": "airflow < 3 cm/s"
         },
         {
-          "brier": 0.0333300373149144,
-          "log_loss": 0.1329054500541876,
+          "brier": 0.04439366578082379,
+          "log_loss": 0.17290882109076552,
           "n": 20,
           "n_not_sustained": 1,
           "name": "airflow 3-10 cm/s"
         },
         {
-          "brier": 0.05909255179098159,
-          "log_loss": 0.254116151111508,
+          "brier": 0.08729548598255453,
+          "log_loss": 0.32208370444318396,
           "n": 9,
           "n_not_sustained": 2,
           "name": "airflow > 10 cm/s"
         },
         {
-          "brier": 0.1327617489171314,
-          "log_loss": 0.41680876285462853,
+          "brier": 0.1479419454645704,
+          "log_loss": 0.4508923629519818,
           "n": 20,
           "n_not_sustained": 9,
           "name": "confidence high"
         },
         {
-          "brier": 0.08489027096603759,
-          "log_loss": 0.273867109859835,
+          "brier": 0.0930529630849592,
+          "log_loss": 0.30621897716367713,
           "n": 28,
           "n_not_sustained": 2,
           "name": "confidence medium"
@@ -3121,6 +3131,8 @@
     {
       "blindspot_test": {
         "diagnostics": {
+          "partial_note": "point-level partial Spearman of epistemic uncertainty vs log loss given aleatoric",
+          "partial_p_value": 0.0004997501249375312,
           "partial_rho_epistemic_given_aleatoric": 0.8019607235864891,
           "rho_aleatoric_point": 0.95024714366745,
           "share_misclassified_flow_off_transient": 0.0
@@ -3276,10 +3288,10 @@
               "pre_reveal_uncertainty": 0.2388319831245045
             }
           ],
-          "runtime_s": 0.9,
+          "runtime_s": 0.8,
           "spearman_rho": 0.9494993469743144
         },
-        "interpretation": "Point level (n=42): Spearman rho=0.96 (one-sided p=<0.001) between pre-reveal epistemic uncertainty and log loss; AUROC for flagging 1 misclassified points = 0.98. Experiment level (n=24 held-out experiments): rho=0.95 (p=<0.001). Withheld experiments with higher pre-reveal epistemic uncertainty tended to be predicted worse at both levels; this is an association in a small, imbalanced sample, not a guarantee.",
+        "interpretation": "Point level (n=42): Spearman rho=0.96 (one-sided p=<0.001) between pre-reveal epistemic uncertainty and log loss; AUROC for flagging 1 misclassified points = 0.98. Experiment level (n=24 held-out experiments): rho=0.95 (p=<0.001). Withheld experiments with higher pre-reveal epistemic uncertainty tended to be predicted worse at both levels; this is an association in a small, imbalanced sample, not a guarantee. Controlling for aleatoric uncertainty, the point-level association is 0.80 (p=<0.001).",
         "point_level": {
           "auroc_error_detection": 0.975609756097561,
           "n": 42,
@@ -3624,7 +3636,7 @@
         "model": "GP",
         "n_pooled_predictions": 210
       },
-      "runtime_s": 10.4,
+      "runtime_s": 10.0,
       "sensitivity": [
         {
           "auc": 0.8672090395480226,
@@ -3795,6 +3807,8 @@
     {
       "blindspot_test": {
         "diagnostics": {
+          "partial_note": "point-level partial Spearman of epistemic uncertainty vs log loss given aleatoric",
+          "partial_p_value": 0.0074962518740629685,
           "partial_rho_epistemic_given_aleatoric": 0.4016682336069218,
           "rho_aleatoric_point": 0.44246353322528365,
           "share_misclassified_flow_off_transient": 0.0
@@ -3959,7 +3973,7 @@
           "runtime_s": 0.7,
           "spearman_rho": 0.19322555812163203
         },
-        "interpretation": "Point level (n=42): Spearman rho=0.39 (one-sided p=0.007) between pre-reveal epistemic uncertainty and log loss; AUROC for flagging 13 misclassified points = 0.60. Experiment level (n=25 held-out experiments): rho=0.19 (p=0.173). The two levels do not agree, or the evidence is below the 0.05 threshold; treat as inconclusive. Possible reasons: aleatoric (outcome-variability) uncertainty tracks log loss more strongly (rho=0.44), so errors concentrate where the model already expects mixed outcomes rather than where data are sparse.",
+        "interpretation": "Point level (n=42): Spearman rho=0.39 (one-sided p=0.007) between pre-reveal epistemic uncertainty and log loss; AUROC for flagging 13 misclassified points = 0.60. Experiment level (n=25 held-out experiments): rho=0.19 (p=0.173). The two levels do not agree, or the evidence is below the 0.05 threshold; treat as inconclusive. Controlling for aleatoric uncertainty, the point-level association is 0.40 (p=0.007). Possible reasons: aleatoric (outcome-variability) uncertainty tracks log loss more strongly (rho=0.44), so errors concentrate where the model already expects mixed outcomes rather than where data are sparse.",
         "point_level": {
           "auroc_error_detection": 0.5994694960212201,
           "n": 42,
@@ -4281,7 +4295,7 @@
         "model": "GP",
         "n_pooled_predictions": 210
       },
-      "runtime_s": 8.7,
+      "runtime_s": 8.6,
       "sensitivity": [
         {
           "auc": 0.596551724137931,
@@ -4452,6 +4466,8 @@
     {
       "blindspot_test": {
         "diagnostics": {
+          "partial_note": "point-level partial Spearman of epistemic uncertainty vs log loss given aleatoric",
+          "partial_p_value": 0.0004997501249375312,
           "partial_rho_epistemic_given_aleatoric": 0.6268666640427715,
           "rho_aleatoric_point": 0.9074043122179508,
           "share_misclassified_flow_off_transient": 0.0
@@ -4574,7 +4590,7 @@
           "runtime_s": 0.5,
           "spearman_rho": 0.8200620475698035
         },
-        "interpretation": "Point level (n=33): Spearman rho=0.87 (one-sided p=<0.001) between pre-reveal epistemic uncertainty and log loss; AUROC for flagging 2 misclassified points = 0.87. Experiment level (n=18 held-out experiments): rho=0.82 (p=<0.001). Withheld experiments with higher pre-reveal epistemic uncertainty tended to be predicted worse at both levels; this is an association in a small, imbalanced sample, not a guarantee. Caveat: aleatoric (predictive-entropy) uncertainty tracks log loss at least as strongly (rho=0.91), and the epistemic-loss association controlling for it is 0.63; so this does not show that epistemic uncertainty adds information beyond the model's overall predictive uncertainty.",
+        "interpretation": "Point level (n=33): Spearman rho=0.87 (one-sided p=<0.001) between pre-reveal epistemic uncertainty and log loss; AUROC for flagging 2 misclassified points = 0.87. Experiment level (n=18 held-out experiments): rho=0.82 (p=<0.001). Withheld experiments with higher pre-reveal epistemic uncertainty tended to be predicted worse at both levels; this is an association in a small, imbalanced sample, not a guarantee. Caveat: aleatoric (predictive-entropy) uncertainty tracks log loss at least as strongly (rho=0.91), and the epistemic-loss association controlling for it is 0.63; so this does not show that epistemic uncertainty adds information beyond the model's overall predictive uncertainty. Controlling for aleatoric uncertainty, the point-level association is 0.63 (p=<0.001).",
         "point_level": {
           "auroc_error_detection": 0.8709677419354839,
           "n": 33,
@@ -4931,7 +4947,7 @@
         "model": "GP",
         "n_pooled_predictions": 165
       },
-      "runtime_s": 9.0,
+      "runtime_s": 8.4,
       "sensitivity": [
         {
           "auc": 0.9252,
@@ -5102,6 +5118,8 @@
     {
       "blindspot_test": {
         "diagnostics": {
+          "partial_note": "point-level partial Spearman of epistemic uncertainty vs log loss given aleatoric",
+          "partial_p_value": 0.0004997501249375312,
           "partial_rho_epistemic_given_aleatoric": 0.685986161559505,
           "rho_aleatoric_point": 0.9916256157635468
         },
@@ -5223,7 +5241,7 @@
           "runtime_s": 0.5,
           "spearman_rho": 0.8448810754912099
         },
-        "interpretation": "Point level (n=29): Spearman rho=0.95 (one-sided p=<0.001) between pre-reveal epistemic uncertainty and log loss; AUROC for flagging 0 misclassified points = n/a. Experiment level (n=18 held-out experiments): rho=0.84 (p=<0.001). Withheld experiments with higher pre-reveal epistemic uncertainty tended to be predicted worse at both levels; this is an association in a small, imbalanced sample, not a guarantee. Caveat: aleatoric (predictive-entropy) uncertainty tracks log loss at least as strongly (rho=0.99), and the epistemic-loss association controlling for it is 0.69; so this does not show that epistemic uncertainty adds information beyond the model's overall predictive uncertainty.",
+        "interpretation": "Point level (n=29): Spearman rho=0.95 (one-sided p=<0.001) between pre-reveal epistemic uncertainty and log loss; AUROC for flagging 0 misclassified points = n/a. Experiment level (n=18 held-out experiments): rho=0.84 (p=<0.001). Withheld experiments with higher pre-reveal epistemic uncertainty tended to be predicted worse at both levels; this is an association in a small, imbalanced sample, not a guarantee. Caveat: aleatoric (predictive-entropy) uncertainty tracks log loss at least as strongly (rho=0.99), and the epistemic-loss association controlling for it is 0.69; so this does not show that epistemic uncertainty adds information beyond the model's overall predictive uncertainty. Controlling for aleatoric uncertainty, the point-level association is 0.69 (p=<0.001).",
         "point_level": {
           "auroc_error_detection": null,
           "n": 29,
@@ -5568,7 +5586,7 @@
         "model": "GP",
         "n_pooled_predictions": 145
       },
-      "runtime_s": 8.3,
+      "runtime_s": 7.8,
       "sensitivity": [
         {
           "auc": 0.87375,
@@ -5733,7 +5751,7 @@
       ]
     }
   ],
-  "model_version": "gp-laplace-v1+8783ff5a.b75416",
+  "model_version": "gp-laplace-v1+8783ff5a.adfbbd",
   "not_modelled": {
     "nomex_fabric__concurrent": "3 training experiments (needs ≥ 6); 0 sustained observations (needs ≥ 3)",
     "nomex_fabric__unknown": "3 training experiments (needs ≥ 6); 1 sustained observations (needs ≥ 3); 2 not-sustained observations (needs ≥ 3)",
@@ -5747,5 +5765,5 @@
     "wax_candle__unknown": "1 not-sustained observations (needs ≥ 3); not-sustained outcomes in 1 experiment(s) (needs ≥ 2)",
     "wax_candle__wake": "3 training experiments (needs ≥ 6); 2 sustained observations (needs ≥ 3); 1 not-sustained observations (needs ≥ 3); not-sustained outcomes in 1 experiment(s) (needs ≥ 2)"
   },
-  "runtime_s": 20.9
+  "runtime_s": 18.7
 }
