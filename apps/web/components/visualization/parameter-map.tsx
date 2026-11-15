@@ -1154,13 +1154,13 @@ export default function ParameterMap(props: ParameterMapProps) {
                         stroke={g.anyOn ? "var(--surface)" : ACCENT}
                         strokeWidth={1.5}
                       />
-                      <text x={X} y={Y + 3.5} textAnchor="middle" fontSize={10} fontWeight={600} fill={g.anyOn ? "#fff" : ACCENT} pointerEvents="none" style={{ fontVariantNumeric: "tabular-nums" }}>{g.label}</text>
+                      <text aria-hidden="true" x={X} y={Y + 3.5} textAnchor="middle" fontSize={10} fontWeight={600} fill={g.anyOn ? "#fff" : ACCENT} pointerEvents="none" style={{ fontVariantNumeric: "tabular-nums" }}>{g.label}</text>
                       {offRanks.length > 0 && (() => {
                         const offLabel = offText;
                         // Flip the label to the left of the marker when it would run past the plot's right edge (narrow maps).
                         const flip = X + half + 5 + offLabel.length * 5.6 > iw;
                         return (
-                          <text x={flip ? X - half - 5 : X + half + 5} y={Y + 3.5} textAnchor={flip ? "end" : "start"} fontSize={10} fill={MUTED} stroke="var(--surface)" strokeWidth={3} paintOrder="stroke" strokeLinejoin="round" pointerEvents="none">
+                          <text aria-hidden="true" x={flip ? X - half - 5 : X + half + 5} y={Y + 3.5} textAnchor={flip ? "end" : "start"} fontSize={10} fill={MUTED} stroke="var(--surface)" strokeWidth={3} paintOrder="stroke" strokeLinejoin="round" pointerEvents="none">
                             {offLabel}
                           </text>
                         );

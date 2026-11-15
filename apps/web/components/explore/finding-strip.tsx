@@ -104,7 +104,7 @@ export function FindingStrip({ groups, profiles, onShowMap }: { groups: readonly
               <dt className="text-xs text-muted">{gap.name}{profileConditions(gap) ? ` (${profileConditions(gap)})` : ""}</dt>
               <dd className="mt-0.5 text-[13px] text-fg">
                 <span className="num text-[17px] font-semibold">{gapT.comparable_observations}</span> comparable observations
-                <span className="text-muted">{gapT.groups_with_comparable === 0 ? `, in all ${gapT.n_groups} material groups` : `, in ${gapT.groups_with_comparable} of ${gapT.n_groups} material groups`}</span>
+                <span className="text-muted">{gapT.groups_with_comparable === 0 ? `, across all ${gapT.n_groups} material groups` : `, in ${gapT.groups_with_comparable} of ${gapT.n_groups} material groups`}</span>
               </dd>
             </div>
             {o2 && kpa ? (
