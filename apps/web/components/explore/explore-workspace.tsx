@@ -340,7 +340,7 @@ export function ExploreWorkspace() {
           id="explorer-map"
           aria-labelledby="map-heading"
           data-testid="map-region"
-          className="order-2 min-w-0 scroll-mt-20 rounded-lg border border-border bg-surface lg:order-none lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:sticky lg:top-[calc(var(--header-h)+12px)] lg:z-10 lg:max-h-[calc(100vh-var(--header-h)-24px)] lg:overflow-y-auto"
+          className="order-2 min-w-0 scroll-mt-20 rounded-lg border border-border bg-surface lg:order-none lg:col-start-1 lg:row-span-2 lg:row-start-1"
         >
           <div className="space-y-3 border-b border-border px-4 py-3">
             <div className="flex flex-wrap items-start gap-x-4 gap-y-3">
@@ -379,7 +379,7 @@ export function ExploreWorkspace() {
           </div>
           {mapLayers.context && ctx.envelopes.length > 0 ? (
             <details className="group border-t border-border px-4 py-2 text-xs" data-testid="context-list">
-              <summary className="cursor-pointer list-none text-muted hover:text-fg [&::-webkit-details-marker]:hidden">
+              <summary className="block cursor-pointer list-none text-muted hover:text-fg [&::-webkit-details-marker]:hidden [&::marker]:content-none">
                 <span aria-hidden className="mr-1 inline-block transition-transform group-open:rotate-90">›</span>
                 Related NASA work on the chart ({ctx.envelopes.length}): dotted boxes the model does not use
               </summary>

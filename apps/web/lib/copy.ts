@@ -35,7 +35,7 @@ export const HERO_BYLINE = "Blind Spots · machine learning that says when it do
 
 /** Verdict lines for the answer card (icon + words; never colour alone). */
 export const VERDICT_LINE = {
-  insufficient_evidence: "Blind spot: none of the ISS flame tests ran in air like this.",
+  insufficient_evidence: "Blind spot: none of the ISS flame tests in our data ran in air like this.",
   extrapolation: "Partly covered: only part of this air has nearby ISS tests.",
   supported: "Covered: ISS flame tests ran in air like this.",
 } as const;

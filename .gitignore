@@ -29,3 +29,4 @@ apps/web/public/snapshot/
 .claude/
 .work/
 .coverage
+.playwright-mcp/

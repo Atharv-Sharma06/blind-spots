@@ -106,21 +106,21 @@ export function BriefView() {
         }
       `}</style>
 
-      <div className="no-print brief-ui mb-6 flex flex-wrap items-center gap-2">
-        <Button asChild variant="ghost" size="sm">
-          <Link href={exploreHref}><ArrowLeft aria-hidden />Back to Explorer</Link>
+      <div className="no-print brief-ui mb-4 flex flex-nowrap items-center gap-1.5 sm:mb-6 sm:flex-wrap sm:gap-2">
+        <Button asChild variant="ghost" size="sm" className="max-md:px-2">
+          <Link href={exploreHref} aria-label="Back to Explorer"><ArrowLeft aria-hidden />Back<span className="hidden sm:inline">&nbsp;to Explorer</span></Link>
         </Button>
         {cabinsHref ? (
-          <Button asChild variant="ghost" size="sm">
+          <Button asChild variant="ghost" size="sm" className="max-md:px-2">
             <Link href={cabinsHref}><ArrowLeft aria-hidden />Cabins</Link>
           </Button>
         ) : null}
-        <div className="ml-auto flex flex-wrap gap-2">
-          <Button variant="secondary" disabled={!brief} onClick={() => brief && download(`blind-spots-brief-${slug(groupId ?? "group")}.md`, cleanBriefText(brief.markdown))}>
-            <Download aria-hidden />Download .md
+        <div className="ml-auto flex gap-1.5 sm:flex-wrap sm:gap-2">
+          <Button variant="secondary" aria-label="Download .md" className="max-md:px-2.5" disabled={!brief} onClick={() => brief && download(`blind-spots-brief-${slug(groupId ?? "group")}.md`, cleanBriefText(brief.markdown))}>
+            <Download aria-hidden />Download<span className="hidden sm:inline">&nbsp;.md</span>
           </Button>
-          <Button variant="primary" disabled={!brief} onClick={() => window.print()}>
-            <Printer aria-hidden />Print / Save as PDF
+          <Button variant="primary" aria-label="Print / Save as PDF" className="max-md:px-2.5" disabled={!brief} onClick={() => window.print()}>
+            <Printer aria-hidden />Print<span className="hidden sm:inline">&nbsp;/ Save as PDF</span>
           </Button>
         </div>
       </div>
@@ -143,18 +143,20 @@ export function BriefView() {
             <p className="brief-ui text-xs font-medium uppercase tracking-[0.08em] text-muted">Blind Spots · Research brief</p>
             <h1 className="mt-2 text-[28px] font-semibold leading-tight tracking-[-0.02em]">{plainTitle ?? brief.title.replace(/^Research brief:\s*/, "")}</h1>
             {plainTitle ? <p className="brief-ui mt-1 text-[13px] text-muted">{brief.title.replace(/^Research brief:\s*/, "")}</p> : null}
-            <p className="brief-ui mt-3 max-w-[62ch] text-[15px] leading-relaxed">
-              A short summary for this cabin and material: whether NASA&apos;s ISS flame tests cover its air, and which research candidate would teach the model the most. The sections below keep the exact technical terms; see{" "}
-              <Link href="/methodology#nearby" className="text-accent underline underline-offset-2">How it works</Link> for what &quot;nearby&quot; means.
+            <p className="brief-ui mt-2 max-w-[62ch] text-[15px] leading-relaxed sm:mt-3">
+              Do NASA&apos;s ISS flame tests cover this cabin&apos;s air, and which research candidate would teach the model the most?
+              <span className="hidden sm:inline"> The sections below keep the exact technical terms; see{" "}
+              <Link href="/methodology#nearby" className="text-accent underline underline-offset-2">How it works</Link> for what &quot;nearby&quot; means.</span>
             </p>
-            <dl className="brief-ui num mt-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted">
-              <div className="flex gap-1.5"><dt>Generated</dt><dd className="text-fg">{fmtGenerated(brief.generated_at)}</dd></div>
-              <div className="flex gap-1.5"><dt>Dataset</dt><dd className="text-fg">{shortVersion(brief.dataset_version)}</dd></div>
-              <div className="flex gap-1.5"><dt>Model</dt><dd className="text-fg">{brief.model_version}</dd></div>
-            </dl>
           </header>
 
           <InShort profileId={profileId} groupId={groupId} />
+
+          <dl className="brief-ui num mt-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted">
+            <div className="flex gap-1.5"><dt>Generated</dt><dd className="text-fg">{fmtGenerated(brief.generated_at)}</dd></div>
+            <div className="flex gap-1.5"><dt>Dataset</dt><dd className="text-fg">{shortVersion(brief.dataset_version)}</dd></div>
+            <div className="flex gap-1.5"><dt>Model</dt><dd className="text-fg">{brief.model_version}</dd></div>
+          </dl>
 
           <Callout variant="info" title="Computational research-planning output" className="brief-ui my-5">
             {DISCLAIMER} Candidate conditions are computational research candidates requiring qualified scientific review, established safety procedures and formal feasibility assessment. This brief contains no test procedures.

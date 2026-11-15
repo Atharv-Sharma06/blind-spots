@@ -5,7 +5,7 @@
 import type { Plane, Verdict } from "@/lib/types";
 
 export const PLAIN_VERDICT: Record<Verdict, { headline: string; tone: "blind" | "partly" | "covered" }> = {
-  insufficient_evidence: { headline: "Blind spot: none of the ISS flame tests ran in air like this.", tone: "blind" },
+  insufficient_evidence: { headline: "Blind spot: none of the ISS flame tests in our data ran in air like this.", tone: "blind" },
   extrapolation: { headline: "Partly covered: only part of this air has nearby ISS tests.", tone: "partly" },
   supported: { headline: "Covered: ISS flame tests ran in air like this.", tone: "covered" },
 };

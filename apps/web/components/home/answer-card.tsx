@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { isApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { useAssessTarget, useGroups, useHeadline, useObservations, useTargets } from "@/hooks/api";
-import type { AssessResponse, AtmosphereProfile, GroupSummary } from "@/lib/types";
+import type { ApiObservation, AssessResponse, AtmosphereProfile, GroupSummary } from "@/lib/types";
 import {
   airSentenceParts,
   answerSentences,
@@ -71,6 +71,7 @@ export function AnswerCard({ cabin, material, onMaterialChange }: AnswerCardProp
   const headlineSettled = !!headlineQ.data || headlineQ.isError;
 
   const results = React.useMemo(() => (obs ? testRows(obs) : null), [obs]);
+  const notUsedReason = React.useMemo(() => (obs ? notUsedReasonText(obs) : ""), [obs]);
 
   const fatal = groupsQ.isError || targetsQ.isError;
   const unknownCabin = !!targetsQ.data && !profile;
@@ -105,7 +106,7 @@ export function AnswerCard({ cabin, material, onMaterialChange }: AnswerCardProp
             />
             <div id="chart" data-tour="chart" className="scroll-mt-20 border-t border-border px-4 pt-5 pb-4 sm:px-6">
               {results ? (
-                <ChartBlock profile={profile} cabinId={cabin} profiles={profiles} results={results} materialLabel={lcFirst(materialName(group.group_id, group.label))} />
+                <ChartBlock profile={profile} cabinId={cabin} profiles={profiles} results={results} notUsedReason={notUsedReason} materialLabel={lcFirst(materialName(group.group_id, group.label))} />
               ) : (
                 <div className={cn("w-full", CHART_HEIGHT_CLASS)} aria-busy="true">
                   <Skeleton className="h-full w-full" />
@@ -120,6 +121,30 @@ export function AnswerCard({ cabin, material, onMaterialChange }: AnswerCardProp
       </div>
     </section>
   );
+}
+
+const NOT_USED_WHY: Record<string, string> = {
+  no_numeric_airflow: "no airflow was recorded",
+  low_confidence: "the record is low confidence",
+  not_ignited: "the sample never lit",
+};
+
+/** A short plain reason for the results the model does not use, from the reasons in the data (same results testRows counts). */
+function notUsedReasonText(obs: readonly ApiObservation[]): string {
+  const num = (v: number | null) => typeof v === "number" && Number.isFinite(v);
+  const counts = new Map<string, number>();
+  let total = 0;
+  for (const o of obs) {
+    if (o.label === null || !num(o.oxygen_percent) || !num(o.pressure_for_analysis_kpa ?? o.total_pressure_kpa) || o.included_in_training !== false) continue;
+    const key = o.exclusion_reason ?? "";
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+    total += 1;
+  }
+  if (total === 0) return "";
+  const [topKey, topN] = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]!;
+  const why = NOT_USED_WHY[topKey] ?? "the data marks them as not suitable";
+  if (counts.size === 1) return ` because ${why}`;
+  return topN * 2 > total ? ` mostly because ${why}` : " for several reasons given in the data";
 }
 
 /** Keeps "15–22.2 %" and "56.5 kPa" on one line: a number never splits from its unit or its range. */
@@ -248,7 +273,13 @@ function Verdict({ profile, cabinId, group, assess, assessError, onRetry, compar
     );
   }
 
-  const title = verdictTitle({ verdict: assess.verdict, comparable: assess.coverage.comparable_observations, comparableAnyMaterial });
+  const title = verdictTitle({
+    verdict: assess.verdict,
+    comparable: assess.coverage.comparable_observations,
+    comparableAnyMaterial,
+    pointsWithComparable: assess.coverage.points_with_comparable,
+    nTargetPoints: assess.coverage.n_target_points,
+  });
   const sentences = answerSentences({
     verdict: assess.verdict,
     comparable: assess.coverage.comparable_observations,
@@ -317,15 +348,18 @@ function ChartBlock({
   cabinId,
   profiles,
   results,
+  notUsedReason,
   materialLabel,
 }: {
   profile: AtmosphereProfile;
   cabinId: string;
   profiles: readonly AtmosphereProfile[];
   results: { rows: TestRow[]; withoutOutcome: number; notUsed: number; notUsedNoAirflow: boolean };
+  notUsedReason: string;
   materialLabel: string;
 }) {
   const { rows, withoutOutcome, notUsed, notUsedNoAirflow } = results;
+  const notUsedWhy = notUsedReason || (notUsedNoAirflow ? " because no airflow was recorded" : " for reasons given in the data");
   const dots = React.useMemo(() => toDots(rows), [rows]);
   const cabin = React.useMemo(() => chartCabin(cabinId, "This cabin", profile), [cabinId, profile]);
   const others = React.useMemo(
@@ -384,6 +418,14 @@ function ChartBlock({
             Other cabins (tap a dot for its name)
           </span>
         ) : null}
+        {cabin.xHi - cabin.xLo > 0 || cabin.yHi - cabin.yLo > 0 ? (
+          <span className="inline-flex items-center gap-1.5" data-testid="legend-range">
+            <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>
+              <rect x="1" y="1" width="10" height="10" fill="var(--fg)" fillOpacity="0.06" stroke="var(--fg)" strokeWidth="1.25" strokeDasharray="3 2" />
+            </svg>
+            Dashed box: the range of air this cabin can have
+          </span>
+        ) : null}
         <span>
           <span className="num text-fg">{rows.length.toLocaleString("en-US")}</span> ISS test results for {materialLabel}
         </span>
@@ -397,7 +439,7 @@ function ChartBlock({
       ) : null}
       {notUsed > 0 ? (
         <p className="mt-1 max-w-3xl text-xs text-muted" data-testid="not-used-note">
-          {notUsed === 1 ? "1 result is" : `${notUsed.toLocaleString("en-US")} results are`} not used by the model{notUsedNoAirflow ? " because no airflow was recorded" : ""}.
+          {notUsed === 1 ? "1 result is" : `${notUsed.toLocaleString("en-US")} results are`} not used by the model{notUsedWhy}.
         </p>
       ) : null}
       {withoutOutcome > 0 ? (

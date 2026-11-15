@@ -129,15 +129,29 @@ export interface VerdictFacts {
   comparable: number;
   /** Nearby results summed over every material (headline); null when the headline is unavailable. */
   comparableAnyMaterial: number | null;
+  /** Sampled points of this cabin's air with a nearby ISS test (coverage.points_with_comparable); optional. */
+  pointsWithComparable?: number | null;
+  /** Sampled points in this cabin's air (coverage.n_target_points); optional. */
+  nTargetPoints?: number | null;
 }
 
 /** The big line. It never says "none" unless the API says none for the scope it names. */
 export function verdictTitle(f: VerdictFacts): string {
   if (f.verdict === "supported") return "Covered: ISS flame tests ran in air like this.";
-  if (f.verdict === "extrapolation") return "Partly covered: only part of this air has nearby ISS tests.";
-  if (f.comparableAnyMaterial === 0) return "Blind spot: none of the ISS flame tests ran in air like this.";
-  if (f.comparable === 0) return "Blind spot: no ISS test of this material ran in air like this.";
-  return "Blind spot: very few ISS tests of this material ran in air like this.";
+  if (f.verdict === "extrapolation") {
+    const n = f.pointsWithComparable;
+    const m = f.nTargetPoints;
+    if (isNum(n) && isNum(m) && m > 0) {
+      // Same threshold as the cabin chip ("Barely covered"): under a quarter of the sampled points have nearby tests.
+      return n / m < 0.25
+        ? `Barely covered: only ${n} of ${m} points in this air have nearby ISS tests.`
+        : "Partly covered: only part of this air has nearby ISS tests.";
+    }
+    return "Partly covered: only part of this air has nearby ISS tests.";
+  }
+  if (f.comparableAnyMaterial === 0) return "Blind spot: none of the ISS flame tests in our data ran in air like this.";
+  if (f.comparable === 0) return "Blind spot: no ISS test of this material in our data ran in air like this.";
+  return "Blind spot: very few ISS tests of this material in our data ran in air like this.";
 }
 
 export interface AnswerFacts extends VerdictFacts {
