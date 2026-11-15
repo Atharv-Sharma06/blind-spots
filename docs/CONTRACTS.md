@@ -121,8 +121,15 @@ column: label = `<as-run no.>/<test no.>` (e.g. `85/117`, `85/117a`) to stay uni
 | extinction_mode | only when `extinguished`: `quench_low_flow`, `blowoff_high_flow`, `at_constant_flow`, `flow_turned_off`, `n2_suppression`; else empty |
 | raw_token | exact substring of the source cell that supports this row (copy verbatim, including spacing) |
 | raw_column | the column header text of that cell, normalized as in the dumps (e.g. `Fan display`, `Air display`, `Test Observations and Anomalies (ignited, spread, extinguished, burn time, color, etc.)`) |
+| token_row | Excel row of the cell holding `raw_token` (usually = `source_row`; differs for BASS continuation rows) |
 | confidence | `high` (explicit in source), `medium` (clear from context), `low` (interpretation) |
 | note | free text |
+
+Exact CSV headers (UTF-8, comma, minimal quoting, LF):
+- tests: `investigation_id,test_label,source_file,source_sheet,source_row,material_family,specimen_geometry,thickness_mm,diameter_mm,width_mm,sides_burning,pmma_color,flame_configuration,configuration_evidence,terminal_event,o2_anomaly,confidence,note`
+- steps: `investigation_id,test_label,source_file,source_sheet,source_row,step_index,flow_value,flow_unit,flow_qualifier,flame_state,extinction_mode,raw_token,raw_column,token_row,confidence,note`
+
+Checker: `python scripts/check_curation_provenance.py <csv>...` (needs openpyxl) must report 0 errors.
 
 Rules: record only what the source supports. Do not create a step for a flow whose flame state is
 unknown. Do not convert units in the CSV (the pipeline converts). If the fan list and air list describe
