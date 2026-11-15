@@ -39,7 +39,7 @@ Participant FAQ (https://www.spaceappschallenge.org/resources/participant-faqs/)
 The FAQ also says Space Apps uses "SI" in place of "AI". The project's public text should therefore say **SI**.
 
 **Owner action (the idea rule):** the guide says SI "should not be used to (come up with your idea of how to solve the
-challenge)". The paste-ready text below says only that the owner directed the work, made the decisions and reviewed the
+challenge)". The paste-ready text below says only that we directed the work, made the decisions and checked the
 outputs. If the core idea came from the team, you may add one true sentence saying so. Do not add it otherwise.
 
 ---
@@ -70,70 +70,69 @@ unticked.
 
 ### 3a. Short version (Project Details, or a free-text box next to the multi-select)
 
-> **Use of Super Intelligence (SI).** Blind Spots was built with heavy SI assistance. We used Claude (Anthropic) through
-> Claude Code to write the code (Next.js web app, Python analysis service and API, tests), the documentation, the site
-> text and this submission text. Claude also transcribed free-text cells of the NASA BASS/BASS-II test matrices and tables
-> from NASA reports into our curation tables. The project owner directed the work, made the decisions (logged in
-> `docs/decisions.md`) and reviewed the results. Code checks SI output instead of trusting it. Every transcribed value
-> must quote its NASA source cell exactly, and rows that fail are dropped (0 failures in this build). Automated tests
-> cover the pipeline and the app. An independent review re-derived the model core and matched it against a brute-force
-> calculation.
-> Every number in the app is computed by our code from NASA data (PSI BASS / BASS-II, CC0) and cited NASA documents. The
-> app runs no generative SI: it uses a Gaussian-process model and active learning, and its explanations are fixed
-> templates filled with computed numbers. We used no SI-generated images, video or audio. The demo video and stills are
-> screen recordings of the real app, labelled "SI-assisted project · built with Claude (Anthropic)". The project contains
-> no NASA logos or other NASA branding.
+> **Use of Super Intelligence (SI).** We used SI heavily to build Blind Spots, so here is exactly how. Claude, by
+> Anthropic, used through Claude Code, wrote much of our code: the Next.js web app, the Python analysis service and its
+> API, and the tests. It also drafted the documentation, the site text and this submission. Claude transcribed the
+> free-text cells of NASA's BASS and BASS-II test matrices, and tables from NASA reports, into our curation tables. We
+> directed the work, made the decisions (each one is logged in `docs/decisions.md`) and checked what came back.
+> We did not want to take SI output on trust, so we wrote code to check it. Every transcribed value has to quote its NASA
+> source cell exactly, and a row that fails is dropped. This build had 0 failures. Automated tests cover the pipeline and
+> the app, and an independent review re-derived the model core and matched it against a brute-force calculation.
+> The numbers in the app come from NASA data (PSI BASS / BASS-II, CC0) and cited NASA documents, computed by our code.
+> The app itself runs no generative SI. It uses a Gaussian-process model and active learning, and its explanations are
+> fixed templates filled in with computed numbers. We used no SI-generated images, video or audio. The demo video and
+> stills are screen recordings of the real app, labelled "SI-assisted project · built with Claude (Anthropic)". There are
+> no NASA logos or other NASA branding in the project, and it is not endorsed by NASA.
 
 ### 3b. Full version (README section, project page)
 
 > ## Use of Super Intelligence (SI)
 >
-> **SI tool used:** Claude (Anthropic), used through Claude Code, a coding assistant that runs in the terminal. No other
-> SI tools were used to build the project. The app itself runs no generative SI.
+> We built Blind Spots with a lot of help from one SI tool, Claude (Anthropic), which we used through Claude Code, a
+> coding assistant that runs in the terminal. We used no other SI tools to build the project, and the app itself runs no
+> generative SI.
 >
-> **Where SI was used**
-> - **Code:** the Python analysis service (ingestion, unit handling, Gaussian-process model, active learning,
->   evaluation), the FastAPI API, the Next.js web app, the test suites and the helper scripts.
-> - **Data curation:** the BASS (PSI-26) and BASS-II (PSI-25) matrices record flow schedules and outcomes as free text.
->   Claude transcribed those cells into the tables in `data/curation/`, twice and independently per chunk, and the two
->   versions were adjudicated. It also transcribed tables from NASA reports (BASS-II Summary Report Appendix A, DARTFire,
->   the Glenn drop-tower limits, Saffire-IV/V/VI, ground flammability thresholds), with a page and table reference on
->   every row. It extracted the verbatim NASA quotes behind the atmosphere profiles. `data/curation/README.md` records
->   how each table was made.
-> - **Text:** documentation, site wording, the methodology page and the submission text.
-> - **Research and review:** research summaries, plus code and science review rounds (also run with Claude).
-> - **Demo media:** the script that records the demo video and screenshots of the real app, headless. The video and
->   stills are screen recordings, not generated images or video. They carry a visible "SI-assisted project · built with
->   Claude (Anthropic)" label.
+> Most of the SI help went into code. Claude wrote much of the Python analysis service (ingestion, unit handling, the
+> Gaussian-process model, active learning, evaluation), the FastAPI API, the Next.js web app, the test suites and the
+> helper scripts. It also drafted the documentation, the site wording, the methodology page and the submission text.
+> We used it for research summaries too, and for code and science review rounds.
 >
-> **What the people did:** the project owner directed the work, made the design and scientific decisions (each one
-> logged with its rationale in `docs/decisions.md` and `docs/decisions.d/`), reviewed the outputs and decided what went
-> into the final project.
+> The data work needed the most care. The BASS (PSI-26) and BASS-II (PSI-25) matrices record flow schedules and outcomes
+> as free text, so Claude transcribed those cells into the tables in `data/curation/`. Each chunk was transcribed twice,
+> independently, and the two versions were adjudicated. Claude also transcribed tables from NASA reports (BASS-II Summary
+> Report Appendix A, DARTFire, the Glenn drop-tower limits, Saffire-IV/V/VI, ground flammability thresholds), with a page
+> and table reference on every row, and it extracted the verbatim NASA quotes behind the atmosphere profiles.
+> `data/curation/README.md` records how each table was made.
 >
-> **How SI output was checked:** each check is done by code, not by trust.
-> - Provenance: every quoted token in the curation tables must be an exact substring of the cited cell in the original
->   NASA spreadsheet. `scripts/check_curation_provenance.py` checks this, and the dataset build checks it again and leaves
->   out any row that fails. This build has 0 failures (`data/normalized/dataset_report.json`, `provenance_failures`).
->   Report-table values were checked against the rendered PDF pages.
-> - Tests: a pytest suite (`services/analysis/tests/`) and a headless Playwright end-to-end suite with unit tests
->   (`apps/web/tests/`), plus lint, format and type checks. The pytest suite includes checks of the active-learning
->   ranking against a brute-force calculation (`services/analysis/tests/acquisition/test_acquisition.py`).
-> - Independent re-derivation: a separate review re-derived the Gaussian-process core and matched it against a dense
->   brute-force calculation to about 1e-14 (`docs/decisions.d/lead-review-fixes.md`).
-> - Audits: several review rounds of the code, science claims, accessibility and wording. Their fixes went through the
->   same tests.
+> For the demo, Claude wrote the script that records the video and screenshots of the real app, headless. The video and
+> stills are screen recordings, not generated images or video, and they carry a visible "SI-assisted project · built with
+> Claude (Anthropic)" label.
 >
-> **Data and numbers:** every number shown is computed by this code from NASA data (Physical Sciences Informatics BASS /
-> BASS-II, CC0) and cited NASA documents. No measurement, source or quote was invented by SI. Missing values stay missing.
+> We directed the work. We made the design and scientific decisions, and each one is logged with its reasoning in
+> `docs/decisions.md` and `docs/decisions.d/`. We reviewed the outputs and decided what went into the final project.
 >
-> **No NASA branding:** no generated content uses or changes NASA logos, flags, insignia or mission patches. NASA
-> datasets and experiments are named only as citations of where the data comes from. No NASA approval or endorsement is
-> claimed.
+> We checked SI output with code rather than trusting it. Every quoted token in the curation tables must be an exact
+> substring of the cited cell in the original NASA spreadsheet. `scripts/check_curation_provenance.py` checks this, and
+> the dataset build checks it again and leaves out any row that fails. This build has 0 failures
+> (`data/normalized/dataset_report.json`, `provenance_failures`). Report-table values were checked against the rendered
+> PDF pages. There is a pytest suite (`services/analysis/tests/`) and a headless Playwright end-to-end suite with unit
+> tests (`apps/web/tests/`), plus lint, format and type checks. The pytest suite checks the active-learning ranking
+> against a brute-force calculation (`services/analysis/tests/acquisition/test_acquisition.py`). A separate review
+> re-derived the Gaussian-process core and matched it against a dense brute-force calculation to about 1e-14
+> (`docs/decisions.d/lead-review-fixes.md`). We also ran several review rounds of the code, science claims,
+> accessibility and wording, and their fixes went through the same tests.
+>
+> Every number shown is computed by this code from NASA data (Physical Sciences Informatics BASS / BASS-II, CC0) and
+> cited NASA documents. SI did not invent any measurement, source or quote, and missing values stay missing.
+>
+> No generated content uses or changes NASA logos, flags, insignia or mission patches. We name NASA datasets and
+> experiments only to cite where the data comes from. The project is not endorsed by NASA, and we do not claim NASA
+> approval.
 
 ### 3c. One-line label (footers, video descriptions, metadata fields)
 
-> SI-assisted project: built with Claude (Anthropic). Code, data curation and text were SI-assisted and checked by code
-> against NASA sources. See "Use of Super Intelligence (SI)" in the README.
+> SI-assisted project: built with Claude (Anthropic). Claude helped write the code, curate the data and draft the text,
+> and we checked its work with code against the NASA sources. See "Use of Super Intelligence (SI)" in the README.
 
 ---
 

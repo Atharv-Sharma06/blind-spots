@@ -8,9 +8,9 @@ Full drafts with sources and verification notes: `submission/form/` (one file pe
 Blind Spots: Do ISS Fire Tests Cover Moon/Mars Cabin Air?
 ```
 
-## Summary *  (166 words, 1011 of 1500 characters)
+## Summary *  (170 words, 1025 of 1500 characters)
 ```
-Blind Spots is an open-source website showing whether NASA's ISS tests cover a crew cabin's air. We turned 250 ISS flame tests (BASS, BASS-II; NASA PSI) into a dataset where every value links to its source. Pick a cabin to see a plain answer, a chart and the best next experiments. ISS air has 241 nearby ISS test results, but 8 of 11 cabins have none, including NASA's Exploration Atmosphere (34 % oxygen, 56.5 kPa). A machine-learning model predicts whether a flame keeps burning and says when evidence is missing; active learning ranks the most informative next experiments. For that cabin and thin acrylic film, the top experiment would cut the model's uncertainty by an expected 19.3 %, under stated assumptions. Published validation shows where a simple baseline does as well. Fire is a serious hazard in a sealed cabin, and future cabins may use thinner, oxygen-richer air. Ranked experiments are computational research candidates; this is not a certified fire-safety assessment and not endorsed by NASA.
+Moon and Mars cabins may use thinner, oxygen-richer air than the ISS, and fire in a sealed cabin is a serious hazard. Our open-source website, Blind Spots, checks whether NASA's ISS tests cover that air. We turned 250 ISS flame tests (BASS, BASS-II; NASA PSI) into a dataset where every value links to its source. Pick a cabin to get a plain answer and a chart. The ISS's own air has 241 nearby test results. Yet 8 of 11 cabins have none, including NASA's Exploration Atmosphere (34 % oxygen, 56.5 kPa). A machine-learning model predicts whether a flame keeps burning and flags missing evidence, and active learning ranks the most informative next experiments. For that cabin and thin acrylic film, the top one would cut the model's uncertainty by an expected 19.3 %, under stated assumptions. Our published validation shows where a simple baseline does as well. Ranked experiments are computational research candidates needing qualified review. This is not a certified fire-safety assessment, and it is not endorsed by NASA.
 ```
 
 ## Project Demonstration *
@@ -32,62 +32,54 @@ https://blind-spots-kappa.vercel.app
 
 ## What it does
 
-NASA burned materials aboard the International Space Station (ISS) to learn when a flame keeps burning. All those tests ran in ISS-like air. Moon and Mars cabins plan thinner air with more oxygen.
+NASA burned materials aboard the International Space Station (ISS) to learn when a flame keeps burning. Those tests all ran in ISS-like air. Moon and Mars cabins plan thinner air with more oxygen, and we wanted to know how far apart the two are.
 
-Blind Spots asks one question: **do the ISS flame tests cover this cabin's air?** The home page asks it and shows the key numbers; **Check a cabin** opens the tool.
+So Blind Spots asks one question: do the ISS flame tests cover this cabin's air? Pick one of 11 documented NASA cabin atmospheres and each card says Covered, Barely covered or Not covered. Open one for a plain verdict, a chart of oxygen against pressure with ISS tests and your cabin marked, and the 3 tests that would teach the model most, plus what each outcome would show.
 
-1. **Pick a cabin.** 11 documented NASA cabin atmospheres. Each card says Covered, Barely covered or Not covered.
-2. **See the answer.** A plain verdict and a chart of oxygen against pressure, with ISS tests and your cabin marked.
-3. **See what to test next.** The 3 tests that would teach the model most, and what we would learn if the flame kept burning or went out.
-
-**Headline:** the NASA Moon/Mars Exploration Atmosphere (34 % oxygen, 56.5 kPa) has no nearby ISS test results for any of 20 material setups. The ISS cabin has 241. 8 of 11 cabins have none, including all 7 below sea-level pressure.
+Our headline: the NASA Moon/Mars Exploration Atmosphere (34 % oxygen, 56.5 kPa) has no nearby ISS test results for any of 20 material setups. The ISS cabin has 241. Overall, 8 of 11 cabins have none, including all 7 below sea-level pressure.
 
 ## How it works
 
-1. **Data.** NASA PSI records of 250 ISS BASS and BASS-II tests. Every value links to its source cell; the build rejects any quote not found there (0 failures across 749 flow steps).
-2. **Coverage.** "Nearby" means close in oxygen, pressure and airflow. ISS tests span 13.5 to 22.7 % oxygen and 98.3 to 102.2 kPa.
-3. **A model that says "I don't know".** For the 9 of 20 material setups with enough data, a Gaussian-process model (one that reports its own uncertainty) estimates the chance a flame keeps burning. With no nearby tests it shows no number.
-4. **Ranking.** Machine learning picks the tests that cut the model's uncertainty most. For thin acrylic films in the Exploration Atmosphere, the top pick (34 % oxygen, 56.5 kPa, airflow 1.7 cm/s) cuts it by 19 %, against 0 % for a random pick and 16 % for the nearest gap. If the flame kept burning, it would fall 18 %; if it went out, 21 %. Hypothetical model updates, not experimental results.
+The data are NASA PSI records of 250 ISS BASS and BASS-II tests. Every value links to its source cell, and the build rejects any quote it can't find there (0 failures across 749 flow steps).
 
-## Benefits
+"Nearby" means close in oxygen, pressure and airflow. ISS tests span 13.5 to 22.7 % oxygen and 98.3 to 102.2 kPa.
 
-- Scientists and designers see in seconds whether a cabin's air is backed by ISS records.
-- A vague gap becomes a short, ranked list of questions.
+For the 9 of 20 material setups with enough data, a Gaussian-process model estimates the chance a flame keeps burning. It reports its own uncertainty, and with no nearby tests it shows no number instead of guessing.
 
-## Intended impact
+Machine learning ranks tests by how much each would cut that uncertainty. For thin acrylic films in the Exploration Atmosphere, the top pick (34 % oxygen, 56.5 kPa, airflow 1.7 cm/s) cuts it by 19 %, against 0 % for a random pick and 16 % for the nearest gap. If the flame kept burning, it would fall 18 %. If it went out, 21 %. These are hypothetical model updates, not experimental results.
 
-Before anyone trusts a flammability number for a Moon or Mars cabin, they should know how much evidence exists. Blind Spots shows the gap and points research where it would teach the most.
+## Benefits and intended impact
+
+A scientist or cabin designer can see in seconds whether a cabin's air is backed by ISS records, and a vague gap becomes a short, ranked list of questions. Before anyone trusts a flammability number for a Moon or Mars cabin, they should know how much evidence sits behind it. Blind Spots shows that gap and where research would teach the most.
 
 The closest NASA work for the Exploration Atmosphere (SoFIE-GEL; Glenn drop-tower tests, NASA/TM-2008-215260) has no public per-test table. Publishing one would close the gap fastest.
 
-## Tools, languages and software
+## What is new here
 
-- **Python 3.12:** FastAPI, NumPy, SciPy, pandas, scikit-learn.
-- **TypeScript:** Next.js, React, Tailwind CSS, D3.
-- **Testing, hosting:** Playwright, axe-core, Vercel.
-
-## How it is creative
-
-- "We don't know" counts as a result: the model abstains instead of guessing.
-- It asks "how much evidence do we have?" before "will it burn?"
+We ask "how much evidence do we have?" before "will it burn?" A model that says it doesn't know counts as a result.
 
 ## Factors we considered
 
-- **Honesty.** Gaps are gaps in the ISS records, not NASA's knowledge. NASA ground tests exist for air like this; the model does not use them.
-- **Assumed pressure.** BASS-II did not record pressure, so 419 of 565 test steps use the ISS nominal 101.353 kPa, flagged as assumed.
-- **Limits.** The model beats a majority-class guess in 6 of 9 material setups; the ranking beat random in 11 of 18 replayed scenarios. Samples are small.
-- **Accessibility.** Icon plus words, never colour alone; "Show as table" for the chart.
-- **No server.** The site runs on a precomputed snapshot. NASA PSI data are CC0.
-- **Safety.** Not endorsed by NASA. Not a certified fire-safety assessment. Results are computational research candidates requiring qualified scientific review, established safety procedures and formal feasibility assessment. No experimental procedures are given.
+The gaps are gaps in the ISS records, not in NASA's knowledge. NASA ground tests exist for air like this, but our model does not use them. BASS-II did not record pressure, so 419 of 565 test steps use the ISS nominal 101.353 kPa, flagged as assumed.
+
+The limits bug us. The model beats a majority-class guess in 6 of 9 material setups, and the ranking beat random in 11 of 18 replayed scenarios. The samples are small.
+
+Status shows an icon plus words, never colour alone, and the chart has a "Show as table" option. The site runs on a precomputed snapshot, so it needs no server. NASA PSI data are CC0.
+
+Blind Spots is not endorsed by NASA and is not a certified fire-safety assessment. The ranked tests are computational research candidates requiring qualified scientific review, established safety procedures and formal feasibility assessment. We give no experimental procedures.
+
+## Tools and languages
+
+Python 3.12 (FastAPI, NumPy, SciPy, pandas, scikit-learn) for the analysis, TypeScript (Next.js, React, Tailwind CSS, D3) for the site, Playwright and axe-core for testing, and Vercel for hosting.
 
 ## Use of SI
 
-The code, text and analysis were written with SI assistance from Claude, by Anthropic. Every number is computed from NASA data and checked by provenance checks and tests. The app runs no language model.
+Claude, by Anthropic, wrote much of the code and text. We directed the work, made the decisions and checked the results. Every number is computed from NASA data and checked by provenance checks and tests. The app runs no language model.
 
 ## Links
 
 - Site: https://blind-spots-kappa.vercel.app
-- Check a cabin: https://blind-spots-kappa.vercel.app/cabins
+- Cabins tool: https://blind-spots-kappa.vercel.app/cabins
 - Code: https://github.com/Atharv-Sharma06/blind-spots
 - 30-second video: https://blind-spots-kappa.vercel.app/video/blind-spots-demo-30s.webm
 

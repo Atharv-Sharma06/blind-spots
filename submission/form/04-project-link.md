@@ -7,17 +7,20 @@ https://blind-spots-kappa.vercel.app
 ```
 
 Put the code link in **Project Details** (first line, for example "Source code (MIT): https://github.com/Atharv-Sharma06/blind-spots").
-The README already links back to the live site, and the site header links to the repo, so each one leads to the other.
+The README links back to the live site and the site header links to the repo, so judges can get from either one to the
+other.
 
 ## Why the live site
 
-- The form asks for "a website you created to showcase your project" or a code repository. Judges can use the live site
-  straight away: no install, no Python or Node setup. The default page shows the coverage chart with real data on first load.
-- It opens anonymously: HTTP 200, no redirect, no Vercel deployment protection, no login wall (checked below).
-- The site header has a "GitHub" link to `https://github.com/Atharv-Sharma06/blind-spots`, so a judge who wants the code
-  can reach it in one click.
-- The repo is a fallback, not a replacement: if the site is ever down, the README, docs and screenshot still explain the
-  project and how to run it.
+The form asks for "a website you created to showcase your project" or a code repository. We chose the site because
+judges can use it straight away, with no install and no Python or Node setup. The root URL is now a landing page that
+asks the question in plain words, and the Cabins tool at /cabins shows real data on first load (both returned HTTP 200
+between 18:12 and 18:13 on 2026-11-15). The site opens anonymously too, with no Vercel deployment protection and no login wall
+(checked below).
+
+The site header has a "GitHub" link to `https://github.com/Atharv-Sharma06/blind-spots`, so a judge who wants the code
+is one click away. We treat the repo as the fallback, not a replacement. If the site is ever down, the README, docs and
+screenshot still explain the project and how to run it.
 
 ## Verification (run 2026-11-15, 15:53 to 15:56 EST; logged-out, no cookies; Playwright Chromium headless, 1440x900)
 
@@ -70,4 +73,5 @@ Code repository:
 5. After the redeploy, re-check that `/video/blind-spots-demo-30s.webm` still returns 200. It is tracked in git
    (`apps/web/public/video/blind-spots-demo-30s.webm`), so it should.
 
-None of these blocks using the live-site URL. The root page, `/experiments`, `/methodology` and `/brief` all work anonymously now.
+None of these stops us using the live-site URL. In the 15:53 check the root page, `/experiments`, `/methodology` and
+`/brief` all worked anonymously.

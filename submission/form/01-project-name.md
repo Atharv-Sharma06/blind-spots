@@ -5,28 +5,37 @@ Blind Spots: Do ISS Fire Tests Cover Moon/Mars Cabin Air?
 ## Alternatives
 
 1. Blind Spots: Where Microgravity Fire Evidence Ends
-   (50 characters) Same wording as the README tagline and the product line in apps/web/lib/copy.ts (PRODUCT_LINE).
-   It is the safest option if the redesign does not ship. It says less about cabins and the next experiment.
+   (50 characters) This was our first tagline. The product line has since moved on to "Blind Spots: where NASA's ISS
+   fire tests end, and what to test next." (PRODUCT_LINE in apps/web/lib/copy.ts), so this option is close to it
+   but no longer word for word. It is the safe pick, though it says little about cabins or the next experiment.
 
 2. Blind Spots: ISS Fire-Test Coverage for Moon and Mars Cabins
-   (60 characters) A plain description of what the map shows. It is not a question, which suits judges skimming a
-   list of projects, but it does not hint at the machine-learning ranking.
+   (60 characters) This one simply describes what the site shows. A judge skimming a long list gets the idea fast.
+   It does not hint at the machine-learning ranking, and it reads a bit like a report title.
 
 ## Why the recommended title
 
-- It keeps the brand exactly as in the site header ("Blind Spots") and puts the redesigned homepage question after it.
-  The local page `<title>` is "Blind Spots: do NASA's space-station fire tests cover this cabin's air?"
-  (SITE_TITLE in apps/web/lib/copy.ts), so the recommended title is a shorter version of it.
-- It is phrased as a question, so it does not claim a safety verdict or certification. "Moon/Mars" matches the cabin card
-  label "Moon/Mars Exploration Atmosphere" (.work/redesign/SPEC.md).
-- None of the three options uses the word "NASA" or any NASA logo or mark. That keeps any hint of NASA endorsement out of
-  the name; the summary and links still say where the data comes from.
-- It fits the challenge "Flame in Freefall", whose objective is to find the investigations most relevant to the fire
-  safety of crew environments, including Moon and Mars bases.
+We kept the brand exactly as it appears in the site header, "Blind Spots", and put the question we built the site
+around after it. The page `<title>` in the code is "Blind Spots: do NASA's space-station fire tests cover this cabin's
+air?" (SITE_TITLE in apps/web/lib/copy.ts), and the README opens with "Do NASA's space-station fire tests cover the air
+in a Moon or Mars cabin?". The recommended title is a shorter version of the same question.
 
-## Consistency notes (checked 2026-11-15, 15:54 EST)
+We liked a question because it does not claim a safety verdict or a certification. It just says what we checked.
+"Moon/Mars" matches the landing page, which asks about "future Moon and Mars cabins", and the homepage figure for
+"Moon and Mars cabin air".
 
-- README.md line 3: "Blind Spots: where NASA's microgravity fire evidence ends, and what to learn next."
-- submission/project-page.md "Project Name" section: "Blind Spots". It still works, but it describes nothing on its own.
-- The public deployment https://blind-spots-kappa.vercel.app still shows the old `<title>`: "Blind Spots — where NASA's
-  microgravity fire evidence ends". It changes to the question title once the redesign is deployed.
+None of the three options uses the word "NASA" or any NASA logo or mark. We did that on purpose, so the name carries
+no hint of NASA endorsement. The summary and the links still say where the data comes from.
+
+The title also lines up with the challenge, "Flame in Freefall". Its objective is to find the investigations most
+relevant to the fire safety of crew environments, Moon and Mars bases included.
+
+## Consistency notes (checked 2026-11-15, 18:13 EST)
+
+README.md line 3 reads "**Do NASA's space-station fire tests cover the air in a Moon or Mars cabin?**".
+
+The "Project Name" section of submission/project-page.md still says only "Blind Spots". That works, but on its own
+it tells a reader nothing.
+
+The public deployment at https://blind-spots-kappa.vercel.app now serves the `<title>` "Blind Spots" on its landing
+page. The Cabins tool lives at https://blind-spots-kappa.vercel.app/cabins.

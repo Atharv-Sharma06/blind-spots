@@ -90,7 +90,7 @@
   <div class="title-wrap">
     <div class="kicker">NASA Space Apps 2026 · Flame in Freefall</div>
     <h1><span class="mark"></span>Blind Spots</h1>
-    <p class="lead">Do NASA's ISS flame tests cover the air in Moon and Mars cabins?</p>
+    <p class="lead">We wanted to know if NASA's ISS flame tests cover the air planned for Moon and Mars cabins.</p>
     <p class="meta">Team Yareed · data: NASA (BASS, BASS-II)</p>
   </div>
   <div class="footer"><span>SI-assisted project · built with Claude (Anthropic) · Not endorsed by NASA</span><span>1 / 7</span></div>
@@ -99,7 +99,7 @@
 <!-- 2. Problem -->
 <section class="slide">
   <div class="kicker">The problem</div>
-  <h2 style="font-size:64px">Moon and Mars cabins plan thinner air with more oxygen than the ISS.</h2>
+  <h2 style="font-size:64px">NASA's Moon and Mars cabin plans use thinner air with more oxygen than the ISS.</h2>
   <div class="air">
     <div class="air-card">
       <div class="name">ISS today</div>
@@ -117,8 +117,8 @@
       <div class="val">56.5 kPa <span>pressure</span></div>
     </div>
   </div>
-  <p class="bottom-line">ISS tests covered 13.5–22.7 % oxygen and 98–102 kPa.</p>
-  <p class="small" style="margin-top:22px">Cabin air: NASA reports on NTRS (20140000417, 20220000245).</p>
+  <p class="bottom-line">The ISS tests in our data ran at 13.5–22.7 % oxygen and 98–102 kPa, so only today's ISS air sits inside that range.</p>
+  <p class="small" style="margin-top:22px">The cabin air values come from NASA reports on NTRS (20140000417, 20220000245).</p>
   <div class="footer"><span>SI-assisted project · built with Claude (Anthropic) · Not endorsed by NASA</span><span>2 / 7</span></div>
 </section>
 
@@ -127,9 +127,9 @@
   <div class="kicker">The product</div>
   <div class="row">
     <div class="col-text" style="flex-basis:560px">
-      <h2 style="font-size:64px">Pick a cabin. Get a plain answer.</h2>
-      <p>11 crew cabins, from Apollo to Artemis.</p>
-      <div class="num blind"><b>8</b><span>of 11 cabins:<br>Not covered</span></div>
+      <h2 style="font-size:64px">Pick a cabin and you get a plain answer.</h2>
+      <p>We put in 11 crew cabins, from Apollo to Artemis.</p>
+      <div class="num blind"><b>8</b><span>of the 11 come back<br>as not covered</span></div>
     </div>
     <div class="col-shot"><div class="shot"><img src="img/1-cabins.png" alt="Blind Spots Cabins page: the question, and cards for 11 crew cabins labelled Covered, Barely covered or Not covered"></div></div>
   </div>
@@ -141,10 +141,10 @@
   <div class="kicker">The blind spot</div>
   <div class="row">
     <div class="col-text" style="flex-basis:560px">
-      <h2 style="font-size:54px">Moon/Mars air is far from every ISS test.</h2>
+      <h2 style="font-size:54px">Moon and Mars air sits far from every ISS test.</h2>
       <div class="num ok"><b>241</b><span>nearby ISS test results<br>for ISS air</span></div>
       <div class="num blind"><b>0</b><span>for the Exploration Atmosphere,<br>in all 20 material setups</span></div>
-      <p style="font-size:30px">So the model does not guess there. Other NASA ground tests are not used.</p>
+      <p style="font-size:30px">So the model won't guess there. We didn't fold in NASA's other ground tests.</p>
     </div>
     <div class="col-shot"><div class="shot"><img src="img/2-answer-chart.png" alt="Answer card: Blind spot, none of the ISS flame tests in our data ran in air like this, with a chart of oxygen versus pressure showing ISS tests near 101 kPa and the cabin at 34 % oxygen, 56.5 kPa"></div></div>
   </div>
@@ -156,7 +156,7 @@
   <div class="kicker">The machine learning</div>
   <div class="row">
     <div class="col-text" style="flex-basis:540px; gap:26px">
-      <h2 style="font-size:54px">It says when it does not know. Then it picks what to test next.</h2>
+      <h2 style="font-size:54px">It tells you when it doesn't know, then suggests what to test next.</h2>
       <div class="num ok"><b>19 %</b><span>less uncertainty from<br>the top pick (hypothetical)</span></div>
       <p class="small" style="font-size:22px">Computational research candidates requiring qualified scientific review, established safety procedures and formal feasibility assessment.</p>
     </div>
@@ -168,39 +168,39 @@
 <!-- 6. Validation + limits -->
 <section class="slide">
   <div class="kicker">How we know it works</div>
-  <h2 style="font-size:60px">Checked against simple baselines.</h2>
+  <h2 style="font-size:60px">We checked it against simple baselines, and it doesn't always win.</h2>
   <div class="stats">
     <div class="stat">
       <div class="big">749</div>
-      <div class="what">ISS test results from 276 experiments.</div>
+      <div class="what">ISS test results, from 276 experiments.</div>
       <div class="src">docs/evidence-report.md</div>
     </div>
     <div class="stat">
       <div class="big">6 of 9</div>
-      <div class="what">material types where the model beats a simple guess. 3 too close to call.</div>
+      <div class="what">material types where the model beats a simple guess. The other 3 are too close to call.</div>
       <div class="src">docs/validation.md</div>
     </div>
     <div class="stat">
       <div class="big">11 of 18</div>
-      <div class="what">replayed scenarios where its picks beat random picks. 5 too close to call, 2 worse.</div>
+      <div class="what">replayed scenarios where its picks beat random ones. 5 were too close to call and 2 were worse.</div>
       <div class="src">docs/validation.md</div>
     </div>
   </div>
-  <p class="limit-line"><b>Limits:</b> every ISS test ran near sea-level pressure, and there is no partial-gravity data. Not a certified fire-safety assessment.</p>
+  <p class="limit-line">What bugs us most is that every ISS test ran near sea-level pressure, and we have no partial-gravity data. This is not a certified fire-safety assessment.</p>
   <div class="footer"><span>SI-assisted project · built with Claude (Anthropic) · Not endorsed by NASA</span><span>6 / 7</span></div>
 </section>
 
 <!-- 7. Links + credits -->
 <section class="slide">
   <div class="kicker">Try it</div>
-  <h2>Open it, pick a cabin, see the answer.</h2>
+  <h2>Open the site and pick a cabin.</h2>
   <div class="links">
-    <div><div class="l">Live app (no login)</div><div class="u">https://blind-spots-kappa.vercel.app</div></div>
+    <div><div class="l">Live site, no login (the tool is at /cabins)</div><div class="u">https://blind-spots-kappa.vercel.app</div></div>
     <div><div class="l">Code, data sources and validation</div><div class="u">https://github.com/Atharv-Sharma06/blind-spots</div></div>
   </div>
   <div class="credits">
     <p><b>Team Yareed.</b> Data: NASA Physical Science Informatics (BASS, BASS-II; CC0). Cabin air: NASA NTRS.</p>
-    <p style="margin-top:16px">Code written with Claude (Anthropic); the app uses no generative AI. Not endorsed by NASA. Not a certified fire-safety assessment.</p>
+    <p style="margin-top:16px">Claude, by Anthropic, wrote much of the code and text. We directed the work, made the decisions and checked it, and every number comes from NASA data through the code. The app itself uses no generative AI. It is not endorsed by NASA and is not a certified fire-safety assessment.</p>
   </div>
   <div class="footer"><span>SI-assisted project · built with Claude (Anthropic) · Not endorsed by NASA</span><span>7 / 7</span></div>
 </section>

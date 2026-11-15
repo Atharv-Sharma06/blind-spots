@@ -1,7 +1,7 @@
 # Backup demo: 7-slide deck (fallback for "Project Demonstration")
 
-The video (`03-demo.md`) is the primary demo. This deck is the fallback if the video link fails or a slide link is
-preferred. The form allows "a slide presentation (no more than 7 slides, including the title and introduction)".
+The video (`03-demo.md`) is our main demo. We made this deck as a fallback, in case the video link fails or a slide
+link suits better. The form allows "a slide presentation (no more than 7 slides, including the title and introduction)".
 
 - **File to share:** `submission/slides/blind-spots-slides.pdf` (16:9, 1920 x 1080 px per page, 7 pages = 7 slides
   including the title; checked: 7 pages, MediaBox 1440 x 810 pt = 1920 x 1080 px; 1.8 MB).
@@ -14,11 +14,10 @@ preferred. The form allows "a slide presentation (no more than 7 slides, includi
 https://github.com/Atharv-Sharma06/blind-spots/blob/main/submission/slides/blind-spots-slides.pdf
 ```
 
-- The repository is public, so GitHub shows the PDF in the browser with no login, password or registration.
-- This link works only after the file is committed and pushed to `main`. Open it in a logged-out (private) window
-  before pasting it into the form.
-- Direct download alternative (same file):
-  `https://raw.githubusercontent.com/Atharv-Sharma06/blind-spots/main/submission/slides/blind-spots-slides.pdf`
+The repository is public, so GitHub shows the PDF in the browser with no login, password or registration. The link
+only works once the file is committed and pushed to `main`, so open it in a logged-out (private) window before pasting
+it into the form. The same file also downloads directly from
+`https://raw.githubusercontent.com/Atharv-Sharma06/blind-spots/main/submission/slides/blind-spots-slides.pdf`.
 
 ## The 7 slides
 
@@ -36,12 +35,14 @@ Dataset `4fe55f76142a`, model `gp-laplace-v1+4fe55f76.adfbbd` (from `GET /api/he
 
 ## Rules checked
 
-- Every slide carries the footer "SI-assisted project · built with Claude (Anthropic) · Not endorsed by NASA" (the SI
-  indicator the form asks for on images and videos).
-- No NASA logos, flags or mission insignia; no AI-generated images. The only images are headless screenshots of the app.
-- Wording: "ISS flame tests"; candidates are "computational research candidates requiring qualified scientific review,
-  established safety procedures and formal feasibility assessment"; "Not a certified fire-safety assessment";
-  "not represented in the integrated records" (never "NASA has not studied").
+Every slide carries the footer "SI-assisted project · built with Claude (Anthropic) · Not endorsed by NASA", which is
+the SI indicator the form asks for on images and videos. There are no NASA logos, flags or mission insignia, and no
+SI-generated images. The only images are headless screenshots of the app.
+
+We kept the wording careful. The slides say "ISS flame tests", and they call candidates "computational research
+candidates requiring qualified scientific review, established safety procedures and formal feasibility assessment".
+They say "Not a certified fire-safety assessment" and "not represented in the integrated records", never "NASA has not
+studied".
 
 ## Screenshots
 
@@ -63,5 +64,6 @@ node ../../submission/slides/build/shoot.js     # screenshots -> submission/slid
 node ../../submission/slides/build/render.js    # PDF -> submission/slides/blind-spots-slides.pdf
 ```
 
-If the Cabins page changes after the screenshots were taken, re-run both commands and re-check slides 3 to 5 (the
-numbers on slides 3 and 5 are read off those sections).
+If the Cabins page changes after the screenshots were taken, re-run both commands and re-check slides 3 to 5, because
+the numbers on slides 3 and 5 are read off those sections. The Cabins page now lives at /cabins, behind the new landing
+page at /.
