@@ -66,9 +66,20 @@ def post_key(path: str, body: dict[str, Any]) -> str:
     return f"POST {path} {canonical(body)}"
 
 
-def round_floats(obj: Any, nd: int = GRID_DECIMALS) -> Any:
+SIG_DIGITS = 4
+SLICE_DEDUPE_KPA = 1.0
+
+
+def _sig(x: float, nd: int = SIG_DIGITS) -> float:
+    if x == 0 or x != x or x in (float("inf"), float("-inf")):
+        return x
+    return float(f"{x:.{nd}g}")
+
+
+def round_floats(obj: Any, nd: int = SIG_DIGITS) -> Any:
+    """Round every float to ``nd`` significant digits (keeps the snapshot small; display never needs more)."""
     if isinstance(obj, float):
-        return round(obj, nd)
+        return _sig(obj, nd)
     if isinstance(obj, list):
         return [round_floats(v, nd) for v in obj]
     if isinstance(obj, dict):
@@ -82,6 +93,7 @@ class Writer:
         self.files = out / "files"
         self.entries: dict[str, str] = {}
         self.bytes = 0
+        self.by_content: dict[str, str] = {}
         if self.files.exists():
             shutil.rmtree(self.files)
         self.files.mkdir(parents=True, exist_ok=True)
@@ -90,11 +102,16 @@ class Writer:
         if alias_of is not None:
             self.entries[key] = self.entries[alias_of]
             return
+        digest_c = hashlib.sha1(text.encode()).hexdigest()
+        if digest_c in self.by_content:
+            self.entries[key] = self.by_content[digest_c]
+            return
         slug = re.sub(r"[^a-z0-9]+", "-", key.split(" ")[1].lower()).strip("-")[:40]
         digest = hashlib.sha1(key.encode()).hexdigest()[:12]
         rel = f"files/{slug}-{digest}.{ext}"
         (self.out / rel).write_text(text, encoding="utf-8")
         self.entries[key] = rel
+        self.by_content[digest_c] = rel
         self.bytes += len(text.encode())
 
 
@@ -113,6 +130,13 @@ class Exporter:
             self.w.add(key, r.text, ext="csv")
             return None
         data = r.json()
+        if rounded and path == "/api/coverage":
+            data = {k: v for k, v in data.items() if k != "comparable_count"}  # never read by the web
+        if rounded and path == "/api/surface":
+            # Grids the web never reads from /api/surface (evidence layers come from /api/coverage).
+            for k in ("epistemic", "aleatoric", "total", "inside_hull", "comparable_count", "nn_distance"):
+                if k in data:
+                    data[k] = None
         text = json.dumps(round_floats(data) if rounded else data, separators=(",", ":"), ensure_ascii=False)
         self.w.add(key, text)
         return data
@@ -123,7 +147,20 @@ class Exporter:
             raise RuntimeError(f"POST {path} {canonical(body)[:200]} -> {r.status_code}: {r.text[:300]}")
         data = r.json()
         key = post_key(path, body)
-        self.w.add(key, json.dumps(data, separators=(",", ":"), ensure_ascii=False))
+        if path == "/api/candidates/counterfactual":
+            data_out = round_floats(data)
+            for sc in data_out.get("scenarios", []):
+                # Hypothetical map rasters are display-only (hover, colour ramp): 2 decimals.
+                if isinstance(sc.get("surface"), dict):
+                    sc["surface"] = {
+                        k: [[round(v, 2) for v in row] for row in arr]
+                        if k in ("p_sustained", "latent_std_ratio")
+                        else round_floats(arr)
+                        for k, arr in sc["surface"].items()
+                    }
+        else:
+            data_out = data
+        self.w.add(key, json.dumps(data_out, separators=(",", ":"), ensure_ascii=False))
         for alt in aliases or []:
             self.w.add(post_key(path, alt), "", alias_of=key)
         return data
@@ -144,6 +181,49 @@ def snapshot_slices() -> dict[str, list[float]]:
         if nominal is not None:
             pressures.add(float(nominal))
     return {"o2_flow": sorted(pressures), "o2_pressure": list(O2_PRESSURE_SLICES)}
+
+
+def slice_representatives(slices: dict[str, list[float]]) -> dict[str, dict[float, float]]:
+    """Maps every slice to the one kept within SLICE_DEDUPE_KPA of it (a documented profile value wins)."""
+    documented: set[float] = set()
+    for p in deps.profiles_manifest().get("profiles", []):
+        nominal = (p.get("total_pressure_kpa") or {}).get("nominal")
+        if nominal is not None:
+            documented.add(float(nominal))
+    out: dict[str, dict[float, float]] = {}
+    for plane, vals in slices.items():
+        clusters: list[list[float]] = []
+        for v in sorted(vals):
+            if clusters and v - clusters[-1][0] <= SLICE_DEDUPE_KPA:
+                clusters[-1].append(v)
+            else:
+                clusters.append([v])
+        m: dict[float, float] = {}
+        for c in clusters:
+            r = next((v for v in c if v in documented), c[0])
+            for v in c:
+                m[v] = r
+        out[plane] = m
+    return out
+
+
+def pressure_plane_slice(assessed: dict[str, Any]) -> float:
+    """The airflow slice the web selects on the O2 x pressure plane for this target (snapped).
+
+    Mirrors targetSliceFor() in apps/web/components/explore/model.ts: nominal airflow, else the geometric
+    mean of the band, snapped to the nearest exported slice.
+    """
+    flow = (assessed.get("target") or {}).get("airflow_cm_s") or {}
+    v = flow.get("nominal")
+    if v is None and flow.get("min") is not None and flow.get("max") is not None:
+        v = (float(flow["min"]) * float(flow["max"])) ** 0.5
+    if v is None:
+        return COUNTERFACTUAL_O2_PRESSURE_SLICE
+    best = O2_PRESSURE_SLICES[0]
+    for x in O2_PRESSURE_SLICES:
+        if abs(x - v) < abs(best - v):
+            best = x
+    return best
 
 
 def export(out: Path) -> dict[str, Any]:
@@ -171,14 +251,22 @@ def export(out: Path) -> dict[str, Any]:
         ex.get("/api/model/metadata", {"group": gid})
 
     slices = snapshot_slices()
-    print(f"coverage/surface slices: {slices}", file=sys.stderr)
+    reps = slice_representatives(slices)
+    print(
+        f"coverage/surface slices: {slices} (kept: {sorted(set(reps['o2_flow'].values()))})", file=sys.stderr
+    )
     for g in groups:
         gid = g["group_id"]
         for plane in PLANES:
-            for s in slices[plane]:
-                q = {"group": gid, "plane": plane, "slice": s}
+            for r in sorted(set(reps[plane].values())):
+                q = {"group": gid, "plane": plane, "slice": r}
                 ex.get("/api/coverage", q, rounded=True)
                 ex.get("/api/surface", q, rounded=True)
+            for s, r in reps[plane].items():
+                if s != r:
+                    for path in ("/api/coverage", "/api/surface"):
+                        q = {"group": gid, "plane": plane, "slice": r}
+                        ex.w.add(get_key(path, {**q, "slice": s}), "", alias_of=get_key(path, q))
 
     profiles = operating_profiles()
     skipped = {
@@ -193,7 +281,7 @@ def export(out: Path) -> dict[str, Any]:
         nominal_p = float(p["total_pressure_kpa"]["nominal"])
         for g in groups:
             gid = g["group_id"]
-            ex.post("/api/target/assess", {"group_id": gid, "target": target})
+            assessed = ex.post("/api/target/assess", {"group_id": gid, "target": target})
             rank_body = {
                 "group_id": gid,
                 "target": target,
@@ -209,15 +297,32 @@ def export(out: Path) -> dict[str, Any]:
                 ],
             )
             n_rank += 1
-            if gid not in modelled or rank["status"] != "ok":
+            if gid not in modelled:
                 continue
-            for cand in rank["candidates"]:
+            if rank["status"] != "ok":
+                # No informative/eligible candidate: the brief is still available without a candidate.
+                ex.post("/api/brief", {"group_id": gid, "target": target, "candidate": None})
+                continue
+            # Size budget: the top candidate is exported on both planes; the others only on the plane that
+            # shows the gap (O2 x pressure when the target pressure is outside the group's evidence).
+            plane_slice = {"o2_flow": nominal_p, "o2_pressure": pressure_plane_slice(assessed)}
+            relevant: str | None = None
+            for ci, cand in enumerate(rank["candidates"]):
                 point = {k: cand[k] for k in ("oxygen_percent", "airflow_cm_s", "pressure_kpa")}
-                for plane, sl in (("o2_flow", nominal_p), ("o2_pressure", COUNTERFACTUAL_O2_PRESSURE_SLICE)):
-                    ex.post(
+                planes = ("o2_flow", "o2_pressure") if ci == 0 else (relevant,)
+                for plane in planes:
+                    cf = ex.post(
                         "/api/candidates/counterfactual",
-                        {"group_id": gid, "target": target, "candidate": point, "plane": plane, "slice": sl},
+                        {
+                            "group_id": gid,
+                            "target": target,
+                            "candidate": point,
+                            "plane": plane,
+                            "slice": plane_slice[plane],
+                        },
                     )
+                    if ci == 0 and plane == "o2_flow":
+                        relevant = "o2_flow" if cf.get("target_p_supported") else "o2_pressure"
             top = rank["candidates"][0]
             top_point = {k: top[k] for k in ("oxygen_percent", "airflow_cm_s", "pressure_kpa")}
             ex.post(

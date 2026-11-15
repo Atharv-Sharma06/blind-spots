@@ -460,3 +460,60 @@ def test_key_format() -> None:
         'POST /api/x {"a":{"y":[2.5],"z":null},"b":1}'
     )
     assert np.isclose(sum(np.array([0.25, 0.75])), 1.0)
+
+
+# --- review fixes: no base-rate estimates, uninformative ranks, input validation, bounded caches -----
+
+
+def test_no_probability_estimate_when_unsupported(client: TestClient, gid: str) -> None:
+    a = post(client, "/api/target/assess", {"group_id": gid, "target": EXPLORATION})
+    if a["verdict"] == "insufficient_evidence":
+        assert a["model"]["p_sustained_mean"] is None
+        assert "Model estimate of P(sustained)" not in a["summary"]
+    r = rank(client, gid, EXPLORATION)
+    for c in [*r["candidates"], *[b for b in r["baselines"].values() if b]]:
+        if c["nn_distance"] is not None and c["nn_distance"] > 1.0:
+            assert c["p_sustained"] is None
+            assert "the model estimates P(sustained)" not in c["explanation"]
+        else:
+            assert c["p_sustained"] is not None
+
+
+def test_rank_flags_uninformative_candidates(client: TestClient, gid: str) -> None:
+    custom = {
+        "custom": {
+            "label": "unreachable",
+            "oxygen_percent": {"nominal": 90.0},
+            "total_pressure_kpa": {"nominal": 30.0},
+        }
+    }
+    r = rank(client, gid, custom)
+    assert r["status"] in ("ok", "no_informative_candidates")
+    if r["status"] == "ok":
+        assert r["candidates"][0]["evr_fraction"] >= 1e-4
+    else:
+        assert r["candidates"] == [] and any("tie-breaking" in a for a in r["assumptions"])
+    assert any("outside the candidate" in a for a in r["assumptions"])
+
+
+def test_custom_target_rejects_one_sided_airflow(client: TestClient, gid: str) -> None:
+    custom = {
+        "custom": {
+            "label": "x",
+            "oxygen_percent": {"nominal": 21.0},
+            "total_pressure_kpa": {"nominal": 101.3},
+            "airflow_cm_s": {"min": 5.0},
+        }
+    }
+    resp = client.post("/api/target/assess", json={"group_id": gid, "target": custom})
+    assert resp.status_code == 422 and resp.json()["error"]["code"] == "validation_error"
+
+
+def test_lp_model_cache_is_bounded(client: TestClient, gid: str) -> None:
+    from blindspots.api.services import modeling
+
+    gm = modeling.group_model(gid)
+    assert gm is not None
+    for i in range(modeling._LP_CACHE_MAX + 8):
+        modeling.model_for_lp(gm, 0.51 + 0.01 * i)
+    assert len(modeling._LP_CACHE) <= modeling._LP_CACHE_MAX

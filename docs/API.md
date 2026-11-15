@@ -62,7 +62,10 @@ Context-only evidence (never used in models):
   "flow_cm_s_range","data_availability","reason_not_integrated","sources":[{"url","quote"}]}],
   "ground_flammability": [{"material","total_pressure_kpa","oxygen_percent","result","result_definition",
   "source_title","source_url","page","table"}],
-  "saffire": ExperimentRecord[]}`
+  "context_experiments": ExperimentRecord[]}`
+`context_experiments` = every experiment whose investigation role is `integrated_context` (Saffire-I/III and
+any transcribed context tables such as Saffire-IV–VI, drop-tower or sounding-rocket tests): real documented
+conditions shown on the map as context, never used for modelling.
 
 ### GET /api/coverage?group=&plane=&slice=&nx=&ny=&x_min=&x_max=&y_min=&y_max=
 `plane` = `o2_flow` (x = O2 %, y = airflow cm/s on a log axis, slice = pressure kPa, default 101.3) or
@@ -101,18 +104,24 @@ Request `{"group_id": str, "target": Target}`. Response:
  "model": {"model_status": "modeled", "p_sustained_mean": 0.71, "p_sustained_min": 0.40,
    "p_sustained_max": 0.90, "latent_std_ratio_mean": 0.97, "epistemic_mean": 0.31, "aleatoric_mean": 0.40},
  "verdict": "insufficient_evidence", "reasons": [{"code", "message", "value"}],
+ "documented_context": [{"id", "name", "overlap": "contains_target_nominal" | "overlaps_target_region",
+   "data_availability", "reason_not_integrated"}],
  "summary": "Deterministic sentence(s) built from the numbers above."}
 ```
+`documented_context` lists not-integrated investigations (`/api/context` → `not_integrated`) whose documented
+O2/pressure/flow ranges contain or overlap the target. The summary must then say the target conditions are
+"not represented in the integrated records" and name those investigations — never "not studied".
 
 ### POST /api/candidates/rank
 Request `{"group_id": str, "target": Target, "k": 3, "assumptions": {"pressure_length_scale": 0.3}}`.
 ```json
-{"group_id": "...", "target": {/* resolved */}, "status": "ok"|"no_eligible_candidates"|"model_unavailable",
+{"group_id": "...", "target": {/* resolved */}, "status": "ok"|"no_eligible_candidates"|"no_informative_candidates"|"model_unavailable",
  "candidates": [{"candidate_id": "c1", "rank": 1, "oxygen_percent": 28.0, "pressure_kpa": 70.3,
    "airflow_cm_s": 3.2, "evr": 0.84, "evr_fraction": 0.21, "marginal_evr_fraction": 0.21,
    "mi_reduction_fraction": 0.18, "p_sustained": 0.55, "latent_std_ratio": 0.95, "nn_distance": 3.1,
    "feasibility_status": "within_demonstrated_envelope"|"outside_demonstrated_envelope",
-   "feasibility_note": "...", "reasons": [{"code", "message", "value"}], "explanation": "..."}],
+   "feasibility_note": "...", "reasons": [{"code", "message", "value"}], "explanation": "...",
+   "related_documented_investigations": [{"id", "name", "data_availability", "note"}]}],
  "baselines": {"random": Candidate, "uncertainty_sampling": Candidate, "nearest_gap": Candidate},
  "sensitivity": [{"pressure_length_scale": 0.15, "top_candidate": Candidate, "same_top_as_default": true}],
  "assumptions": ["..."], "candidate_domain": {"oxygen_percent": [12, 40], "pressure_kpa": [50, 103],
@@ -121,6 +130,9 @@ Request `{"group_id": str, "target": Target, "k": 3, "assumptions": {"pressure_l
 ```
 Candidate `reasons` codes: `high_target_covariance`, `high_candidate_uncertainty`, `near_decision_boundary`,
 `fills_coverage_gap`, `assumption_dependent` (value depends mainly on the assumed pressure correlation).
+`related_documented_investigations`: not-integrated investigations whose documented envelope contains the
+candidate (note: "Inside the documented test envelope of <name>; existing data may already inform this
+candidate (not integrated: <reason>).").
 
 ### POST /api/candidates/compare
 Request `{"group_id", "target", "a": {"oxygen_percent","airflow_cm_s","pressure_kpa"}, "b": {...}}`.

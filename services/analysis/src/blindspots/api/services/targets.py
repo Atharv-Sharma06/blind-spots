@@ -128,6 +128,14 @@ def resolve_target(target: Target) -> ResolvedSpec:
         airflow = c.airflow_cm_s.model_dump() if c.airflow_cm_s else None
         if airflow and airflow.get("nominal") is not None and airflow.get("min") is None:
             airflow = {"nominal": airflow["nominal"], "min": airflow["nominal"], "max": airflow["nominal"]}
+        if airflow and (airflow.get("min") is None) != (airflow.get("max") is None):
+            raise ApiError(
+                422,
+                "validation_error",
+                "Custom airflow needs both min and max (or a single nominal value); a one-sided range "
+                "would be ignored.",
+                {"airflow_cm_s": airflow},
+            )
         spec = acq_targets.custom(
             CUSTOM_LABEL,
             o2n,

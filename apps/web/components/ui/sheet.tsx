@@ -24,7 +24,7 @@ export const SheetContent = React.forwardRef<React.ElementRef<typeof DialogPrimi
       <DialogPrimitive.Overlay className="fixed inset-0 z-40 bg-fg/20 data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in" />
       <DialogPrimitive.Content
         ref={ref}
-        aria-describedby={description ? undefined : undefined}
+        {...(description ? {} : { "aria-describedby": undefined })}
         className={cn(
           "fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l border-border bg-surface sm:max-w-[480px]",
           "data-[state=closed]:animate-sheet-out data-[state=open]:animate-sheet-in",

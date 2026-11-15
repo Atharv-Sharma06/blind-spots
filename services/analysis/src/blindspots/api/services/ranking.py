@@ -21,7 +21,7 @@ from blindspots.api.models import Target
 from blindspots.api.services import context as ctxmod
 from blindspots.api.services import modeling
 from blindspots.api.services.targets import ResolvedSpec, resolve_target
-from blindspots.coverage.coverage import SCALES, to_coords
+from blindspots.coverage.coverage import SCALES, nn_distance, to_coords
 from blindspots.coverage.grid import DEFAULT_SLICE
 from blindspots.models.gp_laplace import GPLaplaceClassifier
 from blindspots.models.registry import GroupModel
@@ -41,6 +41,7 @@ HIGH_COVARIANCE_CORR = 0.5
 HIGH_UNCERTAINTY_RATIO = 0.85
 BOUNDARY_P_RANGE = (0.3, 0.7)
 GAP_NN_DISTANCE = 1.0
+MIN_INFORMATIVE_FRACTION = 1e-4  # below this the best candidate carries no usable information
 ROUND = 4
 
 
@@ -145,6 +146,9 @@ def build_candidate(
     x = to_coords(o2, p, u)
     st = _candidate_stats(model, ctx.t, ctx.w, x)
     nn = rec["reasons"]["coverage_nn_d"]
+    # Far from every integrated observation the predicted probability only reverts to the training base
+    # rate (fixed pressure length scale), so it is not reported as an estimate.
+    p_supported = nn is not None and nn <= GAP_NN_DISTANCE
     reasons: list[dict[str, Any]] = []
     if st["corr"] >= HIGH_COVARIANCE_CORR:
         reasons.append(
@@ -164,7 +168,7 @@ def build_candidate(
                 st["ratio"],
             )
         )
-    if BOUNDARY_P_RANGE[0] <= st["p"] <= BOUNDARY_P_RANGE[1]:
+    if p_supported and BOUNDARY_P_RANGE[0] <= st["p"] <= BOUNDARY_P_RANGE[1]:
         reasons.append(
             _reason(
                 "near_decision_boundary",
@@ -204,13 +208,19 @@ def build_candidate(
     )
     if rank is not None and rank > 1:
         sentence += f" ({_pct(marg)} after the higher-ranked picks)"
-    sentence += (
-        f"; the model estimates P(sustained) = {st['p']:.2f} with latent std ratio {st['ratio']:.2f}"
-        + (
-            f" and the nearest integrated observation is {nn:.1f} reference distances away."
-            if nn is not None
-            else "."
+    if p_supported:
+        sentence += (
+            f"; the model estimates P(sustained) = {st['p']:.2f} with latent std ratio {st['ratio']:.2f}"
         )
+    else:
+        sentence += (
+            f"; no supported estimate of P(sustained) is given here (predictions this far from the data "
+            f"revert to the training base rate), latent std ratio {st['ratio']:.2f}"
+        )
+    sentence += (
+        f" and the nearest integrated observation is {nn:.1f} reference distances away."
+        if nn is not None
+        else "."
     )
     if dependent:
         sentence += " This value depends mainly on the assumed pressure correlation."
@@ -225,7 +235,7 @@ def build_candidate(
         "evr_fraction": _r(frac, 6),
         "marginal_evr_fraction": _r(marg, 6),
         "mi_reduction_fraction": _r(st["mi_frac"], 6),
-        "p_sustained": _r(st["p"], 4),
+        "p_sustained": _r(st["p"], 4) if p_supported else None,
         "latent_std_ratio": _r(st["ratio"], 4),
         "nn_distance": _r(nn, 3),
         "feasibility_status": status,
@@ -295,6 +305,17 @@ def _assumptions(ctx: Ctx) -> list[str]:
         f"{d['pressure_kpa'][0]:g}-{d['pressure_kpa'][1]:g} kPa, airflow "
         f"{d['airflow_cm_s'][0]:g}-{d['airflow_cm_s'][1]:g} cm/s (an analysis grid, not a test envelope)."
     )
+    tp = spec.pressure_nominal_kpa
+    if not d["pressure_kpa"][0] <= tp <= d["pressure_kpa"][1]:
+        out.append(
+            f"The target pressure ({tp:g} kPa) lies outside the candidate pressure domain; candidates at "
+            "that pressure are added to the grid so the target pressure itself can be probed."
+        )
+    if not d["oxygen_percent"][0] <= spec.o2_nominal <= d["oxygen_percent"][1]:
+        out.append(
+            f"The target oxygen level ({spec.o2_nominal:g} %) lies outside the candidate oxygen domain; "
+            "candidates cannot reach it, so their correlation with the target region is weak."
+        )
     reg = modeling.full_registry()
     cur = config.dataset_version()
     if cur is not None and reg.dataset_version != cur:
@@ -362,6 +383,21 @@ def rank(group_id: str, target: Target, k: int, lp: float) -> dict[str, Any]:
             }
         gains = jp.evr(None)
         fractions[s] = gains / jp.total0
+        if abs(s - ctx.lp) < 1e-12 and float(np.max(gains)) / jp.total0 < MIN_INFORMATIVE_FRACTION:
+            return {
+                **base,
+                "status": "no_informative_candidates",
+                "candidates": [],
+                "baselines": None,
+                "sensitivity": [],
+                "assumptions": [
+                    "No candidate in the analysis grid is expected to reduce the target region's latent "
+                    f"variance by more than {100 * MIN_INFORMATIVE_FRACTION:g} %: the target conditions "
+                    "are effectively uncorrelated with every candidate under the model, so ranking would "
+                    "only reflect tie-breaking.",
+                    *_assumptions(ctx),
+                ],
+            }
         top_i = int(np.argmax(gains))
         if abs(s - ctx.lp) < 1e-12:
             jp_default = jp
@@ -581,8 +617,14 @@ def counterfactual_response(
                 "surface": surface,
             }
         )
+    from blindspots.api.services.assess import target_verdict
+
+    target_supported = target_verdict(ctx.gm, ctx.t) != "insufficient_evidence"
+    nn_c = float(nn_distance(x, ctx.evidence)[0]) if len(ctx.evidence) else None
+    cand_supported = nn_c is not None and nn_c <= GAP_NN_DISTANCE
     return {
-        "p_sustained_at_candidate": res["p_sustained_at_candidate"],
+        "p_sustained_at_candidate": res["p_sustained_at_candidate"] if cand_supported else None,
+        "target_p_supported": target_supported,
         "current": {
             "target_p_mean": cur["target_p_mean"],
             "target_latent_var": cur["target_latent_var"],

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections import OrderedDict
+from threading import Lock
 from typing import Any
 
 import numpy as np
@@ -56,6 +58,11 @@ def trained_pressure_length_scale(model: GPLaplaceClassifier) -> float:
     return float(model.length_scales[2])
 
 
+_LP_CACHE: OrderedDict[str, GPLaplaceClassifier] = OrderedDict()
+_LP_LOCK = Lock()
+_LP_CACHE_MAX = 32  # bounded: clients can request any pressure length scale in [0.05, 3]
+
+
 def model_for_lp(gm: GroupModel, lp: float) -> GPLaplaceClassifier:
     """The group posterior with the pressure length scale replaced by ``lp`` (all else fixed)."""
     assert gm.model is not None
@@ -69,7 +76,17 @@ def model_for_lp(gm: GroupModel, lp: float) -> GPLaplaceClassifier:
         d["length_scales"][2] = float(lp)
         return GPLaplaceClassifier.from_dict(d)
 
-    return deps._cached(f"lp:{reg.model_version}:{gm.group_id}:{lp:.6f}", None, build)
+    key = f"{config.MODELS_DIR}:{reg.model_version}:{id(reg)}:{gm.group_id}:{lp:.6f}"
+    with _LP_LOCK:
+        if key in _LP_CACHE:
+            _LP_CACHE.move_to_end(key)
+            return _LP_CACHE[key]
+    model = build()
+    with _LP_LOCK:
+        _LP_CACHE[key] = model
+        while len(_LP_CACHE) > _LP_CACHE_MAX:
+            _LP_CACHE.popitem(last=False)
+    return model
 
 
 def model_id(group_id: str) -> str:

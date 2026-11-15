@@ -21,12 +21,14 @@ function Dot({ state }: { state: BackendState }) {
 }
 
 const short = (v: string | null | undefined) => (v ? v.slice(0, 12) : null);
+/** Chip shows the model family only (e.g. gp-laplace-v1); the full id sits in the tooltip. */
+const modelFamily = (v: string | null | undefined) => (v ? (v.split("+")[0] ?? v) : null);
 
 /** Dataset / model version chip fed by GET /api/health. */
 export function VersionChip({ className }: { className?: string }) {
   const { state, health, error } = useHealth();
   const data = short(health?.dataset_version);
-  const model = short(health?.model_version);
+  const model = modelFamily(health?.model_version) ?? short(health?.model_version);
 
   let label: React.ReactNode;
   let detail: string;
@@ -57,7 +59,7 @@ export function VersionChip({ className }: { className?: string }) {
         type="button"
         data-testid="version-chip"
         data-state={state}
-        aria-label={`Service status: ${detail}`}
+        aria-label={state === "ok" || state === "degraded" ? `data ${data ?? "n/a"}, model ${model ?? "n/a"}. ${detail}` : `${state === "loading" ? "Checking" : "Backend unavailable"}. ${detail}`}
         className={cn(
           "inline-flex h-6 items-center gap-1.5 rounded-sm border border-border bg-surface px-2 text-xs text-muted transition-colors hover:border-border-strong hover:text-fg",
           className,

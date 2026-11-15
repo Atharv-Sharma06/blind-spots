@@ -408,7 +408,7 @@ class SensitivityEntry(ApiModel):
 class RankResponse(ApiModel):
     group_id: str
     target: ResolvedTarget
-    status: Literal["ok", "no_eligible_candidates", "model_unavailable"]
+    status: Literal["ok", "no_eligible_candidates", "no_informative_candidates", "model_unavailable"]
     candidates: list[Candidate]
     baselines: CandidateBaselines | None = None
     sensitivity: list[SensitivityEntry] = []
@@ -464,7 +464,10 @@ class Scenario(ApiModel):
 
 
 class CounterfactualResponse(ApiModel):
-    p_sustained_at_candidate: float
+    p_sustained_at_candidate: float | None = None
+    # False when the target verdict is insufficient_evidence: target_p_mean values then only reflect
+    # reversion to the training base rate and must not be shown as estimates.
+    target_p_supported: bool = True
     current: CounterfactualCurrent
     scenarios: list[Scenario]
     expected_variance_reduction_fraction: float

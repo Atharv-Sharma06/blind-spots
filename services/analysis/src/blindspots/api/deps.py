@@ -45,15 +45,25 @@ def clean(value: Any) -> Any:
     return value
 
 
+_BUILD_LOCKS: dict[str, Lock] = {}
+
+
 def _cached(name: str, key: Any, build: Any) -> Any:
+    """Cache one value per name; concurrent first requests share a single build (per-name lock)."""
     with _LOCK:
         hit = _CACHE.get(name)
         if hit is not None and hit[0] == key:
             return hit[1]
-    value = build()
-    with _LOCK:
-        _CACHE[name] = (key, value)
-    return value
+        build_lock = _BUILD_LOCKS.setdefault(name, Lock())
+    with build_lock:
+        with _LOCK:
+            hit = _CACHE.get(name)
+            if hit is not None and hit[0] == key:
+                return hit[1]
+        value = build()
+        with _LOCK:
+            _CACHE[name] = (key, value)
+        return value
 
 
 def clear_caches() -> None:

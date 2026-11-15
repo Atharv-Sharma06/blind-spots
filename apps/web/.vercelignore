@@ -1,0 +1,11 @@
+# Present on purpose: with a .vercelignore the Vercel CLI no longer falls back to .gitignore, so the
+# gitignored public/snapshot/ (generated per deployment) IS uploaded. Do not add it here.
+node_modules
+.next
+.next-*
+test-results
+playwright-report
+tests
+*.tsbuildinfo
+.DS_Store
+.env*.local

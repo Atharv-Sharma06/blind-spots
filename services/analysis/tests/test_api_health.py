@@ -16,18 +16,22 @@ def test_health_degraded_without_artifacts(fake_root: Path) -> None:
         "status": "degraded",
         "dataset_version": None,
         "model_version": None,
-        "artifacts": {"dataset": False, "models": False},
+        "artifacts": {"dataset": False, "models": False, "validation": False},
+        "api_version": "1",
     }
 
 
 def test_health_ok_with_artifacts(fake_root: Path) -> None:
-    (fake_root / "data" / "normalized" / "VERSION").write_text("abc123def456\n")
+    norm = fake_root / "data" / "normalized"
+    norm.joinpath("VERSION").write_text("abc123def456\n")
+    for name in ("experiments", "observations", "investigations"):
+        norm.joinpath(f"{name}.json").write_text("[]")
     (fake_root / "models" / "LATEST").write_text("m-1\n")
     body = TestClient(create_app()).get("/api/health").json()
     assert body["status"] == "ok"
     assert body["dataset_version"] == "abc123def456"
     assert body["model_version"] == "m-1"
-    assert body["artifacts"] == {"dataset": True, "models": True}
+    assert body["artifacts"] == {"dataset": True, "models": True, "validation": False}
 
 
 def test_cors_allows_local_web_origin(fake_root: Path) -> None:

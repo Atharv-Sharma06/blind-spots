@@ -588,7 +588,8 @@ export interface Candidate {
   evr_fraction: number;
   marginal_evr_fraction: number;
   mi_reduction_fraction: number;
-  p_sustained: number;
+  /** null when the candidate is farther than one reference distance from every integrated observation. */
+  p_sustained: number | null;
   latent_std_ratio: number;
   nn_distance: number;
   feasibility_status: FeasibilityStatus;
@@ -598,7 +599,7 @@ export interface Candidate {
   related_documented_investigations: RelatedInvestigation[];
 }
 
-export type RankStatus = "ok" | "no_eligible_candidates" | "model_unavailable";
+export type RankStatus = "ok" | "no_eligible_candidates" | "no_informative_candidates" | "model_unavailable";
 
 export interface SensitivityEntry {
   pressure_length_scale: number;
@@ -666,7 +667,9 @@ export interface CounterfactualScenario {
 }
 
 export interface CounterfactualResponse {
-  p_sustained_at_candidate: number;
+  p_sustained_at_candidate: number | null;
+  /** false when the target verdict is insufficient_evidence (target P values are base-rate reversion). */
+  target_p_supported?: boolean;
   current: { target_p_mean: number; target_latent_var: number; target_epistemic: number };
   scenarios: CounterfactualScenario[];
   expected_variance_reduction_fraction: number;

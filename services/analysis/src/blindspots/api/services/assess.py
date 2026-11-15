@@ -72,6 +72,16 @@ def _aggregate(verdicts: list[str], reasons: list[list[dict[str, Any]]]) -> tupl
     return verdict, out
 
 
+def target_verdict(gm: Any, t: np.ndarray) -> str:
+    """Evidence verdict of a target region under a group model (same rule as ``assess``)."""
+    assert gm.model is not None
+    a = modeling.assess_points(gm.model, t)
+    ev = modeling.explain_points(
+        t, modeling.evidence_coords(gm.model), a["ratio"], a["aleatoric"], a["total"]
+    )
+    return _aggregate(ev["verdict"], ev["reasons"])[0]
+
+
 def assess(group_id: str, target: Target) -> dict[str, Any]:
     store = deps.require_store()
     group = deps.get_group(group_id, store)
@@ -99,11 +109,12 @@ def assess(group_id: str, target: Target) -> dict[str, Any]:
             t, modeling.evidence_coords(gm.model), a["ratio"], a["aleatoric"], a["total"]
         )
         verdict, reasons = _aggregate(ev["verdict"], ev["reasons"])
+        supported = verdict != "insufficient_evidence"
         model = {
             "model_status": "modeled",
-            "p_sustained_mean": float((w * a["p"]).sum()),
-            "p_sustained_min": float(a["p"].min()),
-            "p_sustained_max": float(a["p"].max()),
+            "p_sustained_mean": float((w * a["p"]).sum()) if supported else None,
+            "p_sustained_min": float(a["p"].min()) if supported else None,
+            "p_sustained_max": float(a["p"].max()) if supported else None,
             "latent_std_ratio_mean": float((w * a["ratio"]).sum()),
             "epistemic_mean": float((w * a["epistemic"]).sum()),
             "aleatoric_mean": float((w * a["aleatoric"]).sum()),
@@ -148,7 +159,12 @@ def summary(
     if cov["nn_distance_min"] is not None:
         parts[0] += f"; the nearest is {cov['nn_distance_min']:.1f} reference distances away"
     parts[0] += "."
-    if model["model_status"] == "modeled":
+    if model["model_status"] == "modeled" and verdict == "insufficient_evidence":
+        parts.append(
+            "No reliable estimate of P(sustained) is given: the target lies outside the integrated "
+            "evidence, where model output reverts toward the training base rate."
+        )
+    elif model["model_status"] == "modeled":
         parts.append(
             f"Model estimate of P(sustained) over the target region: mean {model['p_sustained_mean']:.2f} "
             f"(range {model['p_sustained_min']:.2f}-{model['p_sustained_max']:.2f}), mean latent std ratio "
