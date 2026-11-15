@@ -128,10 +128,10 @@ test("verdict, flame-state and feasibility labels use the exact wording", () => 
 
 const group = (group_id, model_status, n_training, n_observations = n_training) => ({ group_id, model_status, n_training, n_observations });
 
-test("default group: preferred if modelled, else modelled with most training rows", () => {
-  const gs = [group("a", "modeled", 10), group("b", "modeled", 30), group("pmma_rod__stagnation", "insufficient_data", 99)];
+test("default group: the API's is_default flag, else modelled with most training rows", () => {
+  const gs = [group("a", "modeled", 10), group("b", "modeled", 30), group("c", "insufficient_data", 99)];
   assert.equal(pickDefaultGroup(gs).group_id, "b");
-  assert.equal(pickDefaultGroup([...gs, group("pmma_rod__stagnation", "modeled", 5)]).group_id, "pmma_rod__stagnation");
+  assert.equal(pickDefaultGroup([...gs, { ...group("d", "modeled", 5), is_default: true }]).group_id, "d");
 });
 
 test("default profile skips the envelope", () => {
