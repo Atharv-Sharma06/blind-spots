@@ -50,28 +50,12 @@ Code repository:
 | Licence | `LICENSE` file present (raw 200), starts "MIT License / Copyright (c) 2026 Atharv Sharma"; the sidebar links to it. But GitHub detects it as **"Other"** (see issue 3) |
 | GitHub README equals local README | yes (`diff` of raw README against the working copy: no difference) |
 
-## Issues for the lead before submitting
+## Status (re-checked 2026-11-15, 22:25 EST)
 
-1. **`/explore` returns 404 on the live site now.** `curl -sIL https://blindspots.earth/explore` gives 404,
-   and the page shows "Page not found". `apps/web/app/explore/` is untracked locally (`?? apps/web/app/explore/`), so it is
-   not in the current deployment. The published README already sends people there ("**Explorer** (`/explore`) is the full
-   expert workspace"). This should clear with the 16:25 redeploy. Re-run `curl -sIL` on all five routes afterwards.
-2. **The GitHub README describes the redesign, not the site that is live now.** README line 13 says "[live app](...)
-   (press **30-second tour**)". The live home page HTML has no "30-second tour" text. That button comes from the
-   uncommitted `components/home/hero.tsx` and `components/demo/home-tour.tsx`. The README also calls the home page the
-   "Cabins page", and the live nav does not have that label yet. Both are fixed once the redeploy ships. If the redeploy
-   slips, change the README or don't submit before it is live.
-3. **GitHub does not recognise the licence as MIT.** The API returns `"license": {"key": "other", "spdx_id": "NOASSERTION"}`.
-   The cause is the extra paragraph at the end of `LICENSE` ("The NASA data in data/raw are public-domain / CC0 records
-   ... This project is not endorsed by NASA."), which stops GitHub's licence detector from matching the MIT text. To fix
-   it, move that paragraph into the README "Licence and attribution" section (or a `NOTICE` file) and leave `LICENSE` as
-   the plain MIT text. This is minor because the file is public and clearly says MIT, but a judge's sidebar will not show
-   "MIT license".
-4. The README screenshot (`1-explore-default.png`, captioned "Explorer, the expert view") shows the old expert screen.
-   It is accurate for `/explore` after the redeploy, so no change is needed. Only re-capture it if you want the first image
-   to match the new first-glance home page.
-5. After the redeploy, re-check that `/video/blind-spots-demo-30s.webm` still returns 200. It is tracked in git
-   (`apps/web/public/video/blind-spots-demo-30s.webm`), so it should.
+All earlier issues are resolved on the live site:
+- `/explore` returns 200 on https://blindspots.earth (as do `/`, `/cabins`, `/findings`, `/experiments`, `/methodology`, `/brief`).
+- The README describes the site that is live (landing page at `/`, Cabins tool at `/cabins`).
+- GitHub detects the licence as MIT (the NASA data note moved to `NOTICE`).
+- The demo video link returns 200 and serves the current recording (`/video/blind-spots-demo-30s.webm`, 3,018,832 bytes, same file as in the repo).
 
-None of these stops us using the live-site URL. In the 15:53 check the root page, `/experiments`, `/methodology` and
-`/brief` all worked anonymously.
+Nothing left to fix before submitting.

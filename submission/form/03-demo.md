@@ -86,16 +86,7 @@ or registration" (do not choose Private).
 5. Visibility: **Unlisted** (or Public) -> Save -> copy the `https://youtu.be/...` link.
 6. Check it in a private/incognito window before pasting it into the form.
 
-## Before pasting (lead checklist)
+## Status (re-checked 2026-11-15, 22:25 EST)
 
-1. The link serves whatever `apps/web/public/video/blind-spots-demo-30s.webm` was in the deployed build. Today that file
-   is the OLD explorer tour (15:09 recording, 1,594,579 bytes). After recording the new video, copy
-   `<out_dir>/blind-spots-demo-30s.webm` over `apps/web/public/video/blind-spots-demo-30s.webm`, commit, push and
-   redeploy. Otherwise the link still plays the old tour.
-2. `curl -sIL https://blindspots.earth/video/blind-spots-demo-30s.webm` -> 200, `content-type: video/webm`,
-   and a `content-length` equal to the new file's size.
-3. Open the link in a logged-out headless browser and confirm it plays the Cabins-page tour, not the old explorer one.
-4. Restyle (2026-11-15 evening): `/` is now a landing page and the Cabins tool moved to `/cabins`; the tour autostarts on
-   `/cabins?demo=1`. `.work/video/record.mjs` still opens `/?demo=1`, which forwards to `/cabins?demo=1` (one extra
-   redirect before the tour). The 28.80 s test above was recorded before the restyle; re-check the new recording's
-   duration (limit 30 s) and that it shows the new dark look.
+The link serves the current 28.8-second tour of the live site (3,018,832 bytes, `video/webm`, HTTP 200), the same file
+as `apps/web/public/video/blind-spots-demo-30s.webm` in the repo. No redeploy is needed before pasting.
