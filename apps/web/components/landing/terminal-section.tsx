@@ -1,5 +1,6 @@
 "use client";
 
+import { Reveal } from "@/components/ui/reveal";
 import * as React from "react";
 import { Hold } from "./ui";
 import { useHeadlineCounts, useTopCut } from "./use-landing-data";
@@ -94,6 +95,7 @@ function TerminalCard() {
 export function TerminalSection() {
   return (
     <section id="how" aria-labelledby="landing-how" className="scroll-mt-4 bg-black px-4 py-20 text-white md:px-10 md:py-28">
+      <Reveal>
       <p className="text-center text-[12px] font-medium tracking-[0.08em] text-white/60 uppercase">How it works</p>
       <h2
         id="landing-how"
@@ -101,9 +103,13 @@ export function TerminalSection() {
       >
         A model that says when it does not know
       </h2>
+      </Reveal>
 
       <div className="mx-auto mt-14 grid w-full max-w-[1160px] items-center gap-8 md:mt-20 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-10">
+        <Reveal>
         <TerminalCard />
+        </Reveal>
+        <Reveal delay={120}>
         <Frame>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -114,6 +120,7 @@ export function TerminalSection() {
             className="block aspect-[16/10] w-full object-cover object-left-top"
           />
         </Frame>
+        </Reveal>
       </div>
     </section>
   );

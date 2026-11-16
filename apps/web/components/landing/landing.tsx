@@ -4,6 +4,7 @@ import { Hero } from "./hero";
 import { TerminalSection } from "./terminal-section";
 import { Stats } from "./stats";
 import { FindingsTeaser } from "./findings-teaser";
+import { Reveal } from "@/components/ui/reveal";
 
 function DemoVideo() {
   return (
@@ -12,7 +13,7 @@ function DemoVideo() {
         <h2 id="landing-video" className="text-[28px] leading-[34px] font-medium tracking-[-0.02em] text-fg md:text-[40px] md:leading-[44px]">
           The 30-second tour
         </h2>
-        <div className="mt-8 overflow-hidden rounded-[20px] border border-border bg-surface p-2 md:mt-10 md:rounded-[24px] md:p-3">
+        <Reveal className="mt-8 overflow-hidden rounded-[20px] border border-border bg-surface p-2 md:mt-10 md:rounded-[24px] md:p-3">
           <video
             src="/video/blind-spots-demo-30s.webm"
             poster="/video/poster.jpg"
@@ -22,7 +23,7 @@ function DemoVideo() {
             preload="metadata"
             className="aspect-video w-full rounded-[14px] bg-black md:rounded-[16px]"
           />
-        </div>
+        </Reveal>
         <p className="mt-6 text-[14px] leading-5 text-muted">Made for the NASA Space Apps Challenge 2026.</p>
       </div>
     </section>

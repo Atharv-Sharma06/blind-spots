@@ -4,6 +4,7 @@ import * as React from "react";
 import { ArrowRight } from "lucide-react";
 import { CANDIDATE_FRAMING } from "@/lib/copy";
 import { Hold, RoundLink } from "./ui";
+import { Reveal } from "@/components/ui/reveal";
 import { TickGauge } from "./tick-gauge";
 import { useHeadlineCounts, useTopCut } from "./use-landing-data";
 
@@ -42,6 +43,7 @@ export function Stats() {
           Where the tests are, today
         </h2>
         <div className="mt-8 grid overflow-hidden rounded-[24px] bg-band md:mt-10 md:grid-cols-3 md:rounded-[32px] md:[&>*+*]:border-l md:[&>*+*]:border-fg/10 max-md:[&>*+*]:border-t max-md:[&>*+*]:border-fg/10">
+          <Reveal>
           <Cell title="Nearby ISS test results" href="/explore" hrefLabel="Open the Explorer">
             {iss ? (
               <p className={NUM}>{iss.comparable_observations}</p>
@@ -52,7 +54,9 @@ export function Stats() {
             )}
             <Caption>ISS fire tests run in air like the ISS cabin</Caption>
           </Cell>
+          </Reveal>
 
+          <Reveal delay={100}>
           <div className="flex min-h-[15rem] flex-col justify-between gap-5 p-6 md:p-8">
             <p className="text-[16px] leading-6 text-fg">Cabins with no nearby ISS test</p>
             <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
@@ -78,7 +82,9 @@ export function Stats() {
               ) : null}
             </div>
           </div>
+          </Reveal>
 
+          <Reveal delay={200}>
           <Cell title="What to test next" href="/cabins" hrefLabel="Check a cabin">
             {digits ? (
               <p className={NUM}>
@@ -94,6 +100,7 @@ export function Stats() {
             )}
             <Caption>The top test cuts uncertainty by this much</Caption>
           </Cell>
+          </Reveal>
         </div>
         <p className="mt-5 max-w-[80ch] text-[12px] leading-4 text-muted">{CANDIDATE_FRAMING}</p>
       </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { Reveal } from "@/components/ui/reveal";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -84,8 +85,10 @@ export function FindingsTeaser() {
             ? rows.map((r, i) => {
                 const pillar = pillarWord(r.pillar);
                 return (
-                  <li
+                  <Reveal
+                    as="li"
                     key={r.groupId}
+                    delay={i * 100}
                     className={cn("flex min-h-[13rem] flex-col gap-4 rounded-[16px] p-6 md:p-7", i === 0 ? "card-ink" : "card")}
                   >
                     <div className="flex items-start justify-between gap-4">
@@ -97,7 +100,7 @@ export function FindingsTeaser() {
                     </div>
                     <h3 className="text-[20px] leading-7 font-medium text-fg">{r.label}</h3>
                     <p className="text-[16px] leading-6 text-muted">{r.headline}</p>
-                  </li>
+                  </Reveal>
                 );
               })
             : [0, 1, 2].map((k) => (

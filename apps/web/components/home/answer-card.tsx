@@ -32,6 +32,7 @@ import {
 } from "./answer-copy";
 import { materialName, shortCabinName } from "./cabins";
 import { StepHeading } from "./step-heading";
+import { useHydrated } from "./stats-row";
 import { MaterialPicker } from "./material-picker";
 import { CHART_HEIGHT_CLASS, SimpleChart } from "./simple-chart";
 
@@ -79,6 +80,8 @@ export function AnswerCard({ cabin, material, onMaterialChange }: AnswerCardProp
   const fatal = groupsQ.isError || targetsQ.isError;
   const unknownCabin = !!targetsQ.data && !profile;
 
+  // Server and first client render both show the skeleton; data cached on the client must not change the first paint.
+  const hydrated = useHydrated();
   return (
     <section id="answer" data-tour="answer" aria-labelledby="answer-heading" className="scroll-mt-20">
       <StepHeading n={2} id="answer-heading" title="The answer" hint="Do the ISS flame tests cover this cabin's air?" />
@@ -88,7 +91,7 @@ export function AnswerCard({ cabin, material, onMaterialChange }: AnswerCardProp
           <Notice>We could not load the cabin data. Please reload the page.</Notice>
         ) : unknownCabin ? (
           <Notice>We do not know that cabin. Pick one of the cabins above.</Notice>
-        ) : !profile || !group || !headlineSettled ? (
+        ) : !hydrated || !profile || !group || !headlineSettled ? (
           <AnswerSkeleton />
         ) : (
           <>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowDown, ArrowUpRight, Map } from "lucide-react";
 import { RoundLink, FOCUS } from "./ui";
+import { Parallax, Reveal } from "@/components/ui/reveal";
 
 const SOURCES = ["NASA PSI", "BASS", "BASS-II", "NTRS"] as const;
 
@@ -21,6 +22,8 @@ export function Hero() {
   return (
     <section className="mx-auto flex w-full max-w-[1440px] flex-1 flex-col px-4 md:px-10" aria-labelledby="landing-question">
       <div className="flex flex-1 flex-col items-center justify-center py-12 text-center md:py-16">
+        <Parallax>
+        <Reveal>
         <h1
           id="landing-question"
           aria-label="Where ISS tests end."
@@ -34,9 +37,14 @@ export function Hero() {
             end.
           </span>
         </h1>
+        </Reveal>
+        </Parallax>
+        <Reveal delay={90}>
         <p className="mt-7 max-w-[46ch] text-[16px] leading-6 text-fg/70 md:mt-9 md:text-[18px] md:leading-7">
           Do NASA&apos;s space-station fire tests cover the air of future Moon and Mars cabins? Pick a cabin and see how many were run in air like it.
         </p>
+        </Reveal>
+        <Reveal delay={180}>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 md:mt-9">
           <Link
             href="/cabins"
@@ -55,6 +63,7 @@ export function Hero() {
             </span>
           </Link>
         </div>
+        </Reveal>
       </div>
 
       {/* Bottom strip: quick link, the data sources as plain grey words, scroll down. */}

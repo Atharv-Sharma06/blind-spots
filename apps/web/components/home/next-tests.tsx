@@ -10,6 +10,7 @@ import { cn } from "@/lib/cn";
 import type { Candidate, GroupSummary, RankResponse, ResolvedTarget } from "@/lib/types";
 import { testRows } from "./answer-copy";
 import { materialName, shortCabinName } from "./cabins";
+import { useHydrated } from "./stats-row";
 import {
   airflowText,
   atTargetSentence,
@@ -213,7 +214,9 @@ export function NextTests({ cabin, material }: NextTestsProps) {
   const groupsQ = useGroups();
   const targetsQ = useTargets();
   const groups = groupsQ.data?.data;
-  const group = groups ? resolveGroup(groups, material) : null;
+  // Until hydration, behave like the server (no cached data) so the first client render matches the HTML.
+  const hydrated = useHydrated();
+  const group = hydrated && groups ? resolveGroup(groups, material) : null;
   const modelled = group?.model_status === "modeled";
 
   // The same request the Explorer's candidate panel sends for a profile target (snapshot entries exist for all of them).

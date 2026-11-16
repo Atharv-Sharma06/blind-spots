@@ -1,5 +1,6 @@
 "use client";
 
+import { Reveal } from "@/components/ui/reveal";
 import Link from "next/link";
 import { ProvenanceTag } from "@/components/ui/provenance-tag";
 import { cn } from "@/lib/cn";
@@ -46,7 +47,8 @@ export function FindingCard({
   ]);
 
   return (
-    <li
+    <Reveal
+      as="li"
       data-testid="finding-card"
       data-group={m.group_id}
       className={cn(
@@ -181,6 +183,6 @@ export function FindingCard({
           ) : null}
         </div>
       </details>
-    </li>
+    </Reveal>
   );
 }
