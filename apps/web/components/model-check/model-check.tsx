@@ -19,9 +19,9 @@ import {
   type ValidationGroupLike,
 } from "./model-check-data";
 
-/** The SI line (product plan F5): there is no live language model in the app. */
+/** The SI line (product plan F5): the ML model does the work; an optional Claude explainer is labelled. */
 export const SI_LINE =
-  "SI here means an uncertainty-aware ML model (Gaussian process) that estimates, abstains and ranks, built with SI assistance. No AI-written answers.";
+  "SI here means an uncertainty-aware ML model (Gaussian process) that estimates, abstains and ranks, built with SI assistance. Findings and answers are written by code; the optional Claude explanation is labelled SI-generated.";
 
 function useModelCheckRows(): { rows: ModelCheckRow[]; groups: GroupSummary[]; pending: boolean; failed: boolean } {
   const validation = useValidation();

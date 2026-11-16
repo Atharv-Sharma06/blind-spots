@@ -58,7 +58,7 @@ snapshot serves). Dataset `{{DV}}`, model `{{MV}}`.
 
 ## Use of SI (super intelligence)
 
-- **Inside the app: machine learning, no language model.** A Gaussian-process model gives the probability that a flame keeps
+- **Inside the app: machine learning, plus an optional labelled Claude explainer.** A Gaussian-process model gives the probability that a flame keeps
   burning only where nearby ISS test results support it, and says "Insufficient experimental evidence for a reliable
   estimate." otherwise. Active learning ranks the next experiment by how much it would cut the model's uncertainty about the
   chosen cabin. Every sentence the app shows is a deterministic template filled with computed numbers.

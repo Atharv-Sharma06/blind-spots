@@ -1,7 +1,7 @@
 # Architecture
 
 Blind Spots is a Python analysis service plus a Next.js web app, connected by one JSON API. Everything shown to a user is computed from the integrated NASA records by
-deterministic code; there is no language model at runtime (explanations are template sentences over computed numbers). Exact HTTP shapes: [API.md](API.md).
+deterministic code; findings and answers are template sentences over computed numbers; the only language model is the optional `/api/explain` route (Claude Opus 5.5), whose output is number-checked and labelled SI-generated. Exact HTTP shapes: [API.md](API.md).
 Build contracts and integrity rules: [CONTRACTS.md](CONTRACTS.md).
 
 ## Flow

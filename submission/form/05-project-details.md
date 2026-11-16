@@ -6,6 +6,8 @@ So Blind Spots asks one question: do the ISS flame tests cover this cabin's air?
 
 Our headline: the NASA Moon/Mars Exploration Atmosphere (34 % oxygen, 56.5 kPa) has no nearby ISS test results for any of 20 material setups. The ISS cabin has 241. Overall, 8 of 11 cabins have none, including all 7 below sea-level pressure.
 
+Three newer parts help with the challenge's ask to summarize, rank and interpret. A Findings page ranks what the ISS fire tests show, such as the lowest oxygen at which each material kept burning, and links every finding to the records it comes from. An "Ask about your cabin air" box answers one cabin and material in a single sentence. And a model check beside the charts shows where our model beats a simple guess and where it does not.
+
 ## How it works
 
 The data are NASA PSI records of 250 ISS BASS and BASS-II tests. Every value links to its source cell, and the build rejects any quote it can't find there (0 failures across 749 flow steps).
@@ -42,7 +44,7 @@ Python 3.12 (FastAPI, NumPy, SciPy, pandas, scikit-learn) for the analysis, Type
 
 ## Use of SI
 
-Claude, by Anthropic, wrote much of the code and text. We directed the work, made the decisions and checked the results. Every number is computed from NASA data and checked by provenance checks and tests. The app runs no language model.
+Claude, by Anthropic, wrote much of the code and text. We directed the work, made the decisions and checked the results. Every number is computed from NASA data and checked by provenance checks and tests. Inside the app, a Gaussian-process model estimates, abstains and ranks. An optional "Explain with SI" button sends only the numbers on screen to Claude Opus 5.5 and shows a short explanation labelled as SI-generated; our code removes any sentence with a number that is not on the page.
 
 ## Links
 

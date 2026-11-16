@@ -79,8 +79,9 @@ unticked.
 > source cell exactly, and a row that fails is dropped. This build had 0 failures. Automated tests cover the pipeline and
 > the app, and an independent review re-derived the model core and matched it against a brute-force calculation.
 > The numbers in the app come from NASA data (PSI BASS / BASS-II, CC0) and cited NASA documents, computed by our code.
-> The app itself runs no generative SI. It uses a Gaussian-process model and active learning, and its explanations are
-> fixed templates filled in with computed numbers. We used no SI-generated images, video or audio. The demo video and
+> Inside the app, a Gaussian-process model and active learning do the estimating, abstaining and ranking, and the findings
+> and answers are written by code from computed numbers. An optional "Explain with SI" button sends only the numbers on
+> screen to Claude Opus 5.5; the reply is labelled SI-generated and code removes any sentence whose numbers are not on the page. We used no SI-generated images, video or audio. The demo video and
 > stills are screen recordings of the real app, labelled "SI-assisted project · built with Claude (Anthropic)". There are
 > no NASA logos or other NASA branding in the project, and it is not endorsed by NASA.
 
