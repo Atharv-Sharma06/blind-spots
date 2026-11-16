@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Play } from "lucide-react";
 import { LogoMark } from "./logo-mark";
 import { NavLinks } from "./nav-links";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 /**
  * Landing header (Reference A): logo mark + tiny all-caps wordmark at the left, four tiny uppercase links centred,
@@ -22,10 +23,11 @@ export function SiteHeader() {
         </Link>
         <NavLinks className="order-3 col-span-2 md:order-none md:col-span-1" />
         <div className="flex items-center justify-end gap-2.5">
+          <ThemeToggle className="size-11" />
           <Link
             href="/cabins?demo=1"
             title="Watch the tour"
-            className="btn-round inline-flex size-11 items-center justify-center max-[359px]:hidden rounded-full border border-fg/15 text-fg transition-colors hover:bg-fg/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+            className="btn-round inline-flex size-11 items-center justify-center max-sm:hidden rounded-full border border-fg/15 text-fg transition-colors hover:bg-fg/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
           >
             <Play className="size-4" aria-hidden />
             <span className="sr-only">Watch the tour</span>

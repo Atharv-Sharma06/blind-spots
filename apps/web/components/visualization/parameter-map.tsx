@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import type { CoverageResponse, SurfaceResponse } from "@/lib/types";
 import { verdictLabel } from "@/lib/format";
 import MapLegend from "./map-legend";
-import { ACCENT, GAP, GAP_HEX, GUIDE, INK, INK_RGB, MUTED, OBSERVED, OBSERVED_TINT, ON_ACCENT, PAPER, TARGET, UNC_ALPHA, fmtTick, gridGeom, maskRuns, plumRgb, yTicks, type GridGeom } from "./map-scales";
+import { ACCENT, GAP, GUIDE, INK, MUTED, OBSERVED, OBSERVED_TINT, ON_ACCENT, PAPER, TARGET, fmtTick, gridGeom, maskRuns, plumRgb, yTicks, type GridGeom, type MapTheme } from "./map-scales";
+import { useMapTheme } from "./use-map-theme";
 
 export interface MapObservation {
   id: string;
@@ -125,7 +126,7 @@ function makeCanvas(nx: number, ny: number): [HTMLCanvasElement, ImageData] | nu
   return [c, ctx.createImageData(nx, ny)];
 }
 
-function buildRasters(surface: SurfaceResponse, hypo: ParameterMapProps["hypotheticalSurface"]): Rasters | null {
+function buildRasters(surface: SurfaceResponse, hypo: ParameterMapProps["hypotheticalSurface"], theme: MapTheme): Rasters | null {
   const p: Grid | null = hypo?.p_sustained ?? surface.p_sustained;
   const u: Grid | null = hypo?.latent_std_ratio ?? surface.latent_std_ratio;
   if (!p && !u) return null;
@@ -149,7 +150,7 @@ function buildRasters(surface: SurfaceResponse, hypo: ParameterMapProps["hypothe
       if (uc && u) {
         const v = at(u[j], i);
         if (typeof v === "number" && Number.isFinite(v)) {
-          const [r, g, b] = plumRgb(v);
+          const [r, g, b] = plumRgb(v, theme.plum);
           uc[1].data[o] = r;
           uc[1].data[o + 1] = g;
           uc[1].data[o + 2] = b;
@@ -159,9 +160,9 @@ function buildRasters(surface: SurfaceResponse, hypo: ParameterMapProps["hypothe
       if (pc && p && supported(i, j)) {
         const v = at(p[j], i);
         if (typeof v === "number" && Number.isFinite(v)) {
-          pc[1].data[o] = INK_RGB[0];
-          pc[1].data[o + 1] = INK_RGB[1];
-          pc[1].data[o + 2] = INK_RGB[2];
+          pc[1].data[o] = theme.inkRgb[0];
+          pc[1].data[o + 1] = theme.inkRgb[1];
+          pc[1].data[o + 2] = theme.inkRgb[2];
           pc[1].data[o + 3] = Math.round(255 * (0.05 + 0.2 * Math.min(1, Math.max(0, v))));
         }
       }
@@ -274,6 +275,7 @@ export default function ParameterMap(props: ParameterMapProps) {
     candidates = [], contextEnvelopes = [], contextPoints = [], highlightObservationIds, selectedObservationId,
     selectedCandidateId, viewDomain, onViewDomainChange, onSelectObservation, onSelectCandidate, height: heightProp, plotClassName, ariaLabel,
   } = props;
+  const theme = useMapTheme();
   const [measuredH, setMeasuredH] = useState<number | null>(null);
   const height = heightProp ?? measuredH ?? 520;
   // D3: axes extend to include the selected target (e.g. Skylab, Apollo); grids are drawn only where provided.
@@ -471,7 +473,7 @@ export default function ParameterMap(props: ParameterMapProps) {
 
   // ---- grid layers (memoised per payload)
   const surfaceKey = surface ?? null;
-  const rasters = useMemo(() => (surfaceKey ? buildRasters(surfaceKey, hypotheticalSurface) : null), [surfaceKey, hypotheticalSurface]);
+  const rasters = useMemo(() => (surfaceKey ? buildRasters(surfaceKey, hypotheticalSurface, theme) : null), [surfaceKey, hypotheticalSurface, theme]);
   const sparse = useMemo(() => {
     const src = coverage?.nn_distance ? coverage : surface?.nn_distance ? surface : null;
     return src ? buildSparse(src) : null;
@@ -518,11 +520,11 @@ export default function ParameterMap(props: ParameterMapProps) {
     ctx.imageSmoothingQuality = "high";
     if (rasters) {
       const [rx, ry, rw, rh] = geomRect(rasters.geom);
-      // The plum scale runs light to dark on the white plot; a partial alpha keeps the darkest (most uncertain)
+      // The plum scale runs from the plot background (low uncertainty) to deep plum or bright lilac (high); a partial alpha keeps the darkest (most uncertain)
       // cells from swallowing the marks and labels drawn on top. The legend ramp uses the same alpha.
       if (layers.uncertainty && rasters.unc) {
         ctx.save();
-        ctx.globalAlpha = UNC_ALPHA;
+        ctx.globalAlpha = theme.uncAlpha;
         ctx.drawImage(rasters.unc, rx, ry, rw, rh);
         ctx.restore();
       }
@@ -537,11 +539,11 @@ export default function ParameterMap(props: ParameterMapProps) {
         // The whole slice is a gap: one flat pale-grey wash and a single label instead of dense hatching.
         ctx.save();
         ctx.globalAlpha = 0.1;
-        ctx.fillStyle = GAP_HEX;
+        ctx.fillStyle = theme.gapHex;
         ctx.fillRect(0, 0, iw, ih);
         ctx.restore();
       }
-      const pat = whole ? null : hatchPattern(ctx, GAP_HEX, dpr, 8);
+      const pat = whole ? null : hatchPattern(ctx, theme.gapHex, dpr, 8);
       if (pat) {
         ctx.save();
         runsPath(sparse.geom, sparse.runs);
@@ -553,7 +555,7 @@ export default function ParameterMap(props: ParameterMapProps) {
       }
     }
     ctx.restore();
-  }, [rasters, sparse, layers.uncertainty, layers.prediction, layers.coverage, px, py, width, height, iw, ih, asTable, M.l, M.t]);
+  }, [rasters, sparse, theme, layers.uncertainty, layers.prediction, layers.coverage, px, py, width, height, iw, ih, asTable, M.l, M.t]);
 
   // ---- vector overlays derived from the grids
   // linear interpolation in cell-centre space (edges are in axis space; centres are midpoints in the scale space,
@@ -1061,7 +1063,7 @@ export default function ParameterMap(props: ParameterMapProps) {
       ) : (
         <div
           ref={wrapRef}
-          className={`relative w-full select-none bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${heightProp === undefined ? plotClassName ?? "h-[520px]" : ""}`}
+          className={`relative w-full select-none bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${heightProp === undefined ? plotClassName ?? "h-[520px]" : ""}`}
           style={heightProp === undefined ? undefined : { height: heightProp }}
           tabIndex={0}
           role="group"
@@ -1270,7 +1272,7 @@ export default function ParameterMap(props: ParameterMapProps) {
             <div
               ref={tipRef}
               role="tooltip"
-              className="pointer-events-none absolute left-0 top-0 z-10 w-[min(260px,calc(100%-8px))] rounded-md border border-border bg-white px-2.5 py-2 text-[12px] text-fg shadow-popover"
+              className="pointer-events-none absolute left-0 top-0 z-10 w-[min(260px,calc(100%-8px))] rounded-md border border-border bg-surface px-2.5 py-2 text-[12px] text-fg shadow-popover"
               style={{ transform: tipTransform(hover.x, hover.y) }}
             >
               {tip}

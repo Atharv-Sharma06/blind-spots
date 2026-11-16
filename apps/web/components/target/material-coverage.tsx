@@ -15,9 +15,9 @@ import { materialFlowNote, materialName } from "@/components/home/cabins";
 
 /** Status per verdict: an outlined chip with a status dot plus the word (never colour alone). */
 const DOT = {
-  blind: "bg-[#161616]",
+  blind: "bg-fg",
   partly: "bg-[#E8A33B]",
-  covered: "bg-[#2FD067]",
+  covered: "bg-cta",
 } as const;
 
 /** Starts the per-group assessments only once the table is near the viewport (keeps them out of the critical path). */

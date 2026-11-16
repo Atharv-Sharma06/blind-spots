@@ -117,7 +117,7 @@ export function QueryBoundary<T>({ query, children, rows = 3 }: { query: ApiQuer
     return (
       <div role="status" aria-label="Loading" className="space-y-1.5">
         {Array.from({ length: rows }, (_, i) => (
-          <Skeleton key={i} className="h-8 w-full rounded-[10px] bg-black/[0.06]" />
+          <Skeleton key={i} className="h-8 w-full rounded-[10px] bg-fg/10" />
         ))}
       </div>
     );

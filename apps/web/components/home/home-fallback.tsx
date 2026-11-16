@@ -11,7 +11,7 @@ export function HomeFallback() {
       <section className={HOME_BAND}>
         <HeroText>
           {/* Same footprint as the tour pill, so the layout does not jump when it mounts. */}
-          <div aria-hidden className="h-11 w-[10.5rem] rounded-full border border-[#161616]/20 bg-surface" />
+          <div aria-hidden className="h-11 w-[10.5rem] rounded-full border border-fg/20 bg-surface" />
         </HeroText>
         <StatsSkeleton />
       </section>

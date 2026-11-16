@@ -11,9 +11,9 @@ import type { Verdict } from "@/lib/types";
 
 /** Status dot colours (light theme): covered = green, barely covered = amber, not covered = black. */
 export const STATUS_DOT = {
-  covered: "bg-[#2FD067]",
+  covered: "bg-cta",
   partly: "bg-[#E8A33B]",
-  blind: "bg-[#161616]",
+  blind: "bg-fg",
 } as const;
 
 /**

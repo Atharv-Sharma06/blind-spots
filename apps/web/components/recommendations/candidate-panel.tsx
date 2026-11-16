@@ -35,11 +35,11 @@ export const AT_TARGET_TEXT =
 
 /** Oxygen, pressure and airflow as three label/value rows with big medium numbers (white on the ink card, ink on white). */
 function Conditions({ c, ink }: { c: Candidate; ink?: boolean }) {
-  const val = cn("num text-[22px] leading-none font-medium whitespace-nowrap", ink ? "text-white" : "text-fg");
-  const row = cn("flex items-baseline justify-between gap-3 py-2.5 first:pt-0 last:pb-0", ink ? "border-white/15" : "border-border");
-  const lab = cn("text-sm", ink ? "text-white/70" : "text-muted");
+  const val = cn("num text-[22px] leading-none font-medium whitespace-nowrap", ink ? "text-on-ink" : "text-fg");
+  const row = cn("flex items-baseline justify-between gap-3 py-2.5 first:pt-0 last:pb-0", ink ? "border-on-ink/15" : "border-border");
+  const lab = cn("text-sm", ink ? "text-on-ink/70" : "text-muted");
   return (
-    <dl className={cn("divide-y", ink ? "divide-white/15" : "divide-border")}>
+    <dl className={cn("divide-y", ink ? "divide-on-ink/15" : "divide-border")}>
       <div className={row}>
         <dt className={lab}>Oxygen</dt>
         <dd className={val}>{fmtOxygen(c.oxygen_percent)}</dd>
@@ -76,8 +76,8 @@ function CompareToggle({ id, ids, onToggle }: { id: string; ids: [string | null,
       aria-pressed={on}
       onClick={() => onToggle(id)}
       className={cn(
-        "inline-flex min-h-11 items-center gap-2 rounded-[14px] border px-4 text-[15px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white",
-        on ? "border-white bg-white text-[#161616]" : "border-white/30 text-white hover:bg-white/10",
+        "inline-flex min-h-11 items-center gap-2 rounded-[14px] border px-4 text-[15px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-on-ink",
+        on ? "border-on-ink bg-on-ink text-ink-card" : "border-on-ink/45 text-on-ink hover:bg-on-ink/10",
       )}
     >
       <GitCompareArrows aria-hidden className="size-4" />
@@ -93,7 +93,7 @@ function RankBadge({ rank, active }: { rank: number; active?: boolean }) {
       aria-hidden
       className={cn(
         "num grid size-10 shrink-0 place-items-center rounded-full text-[15px] font-medium",
-        active ? "bg-white text-[#161616]" : "border border-border bg-surface text-fg",
+        active ? "bg-on-ink text-ink-card" : "border border-border bg-surface text-fg",
       )}
     >
       {rank}
@@ -104,7 +104,7 @@ function RankBadge({ rank, active }: { rank: number; active?: boolean }) {
 /** Headline percent as a big medium number. */
 function EvrValue({ text }: { text: string }) {
   return (
-    <span className="inline-block align-[-0.08em] text-[40px] leading-none font-medium tracking-[-0.02em] whitespace-nowrap text-white" data-testid="evr-value">
+    <span className="inline-block align-[-0.08em] text-[40px] leading-none font-medium tracking-[-0.02em] whitespace-nowrap text-on-ink" data-testid="evr-value">
       {text}
     </span>
   );
@@ -162,7 +162,7 @@ export function CandidatePanel(p: CandidatePanelProps) {
         <article
           aria-label="Top candidate"
           data-testid="top-candidate"
-          className={cn("card-ink space-y-5 p-6 text-white sm:p-7", selectedId === top.candidate_id && "ring-2 ring-[#2FD067]")}
+          className={cn("card-ink space-y-5 p-6 text-on-ink sm:p-7", selectedId === top.candidate_id && "ring-2 ring-cta")}
         >
           <div className="flex items-center gap-3">
             <RankBadge rank={top.rank} active />
@@ -171,19 +171,19 @@ export function CandidatePanel(p: CandidatePanelProps) {
           <Conditions c={top} ink />
 
           <div>
-            <p className="text-[16px] leading-snug text-white">
+            <p className="text-[16px] leading-snug text-on-ink">
               Would cut the model&apos;s uncertainty about this cabin by{" "}
               <EvrValue text={fmtFractionPercent(top.evr_fraction)} />.
             </p>
-            <p className="mt-1 text-xs text-white/70">
+            <p className="mt-1 text-xs text-on-ink/70">
               A model estimate{isAssumptionDependent(top) ? ", based on an assumed pressure link" : ""}.
             </p>
           </div>
 
-          {atTarget ? <p className="text-xs text-white">{AT_TARGET_TEXT}</p> : null}
-          <p className="text-xs text-white/70">
+          {atTarget ? <p className="text-xs text-on-ink">{AT_TARGET_TEXT}</p> : null}
+          <p className="text-xs text-on-ink/70">
             Nearest ISS test: {fmtFixed(top.nn_distance, 1)} steps away{far ? "" : " (nearby)"}.
-            {showP ? <> Flame chance: <span className="num text-white">{pct(top.p_sustained)}</span>.</> : " No flame estimate: too little evidence."}
+            {showP ? <> Flame chance: <span className="num text-on-ink">{pct(top.p_sustained)}</span>.</> : " No flame estimate: too little evidence."}
           </p>
 
           <div className="flex flex-wrap gap-2">
@@ -191,7 +191,7 @@ export function CandidatePanel(p: CandidatePanelProps) {
               type="button"
               onClick={() => onExplore(top)}
               data-testid="explore-candidate"
-              className="inline-flex min-h-11 items-center gap-2 rounded-[14px] bg-white px-4 text-[15px] font-medium text-[#161616] transition-colors hover:bg-white/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="inline-flex min-h-11 items-center gap-2 rounded-[14px] bg-on-ink px-4 text-[15px] font-medium text-ink-card transition-colors hover:bg-on-ink/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-on-ink"
             >
               <Crosshair aria-hidden className="size-4" />
               What would we learn?

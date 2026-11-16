@@ -104,45 +104,48 @@ export function BriefView() {
   return (
     <article className="brief-root mx-auto w-full max-w-[880px] px-4 py-6 md:px-6 md:py-10" data-testid="brief">
       <style>{`
-        /* v2: a white document card on the canvas. Tokens are re-declared on the card so the page reads light on any canvas. */
-        .brief-doc{--fg:#161616;--muted:#6F6D68;--border:#E4E2DC;--border-strong:#CFCCC4;--surface:#FFFFFF;--subtle:#F3F2EF;--accent:#1F9D55;
-          background:#FFFFFF;color:#161616;border:1px solid #E4E2DC;border-radius:24px;padding:24px 20px 28px}
+        /* v2: a surface-coloured document card on the canvas. Every colour is a theme token, so it reads right in light and dark. */
+        .brief-doc{background:var(--surface);color:var(--fg);border:1px solid var(--border);border-radius:24px;padding:24px 20px 28px}
         @media (min-width:640px){.brief-doc{padding:44px 48px 40px}}
-        .brief-pill{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border:1px solid var(--border-strong,#CFCCC4);border-radius:9999px;background:transparent;color:var(--fg,#161616);font-size:14px;line-height:20px;font-weight:500;white-space:nowrap;text-decoration:none;transition:background-color .15s,border-color .15s}
-        .brief-pill:hover{background:rgba(22,22,22,.05);border-color:var(--fg,#161616)}
+        .brief-pill{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border:1px solid var(--border-strong);border-radius:9999px;background:transparent;color:var(--fg);font-size:14px;line-height:20px;font-weight:500;white-space:nowrap;text-decoration:none;transition:background-color .15s,border-color .15s}
+        .brief-pill:hover{background:color-mix(in srgb,var(--fg) 6%,transparent);border-color:var(--fg)}
         .brief-pill svg{width:18px;height:18px;flex-shrink:0}
-        .brief-pill-ink{background:#161616;border-color:#161616;color:#FFFFFF;border-radius:14px;padding:0 22px;font-weight:500}
-        .brief-pill-ink:hover{background:#2B2B2B;border-color:#2B2B2B}
+        .brief-pill-ink{background:var(--ink-card);border-color:var(--ink-card);color:var(--on-ink);border-radius:14px;padding:0 22px;font-weight:500}
+        .brief-pill-ink:hover{background:color-mix(in srgb,var(--ink-card) 88%,var(--on-ink));border-color:color-mix(in srgb,var(--ink-card) 88%,var(--on-ink))}
         .brief-pill:disabled{opacity:.45;pointer-events:none}
-        .brief-pill:focus-visible,.brief-sec>summary:focus-visible{outline:2px solid #1F9D55;outline-offset:2px}
+        .brief-pill:focus-visible,.brief-sec>summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
         .brief-sec>summary:focus-visible{border-radius:8px}
         .brief-sec>summary{list-style:none}
         .brief-sec>summary::-webkit-details-marker{display:none}
         .brief-sec>summary::before{display:none!important}
-        .brief-sec{border-top:1px solid #E4E2DC}
-        .brief-secs{border-bottom:1px solid #E4E2DC}
+        .brief-sec{border-top:1px solid var(--border)}
+        .brief-secs{border-bottom:1px solid var(--border)}
         .brief-sec[open] .brief-chev{transform:rotate(180deg)}
-        .brief-note{display:flex;gap:12px;border:1px solid #E4E2DC;border-radius:12px;padding:14px 16px;font-size:14px;line-height:20px;color:#161616}
-        .brief-verdict{border-radius:16px;padding:22px 20px;background:#F3F2EF;border:1px solid #E4E2DC;color:#161616}
-        .brief-verdict[data-verdict=insufficient_evidence]{background:#1C1C1C;border-color:#1C1C1C;color:#FFFFFF}
+        .brief-note{display:flex;gap:12px;border:1px solid var(--border);border-radius:12px;padding:14px 16px;font-size:14px;line-height:20px;color:var(--fg)}
+        .brief-verdict{border-radius:16px;padding:22px 20px;background:var(--subtle);border:1px solid var(--border);color:var(--fg)}
         @media (min-width:640px){.brief-verdict{padding:28px}}
-        .brief-verdict[data-verdict=insufficient_evidence] .brief-ink-muted{color:#B9B7B1}
-        .brief-verdict[data-verdict=insufficient_evidence] .brief-rule{border-color:rgba(255,255,255,.16)}
+        /* "Blind spot" verdict: the inverting ink card (dark card with light text in light mode, light card with dark text in dark mode). */
+        .brief-verdict[data-verdict=insufficient_evidence]{--fg:var(--on-ink);--muted:color-mix(in srgb,var(--on-ink) 72%,var(--ink-card));--border:color-mix(in srgb,var(--on-ink) 16%,transparent);background:var(--ink-card);border-color:var(--ink-card);color:var(--on-ink)}
+        .brief-verdict[data-verdict=insufficient_evidence] .brief-ink-muted{color:var(--muted)}
+        .brief-verdict[data-verdict=insufficient_evidence] .brief-rule{border-color:var(--border)}
         .brief-dot{display:inline-block;width:12px;height:12px;border-radius:9999px;flex-shrink:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
         .brief-prose,.brief-prose *{overflow-wrap:anywhere;min-width:0}
         .brief-prose pre{overflow-x:auto}
         .brief-print-only{display:none}
-        .brief-prose .brief-body{font-size:16px;line-height:1.6;color:#161616}
+        .brief-prose .brief-body{font-size:16px;line-height:1.6;color:var(--fg)}
         .brief-prose p,.brief-prose li{max-width:72ch}
-        .brief-prose a{text-decoration-color:#CFCCC4}
-        .brief-prose a:hover{color:#1F9D55}
+        .brief-prose a{text-decoration-color:var(--border-strong)}
+        .brief-prose a:hover{color:var(--accent)}
         @media print{
+          /* Print is always a light document: re-pin the tokens on the brief itself so a dark theme never reaches the paper. */
+          html{color-scheme:light!important}
+          .brief-root{--bg:#fff;--band:#fff;--surface:#fff;--subtle:#f4f4f5;--border:#d4d4d8;--border-strong:#a1a1aa;--fg:#111;--muted:#52525b;--accent:#0b5f2c;--ink-card:#fff;--on-ink:#111}
           body>header,body>footer,body>a,.no-print{display:none!important}
           .brief-print-only{display:block!important}
           .brief-chev{display:none!important}
           html,body{background:#fff!important;background-image:none!important;color:#111!important}
           body::before,body::after{display:none!important}
-          .brief-root .brief-doc{background:none!important;border:0!important;border-radius:0!important;padding:0!important;box-shadow:none!important}
+          .brief-root .brief-doc{background:none!important;border:0!important;border-radius:0!important;padding:0!important;box-shadow:none!important;color:#111!important}
           .brief-root .brief-card{background:none!important;box-shadow:none!important;border:1px solid #d4d4d8!important;border-radius:8px!important;color:#111!important;filter:none!important}
           .brief-root .brief-card::before,.brief-root .brief-card::after{display:none!important}
           .brief-root .brief-card *{color:#111!important}
@@ -150,13 +153,13 @@ export function BriefView() {
           .brief-root .brief-card .brief-rule{border-color:#d4d4d8!important}
           .brief-root .brief-verdict[data-verdict=insufficient_evidence] .brief-dot{background:#111!important}
           .brief-secs{border-bottom:0!important}
-          .brief-sec{margin-bottom:8px}
+          .brief-sec{margin-bottom:8px;border-color:#d4d4d8!important}
           .brief-sec>summary{min-height:0!important;padding:6px 10px!important}
           .brief-sec>div{padding:8px 10px!important;border-color:#d4d4d8!important}
           @page{size:A4;margin:18mm 16mm}
           .brief-root{max-width:none!important;padding:0!important}
-          .brief-prose .brief-body{font-size:10pt;line-height:1.45}
-          .brief-prose h1,.brief-prose h2{break-after:avoid;page-break-after:avoid}
+          .brief-prose .brief-body{font-size:10pt;line-height:1.45;color:#111!important}
+          .brief-prose h1,.brief-prose h2{break-after:avoid;page-break-after:avoid;color:#111!important}
           .brief-prose li:not(:has(ul,ol)){break-inside:avoid}
           .brief-prose p,.brief-prose li{orphans:3;widows:3}
           .brief-prose a{color:inherit;text-decoration:none}
@@ -185,11 +188,11 @@ export function BriefView() {
         <QueryError error={briefQ.error} onRetry={() => void briefQ.refetch()} />
       ) : !brief ? (
         <div role="status" aria-label="Generating research brief" className="min-h-[70svh] space-y-3">
-          <Skeleton className="h-8 w-3/4 bg-black/[0.06]" />
-          <Skeleton className="h-4 w-1/2 bg-black/[0.06]" />
-          <Skeleton className="h-4 w-full bg-black/[0.06]" />
-          <Skeleton className="h-4 w-5/6 bg-black/[0.06]" />
-          <Skeleton className="h-4 w-full bg-black/[0.06]" />
+          <Skeleton className="h-8 w-3/4" />
+          <Skeleton className="h-4 w-1/2" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-5/6" />
+          <Skeleton className="h-4 w-full" />
         </div>
       ) : (
         <div className="brief-prose">

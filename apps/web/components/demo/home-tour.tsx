@@ -37,25 +37,25 @@ import {
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "").trim();
 const siteLabel = SITE_URL.replace(/^https?:\/\//, "").replace(/\/$/, "");
 
-/** Highlight ring: a near-black edge with a faint halo (the second value is the breathing peak). */
-const RING_GLOW_A = "0 0 0 2px #161616, 0 0 0 6px rgb(22 22 22 / .10)";
-const RING_GLOW_B = "0 0 0 2px #161616, 0 0 0 10px rgb(22 22 22 / .06)";
+/** Highlight ring: an edge in the theme's ink colour (near-black in light, off-white in dark) with a faint halo (the second value is the breathing peak). */
+const RING_GLOW_A = "0 0 0 2px var(--fg), 0 0 0 6px color-mix(in srgb, var(--fg) 12%, transparent)";
+const RING_GLOW_B = "0 0 0 2px var(--fg), 0 0 0 10px color-mix(in srgb, var(--fg) 7%, transparent)";
 
 /** Button looks (explicit values so the tour never depends on another file's button styles). */
 const BTN_BASE =
   "inline-flex shrink-0 items-center justify-center gap-2 text-center text-[14px] font-medium leading-tight transition-colors disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0";
-/** The one forward action: black pill (radius 14, white text). */
-const PILL_INK = `${BTN_BASE} h-11 rounded-[14px] bg-[#161616] px-5 text-white hover:bg-black max-md:min-h-11`;
+/** The one forward action: ink pill (radius 14); it inverts with the theme (dark pill in light, light pill in dark). */
+const PILL_INK = `${BTN_BASE} h-11 rounded-[14px] bg-fg px-5 text-surface hover:bg-fg/85 max-md:min-h-11`;
 /** Secondary actions: outlined pill, hairline border. */
-const PILL_OUTLINE = `${BTN_BASE} h-11 rounded-full border border-[#161616]/20 bg-white px-4 text-[#161616] hover:bg-[#161616]/[.05] max-md:min-h-11`;
-/** Green call-to-action pill (title and end cards). */
+const PILL_OUTLINE = `${BTN_BASE} h-11 rounded-full border border-fg/20 bg-surface px-4 text-fg hover:bg-fg/[.06] max-md:min-h-11`;
+/** Green call-to-action pill (title and end cards). Fixed in both themes: dark text on green. */
 const PILL_CTA =
   "inline-flex h-11 min-w-[140px] shrink-0 items-center justify-center gap-2 rounded-full bg-[#2FD067] px-6 text-[12px] font-semibold uppercase tracking-[.06em] text-[#0B2414] transition-colors hover:bg-[#27BF5C] [&_svg]:size-4 [&_svg]:shrink-0";
 /** Small tracked uppercase label (the eyebrow look). */
 const EYEBROW = "text-[11px] font-medium uppercase tracking-[.08em] sm:text-[12px]";
 
 /** Keyboard hint chip. */
-const KBD = "inline-flex h-5 min-w-5 items-center justify-center rounded-[6px] border border-[#E4E2DC] bg-[#F3F2EF] px-1.5 font-mono text-[11px] font-medium text-[#5F5D58]";
+const KBD = "inline-flex h-5 min-w-5 items-center justify-center rounded-[6px] border border-border bg-subtle px-1.5 font-mono text-[11px] font-medium text-muted";
 
 /** A fact value that is a plain number (count, percent, range): shown large in the plain sans face. */
 const NUMERIC_FACT = /^[\d.,\s–−%]+$|^\d+ of \d+$/;
@@ -448,7 +448,7 @@ export function HomeTour({ className }: { className?: string }) {
       onClick={start}
       className={cn(PILL_OUTLINE, className)}
     >
-      <span aria-hidden className="text-[11px] text-[#1F9D55]">▶</span>
+      <span aria-hidden className="text-[11px] text-accent">▶</span>
       30-second tour
     </button>
   );
@@ -458,7 +458,7 @@ export function HomeTour({ className }: { className?: string }) {
   const isTitle = scene === 0;
   const running = !paused && !reduced && !blocked;
   const pauseButton = reduced ? (
-    <span className="text-xs text-[#5F5D58]">Autoplay is off. Use Next.</span>
+    <span className="text-xs text-muted">Autoplay is off. Use Next.</span>
   ) : (
     <button type="button" onClick={togglePause} aria-pressed={paused} aria-keyshortcuts="Space" className={PILL_OUTLINE}>
       {paused ? <Play aria-hidden /> : <Pause aria-hidden />}
@@ -471,17 +471,20 @@ export function HomeTour({ className }: { className?: string }) {
       @keyframes tour-fill{from{width:var(--from)}to{width:var(--to)}}
       @keyframes tour-ring{0%,100%{box-shadow:${RING_GLOW_A}}50%{box-shadow:${RING_GLOW_B}}}
       @media (prefers-reduced-motion: reduce){[data-tour-ring]{animation:none!important}}
+      .tour-title-bg{background:linear-gradient(to bottom,#EDE7DC 0%,#F2EFE8 22%,#F2EFE8 78%,#EDE7DC 100%)}
+      :root[data-theme="dark"] .tour-title-bg{background:linear-gradient(to bottom,#1B1A18 0%,#0F0F0E 22%,#0F0F0E 78%,#1B1A18 100%)}
+      @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tour-title-bg{background:linear-gradient(to bottom,#1B1A18 0%,#0F0F0E 22%,#0F0F0E 78%,#1B1A18 100%)}}
     `}</style>
   );
 
   // ---- title and end cards: full screen, large type (readable in a 1080p recording)
-  // Title: warm cream page, huge bold tight headline, green pill + label with a round icon button (the landing look).
-  // End: pure black section, white bold name, outlined pills.
+  // Title: warm cream page (deep warm black in dark mode), huge bold tight headline, green pill + label with a round icon button (the landing look).
+  // End: pure black section in both themes (fixed on purpose, like the landing's terminal section), white bold name, outlined pills.
   if (isTitle || isEnd) {
     const roundX = (dark: boolean) => (
       <span
         aria-hidden
-        className={cn("inline-flex size-10 items-center justify-center rounded-full border", dark ? "border-white/25 text-white" : "border-[#161616]/20 text-[#161616]")}
+        className={cn("inline-flex size-10 items-center justify-center rounded-full border", dark ? "border-white/25 text-white" : "border-fg/20 text-fg")}
       >
         <X className="size-4" />
       </span>
@@ -499,17 +502,14 @@ export function HomeTour({ className }: { className?: string }) {
             data-tour-state={isTitle ? "title" : "end"}
             className={cn(
               "fixed inset-0 z-50 flex flex-col items-center justify-center overflow-y-auto px-5 py-10 outline-none",
-              isTitle ? "text-[#161616]" : "text-white",
+              isTitle ? "tour-title-bg text-fg" : "bg-black text-white",
             )}
-            style={{
-              background: isTitle ? "linear-gradient(to bottom, #EDE7DC 0%, #F2EFE8 22%, #F2EFE8 78%, #EDE7DC 100%)" : "#000000",
-            }}
           >
             {style}
             <div className={cn("relative w-full text-center", isTitle ? "max-w-[1180px]" : "max-w-[1000px]")} aria-live="polite">
               {isTitle ? (
                 <>
-                  <p className={cn(EYEBROW, "inline-flex h-9 items-center rounded-full border border-[#161616]/15 px-4")}>{TITLE_SUBLINE}</p>
+                  <p className={cn(EYEBROW, "inline-flex h-9 items-center rounded-full border border-fg/15 px-4")}>{TITLE_SUBLINE}</p>
                   <h2 className="mx-auto mt-6 text-balance text-[38px] font-extrabold leading-[0.96] tracking-[-0.045em] sm:text-[clamp(48px,6.6vw,96px)]">
                     {TITLE_LINE}
                   </h2>
@@ -563,10 +563,10 @@ export function HomeTour({ className }: { className?: string }) {
               )}
             </div>
             {isTitle && running ? (
-              <div className="absolute inset-x-0 bottom-0 h-1.5 bg-[#161616]/10" aria-hidden>
+              <div className="absolute inset-x-0 bottom-0 h-1.5 bg-fg/10" aria-hidden>
                 <div
                   key={runId}
-                  className="h-full rounded-r-full bg-[#161616]"
+                  className="h-full rounded-r-full bg-fg"
                   style={{ ["--from" as string]: "0%", ["--to" as string]: "100%", animation: `tour-fill ${TITLE_SECONDS}s linear forwards` }}
                 />
               </div>
@@ -615,8 +615,8 @@ export function HomeTour({ className }: { className?: string }) {
             aria-label="Tour"
             data-testid="home-tour-card"
             data-tour-state={`scene-${scene}`}
-            className="fixed inset-x-0 bottom-0 z-50 mx-auto max-h-[56vh] w-full max-w-[780px] overflow-y-auto rounded-t-[24px] border border-[#E4E2DC] bg-white text-[#161616] outline-none sm:bottom-5 sm:w-[calc(100%-2rem)] sm:rounded-[24px]"
-            style={{ boxShadow: "0 28px 56px -22px rgb(22 22 22 / .30), 0 2px 8px rgb(22 22 22 / .06)" }}
+            className="fixed inset-x-0 bottom-0 z-50 mx-auto max-h-[56vh] w-full max-w-[780px] overflow-y-auto rounded-t-[24px] border border-border bg-surface text-fg outline-none sm:bottom-5 sm:w-[calc(100%-2rem)] sm:rounded-[24px]"
+            style={{ boxShadow: "0 28px 56px -22px rgb(0 0 0 / .32), 0 2px 8px rgb(0 0 0 / .08)" }}
           >
             <div className="flex gap-1.5 px-5 pt-4 sm:px-7 sm:pt-5" aria-hidden>
               {SCENES.map((s, k) => {
@@ -624,11 +624,11 @@ export function HomeTour({ className }: { className?: string }) {
                 const done = scene > n;
                 const cur = scene === n;
                 return (
-                  <div key={s.id} className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#161616]/10">
+                  <div key={s.id} className="h-1.5 flex-1 overflow-hidden rounded-full bg-fg/10">
                     {cur ? (
                       <div
                         key={`${runId}-${beat}`}
-                        className="h-full rounded-full bg-[#161616]"
+                        className="h-full rounded-full bg-fg"
                         style={{
                           ["--from" as string]: `${from}%`,
                           ["--to" as string]: `${to}%`,
@@ -638,42 +638,42 @@ export function HomeTour({ className }: { className?: string }) {
                         }}
                       />
                     ) : (
-                      <div className={cn("h-full rounded-full bg-[#161616]", done ? "w-full" : "w-0")} />
+                      <div className={cn("h-full rounded-full bg-fg", done ? "w-full" : "w-0")} />
                     )}
                   </div>
                 );
               })}
             </div>
             <div className="px-5 pb-3 pt-3 sm:px-7 sm:pb-4 sm:pt-4" aria-live="polite" aria-atomic="true">
-              <p className={cn(EYEBROW, "text-[#5F5D58]")}>
+              <p className={cn(EYEBROW, "text-muted")}>
                 {`${scene} of ${SCENE_COUNT} · ${cap?.title ?? ""}`}
                 {paused ? " · paused" : ""}
               </p>
-              <h2 className="mt-1.5 text-balance text-[21px] font-medium leading-[1.2] tracking-[-0.02em] text-[#161616] sm:text-[30px]" data-testid="home-tour-caption">
+              <h2 className="mt-1.5 text-balance text-[21px] font-medium leading-[1.2] tracking-[-0.02em] text-fg sm:text-[30px]" data-testid="home-tour-caption">
                 {cap?.caption}
               </h2>
               {cap && cap.facts.length > 0 ? (
                 <dl className="mt-3 flex flex-wrap items-end gap-x-6 gap-y-2 sm:mt-4 sm:gap-x-9">
                   {cap.facts.map((f) => (
                     <div key={f.label} className="min-w-0">
-                      <dt className="text-[12px] leading-tight text-[#5F5D58] sm:text-[13px]">{f.label}</dt>
+                      <dt className="text-[12px] leading-tight text-muted sm:text-[13px]">{f.label}</dt>
                       {NUMERIC_FACT.test(f.value) ? (
-                        <dd className="tabular mt-1.5 text-[32px] font-medium leading-none tracking-[-0.02em] text-[#161616] sm:text-[40px]">{f.value}</dd>
+                        <dd className="tabular mt-1.5 text-[32px] font-medium leading-none tracking-[-0.02em] text-fg sm:text-[40px]">{f.value}</dd>
                       ) : (
-                        <dd className="tabular mt-1 text-[15px] font-medium text-[#161616] sm:text-[18px]">{f.value}</dd>
+                        <dd className="tabular mt-1 text-[15px] font-medium text-fg sm:text-[18px]">{f.value}</dd>
                       )}
                     </div>
                   ))}
                 </dl>
               ) : null}
               {cap && cap.notes.length > 0 ? (
-                <p className="mt-2.5 text-[12px] leading-snug text-[#5F5D58]">
+                <p className="mt-2.5 text-[12px] leading-snug text-muted">
                   {cap.notes.includes("hypothetical") ? `${HYPOTHETICAL_NOTE} ` : ""}
                   {cap.notes.includes("candidate_framing") ? CANDIDATE_FRAMING : ""}
                 </p>
               ) : null}
             </div>
-            <div className="flex flex-wrap items-center gap-2 border-t border-[#161616]/10 px-5 py-3 sm:px-7">
+            <div className="flex flex-wrap items-center gap-2 border-t border-fg/10 px-5 py-3 sm:px-7">
               <button type="button" onClick={() => go(scene - 1)} aria-keyshortcuts="ArrowLeft" className={PILL_OUTLINE}>
                 <ChevronLeft aria-hidden />Back
               </button>
@@ -681,7 +681,7 @@ export function HomeTour({ className }: { className?: string }) {
                 Next<ChevronRight aria-hidden />
               </button>
               {pauseButton}
-              <p className="ml-auto hidden items-center gap-1 text-xs text-[#5F5D58] sm:flex" aria-hidden>
+              <p className="ml-auto hidden items-center gap-1 text-xs text-muted sm:flex" aria-hidden>
                 <kbd className={KBD}>←</kbd> <kbd className={KBD}>→</kbd> to step
               </p>
               <button

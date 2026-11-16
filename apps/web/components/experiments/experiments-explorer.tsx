@@ -209,7 +209,7 @@ export function ExperimentsExplorer() {
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4">
       {all && used > 0 ? (
-        <div className="grid grid-cols-3 gap-4 rounded-2xl bg-[var(--band,#ECE9E0)] p-4 sm:gap-8 sm:p-8" data-summary="counts">
+        <div className="grid grid-cols-3 gap-4 rounded-2xl bg-band p-4 sm:gap-8 sm:p-8" data-summary="counts">
           <Stat first value={fmtCount(total)} label="Experiments" />
           <Stat value={fmtCount(used)} label="The model uses" />
           {steps ? <Stat value={fmtCount(steps)} label="Test results" /> : null}

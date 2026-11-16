@@ -70,9 +70,9 @@ const PLAIN_REASON: Record<string, string> = {
 };
 
 const TONE = {
-  blind: { dot: "bg-white", Icon: CircleSlash },
+  blind: { dot: "bg-on-ink", Icon: CircleSlash },
   partly: { dot: "bg-[#E8A33B]", Icon: TriangleAlert },
-  covered: { dot: "bg-[#2FD067]", Icon: CircleCheck },
+  covered: { dot: "bg-cta", Icon: CircleCheck },
 } as const;
 
 /**
@@ -83,9 +83,9 @@ function PlainVerdict({ verdict, headline, children }: { verdict: AssessResponse
   const v = PLAIN_VERDICT[verdict];
   const tone = TONE[v.tone];
   return (
-    <div className="card-ink relative overflow-hidden p-6 text-white sm:p-7">
+    <div className="card-ink relative overflow-hidden p-6 text-on-ink sm:p-7">
       <div role="status" className="flex items-start gap-3" data-testid="plain-verdict">
-        <span aria-hidden className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-full border border-white/25 text-white">
+        <span aria-hidden className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-full border border-on-ink/25 text-on-ink">
           <tone.Icon className="size-5" />
         </span>
         <p className="min-w-0 text-xl leading-snug font-medium tracking-[-0.01em] sm:text-[22px]">
@@ -93,7 +93,7 @@ function PlainVerdict({ verdict, headline, children }: { verdict: AssessResponse
           {headline}
         </p>
       </div>
-      {children ? <div className="mt-3 space-y-1.5 pl-12 text-white/75">{children}</div> : null}
+      {children ? <div className="mt-3 space-y-1.5 pl-12 text-on-ink/75">{children}</div> : null}
     </div>
   );
 }
@@ -151,7 +151,7 @@ export function UncertaintyBar({ knowledge, variability }: { knowledge: number; 
         className="flex h-2 w-full overflow-hidden rounded-full bg-subtle"
       >
         <div style={{ width: `${knowledge * 100}%`, background: "var(--plum-6)" }} />
-        <div style={{ width: `${variability * 100}%`, background: "var(--plum-2)" }} />
+        <div style={{ width: `${variability * 100}%`, background: "var(--plum-4)" }} />
       </div>
       <div className="mt-1 flex justify-between text-xs text-muted">
         <span>Knowledge uncertainty <span className="num">{k}%</span></span>

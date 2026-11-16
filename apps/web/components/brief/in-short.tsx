@@ -8,11 +8,11 @@ import { verdictTitle } from "@/components/home/answer-copy";
 import { CANDIDATE_FRAMING } from "@/lib/copy";
 import { airflowText, atTargetSentence, isAtTarget, lowerFirst, oxygenText, pressurePsiaText, pressureText, reductionSentence } from "@/components/home/next-logic";
 
-/** One status dot per verdict, always next to the words in the title: blind spot = white dot on the black card, partly = amber, covered = green. */
+/** One status dot per verdict, always next to the words in the title: blind spot = dot in the card's text colour (white on the dark card, dark on the light one), partly = amber, covered = green. Theme tokens, so both themes read. */
 const DOT: Record<Verdict, string> = {
-  insufficient_evidence: "#FFFFFF",
-  extrapolation: "#E8A33B",
-  supported: "#2FD067",
+  insufficient_evidence: "var(--on-ink)",
+  extrapolation: "var(--gap)",
+  supported: "var(--accent)",
 };
 
 /**
@@ -39,9 +39,9 @@ export function InShort({ profileId, groupId }: { profileId: string | null; grou
   if (!settled || !group) {
     return (
       <div role="status" aria-label="Loading the short answer" className="brief-ui brief-card brief-verdict my-5 min-h-[120px]">
-        <Skeleton className="h-4 w-16 bg-black/[0.08]" />
-        <Skeleton className="mt-3 h-6 w-4/5 bg-black/[0.08]" />
-        <Skeleton className="mt-3 h-4 w-full bg-black/[0.08]" />
+        <Skeleton className="h-4 w-16 bg-fg/[0.08]" />
+        <Skeleton className="mt-3 h-6 w-4/5 bg-fg/[0.08]" />
+        <Skeleton className="mt-3 h-4 w-full bg-fg/[0.08]" />
       </div>
     );
   }

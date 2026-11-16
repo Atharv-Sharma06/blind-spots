@@ -17,7 +17,7 @@ const MOON_MARS_PICK = "exploration_atmosphere_8p2_34";
 
 /** Diagonal-stripe fill for "no nearby results" bars (the `hatch` utility, inlined so the chart never depends on it). */
 const HATCH: React.CSSProperties = {
-  backgroundImage: "repeating-linear-gradient(135deg, #CFCCC4 0 2px, transparent 2px 6px)",
+  backgroundImage: "repeating-linear-gradient(135deg, var(--border-strong) 0 2px, transparent 2px 6px)",
 };
 
 const CHART_H = 132; // px, plot height
@@ -141,12 +141,12 @@ function BarChart({ profiles }: { profiles: HeadlineProfile[] }) {
               </span>
               <span
                 aria-hidden
-                className={cn("block w-full rounded-t-[6px]", n > 0 ? "bg-[#161616]" : "border border-b-0 border-[#CFCCC4]")}
+                className={cn("block w-full rounded-t-[6px]", n > 0 ? "bg-fg" : "border border-b-0 border-border-strong")}
                 style={n > 0 ? { height: h } : { ...HATCH, height: h }}
               />
               <span
                 aria-hidden
-                className="block h-[5.25rem] max-h-[5.25rem] overflow-hidden text-ellipsis whitespace-nowrap border-t border-[#161616]/10 pt-1.5 text-[11px] leading-4 text-muted [text-orientation:mixed] [writing-mode:vertical-rl] rotate-180"
+                className="block h-[5.25rem] max-h-[5.25rem] overflow-hidden text-ellipsis whitespace-nowrap border-t border-fg/10 pt-1.5 text-[11px] leading-4 text-muted [text-orientation:mixed] [writing-mode:vertical-rl] rotate-180"
               >
                 {name}
               </span>
@@ -156,11 +156,11 @@ function BarChart({ profiles }: { profiles: HeadlineProfile[] }) {
       </ul>
       <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-label text-muted">
         <span className="inline-flex items-center gap-2">
-          <span aria-hidden className="size-3 rounded-[3px] bg-[#161616]" />
+          <span aria-hidden className="size-3 rounded-[3px] bg-fg" />
           Some nearby results
         </span>
         <span className="inline-flex items-center gap-2">
-          <span aria-hidden className="size-3 rounded-[3px] border border-[#CFCCC4]" style={HATCH} />
+          <span aria-hidden className="size-3 rounded-[3px] border border-border-strong" style={HATCH} />
           None
         </span>
       </div>
@@ -174,7 +174,7 @@ const nearby = (n: number) => (n === 0 ? "no nearby ISS results" : `${fmt(n)} ne
 
 function BigNumber({ value, caption, action, onAction }: { value: string; caption: string; action: string; onAction: () => void }) {
   return (
-    <div className="flex items-start justify-between gap-4 border-t border-[#161616]/10 py-5 first:border-t-0 first:pt-0 md:first:pt-0">
+    <div className="flex items-start justify-between gap-4 border-t border-fg/10 py-5 first:border-t-0 first:pt-0 md:first:pt-0">
       {/* dt before dd in the markup (the caption names the number); flex-col-reverse shows the number first. */}
       <div className="flex min-w-0 flex-col-reverse">
         <dt className="mt-1.5 max-w-[22ch] text-prose leading-6 text-muted">{caption}</dt>
@@ -186,7 +186,7 @@ function BigNumber({ value, caption, action, onAction }: { value: string; captio
         type="button"
         onClick={onAction}
         aria-label={action}
-        className="btn-round inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-[#161616]/15 bg-transparent text-fg transition-colors hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        className="btn-round inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-fg/15 bg-transparent text-fg transition-colors hover:bg-surface focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
       >
         <ArrowRight className="size-5" aria-hidden />
       </button>

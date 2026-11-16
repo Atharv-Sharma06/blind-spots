@@ -83,8 +83,8 @@ export function tickLabel(v: number): string {
 export const CHART = {
   ink: "var(--fg)",
   muted: "var(--muted)",
-  /** Faint guides: a hairline on white that never competes with the data. */
-  grid: "rgb(22 22 22 / 0.08)",
+  /** Faint guides: a hairline that never competes with the data. */
+  grid: "color-mix(in srgb, var(--fg) 10%, transparent)",
   axis: "var(--border-strong)",
   surface: "var(--surface)",
   plum: "var(--plum-6)",

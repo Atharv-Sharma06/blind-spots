@@ -18,3 +18,4 @@ export * from "./tooltip";
 export * from "./disclosure";
 export * from "./dot-number";
 export * from "./progress-ring";
+export * from "./theme-toggle";

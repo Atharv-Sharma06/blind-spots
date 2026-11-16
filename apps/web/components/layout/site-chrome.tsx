@@ -14,7 +14,7 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   if (pathname !== "/") return <>{children}</>;
   return (
-    <div className="flex min-h-dvh flex-1 flex-col bg-[linear-gradient(#EDE7DC,#F2EFE8_240px,#F2EFE8_calc(100%-240px),#EDE7DC)] text-fg">
+    <div className="flex min-h-dvh flex-1 flex-col page-gradient text-fg">
       <SiteHeader />
       <main id="main" tabIndex={-1} className="flex flex-1 flex-col outline-none">
         {children}

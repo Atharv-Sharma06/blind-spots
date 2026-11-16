@@ -6,6 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { BookOpen, Compass, FlaskConical, LayoutGrid, Menu, Play, Search, X, type LucideIcon } from "lucide-react";
 import { DataSourceBadge } from "@/components/data-source-badge";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { DEFAULT_CABIN, COVERAGE_STATUS_LABEL, cabinOrderIndex, coverageStatus, shortCabinName, type CoverageStatus } from "@/components/home/cabins";
 import { useHeadline, useTargets } from "@/hooks/api";
 import { cn } from "@/lib/cn";
@@ -74,10 +75,10 @@ function StatusDot({ status }: { status: CoverageStatus | null }) {
       aria-hidden
       className={cn(
         "size-2.5 shrink-0 rounded-full",
-        status === "none" && "bg-[#161616]",
-        status === "barely" && "bg-[#E8A33B]",
-        status === "covered" && "bg-[#2FD067]",
-        status === null && "border border-[#CFCCC4]",
+        status === "none" && "bg-fg",
+        status === "barely" && "bg-status-barely",
+        status === "covered" && "bg-cta",
+        status === null && "border border-border-strong",
       )}
     />
   );
@@ -90,7 +91,7 @@ function CountBadge({ n, label, active }: { n: number; label: string; active: bo
       aria-label={`${n} ${label}`}
       className={cn(
         "num pointer-events-none absolute right-3 top-1/2 inline-flex size-6 -translate-y-1/2 items-center justify-center rounded-full text-[12px] text-muted",
-        active ? "bg-white" : "bg-[#EFEEEA]",
+        active ? "bg-surface" : "bg-nav-active",
       )}
     >
       {n}
@@ -119,7 +120,7 @@ function SideNav({ onNavigate, cabinCount, experimentCount }: { onNavigate?: () 
                   "flex h-11 items-center gap-3 rounded-[10px] px-3 text-[16px] transition-colors",
                   FOCUS,
                   count?.n != null && "pr-11",
-                  active ? "bg-[#EFEEEA] font-medium text-fg" : "text-fg/80 hover:bg-[#F3F2EF] hover:text-fg",
+                  active ? "bg-nav-active font-medium text-fg" : "text-fg/80 hover:bg-nav-hover hover:text-fg",
                 )}
               >
                 <Icon className="size-5 shrink-0" strokeWidth={1.6} aria-hidden />
@@ -152,7 +153,7 @@ function CabinGroupList({ cabins, onNavigate }: { cabins: CabinEntry[]; onNaviga
               className={cn(
                 "flex min-h-10 items-center gap-3 rounded-[10px] px-3 py-1.5 text-[14px] leading-5 transition-colors",
                 FOCUS,
-                active ? "bg-[#EFEEEA] font-medium text-fg" : "text-fg/80 hover:bg-[#F3F2EF] hover:text-fg",
+                active ? "bg-nav-active font-medium text-fg" : "text-fg/80 hover:bg-nav-hover hover:text-fg",
               )}
             >
               <StatusDot status={c.status} />
@@ -207,7 +208,7 @@ function Wordmark({ onNavigate }: { onNavigate?: () => void }) {
 /** Sidebar footer: data chip, the SI line and the binding sentences. A real <footer> (contentinfo) on desktop. */
 function SidebarFooter() {
   return (
-    <footer className="mt-4 flex flex-col items-start gap-1.5 border-t border-[#E4E2DC] px-3 pt-4 text-[12px] leading-4 text-muted">
+    <footer className="mt-4 flex flex-col items-start gap-1.5 border-t border-border px-3 pt-4 text-[12px] leading-4 text-muted">
       <DataSourceBadge />
       <p data-testid="footer-note" className="pt-1">
         Not a certified fire-safety assessment. Not endorsed by NASA.
@@ -271,7 +272,7 @@ function CabinSearch({ cabins, className, onDone, boxed = false }: { cabins: Cab
   const showList = open && matches.length > 0;
   return (
     <div className={cn("relative min-w-0", className)}>
-      <label className={cn("flex h-12 items-center gap-3", boxed && "rounded-xl border border-[#E4E2DC] bg-white px-3 focus-within:border-fg")}>
+      <label className={cn("flex h-12 items-center gap-3", boxed && "rounded-xl border border-border bg-surface px-3 focus-within:border-fg")}>
         <span className="sr-only">Search cabins</span>
         <Search className="size-5 shrink-0 text-muted" strokeWidth={1.6} aria-hidden />
         <input
@@ -302,7 +303,7 @@ function CabinSearch({ cabins, className, onDone, boxed = false }: { cabins: Cab
         role="listbox"
         aria-label="Matching cabins"
         hidden={!showList}
-        className="absolute left-0 right-0 top-full z-40 mt-1 overflow-hidden rounded-2xl border border-[#E4E2DC] bg-white p-1.5 shadow-[0_12px_32px_-12px_rgb(22_22_22/0.25)] md:min-w-[320px]"
+        className="absolute left-0 right-0 top-full z-40 mt-1 overflow-hidden rounded-2xl bg-surface p-1.5 shadow-popover md:min-w-[320px]"
       >
         {matches.map((c, i) => (
           <li
@@ -315,7 +316,7 @@ function CabinSearch({ cabins, className, onDone, boxed = false }: { cabins: Cab
               go(c.id);
             }}
             onMouseEnter={() => setActive(i)}
-            className={cn("flex min-h-10 cursor-pointer items-center gap-3 rounded-[10px] px-3 py-1.5 text-[16px]", i === active && "bg-[#EFEEEA]")}
+            className={cn("flex min-h-10 cursor-pointer items-center gap-3 rounded-[10px] px-3 py-1.5 text-[16px]", i === active && "bg-nav-active")}
           >
             <StatusDot status={c.status} />
             <span>{c.name}</span>
@@ -344,7 +345,7 @@ function PrimaryPill({ className, compactOnPhone = false }: { className?: string
     <Link
       href={href}
       className={cn(
-        "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap bg-[#161616] text-white transition-colors hover:bg-[#2b2b2b]",
+        "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap pill-ink transition-colors",
         compactOnPhone ? "size-11 rounded-[14px] sm:h-12 sm:w-auto sm:px-5" : "h-[52px] rounded-[14px] px-6 text-[16px]",
         FOCUS,
         className,
@@ -381,10 +382,10 @@ function MenuSheet({ cabins, cabinCount, experimentCount }: { cabins: CabinEntry
         <Menu className="size-6" strokeWidth={1.6} aria-hidden />
       </DialogPrimitive.Trigger>
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-40 bg-[#161616]/40 data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in" />
+        <DialogPrimitive.Overlay className="fixed inset-0 z-40 bg-scrim data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in" />
         <DialogPrimitive.Content
           aria-describedby={undefined}
-          className="fixed inset-y-0 left-0 z-50 flex w-[min(320px,88vw)] flex-col overflow-y-auto bg-white px-4 pb-6 pt-3 shadow-[24px_0_48px_-24px_rgb(22_22_22/0.35)] data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in"
+          className="fixed inset-y-0 left-0 z-50 flex w-[min(320px,88vw)] flex-col overflow-y-auto bg-surface px-4 pb-6 pt-3 shadow-drawer data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in"
         >
           <DialogPrimitive.Title className="sr-only">Menu</DialogPrimitive.Title>
           <div className="mb-3 flex items-center justify-between">
@@ -396,7 +397,7 @@ function MenuSheet({ cabins, cabinCount, experimentCount }: { cabins: CabinEntry
           <CabinSearch cabins={cabins} boxed className="mb-3" onDone={close} />
           <SideNav onNavigate={close} cabinCount={cabinCount} experimentCount={experimentCount} />
           <CabinGroup cabins={cabins} onNavigate={close} />
-          <div className="mt-5 flex flex-wrap items-center gap-x-1 border-t border-[#E4E2DC] pt-3">
+          <div className="mt-5 flex flex-wrap items-center gap-x-1 border-t border-border pt-3">
             <TourButton onNavigate={close} />
             <RepoLink variant="bar" />
           </div>
@@ -415,7 +416,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-1 bg-bg text-fg lg:items-start">
       {/* Desktop sidebar */}
-      <div className="sticky top-0 hidden h-dvh w-[260px] shrink-0 flex-col border-r border-[#E4E2DC] bg-white px-4 pb-5 pt-6 lg:flex print:hidden!">
+      <div className="sticky top-0 hidden h-dvh w-[260px] shrink-0 flex-col border-r border-border bg-surface px-4 pb-5 pt-6 lg:flex print:hidden!">
         <div className="px-0.5 pb-6">
           <Wordmark />
         </div>
@@ -428,13 +429,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <div className="flex min-h-dvh min-w-0 flex-1 flex-col">
         {/* Phones: compact top bar; the menu sheet carries search, nav and the cabin list. */}
-        <div className="flex h-16 items-center gap-2 border-b border-[#E4E2DC] bg-white px-4 lg:hidden print:hidden!">
+        <div className="flex h-16 items-center gap-2 border-b border-border bg-surface px-4 lg:hidden print:hidden!">
           <MenuSheet cabins={cabins} cabinCount={cabinCount} experimentCount={experimentCount} />
           <Link href="/" aria-label="Blind Spots, home" className={cn("flex h-11 min-w-0 items-center gap-2 rounded-xl", FOCUS)}>
             <LogoMark className="size-7" />
             <span className="truncate text-[18px] font-semibold tracking-[-0.02em]">Blind Spots</span>
           </Link>
-          <PrimaryPill compactOnPhone className="ml-auto" />
+          <ThemeToggle className="ml-auto" />
+          <PrimaryPill compactOnPhone />
         </div>
         {/* Desktop top bar */}
         <div className="hidden items-center gap-3 px-8 pb-2 pt-5 lg:flex print:hidden!">
@@ -442,6 +444,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="ml-auto flex items-center gap-1">
             <TourButton />
             {REPO_URL ? <RepoLink variant="bar" /> : null}
+            <ThemeToggle className="ml-2" />
             <PrimaryPill className="ml-3" />
           </div>
         </div>

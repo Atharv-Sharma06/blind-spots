@@ -31,7 +31,7 @@ export const Slider = React.forwardRef<React.ElementRef<typeof SliderPrimitive.R
           <SliderPrimitive.Thumb
             key={i}
             aria-label={thumbLabels?.[i]}
-            className="relative block size-10 rounded-full outline-offset-0 before:absolute before:top-1/2 before:left-1/2 before:size-[18px] before:-translate-x-1/2 before:-translate-y-1/2 before:rounded-full before:border-2 before:border-white before:bg-fg before:shadow-[0_0_0_1px_rgb(22_22_22/0.25)] before:transition-colors before:content-[''] hover:before:bg-[#333333] focus-visible:bg-accent/15"
+            className="relative block size-10 rounded-full outline-offset-0 before:absolute before:top-1/2 before:left-1/2 before:size-[18px] before:-translate-x-1/2 before:-translate-y-1/2 before:rounded-full before:border-2 before:border-surface before:bg-fg before:shadow-[0_0_0_1px_var(--soft-line)] before:transition-colors before:content-[''] hover:before:bg-[var(--ink-hover)] focus-visible:bg-accent/15"
           />
         ))}
       </SliderPrimitive.Root>

@@ -23,7 +23,7 @@ export function StepHeading({
     <div className={cn("flex items-center gap-3 md:gap-4", className)}>
       <span
         aria-hidden
-        className="num inline-flex size-9 shrink-0 items-center justify-center rounded-full border border-[#161616]/20 bg-surface text-ui font-medium text-fg"
+        className="num inline-flex size-9 shrink-0 items-center justify-center rounded-full border border-fg/20 bg-surface text-ui font-medium text-fg"
       >
         {n}
       </span>

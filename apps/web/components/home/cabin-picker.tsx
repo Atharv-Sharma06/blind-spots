@@ -128,7 +128,7 @@ export function CabinPicker({ cabin, onSelect }: CabinPickerProps) {
                   <h3 id={`cabins-${col.key}-h`} className="text-[1.5rem] font-medium leading-8 tracking-[-0.02em] text-fg md:text-[1.75rem] md:leading-9">
                     {col.title}
                   </h3>
-                  <span className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-[#161616]/20 px-3 text-ui text-fg">
+                  <span className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-fg/20 px-3 text-ui text-fg">
                     <span className="num">{col.items.length}</span>
                     <span className="sr-only">{col.items.length === 1 ? "cabin" : "cabins"}</span>
                     <ArrowUpDown className="size-3.5 text-muted" aria-hidden />
@@ -203,7 +203,7 @@ function CabinCard({ profile, selected, tabbable, onLightGrey, stats, headlinePe
   const status: CoverageStatus | null = stats ? coverageStatus(stats) : null;
   const chip = cn(
     "inline-flex min-h-8 items-center whitespace-nowrap rounded-lg border px-2.5 text-ui tabular",
-    selected ? "border-white/30 text-white" : "border-border-strong text-fg",
+    selected ? "border-on-ink/30 text-on-ink" : "border-border-strong text-fg",
   );
   return (
     <button
@@ -220,17 +220,17 @@ function CabinCard({ profile, selected, tabbable, onLightGrey, stats, headlinePe
       onKeyDown={(e) => onKeyDown(e, id)}
       className={cn(
         "group relative flex h-full w-full flex-col gap-3 rounded-2xl p-6 text-left transition-[border-color,transform] duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
-        selected ? "card-ink bg-[#1C1C1C] text-white" : cn("card hover:border-border-strong motion-safe:hover:-translate-y-0.5", onLightGrey && "bg-subtle"),
+        selected ? "card-ink bg-ink-card text-on-ink" : cn("card hover:border-border-strong motion-safe:hover:-translate-y-0.5", onLightGrey && "bg-subtle"),
       )}
     >
       <span className="flex items-start justify-between gap-3">
         <span className="min-w-0">
-          <span className={cn("block text-[11px] font-medium uppercase leading-4 tracking-[0.08em]", selected ? "text-white/60" : "text-muted")}>
+          <span className={cn("block text-[11px] font-medium uppercase leading-4 tracking-[0.08em]", selected ? "text-on-ink/60" : "text-muted")}>
             {CABIN_ROW_LABEL[cabinRow(id)]}
           </span>
           <span
             id={`cabin-${id}-name`}
-            className={cn("mt-1 block text-[20px] font-medium leading-7 tracking-[-0.01em] [text-wrap:pretty]", selected ? "text-white" : "text-fg")}
+            className={cn("mt-1 block text-[20px] font-medium leading-7 tracking-[-0.01em] [text-wrap:pretty]", selected ? "text-on-ink" : "text-fg")}
           >
             {name}
           </span>
@@ -240,14 +240,14 @@ function CabinCard({ profile, selected, tabbable, onLightGrey, stats, headlinePe
           aria-hidden
           className={cn(
             "mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-full border transition-colors",
-            selected ? "border-white bg-white text-[#1C1C1C]" : "border-border-strong group-hover:border-fg/50",
+            selected ? "border-on-ink bg-on-ink text-ink-card" : "border-border-strong group-hover:border-fg/50",
           )}
         >
           {selected ? <Check className="size-3.5" strokeWidth={3} /> : null}
         </span>
       </span>
 
-      <span id={`cabin-${id}-desc`} className={cn("line-clamp-2 text-prose leading-6", selected ? "text-white/70" : "text-muted")}>
+      <span id={`cabin-${id}-desc`} className={cn("line-clamp-2 text-prose leading-6", selected ? "text-on-ink/70" : "text-muted")}>
         {profile.name}
       </span>
 
@@ -257,7 +257,7 @@ function CabinCard({ profile, selected, tabbable, onLightGrey, stats, headlinePe
           <span className={chip}>{air.pressure ?? "Pressure not stated"}</span>
           {selected && air.psia ? <span className={chip}>{air.psia}</span> : null}
         </span>
-        <span id={`cabin-${id}-cover`} className={cn("ml-auto inline-flex items-center gap-2 text-ui", selected ? "text-white/80" : "text-muted")}>
+        <span id={`cabin-${id}-cover`} className={cn("ml-auto inline-flex items-center gap-2 text-ui", selected ? "text-on-ink/80" : "text-muted")}>
           <CoverageMark status={status} pending={headlinePending} failed={headlineFailed} onInk={selected} />
           {stats ? <NearbyTests n={stats.comparable_observations} onInk={selected} /> : null}
         </span>
@@ -271,7 +271,7 @@ function NearbyTests({ n, onInk }: { n: number; onInk: boolean }) {
   if (n === 0) return <span>No nearby tests</span>;
   return (
     <span>
-      <span className={cn("num font-medium", onInk ? "text-white" : "text-fg")}>{n.toLocaleString("en-US")}</span> nearby {n === 1 ? "test" : "tests"}
+      <span className={cn("num font-medium", onInk ? "text-on-ink" : "text-fg")}>{n.toLocaleString("en-US")}</span> nearby {n === 1 ? "test" : "tests"}
     </span>
   );
 }
@@ -281,7 +281,7 @@ function CoverageMark({ status, pending, failed, onInk }: { status: CoverageStat
   if (status) {
     return (
       <span data-coverage={status} className="inline-flex items-center">
-        <span aria-hidden className={cn("size-2.5 rounded-full", status === "none" && onInk ? "bg-white" : STATUS_DOT[status])} />
+        <span aria-hidden className={cn("size-2.5 rounded-full", status === "none" && onInk ? "bg-on-ink" : STATUS_DOT[status])} />
         <span className="sr-only">{COVERAGE_STATUS_LABEL[status]}</span>
       </span>
     );
@@ -289,7 +289,7 @@ function CoverageMark({ status, pending, failed, onInk }: { status: CoverageStat
   // No status yet: a hollow dot and plain words, never a guessed status.
   return (
     <span data-coverage="unknown" className="inline-flex items-center gap-2">
-      <span aria-hidden className={cn("size-2.5 rounded-full border", onInk ? "border-white/60" : "border-muted")} />
+      <span aria-hidden className={cn("size-2.5 rounded-full border", onInk ? "border-on-ink/60" : "border-muted")} />
       {pending ? "Loading…" : failed ? "Not available" : "Not computed"}
     </span>
   );

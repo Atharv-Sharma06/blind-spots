@@ -49,7 +49,7 @@ function Limit({ children }: { children: ReactNode }) {
 
 /** Placeholder text block: wraps like the text it stands in for, so the section keeps its loaded height. */
 function Ghost({ children, className }: { children: ReactNode; className?: string }) {
-  return <span className={`rounded-sm bg-black/[0.06] text-transparent [box-decoration-break:clone] motion-safe:animate-pulse ${className ?? ""}`}>{children}</span>;
+  return <span className={`rounded-sm bg-fg/10 text-transparent [box-decoration-break:clone] motion-safe:animate-pulse ${className ?? ""}`}>{children}</span>;
 }
 
 /** Loading state with the loaded layout's structure (lead, tiles, limits, collapsed table), so later sections do not shift. */

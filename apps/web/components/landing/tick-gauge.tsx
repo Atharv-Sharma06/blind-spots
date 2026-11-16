@@ -33,7 +33,7 @@ export function TickGauge({ value, size = 176, label, sublabel, ariaLabel }: Tic
         y1={c + inner * Math.sin(a)}
         x2={c + outer * Math.cos(a)}
         y2={c + outer * Math.sin(a)}
-        stroke={on ? "#161616" : "#CFCCC4"}
+        className={on ? "stroke-fg" : "stroke-border-strong"}
         strokeOpacity={on ? fade : 1}
         strokeWidth={on ? 2.5 : 2}
         strokeLinecap="round"
@@ -41,14 +41,14 @@ export function TickGauge({ value, size = 176, label, sublabel, ariaLabel }: Tic
     );
   }
   return (
-    <div role="img" aria-label={ariaLabel} className="relative inline-grid shrink-0 place-items-center text-[#161616]" style={{ width: size, height: size }}>
+    <div role="img" aria-label={ariaLabel} className="relative inline-grid shrink-0 place-items-center text-fg" style={{ width: size, height: size }}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden="true" className="absolute inset-0">
         {ticks}
       </svg>
       {label != null || sublabel != null ? (
         <div aria-hidden="true" className="relative flex flex-col items-center text-center">
           {label != null ? <div className="text-[40px] leading-[44px] font-medium tracking-[-0.02em]">{label}</div> : null}
-          {sublabel != null ? <div className="mt-0.5 max-w-[8.5rem] text-[13px] leading-4 text-[#6F6D68]">{sublabel}</div> : null}
+          {sublabel != null ? <div className="mt-0.5 max-w-[8.5rem] text-[13px] leading-4 text-muted">{sublabel}</div> : null}
         </div>
       ) : null}
     </div>

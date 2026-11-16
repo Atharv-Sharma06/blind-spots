@@ -104,7 +104,7 @@ export const STATUS_COLUMNS: readonly CoverageStatus[] = ["none", "barely", "cov
 
 /** Status dot fills (always paired with the status word): black, amber, green. */
 export const STATUS_DOT: Record<CoverageStatus, string> = {
-  none: "bg-[#161616]",
+  none: "bg-fg",
   barely: "bg-[#E8A33B]",
   covered: "bg-[#2FD067]",
 };

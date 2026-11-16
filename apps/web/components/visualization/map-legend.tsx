@@ -1,6 +1,7 @@
 "use client";
 import { cn } from "@/lib/cn";
-import { ACCENT, GAP, GAP_HEX, GUIDE, INK, MUTED, OBSERVED, OBSERVED_TINT, ON_ACCENT, PAPER, TARGET, UNC_ALPHA, PLUM_STOPS, KPA_PER_PSI, plumColor } from "./map-scales";
+import { useMapTheme } from "./use-map-theme";
+import { ACCENT, GAP, GAP_HEX, GUIDE, INK, MUTED, OBSERVED, OBSERVED_TINT, ON_ACCENT, PAPER, TARGET, KPA_PER_PSI, plumColor } from "./map-scales";
 
 export interface MapLegendProps {
   layers: {
@@ -44,10 +45,13 @@ function Item({ swatch, label, hint, title }: { swatch: React.ReactNode; label: 
 }
 
 export default function MapLegend(p: MapLegendProps) {
+  const theme = useMapTheme();
   const l = p.layers;
   const any = Object.values(l).some(Boolean);
   if (!any) return null;
   const showContext = l.context && (p.hasContextEnvelopes || p.hasContextPoints);
+  // The grey shading is the page ink at low alpha: darker on the light plot, lighter on the dark plot.
+  const shade = theme.dark ? "lighter" : "darker";
   const sliceWord = p.plane === "o2_flow" ? "pressure" : "airflow";
   return (
     <div className={cn("text-[13px] leading-snug", p.className)} aria-label="Map legend" role="group">
@@ -154,17 +158,17 @@ export default function MapLegend(p: MapLegendProps) {
               </>
             }
             label="Grey: chance it burns"
-            hint="(darker = higher; no grey = no estimate)"
-            title="Grey shading is the model's estimated chance that a flame keeps burning. Darker means a higher chance. Where the model has no estimate, the map is not shaded."
+            hint={`(${shade} = higher; no grey = no estimate)`}
+            title={`Grey shading is the model's estimated chance that a flame keeps burning. ${theme.dark ? "Lighter" : "Darker"} means a higher chance. Where the model has no estimate, the map is not shaded.`}
           />
         )}
         {l.uncertainty && (
           <li className="flex basis-full items-center gap-1.5">
             <span className="text-fg">Uncertainty</span>
             <span className="text-muted">low</span>
-            <span className="flex w-20" style={{ opacity: UNC_ALPHA }} role="img" aria-label="Colour scale from low uncertainty (light) to high uncertainty (dark purple)">
-              {Array.from({ length: PLUM_STOPS.length * 2 - 1 }, (_, i) => (
-                <span key={i} className="h-3 flex-1 border-y border-border" style={{ background: plumColor(i / (PLUM_STOPS.length * 2 - 2)) }} />
+            <span className="flex w-20" style={{ opacity: theme.uncAlpha }} role="img" aria-label={theme.dark ? "Colour scale from low uncertainty (dark) to high uncertainty (light purple)" : "Colour scale from low uncertainty (light) to high uncertainty (dark purple)"}>
+              {Array.from({ length: theme.plum.length * 2 - 1 }, (_, i) => (
+                <span key={i} className="h-3 flex-1 border-y border-border" style={{ background: plumColor(i / (theme.plum.length * 2 - 2), theme.plum) }} />
               ))}
             </span>
             <span className="text-muted">high</span>

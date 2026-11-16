@@ -61,11 +61,11 @@ export function LayerChips({ layers, onToggle, modelled }: { layers: Layers; onT
       >
         <span aria-hidden className="size-2.5 rounded-full ring-1 ring-fg/15" style={{ background: c.swatch, opacity: on ? 1 : 0.85 }} />
         {c.label}
-        {/* Switch (decorative; aria-pressed carries the state): white knob, black track when on, grey when off. */}
+        {/* Switch (decorative; aria-pressed carries the state): surface-coloured knob, foreground track when on, grey when off. */}
         <span aria-hidden className={cn("relative ml-0.5 inline-block h-[22px] w-[38px] shrink-0 rounded-full transition-colors", on ? "bg-fg" : "bg-border-strong")}>
           <span
             className={cn(
-              "absolute top-[3px] size-4 rounded-full bg-white shadow-[0_1px_2px_rgb(0_0_0/.25)] transition-[left] duration-150 motion-reduce:transition-none",
+              "absolute top-[3px] size-4 rounded-full bg-surface shadow-[0_1px_2px_rgb(0_0_0/.25)] ring-1 ring-fg/15 transition-[left] duration-150 motion-reduce:transition-none",
               on ? "left-[19px]" : "left-[3px]",
             )}
           />

@@ -24,7 +24,7 @@ export const Switch = React.forwardRef<React.ElementRef<typeof SwitchPrimitive.R
         )}
         {...props}
       >
-        <SwitchPrimitive.Thumb className="block size-[18px] rounded-full bg-fg/70 transition-[transform,background-color] data-[state=checked]:translate-x-[18px] data-[state=checked]:bg-white" />
+        <SwitchPrimitive.Thumb className="block size-[18px] rounded-full bg-fg/70 transition-[transform,background-color] data-[state=checked]:translate-x-[18px] data-[state=checked]:bg-on-ink" />
       </SwitchPrimitive.Root>
     );
     if (!label) return control;

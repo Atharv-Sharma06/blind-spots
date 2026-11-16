@@ -38,20 +38,30 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#F7F6F3",
-  colorScheme: "light",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#F7F6F3" },
+    { media: "(prefers-color-scheme: dark)", color: "#0F0F0E" },
+  ],
+  colorScheme: "light dark",
 };
+
+// Runs before first paint (no flash): theme = localStorage "bs-theme" (dark | light), else the OS preference.
+// localStorage can throw (private window, blocked site data), so every read is guarded.
+const THEME_BOOT_SCRIPT = `(function(){var d=document.documentElement,t=null;try{t=localStorage.getItem("bs-theme")}catch(e){}if(t!=="dark"&&t!=="light"){try{t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}catch(e){t="light"}}d.setAttribute("data-theme",t);d.style.colorScheme=t})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   // a04-06: snapshot builds start the manifest fetch with the HTML (<link rel="preload" as="fetch">, emitted once by
   // React); lib/api.ts reuses it because the manifest request is a plain GET without custom headers.
   if (process.env.NEXT_PUBLIC_DATA_MODE === "snapshot") preload("/snapshot/manifest.json", { as: "fetch", crossOrigin: "anonymous" });
   return (
-    <html lang="en" className={`${interTight.variable} ${GeistMono.variable}`}>
+    <html lang="en" className={`${interTight.variable} ${GeistMono.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
+      </head>
       <body className="flex min-h-dvh flex-col bg-bg text-fg">
         <a
           href="#main"
-          className="sr-only z-[60] rounded-full bg-fg text-ui font-medium text-white focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:px-4 focus:py-2.5"
+          className="sr-only z-[60] rounded-full bg-fg text-ui font-medium text-on-ink focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:px-4 focus:py-2.5"
         >
           Skip to content
         </a>

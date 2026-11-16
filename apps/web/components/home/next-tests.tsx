@@ -94,8 +94,8 @@ function Chip({ differs, ink, last, children }: { differs: boolean; ink: boolean
   // Plain template strings, not cn(): tailwind-merge reads the custom size "text-ui" as a text colour and would drop it.
   const tone = ink
     ? differs
-      ? "border-white/60 font-medium text-white"
-      : "border-white/25 text-white/75"
+      ? "border-on-ink/60 font-medium text-on-ink"
+      : "border-on-ink/25 text-on-ink/75"
     : differs
       ? "border-border-strong font-medium text-fg"
       : "border-border text-muted";
@@ -125,17 +125,17 @@ function CandidateCard({
   diff: Differing;
 }) {
   const reduction = reductionParts(c);
-  const note = `text-ui ${first ? "text-white/70" : "text-muted"}`; // template, not cn(): see Chip
+  const note = `text-ui ${first ? "text-on-ink/70" : "text-muted"}`; // template, not cn(): see Chip
   return (
     <li
-      className={cn("relative p-5 md:p-7", first ? "card-ink text-white" : "card")}
+      className={cn("relative p-5 md:p-7", first ? "card-ink text-on-ink" : "card")}
       data-testid={`next-test-${c.rank}`}
     >
       <div className="flex items-start gap-4 md:gap-5">
         <span
           aria-hidden
           className={`num mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-full border text-prose font-medium ${
-            first ? "border-white bg-white text-[#161616]" : "border-border-strong bg-surface text-fg"
+            first ? "border-on-ink bg-on-ink text-ink-card" : "border-border-strong bg-surface text-fg"
           }`}
         >
           {c.rank}
@@ -165,7 +165,7 @@ function CandidateCard({
             ) : null}
           </div>
           {reduction ? (
-            <p className={cn("mt-5 flex items-end justify-between gap-3 border-t pt-4 md:mt-0 md:block md:shrink-0 md:border-0 md:pt-0 md:text-right", first ? "border-white/15" : "border-border")}>
+            <p className={cn("mt-5 flex items-end justify-between gap-3 border-t pt-4 md:mt-0 md:block md:shrink-0 md:border-0 md:pt-0 md:text-right", first ? "border-on-ink/15" : "border-border")}>
               <span className={`${note} md:block`}>{reduction.lead}</span>{" "}
               <span className="block whitespace-nowrap text-display font-medium leading-none tracking-[-0.02em] tabular-nums md:mt-2">{reduction.value}</span>
             </p>

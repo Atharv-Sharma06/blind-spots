@@ -84,18 +84,18 @@ type Tone = "white" | "ink";
 
 const TONE_CARD: Record<Tone, string> = { white: "card", ink: "card-ink" };
 /** Secondary text per tone (AA on each background). */
-const TONE_MUTED: Record<Tone, string> = { white: "text-muted", ink: "text-white/70" };
-const TONE_RULE: Record<Tone, string> = { white: "border-border", ink: "border-white/15" };
-const TONE_CHIP: Record<Tone, string> = { white: "border-border text-muted", ink: "border-white/25 text-white/80" };
+const TONE_MUTED: Record<Tone, string> = { white: "text-muted", ink: "text-muted" };
+const TONE_RULE: Record<Tone, string> = { white: "border-border", ink: "border-border" };
+const TONE_CHIP: Record<Tone, string> = { white: "border-border text-muted", ink: "border-border-strong text-muted" };
 
 function Figure({ slot, tone }: { slot: Slot; tone: Tone }) {
   const muted = TONE_MUTED[tone];
   if (slot.state === "loading") {
     return (
       <div role="status" aria-label="Loading" className="space-y-2">
-        <Skeleton className={cn("h-11 w-24", tone === "ink" ? "bg-white/10" : "bg-black/[0.06]")} />
-        <Skeleton className={cn("h-4 w-full", tone === "ink" ? "bg-white/10" : "bg-black/[0.06]")} />
-        <Skeleton className={cn("h-4 w-4/5", tone === "ink" ? "bg-white/10" : "bg-black/[0.06]")} />
+        <Skeleton className={"h-11 w-24 bg-fg/10"} />
+        <Skeleton className={"h-4 w-full bg-fg/10"} />
+        <Skeleton className={"h-4 w-4/5 bg-fg/10"} />
       </div>
     );
   }
@@ -180,7 +180,7 @@ export function FourSteps({ headline, validation, methodology }: { headline: Api
       <p id="test-results" className="mt-5 max-w-[78ch] scroll-mt-[calc(var(--header-h)+16px)] text-[14px] leading-relaxed text-muted">
         <strong className="font-medium text-fg">A test result</strong> is one airflow step of an experiment.
         {methodology.isPending ? (
-          <span aria-hidden className="rounded-sm bg-black/[0.06] text-transparent motion-safe:animate-pulse">
+          <span aria-hidden className="rounded-sm bg-fg/10 text-transparent motion-safe:animate-pulse">
             {" "}00 more experiments are left out: no flame lit, or unclear airflow or outcome.
           </span>
         ) : (
@@ -190,7 +190,7 @@ export function FourSteps({ headline, validation, methodology }: { headline: Api
       <p id="nearby" className="mt-2 max-w-[78ch] scroll-mt-[calc(var(--header-h)+16px)] text-[14px] leading-relaxed text-muted">
         <strong className="font-medium text-fg">Nearby</strong> means within one step in oxygen, pressure and airflow combined.
         {methodology.isPending ? (
-          <span aria-hidden className="rounded-sm bg-black/[0.06] text-transparent motion-safe:animate-pulse">
+          <span aria-hidden className="rounded-sm bg-fg/10 text-transparent motion-safe:animate-pulse">
             {" "}One step: 00 points of oxygen, about 00&nbsp;% in pressure, or 0.0 in log airflow.
           </span>
         ) : (

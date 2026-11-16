@@ -21,12 +21,12 @@ export interface SheetContentProps extends Omit<React.ComponentPropsWithoutRef<t
 export const SheetContent = React.forwardRef<React.ElementRef<typeof DialogPrimitive.Content>, SheetContentProps>(
   ({ className, title, description, footer, children, ...props }, ref) => (
     <DialogPrimitive.Portal>
-      <DialogPrimitive.Overlay className="fixed inset-0 z-40 bg-fg/40 data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in" />
+      <DialogPrimitive.Overlay className="fixed inset-0 z-40 bg-scrim data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in" />
       <DialogPrimitive.Content
         ref={ref}
         {...(description ? {} : { "aria-describedby": undefined })}
         className={cn(
-          "fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l border-border bg-surface shadow-[-24px_0_48px_-24px_rgb(22_22_22/0.25)] sm:max-w-[480px] sm:rounded-l-2xl",
+          "fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l border-border bg-surface shadow-sheet sm:max-w-[480px] sm:rounded-l-2xl",
           "data-[state=closed]:animate-sheet-out data-[state=open]:animate-sheet-in",
           className,
         )}
