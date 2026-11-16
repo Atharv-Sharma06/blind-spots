@@ -90,35 +90,30 @@ function TerminalCard() {
   );
 }
 
-/** Reference B: pure black, a two-line white headline, a giant word behind a framed product image and a terminal card. */
+/** Reference B: pure black, a two-line white headline, then the three steps (terminal card) beside the product. */
 export function TerminalSection() {
   return (
-    <section id="how" aria-labelledby="landing-how" className="scroll-mt-4 overflow-hidden bg-black px-4 py-20 text-white md:px-10 md:py-28">
+    <section id="how" aria-labelledby="landing-how" className="scroll-mt-4 bg-black px-4 py-20 text-white md:px-10 md:py-28">
+      <p className="text-center text-[12px] font-medium tracking-[0.08em] text-white/60 uppercase">How it works</p>
       <h2
         id="landing-how"
-        className="mx-auto max-w-[22ch] text-center text-[clamp(2rem,6vw,3.5rem)] leading-[1.06] font-bold tracking-[-0.035em] text-balance"
+        className="mx-auto mt-3 max-w-[22ch] text-center text-[clamp(2rem,6vw,3.5rem)] leading-[1.06] font-bold tracking-[-0.035em] text-balance"
       >
         A model that says when it does not know
       </h2>
 
-      <div className="relative mx-auto mt-14 w-full max-w-[1100px] md:mt-20 md:h-[640px]">
-        <p
-          aria-hidden="true"
-          className="pointer-events-none text-center text-[clamp(2.5rem,12.4vw,11rem)] leading-[0.85] font-extrabold tracking-[-0.055em] whitespace-nowrap text-white select-none md:absolute md:inset-x-0 md:top-0"
-        >
-          BLIND SPOTS
-        </p>
-
-        <div className="relative z-10 mt-6 md:absolute md:top-[19%] md:right-0 md:left-auto md:mt-0 md:w-[66%]">
-          <Frame>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/video/poster.jpg" alt="The Blind Spots Cabins page: a cabin's air, the answer and the next test." width={1600} height={900} className="block aspect-video w-full object-cover" />
-          </Frame>
-        </div>
-
-        <div className="relative z-20 -mt-10 ml-3 mr-3 md:absolute md:bottom-0 md:left-0 md:mt-0 md:mr-0 md:ml-0 md:w-[min(560px,56%)]">
-          <TerminalCard />
-        </div>
+      <div className="mx-auto mt-14 grid w-full max-w-[1160px] items-center gap-8 md:mt-20 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-10">
+        <TerminalCard />
+        <Frame>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/video/poster.jpg"
+            alt="The Blind Spots Cabins page: a cabin's air, the answer and the next test."
+            width={1600}
+            height={900}
+            className="block aspect-[16/10] w-full object-cover object-left-top"
+          />
+        </Frame>
       </div>
     </section>
   );
