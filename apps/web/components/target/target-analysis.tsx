@@ -7,6 +7,8 @@ import { PLAIN_VERDICT, pct, pctRange } from "@/components/explore/plain";
 import { materialFullName } from "@/components/home/cabins";
 import { cn } from "@/lib/cn";
 import { DotNumber } from "@/components/ui/dot-number";
+import { ProvenanceTag, type Provenance } from "@/components/ui/provenance-tag";
+import { Term } from "@/components/ui/term";
 import {
   airflowBandSourceLabel,
   fmtCount,
@@ -119,19 +121,25 @@ function Fact({
   suffix,
   mono,
   note,
+  source,
   ...rest
-}: { label: string; help?: string; value: string; suffix?: string; mono?: boolean; note?: string } & React.HTMLAttributes<HTMLDivElement>) {
+}: { label: React.ReactNode; help?: string; value: string; suffix?: string; mono?: boolean; note?: string; source?: Provenance } & React.HTMLAttributes<HTMLDivElement>) {
+  const tag = source ? <ProvenanceTag kind={source} className="ml-auto self-center text-muted" /> : null;
   return (
     <div className="card flex min-h-[132px] min-w-0 flex-col gap-0 p-5" {...rest}>
       <dt className="text-[14px] leading-snug text-fg">{label}</dt>
       {help ? <dd className="mt-0.5 text-xs text-muted">{help}</dd> : null}
       <dd className="mt-auto min-w-0 pt-3">
         {mono ? (
-          <span className="num block text-[32px] leading-none font-medium break-words text-fg">{value}</span>
+          <span className="flex flex-wrap items-baseline gap-x-1.5">
+            <span className="num block text-[32px] leading-none font-medium break-words text-fg">{value}</span>
+            {tag}
+          </span>
         ) : (
           <span className="flex flex-wrap items-baseline gap-x-1.5">
             <DotNumber className="text-[36px] leading-none font-medium break-words text-fg sm:text-[40px]">{value}</DotNumber>
             {suffix ? <span className="text-ui text-muted">{suffix}</span> : null}
+            {tag}
           </span>
         )}
         {note ? <span className="mt-1 block text-xs text-muted">{note}</span> : null}
@@ -210,8 +218,8 @@ export function TargetAnalysis({ query, group, pending }: TargetAnalysisProps) {
         <CabinLine t={a.target} />
 
         <dl className="grid grid-cols-2 gap-3">
-          <Fact label="Nearby ISS test results" value={fmtCount(cov.comparable_observations)} />
-          <Fact label="Cabin conditions with a nearby test" value={fmtCount(cov.points_with_comparable)} suffix={`of ${fmtCount(cov.n_target_points)}`} />
+          <Fact label={<Term id="comparable_results">Nearby ISS test results</Term>} value={fmtCount(cov.comparable_observations)} source="measured" />
+          <Fact label="Cabin conditions with a nearby test" value={fmtCount(cov.points_with_comparable)} suffix={`of ${fmtCount(cov.n_target_points)}`} source="derived" />
           {sup !== null ? (
             <Fact
               data-testid="points-supported"
@@ -219,12 +227,13 @@ export function TargetAnalysis({ query, group, pending }: TargetAnalysisProps) {
               help="Where the model is confident."
               value={fmtCount(sup)}
               suffix={`of ${fmtCount(cov.n_target_points)}`}
+              source="model"
             />
           ) : null}
           {showP ? (
-            <Fact label="Chance the flame keeps burning" help="Model estimate, not a measurement." value={pctRange(m.p_sustained_min, m.p_sustained_max)} />
+            <Fact label={<>Chance the flame <Term id="kept_burning">keeps burning</Term></>} help="Model estimate, not a measurement." value={pctRange(m.p_sustained_min, m.p_sustained_max)} source="model" />
           ) : (
-            <Fact label="Nearest ISS test" help="1 step or less counts as nearby." value={nearest} mono note={isNum(cov.nn_distance_min) ? "steps" : undefined} />
+            <Fact label="Nearest ISS test" help="1 step or less counts as nearby." value={nearest} mono note={isNum(cov.nn_distance_min) ? "steps" : undefined} source={isNum(cov.nn_distance_min) ? "derived" : "missing"} />
           )}
         </dl>
 
@@ -243,16 +252,21 @@ export function TargetAnalysis({ query, group, pending }: TargetAnalysisProps) {
           )}
           <dl className="space-y-1 text-muted">
             {showP ? (
-              <div className="flex justify-between gap-4"><dt>Nearest ISS test</dt><dd className="num text-fg">{nearest}{isNum(cov.nn_distance_min) ? " steps" : ""}</dd></div>
+              <div className="flex justify-between gap-4"><dt>Nearest ISS test</dt><dd className="num text-fg">{nearest}{isNum(cov.nn_distance_min) ? " steps" : ""} <ProvenanceTag kind={isNum(cov.nn_distance_min) ? "derived" : "missing"} className="text-muted" /></dd></div>
             ) : null}
-            <div className="flex justify-between gap-4"><dt>Cabin range inside the ISS test range</dt><dd className="num text-fg">{isNum(cov.fraction_inside_hull) ? pct(cov.fraction_inside_hull) : "—"}</dd></div>
-            {ppo2 !== null ? <div className="flex justify-between gap-4"><dt>Oxygen pressure</dt><dd className="num text-fg">{fmtFixed(ppo2, 1)} kPa</dd></div> : null}
-            {showP && isNum(m.p_sustained_mean) ? <div className="flex justify-between gap-4"><dt>Model average chance of burning</dt><dd className="num text-fg">{pct(m.p_sustained_mean)}</dd></div> : null}
-            {showP && bal && bal.n > 0 ? <div className="flex justify-between gap-4"><dt>ISS tests in this material that kept burning</dt><dd className="num text-fg">{pct(bal.sustained / bal.n)}</dd></div> : null}
+            <div className="flex justify-between gap-4"><dt>Cabin range inside the ISS test range</dt><dd className="num text-fg">{isNum(cov.fraction_inside_hull) ? pct(cov.fraction_inside_hull) : "—"} <ProvenanceTag kind={isNum(cov.fraction_inside_hull) ? "derived" : "missing"} className="text-muted" /></dd></div>
+            {ppo2 !== null ? <div className="flex justify-between gap-4"><dt>Oxygen pressure</dt><dd className="num text-fg">{fmtFixed(ppo2, 1)} kPa <ProvenanceTag kind="derived" title="Oxygen share times cabin pressure." className="text-muted" /></dd></div> : null}
+            {showP && isNum(m.p_sustained_mean) ? <div className="flex justify-between gap-4"><dt>Model average chance of burning</dt><dd className="num text-fg">{pct(m.p_sustained_mean)} <ProvenanceTag kind="model" className="text-muted" /></dd></div> : null}
+            {showP && bal && bal.n > 0 ? <div className="flex justify-between gap-4"><dt>ISS tests in this material that kept burning</dt><dd className="num text-fg">{pct(bal.sustained / bal.n)} <ProvenanceTag kind="measured" className="text-muted" /></dd></div> : null}
           </dl>
           {modelled && dec && a.verdict !== "insufficient_evidence" ? (
             <div>
-              <p className="mb-1 font-medium text-fg">Where the uncertainty comes from</p>
+              <p className="mb-1 flex items-center gap-2 font-medium text-fg">
+                <span>
+                  Where the <Term id="uncertainty">uncertainty</Term> comes from
+                </span>
+                <ProvenanceTag kind="model" className="text-muted" />
+              </p>
               <UncertaintyBar knowledge={dec.knowledge} variability={dec.variability} />
             </div>
           ) : null}
@@ -263,7 +277,7 @@ export function TargetAnalysis({ query, group, pending }: TargetAnalysisProps) {
             </p>
           ) : null}
           <p className="text-muted">
-            <span className="font-medium text-fg">Airflow: {band.label}.</span> {bandNote ?? band.explanation}
+            <span className="font-medium text-fg"><Term id="airflow">Airflow</Term>: {band.label}.</span> {bandNote ?? band.explanation}
           </p>
           {(a.target.flags ?? []).map((f) => (
             <p key={f} className="text-muted">{targetFlagLabel(f)}</p>

@@ -13,6 +13,7 @@ import { ValidationSection } from "./section-validation";
 import { TrustSection } from "./section-trust";
 import { BuiltSection, SiNote } from "./section-built";
 import { FourSteps } from "./four-steps";
+import { ModelCheckFull } from "@/components/model-check/model-check";
 import { setSectionOpen } from "./primitives";
 import { Toc, type TocItem } from "./toc";
 import type { ExtValidation } from "./types";
@@ -72,6 +73,7 @@ export function MethodologyPage() {
             window.setTimeout(() => document.getElementById("validation-detail")?.scrollIntoView({ block: "start" }), 80);
           }}
         />
+        <ModelCheckFull />
         <SiNote />
       </div>
 

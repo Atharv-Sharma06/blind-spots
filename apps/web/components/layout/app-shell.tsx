@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { BookOpen, Compass, FlaskConical, LayoutGrid, Menu, Play, Search, X, type LucideIcon } from "lucide-react";
+import { BookOpen, Compass, FlaskConical, LayoutGrid, ListOrdered, Menu, Play, Search, X, type LucideIcon } from "lucide-react";
 import { DataSourceBadge } from "@/components/data-source-badge";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { DEFAULT_CABIN, COVERAGE_STATUS_LABEL, cabinOrderIndex, coverageStatus, shortCabinName, type CoverageStatus } from "@/components/home/cabins";
@@ -28,6 +28,7 @@ import { SiteFooter } from "./site-footer";
 
 const ICONS: Record<(typeof NAV_ITEMS)[number]["href"], LucideIcon> = {
   "/cabins": LayoutGrid,
+  "/findings": ListOrdered,
   "/explore": Compass,
   "/experiments": FlaskConical,
   "/methodology": BookOpen,

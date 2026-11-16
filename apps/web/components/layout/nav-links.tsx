@@ -7,6 +7,7 @@ import { cn } from "@/lib/cn";
 /** The four tool pages, in reading order. The logo links to the landing page ("/"). */
 export const NAV_ITEMS = [
   { href: "/cabins", label: "Cabins" },
+  { href: "/findings", label: "Findings" },
   { href: "/explore", label: "Explorer" },
   { href: "/experiments", label: "Experiments" },
   { href: "/methodology", label: "How it works" },

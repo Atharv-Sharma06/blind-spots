@@ -5,6 +5,8 @@ import Link from "next/link";
 import { Disclosure } from "@/components/ui/disclosure";
 import { DotNumber } from "@/components/ui/dot-number";
 import { ProgressRing } from "@/components/ui/progress-ring";
+import { ProvenanceTag } from "@/components/ui/provenance-tag";
+import { Term } from "@/components/ui/term";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
@@ -313,26 +315,33 @@ function Verdict({ profile, cabinId, group, assess, assessError, onRetry, compar
           </p>
         </div>
         {hasPts ? (
-          <ProgressRing
-            className="shrink-0 self-start text-fg sm:self-center"
-            value={pts / nPts}
-            size={144}
-            stroke={6}
-            label={<DotNumber className="text-[40px] leading-none font-medium text-fg">{pts}</DotNumber>}
-            sublabel={
-              <span className="block text-xs leading-4 whitespace-nowrap text-muted">
-                of {nPts} points
-                <br />
-                with ISS tests
-              </span>
-            }
-            ariaLabel={`${pts} of ${nPts} points in this cabin's air have nearby ISS tests.`}
-          />
+          <div className="flex shrink-0 flex-col items-center gap-1.5 self-start sm:self-center">
+            <ProgressRing
+              className="shrink-0 text-fg"
+              value={pts / nPts}
+              size={144}
+              stroke={6}
+              label={<DotNumber className="text-[40px] leading-none font-medium text-fg">{pts}</DotNumber>}
+              sublabel={
+                <span className="block text-xs leading-4 whitespace-nowrap text-muted">
+                  of {nPts} points
+                  <br />
+                  with ISS tests
+                </span>
+              }
+              ariaLabel={`${pts} of ${nPts} points in this cabin's air have nearby ISS tests.`}
+            />
+            <ProvenanceTag kind="derived" title="Counted by our code from the ISS test results near this cabin's air." className="-mt-3 text-muted" />
+          </div>
         ) : null}
       </div>
       {picker}
       <div className="space-y-2 px-5 py-5 sm:px-8">
-        {rangeSentence ? <p className="max-w-3xl text-title leading-7 text-fg">{noBreakNumbers(rangeSentence)}</p> : null}
+        {rangeSentence ? (
+          <p className="max-w-3xl text-title leading-7 text-fg">
+            {noBreakNumbers(rangeSentence)} <ProvenanceTag kind="measured" className="text-muted" />
+          </p>
+        ) : null}
         <p className="max-w-3xl text-title leading-7 text-fg">These tests ran in microgravity, not Moon or Mars gravity.</p>
         {related && related.n > 0 ? (
           <p className="max-w-3xl text-ui text-fg" data-testid="related-nasa">
@@ -407,13 +416,13 @@ function ChartBlock({
           <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>
             <circle cx="6" cy="6" r="4.6" fill="var(--observed)" />
           </svg>
-          Flame kept burning
+          Flame <Term id="kept_burning">kept burning</Term>
         </span>
         <span className="inline-flex items-center gap-1.5">
           <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>
             <circle cx="6" cy="6" r="4.1" fill="var(--surface)" stroke="var(--observed)" strokeWidth="1.5" />
           </svg>
-          Flame went out
+          Flame <Term id="went_out">went out</Term>
         </span>
         {others.length > 0 ? (
           <span className="inline-flex items-center gap-1.5">
@@ -436,7 +445,8 @@ function ChartBlock({
         <p className="mt-2 max-w-3xl text-xs text-muted">
           {assumedKpa !== null
             ? `${assumed === rows.length ? "These tests did not record pressure" : "Some tests did not record pressure"}; the chart uses an assumed ${kpaText(assumedKpa)} kPa.`
-            : "Some tests did not record pressure; the chart uses assumed values."}
+            : "Some tests did not record pressure; the chart uses assumed values."}{" "}
+          <ProvenanceTag kind="assumed" />
         </p>
       ) : null}
       <Disclosure className="mt-3" summary="Show as table" summaryClassName="min-h-10">

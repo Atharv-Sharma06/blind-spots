@@ -12,6 +12,7 @@ import type { ApiError } from "@/lib/api";
 import { pointsSupported } from "./evidence";
 import { PLAIN_VERDICT } from "@/components/explore/plain";
 import { materialFlowNote, materialName } from "@/components/home/cabins";
+import { Term } from "@/components/ui/term";
 
 /** Status per verdict: an outlined chip with a status dot plus the word (never colour alone). */
 const DOT = {
@@ -72,9 +73,9 @@ export function MaterialCoverage({
         <TableHeader>
           <tr>
             <TableHead className="whitespace-normal">Material</TableHead>
-            <TableHead numeric className="hidden sm:table-cell">Tests nearby</TableHead>
+            <TableHead numeric className="hidden sm:table-cell"><Term id="comparable_results">Tests nearby</Term></TableHead>
             <TableHead numeric className="hidden sm:table-cell">Nearest (steps)</TableHead>
-            <TableHead>Covered?</TableHead>
+            <TableHead><Term id="coverage">Covered?</Term></TableHead>
           </tr>
         </TableHeader>
         <TableBody>

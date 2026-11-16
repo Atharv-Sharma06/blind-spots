@@ -288,6 +288,41 @@ default assumptions)" when it equals a ranked candidate). Both include the press
 uncertainty reduction at 0.15 / 0.3 / 0.6) and the assumptions list. The relevant-investigations section lists
 the top `investigation_relevance` rows.
 
+### GET /api/findings
+No parameters; deterministic (sorted, floats rounded to 4 significant digits like the snapshot exporter). Computed by
+`blindspots.findings.compute.compute_findings` from the observations with `included_in_training == true` only, the
+groups (`model_status`), GET /api/targets and the default GET /api/headline (same "comparable" rule, nothing new).
+Response `{"dataset_version", "model_version", "ranking_rule", "pillar_rule", "summary": {"n_observations",
+"n_experiments", "n_groups", "n_investigations", "n_sustained", "n_not_sustained"}, "materials": Material[],
+"cabins": Cabin[], "notes": [str]}`.
+- "Kept burning" = training `label` 1 (flame_state `sustained`); "went out" = `label` 0 (extinguished or brief flame
+  without sustained spread), the same split as `label_counts` in GET /api/groups.
+- `Material = {"rank", "group_id", "label", "material_family", "flame_configuration", "n_experiments",
+  "n_observations", "investigation_ids", "campaigns", "model_status", "model_reason", "lowest_o2_burning": Point|null,
+  "highest_o2_out": Point|null, "overlap_o2": [lo, hi]|null, "airflow_bins": [{"lo", "hi"|null, "n", "n_sustained",
+  "lowest_o2_burning"|null}], "n_airflow_missing", "tested_ranges": {"oxygen_percent", "airflow_cm_s", "pressure_kpa",
+  "pressure_basis": "measured"|"assumed"|"mixed"}, "findings": Finding[]}`. Ranked by `lowest_o2_burning.oxygen_percent`
+  ascending (materials where no flame kept burning last), ties by `n_observations` descending, then `group_id`.
+  `overlap_o2` only when lowest burning <= highest went-out. Airflow bins are fixed: [0,2), [2,5), [5,10), [10,20),
+  [20,+) cm/s; rows without airflow are counted in `n_airflow_missing`.
+- `Point = {"oxygen_percent", "airflow_cm_s", "pressure_kpa", "pressure_basis": "measured"|"assumed"|"missing",
+  "o2_basis": "measured"|"interpolated", "n_at_value", "observation_ids" (<=5, sorted), "experiment_ids" (<=5)}`.
+  Fields other than the counts and ids describe the first supporting row by `observation_id`. `pressure_basis`:
+  `total_pressure_kpa` present = measured; else `pressure_for_analysis_kpa` with flag `pressure_assumed` = assumed;
+  else missing (`pressure_kpa` null). `o2_basis` = interpolated when the row has flag `o2_interpolated`.
+- `Finding = {"id": "<group_id>:<kind>", "kind": "lowest_o2_burning"|"overlap"|"airflow"|"pressure_gap",
+  "pillar": "prevention"|"suppression", "headline", "interpretation", "k"|null, "n"|null,
+  "basis": "measured"|"derived"|"assumed", "observation_ids" (<=5), "experiment_ids" (<=5)}`. Sentences are filled
+  from the numbers (<=3 significant digits). `lowest_o2_burning` compares with the ISS cabin nominal oxygen from
+  profile `iss_cabin_nominal` ("about the same as" within 0.5 percentage points). `airflow` needs >=2 bins with a
+  burning flame and names the bins with the lowest and highest such value ("in these tests", no causal claim).
+  `pressure_gap` appears when every tested pressure is above the documented lower-pressure exploration cabins
+  (`exploration_atmosphere_8p2_34`, `artemis_surface_habitat_10p2_26p5`; pressures read from GET /api/targets).
+  No finding is ever tagged detection (detection is not represented in the integrated records).
+- `Cabin = {"rank", "profile_id", "name", "oxygen_percent", "total_pressure_kpa", "comparable_observations",
+  "groups_with_comparable", "n_groups", "sentence", "pillar": "prevention"}` from GET /api/headline, ranked by fewest
+  comparable observations, then name.
+
 ## Static snapshot (deployment without the Python service)
 
 `uv run blindspots export-artifacts --snapshot ../../apps/web/public/snapshot` writes the JSON responses

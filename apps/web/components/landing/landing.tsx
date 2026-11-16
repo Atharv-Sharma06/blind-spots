@@ -3,6 +3,7 @@
 import { Hero } from "./hero";
 import { TerminalSection } from "./terminal-section";
 import { Stats } from "./stats";
+import { FindingsTeaser } from "./findings-teaser";
 
 function DemoVideo() {
   return (
@@ -37,6 +38,7 @@ export function Landing() {
       </div>
       <TerminalSection />
       <Stats />
+      <FindingsTeaser />
       <DemoVideo />
     </div>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { ModelCheckCompact } from "@/components/model-check/model-check";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Map as MapIcon } from "lucide-react";
@@ -372,6 +373,7 @@ export function ExploreWorkspace() {
             ) : null}
             {dm.snapshotOnly ? <p className="text-xs text-muted">Precomputed version: preset values only. Your own cabin needs the full version.</p> : null}
           </div>
+          {group ? <ModelCheckCompact groupId={group.group_id} variant="inline" /> : null}
           {mapLayers.context && ctx.envelopes.length > 0 ? (
             <details className="group mx-3 mb-3 rounded-[var(--radius-lg)] bg-subtle px-4 py-2.5 text-xs ring-1 ring-border sm:mx-4 sm:mb-4" data-testid="context-list">
               <summary className="block cursor-pointer list-none py-1.5 text-muted hover:text-fg [&::-webkit-details-marker]:hidden [&::marker]:content-none">

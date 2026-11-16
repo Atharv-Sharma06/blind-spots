@@ -8,6 +8,8 @@ import { useHomeSelection } from "./use-home-selection";
 import { useLegacyRedirect } from "./legacy-redirect";
 import { StatsRow } from "./stats-row";
 import { HOME_BAND, HOME_CONTAINER } from "./home-layout";
+import { ModelCheckCompact } from "@/components/model-check/model-check";
+import { CabinExplain } from "@/components/explain/cabin-explain";
 
 /** The Cabins page: title and question, a stats row on the beige band, 1 the cabin board, 2 the answer, 3 what to test next. */
 export function HomePage() {
@@ -33,6 +35,8 @@ export function HomePage() {
       </section>
       <CabinPicker cabin={cabin} onSelect={setCabin} />
       <AnswerCard cabin={cabin} material={material} onMaterialChange={setMaterial} />
+      <CabinExplain cabin={cabin} material={material} className="-mt-4" />
+      <ModelCheckCompact groupId={material} />
       <NextTests cabin={cabin} material={material} />
     </div>
   );

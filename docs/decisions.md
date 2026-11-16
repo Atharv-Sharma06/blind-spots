@@ -389,3 +389,43 @@ Append-only log. Format: `D-NNN (date, author): decision. Why. Consequence.`
   - Counts: the README states how the counts fit (experiments in the dataset, ISS glovebox tests, test results = airflow settings, training subset and exclusions), all from generator keys.
   - Scope caveats repeated where a headline is quoted: "covered" concerns the air only (ISS tests are microgravity; PSI holds no partial-gravity combustion data), and the BASS-II test pressure is an assumed ISS nominal, flagged, not a measurement.
   - README screenshots (`docs/img/cabins-pick.png`, `docs/img/cabins-answer.png`) are headless captures of the real Cabins page on the snapshot build, replacing the old Explorer still.
+
+## 2026-11-15 F5: model check rule (GP vs simple baselines)
+- Source: GET /api/model/validation, per group `cv.models[*].brier` (cross-validated, grouped by experiment). Rule in
+  `apps/web/components/model-check/model-check-data.ts`: the GP is "clearly better" than a baseline only when the upper
+  end of its Brier 95% interval is below the baseline's Brier value; otherwise "not clearly better"; missing numbers give
+  no verdict. Baselines: majority_class ("always guess the usual outcome") and logistic_o2_flow ("simple curve").
+  Snapshot result: clearly better than guessing on 5 of 9 groups, not clearly better on 4; clearly better than the curve
+  on 1 of 9. The paired `cv.gp_vs_majority` interval gives the same 5/4 split today. This check never decides abstention
+  (that stays `insufficient_data` or no comparable tests nearby). UI: /cabins and /explore compact card, /methodology table.
+
+## 2026-11-15 F1: GET /api/findings rules
+- `blindspots/findings/compute.py`, included_in_training rows only. Kept burning / went out = training label 1 / 0.
+  Rank: lowest O2 that kept burning (asc; none = last), ties more records then group_id. "About the same as" ISS cabin
+  O2 = within 0.5 percentage points. Pressure-gap finding only when every tested pressure is above the documented
+  lower-pressure exploration cabins (56.5 and 70.3 kPa read from targets). Point fields describe the first supporting
+  row by observation_id. Cabins reuse GET /api/headline counts. Full shape in docs/API.md.
+
+- 2026-11-15 F3 "Ask about your cabin air" (components/ask/**, mounted on /cabins#ask): templated one-sentence answers,
+  no live LLM. "Closest ISS test" is computed in the browser on the documented coverage coordinates and scales
+  (CONTRACTS section 4: z_o2 = O2 %, z_p = ln(p/101.325), s_o2 = 2.0, s_p = 0.1) over the group's training rows;
+  custom air has no airflow, so airflow is not compared and no k-of-n "comparable" count is claimed for custom air.
+  "Has a flame burned" counts the binary label (1 kept burning / 0 not) at or below the chosen oxygen. Model answers
+  for documented cabins come from the precomputed POST /api/target/assess; custom air in snapshot mode says the live
+  service is needed. Never a safety verdict.
+
+## 2026-11-15 F2: /findings page (What the ISS fire tests show)
+- Renders GET /api/findings as-is (sentences, ranking and pillar rule come from the API; no text is generated in the UI).
+  "Detection" is a filter chip that explains "not represented in the integrated records" instead of showing an empty list.
+- Fire-history links limited to two nasa.gov pages checked with curl (HTTP 200, page about the event) on 2026-11-15:
+  https://www.nasa.gov/mission/apollo-1/ and https://www.nasa.gov/history/25-years-ago-fire-aboard-space-station-mir/.
+  The Apollo oxygen/pressure line is read from the `apollo_cm` profile in GET /api/targets, not typed in.
+- "Moon/Mars design" marker = profile status `nasa_design_recommendation`. Evidence links use the Experiments drawer
+  deep link `/experiments?id=<experiment_id>`.
+
+- 2026-11-15 F4 number labels + glossary (components/ui/provenance-tag.tsx, components/ui/term.tsx, lib/glossary.ts):
+  every tagged number says where it comes from in words, not colour: "ISS test" (counted from recorded ISS results),
+  "Computed" (our code on recorded results or documented cabin air, e.g. points with a nearby test, nearest-test
+  steps, oxygen partial pressure), "Model estimate" (GP chance / points with an estimate / uncertainty), "Assumed"
+  (pressure the dataset assumes), "Not recorded" (null). One tag per number group, focusable, tooltip of one
+  sentence. Glossary (14 entries) reuses lib/format.ts and docs/scientific-methodology.md wording; no new numbers.
